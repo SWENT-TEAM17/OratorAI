@@ -1,4 +1,4 @@
-package com.example.project
+package com.github.orator
 
 import org.junit.Assert.*
 import org.junit.Test
