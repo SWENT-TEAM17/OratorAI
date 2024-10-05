@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.project"
+    namespace = "com.github.se.orator"
     compileSdk = 34
 
 
@@ -27,7 +27,7 @@ android {
 
 
     defaultConfig {
-        applicationId = "com.example.project"
+        applicationId = "com.github.se.orator"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
