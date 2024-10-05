@@ -1,4 +1,4 @@
-package com.android.sample.ui.theme
+package com.github.se.orator.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,4 +1,4 @@
-package com.example.project.ui.theme
+package com.github.se.orator.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
