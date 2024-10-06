@@ -24,6 +24,8 @@ firebaseAuthKtx = "23.0.0"
 firebaseDatabaseKtx = "21.0.0"
 firebaseFirestore = "25.1.0"
 firebaseUiAuth = "8.0.0"
+firebaseStorage = "20.0.0"
+firebase-bom = "32.1.1"
 
 # Google Service and Maps
 playServicesAuth = "21.2.0"
@@ -62,6 +64,9 @@ lifecycleRuntimeKtx = "2.8.4"
 fragmentKtx = "1.8.2"
 kotlinxSerializationJson = "1.6.2"
 androidxCoreKtx = "1.6.1"
+
+# Coil
+coil = "2.0.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -113,6 +118,11 @@ play-services-auth = { module = "com.google.android.gms:play-services-auth", ver
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 test-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "androidxCoreKtx" }
+
+firebase-storage = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorage" }
+firebase-appcheck = { module = "com.google.firebase:firebase-appcheck", version = "16.1.2" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 
 [plugins]
