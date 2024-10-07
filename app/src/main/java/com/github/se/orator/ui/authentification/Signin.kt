@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,7 +47,6 @@ import com.github.se.orator.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.BuildConfig
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
@@ -61,7 +59,7 @@ fun SignInScreen() {
   val context = LocalContext.current
 
   val launcher =
-      rememberFirebaseAuthLauncherTest(
+      rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
             Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
@@ -83,47 +81,46 @@ fun SignInScreen() {
             verticalArrangement = Arrangement.Center,
         ) {
           // App Logo Image
-            Image(
-                painter = painterResource(id = R.drawable.app_logo), // Ensure this
-           //drawable exists
-                contentDescription = "App Logo",
-                modifier = Modifier.size(250.dp))
+          Image(
+              painter = painterResource(id = R.drawable.app_logo), // Ensure this
+              // drawable exists
+              contentDescription = "App Logo",
+              modifier = Modifier.size(250.dp))
 
           Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "OratorAI",
-                style = TextStyle(
-                    fontSize = 64.sp,
-                    fontFamily = FontFamily(Font(R.font.manrope_variablefont_wght)),  // Your custom font
-                    fontWeight = FontWeight(600),  // Semi-bold
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF442DAA),  // Start color of the gradient
-                            Color(0xFF00A6A6),  // End color of the gradient
-                        )
-                    ),
-                    textAlign = TextAlign.Center
-                ),
-                modifier = Modifier
-                    .width(276.dp)
-                    .height(141.dp)
-            )
+          Text(
+              text = "OratorAI",
+              style =
+                  TextStyle(
+                      fontSize = 64.sp,
+                      fontFamily =
+                          FontFamily(Font(R.font.manrope_variablefont_wght)), // Your custom font
+                      fontWeight = FontWeight(600), // Semi-bold
+                      brush =
+                          Brush.linearGradient(
+                              colors =
+                                  listOf(
+                                      Color(0xFF442DAA), // Start color of the gradient
+                                      Color(0xFF00A6A6), // End color of the gradient
+                                  )),
+                      textAlign = TextAlign.Center),
+              modifier = Modifier.width(276.dp).height(141.dp))
           // Welcome Text
-            Text(
-                text = "Welcome !",
-                style = TextStyle(
-                    fontSize = 55.sp,
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF000000),
-                    textAlign = TextAlign.Center,
-                )
-            )
+          Text(
+              text = "Welcome !",
+              style =
+                  TextStyle(
+                      fontSize = 55.sp,
+                      fontWeight = FontWeight(500),
+                      color = Color(0xFF000000),
+                      textAlign = TextAlign.Center,
+                  ))
 
           Spacer(modifier = Modifier.height(100.dp))
 
           // Authenticate With Google Button
-          GoogleSignInButtonTest(
+          GoogleSignInButton(
               onSignInClick = {
                 val gso =
                     GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -138,7 +135,7 @@ fun SignInScreen() {
 }
 
 @Composable
-fun GoogleSignInButtonTest(onSignInClick: () -> Unit) {
+fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
       onClick = onSignInClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
@@ -153,14 +150,13 @@ fun GoogleSignInButtonTest(onSignInClick: () -> Unit) {
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()) {
               // Load the Google logo from resources
-                          Image(
-                              painter =
-                              painterResource(id = R.drawable.google_logo), // Ensure this
-               //drawable exists
-                              contentDescription = "Google Logo",
-                              modifier =
-                              Modifier.size(30.dp) // Size of the Google logo
-                                  .padding(end = 8.dp))
+              Image(
+                  painter = painterResource(id = R.drawable.google_logo), // Ensure this
+                  // drawable exists
+                  contentDescription = "Google Logo",
+                  modifier =
+                      Modifier.size(30.dp) // Size of the Google logo
+                          .padding(end = 8.dp))
 
               // Text for the button
               Text(
@@ -173,7 +169,7 @@ fun GoogleSignInButtonTest(onSignInClick: () -> Unit) {
 }
 
 @Composable
-fun rememberFirebaseAuthLauncherTest(
+fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
