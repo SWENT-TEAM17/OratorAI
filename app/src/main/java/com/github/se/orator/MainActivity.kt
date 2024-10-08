@@ -12,17 +12,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.se.orator.ui.theme.ProjectTheme
+import com.github.se.orator.ui.theme.mainScreen.MainScreen
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      ProjectTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-          Greeting(name = "Android", modifier = Modifier.padding(innerPadding))
-        }
-      }
+//      ProjectTheme {
+//        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//          Greeting(name = "Android", modifier = Modifier.padding(innerPadding))
+//        }
+//      }
+      MainScreen()
     }
   }
 }
