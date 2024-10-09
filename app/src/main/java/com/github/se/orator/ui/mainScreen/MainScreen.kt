@@ -5,9 +5,12 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,13 +21,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
+
+import androidx.compose.material.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -48,7 +57,7 @@ import kotlinx.coroutines.delay
 
 /**
  * The main screen's composable responsible to display the welcome text, the practice mode cards
- * and the "view my progress" button
+ * and the toolbar containing buttons for different sections
  */
 @Composable
 fun MainScreen() {
@@ -58,107 +67,105 @@ fun MainScreen() {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .padding(padding)
             ) {
-                // The name to be displayed (hard coded for now)
-                var name = "name"
 
-                // Welcome text
                 Text(
                     modifier = Modifier
-                        .padding(vertical = 32.dp, horizontal = 32.dp)
-                        .padding(start = 16.dp)
-                        .padding(top = 32.dp)
-                        .testTag("mainScreenText"),
-                    text = "Hi $name, what do you want to practice today ?",
-                    fontSize = 30.sp,
+                        .padding(start = 42.dp)
+                        .padding(top = 64.dp)
+                        .testTag("mainScreenText1"),
+                    text = "Find your",
+                    fontSize = 50.sp
+                )
+
+                Text(
+                    modifier = Modifier
+                        .padding(start = 42.dp)
+                        .testTag("mainScreenText2"),
+                    text = "practice mode",
+                    fontSize = 47.sp,
                     fontWeight = FontWeight.Bold
                 )
 
+
+                ButtonRow()
+
                 // Practice mode cards
-                StackedCards()
-
-                // Progress button
-                ProgressButton() {
-                    // go to progress page
-                }
-
+                AnimatedCards()
             }
         }
     )
 }
 
+/**
+ * The implementation of the toolbar containing the different selection buttons of the main screen
+ */
 @Composable
-fun ProgressButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-        shape = RoundedCornerShape(24.dp),
+fun ButtonRow() {
+    Row(
         modifier = Modifier
-            .padding(vertical = 32.dp)
-            .border(
-                BorderStroke(2.dp, Color.Black),
-                shape = RoundedCornerShape(24.dp)
-            )
-            .testTag("mainScreenButton")
+            .testTag("toolbarTest")
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Chart Icon
-            Image(
-                painter = painterResource(R.drawable.chart),
-                contentDescription = "Chart Icon",
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .size(24.dp)
-            )
-            Text(
-                text = "View my progress",
-                color = Color(0, 48, 168),
-                fontSize = 20.sp,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
+        // Popular Button
+        SectionButton("Popular")
+
+        // Fun Button
+        SectionButton("Fun")
+
+        // Connect Button
+        SectionButton("Connect")
     }
 }
 
 /**
- * Function to create the "card stack" effect
+ * @param text the text displayed in each button describing the different selections
+ *
+ * The implementation of a button
  */
 @Composable
-fun StackedCards() {
+fun SectionButton(text: String) {
+    TextButton(
+        onClick = { /* TODO: Add your onClick action */ },
+    ) {
+        Text(
+            text = text,
+            color = Color.Black,
+            fontSize = 20.sp
+        )
+    }
+}
+
+/**
+ * Function to create the sliding animation to browse between modes
+ */
+@Composable
+fun AnimatedCards() {
     Box(
         modifier = Modifier
-            .padding(start = 64.dp, end = 64.dp, top = 64.dp, bottom = 64.dp)
+            .height(518.dp)
+            .padding(top = 16.dp)
             .fillMaxWidth()
-            .aspectRatio(1f)
-            .testTag("stackedCards")
+            .testTag("animatedCards")
     ) {
-        // The "hidden cards" behind
-        // HiddenCard(Modifier.offset(14.dp, (-30).dp), 150)
-        //HiddenCard(Modifier.offset(7.dp, (-15).dp), 200)
-
-        // Main front card
 
         var visible by remember { mutableStateOf(true) }
-        val cardItems = listOf(
-            "Prepare for an interview",
-            "Prepare for an interview",
-            "Prepare for an interview"
-        )
+        val numberOfModes = 3
 
-        // Use a LazyRow to hold the sliding cards
-        LazyRow(
+        // Use a LazyColumn to hold the sliding cards
+        LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(16.dp)
         ) {
-            items(cardItems.size) { index ->
-                val item = cardItems[index]
-                MainCard(
+            items(numberOfModes) { x ->
+                ModeCard(
+                    text = "Prepare for an interview",
+                    painter = painterResource(R.drawable.job_interview),
                     visible = visible,
                     onCardClick = {
                         visible = !visible
@@ -173,67 +180,54 @@ fun StackedCards() {
     }
 }
 
-///**
-// * @param modifier
-// * @param opacity different for each stacked card
-// * Function to create the hidden cards with different opacity
-// */
-//@Composable
-//fun HiddenCard(modifier: Modifier = Modifier, opacity: Int) {
-//    Card(
-//        shape = RoundedCornerShape(16.dp),
-//        backgroundColor = Color(216, 234, 237, opacity), // Light gray background
-//        modifier = modifier
-//            .size(300.dp)
-//            .zIndex(0f)
-//            .border(BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(16.dp))
-//    ) {}
-//}
-
 /**
- * Function to create the main card which will show the current selected mode
+ * @param text the text describing each mode
+ * @param painter the image displayed for each mode
+ * @param visible boolean used for the animation effect
+ * @param onCardClick callback function for a on click event
+ *
+ * The implementation of a mode card
  */
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun MainCard(visible: Boolean, onCardClick: @Composable () -> Unit) {
+fun ModeCard(text: String, painter: Painter, visible: Boolean, onCardClick: @Composable () -> Unit) {
     AnimatedVisibility(
         visible = visible,
-        enter = slideInHorizontally() + fadeIn(),
-        exit = slideOutHorizontally() + fadeOut()
+        enter = slideInVertically() + fadeIn(),
+        exit = slideOutVertically() + fadeOut()
     ) {
         Card(
             shape = RoundedCornerShape(16.dp),
-            backgroundColor = Color(216, 234, 237, 250),
             modifier = Modifier
-                .size(300.dp)
-                .zIndex(1f)
-                .clickable { onCardClick }
-                .border(BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(16.dp)),
-            elevation = 4.dp
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .padding(top = 16.dp)
+                .clickable { onCardClick },
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
             ) {
-                // The context of the mode
-                Text(
-                    modifier = Modifier.padding(vertical = 32.dp),
-                    text = "Prepare for an interview",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                // The front card's descriptive image
+                // Top image
                 Image(
-                    painter = painterResource(R.drawable.job_interview),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
+                    painter = painter,
+                    contentDescription = "Interview Preparation",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(180.dp)
-                        .padding(vertical = 16.dp)
+                        .height(160.dp)
+                        .fillMaxWidth()
+                )
+
+                // Text below the image
+                Text(
+                    text = text,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
             }
         }
     }
 }
-
