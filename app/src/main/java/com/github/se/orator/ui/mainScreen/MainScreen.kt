@@ -105,7 +105,7 @@ fun MainScreen() {
 fun ButtonRow() {
     Row(
         modifier = Modifier
-            .testTag("toolbarTest")
+            .testTag("toolbar")
             .fillMaxWidth()
             .padding(top = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
@@ -130,6 +130,7 @@ fun ButtonRow() {
 fun SectionButton(text: String) {
     TextButton(
         onClick = { /* TODO: Add your onClick action */ },
+        modifier = Modifier.testTag("button")
     ) {
         Text(
             text = text,

@@ -22,27 +22,31 @@ class MainScreenTest {
 
         // Check if the welcome text is displayed correctly
         composeTestRule
-            .onNodeWithTag("mainScreenText")
+            .onNodeWithTag("mainScreenText1")
             .assertExists()
-            //Hard coded the "name" for now
-            .assertTextContains("Hi name, what do you want to practice today ?")
+            .assertTextContains("Find your")
+
+        composeTestRule
+            .onNodeWithTag("mainScreenText2")
+            .assertExists()
+            .assertTextContains("practice mode")
     }
 
     @Test
-    fun testProgressButtonIsDisplayedAndClickable() {
+    fun testToolbarIsDisplayedAndClickable() {
         composeTestRule.setContent {
             MainScreen()
         }
 
-        // Check if the progress button is displayed
+        // Check if the toolbar is displayed
         composeTestRule
-            .onNodeWithTag("mainScreenButton")
+            .onNodeWithTag("toolbar")
             .assertExists()
             .assertIsDisplayed()
 
-        // Check if it's clickable
+        // Check if the buttons are clickable
         composeTestRule
-            .onNodeWithTag("mainScreenButton")
+            .onNodeWithTag("button")
             .assertHasClickAction()
     }
 
@@ -52,9 +56,9 @@ class MainScreenTest {
             MainScreen()
         }
 
-        // Check if the "stacked cards" exists
+        // Check if the animated cards exists
         composeTestRule
-            .onNodeWithTag("stackedCards")
+            .onNodeWithTag("animatedCards")
             .assertExists()
             .assertIsDisplayed()
     }
