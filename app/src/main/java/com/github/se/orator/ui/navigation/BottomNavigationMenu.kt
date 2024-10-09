@@ -1,49 +1,37 @@
 package com.github.se.orator.ui.navigation
 
-import androidx.compose.foundation.Image
-//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import com.github.se.orator.R
+import androidx.compose.ui.unit.dp
 
 @Composable
-fun BottomNavigationMenu() {
-    BottomNavigation(backgroundColor = Color.White, contentColor = Color.Black) {
-        BottomNavigationItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.home),
-                    contentDescription = "Home",
-                    modifier = Modifier.testTag("HomeButton") // Test tag for Home button
-                )
-            },
-            selected = true,
-            onClick = { /* Handle home click */})
-        BottomNavigationItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "Profile",
-                    modifier = Modifier.testTag("ProfileButton") // Test tag for Profile button
-                )
-            },
-            selected = false,
-            onClick = { /* Handle profile click */})
-        BottomNavigationItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.friends),
-                    contentDescription = "Friends",
-                    modifier = Modifier.testTag("FriendsButton") // Test tag for Friends button
-                )
-            },
-            selected = false,
-            onClick = { /* Handle settings click */})
-    }
+fun BottomNavigationMenu(
+    onTabSelect: (TopLevelDestination) -> Unit,
+    tabList: List<TopLevelDestination>,
+    selectedItem: String
+) {
+    BottomNavigation(
+        modifier = Modifier.fillMaxWidth().height(60.dp).testTag("bottomNavigationMenu"),
+        backgroundColor = MaterialTheme.colorScheme.surface,
+        content = {
+            tabList.forEach { tab ->
+                BottomNavigationItem(
+                    icon = { Icon(tab.icon, contentDescription = null) },
+                    label = { Text(tab.textId) },
+                    selected = tab.route == selectedItem,
+                    onClick = { onTabSelect(tab) },
+                    modifier = Modifier.clip(RoundedCornerShape(50.dp)).testTag(tab.textId))
+            }
+        },
+    )
 }
