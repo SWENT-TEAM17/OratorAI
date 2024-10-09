@@ -23,6 +23,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 
 @Composable
@@ -96,7 +97,7 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Edit Profile Button
-                Button(onClick = { /*TODO: Navigate to edit profile screen */ }) {
+                Button(onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
                     Text(text = "Edit Profile")
                 }
 

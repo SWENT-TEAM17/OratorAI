@@ -8,7 +8,8 @@ data class UserProfile(
     val age: Int,
     val profilePic: String? = null,
     val statistics: UserStatistics,
-    val friends: List<String> = emptyList()
+    val friends: List<String> = emptyList(),
+    val bio: String? = null
 )
 
 data class UserStatistics(

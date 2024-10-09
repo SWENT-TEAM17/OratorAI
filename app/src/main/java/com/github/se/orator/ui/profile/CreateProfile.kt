@@ -34,7 +34,7 @@ fun CreateAccountScreen(
             TopAppBar(
                 title = { Text("Create an OratorAI account") },
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle back navigation */ }) {
+                    IconButton(onClick = { navigationActions.goBack() }) {
                         Image(
                             painter = painterResource(id = R.drawable.back_arrow),
                             contentDescription = "Back",
