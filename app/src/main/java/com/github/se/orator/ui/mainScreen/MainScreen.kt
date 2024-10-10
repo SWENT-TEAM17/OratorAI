@@ -40,6 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.orator.R
+import com.github.se.orator.ui.navigation.BottomNavigationMenu
+import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
+import com.github.se.orator.ui.navigation.NavigationActions
 import kotlinx.coroutines.delay
 
 /**
@@ -47,7 +50,7 @@ import kotlinx.coroutines.delay
  * and the toolbar containing buttons for different sections
  */
 @Composable
-fun MainScreen() {
+fun MainScreen(navigationActions: NavigationActions) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         content = { padding ->
@@ -75,15 +78,22 @@ fun MainScreen() {
                     fontWeight = FontWeight.Bold
                 )
 
-
                 ButtonRow()
 
                 // Practice mode cards
                 AnimatedCards()
             }
+        },
+        bottomBar = {
+            BottomNavigationMenu(
+                onTabSelect = { route -> navigationActions.navigateTo(route) },
+                tabList = LIST_TOP_LEVEL_DESTINATION,
+                selectedItem = navigationActions.currentRoute()
+            )
         }
     )
 }
+
 
 /**
  * The implementation of the toolbar containing the different selection buttons of the main screen
