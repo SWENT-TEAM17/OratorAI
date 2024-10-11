@@ -46,76 +46,59 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import kotlinx.coroutines.delay
 
 /**
- * The main screen's composable responsible to display the welcome text, the practice mode cards
- * and the toolbar containing buttons for different sections
+ * The main screen's composable responsible to display the welcome text, the practice mode cards and
+ * the toolbar containing buttons for different sections
  */
 @Composable
 fun MainScreen(navigationActions: NavigationActions) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
+  Scaffold(
+      modifier = Modifier.fillMaxSize(),
+      content = { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+          Text(
+              modifier =
+                  Modifier.padding(start = 42.dp).padding(top = 64.dp).testTag("mainScreenText1"),
+              text = "Find your",
+              fontSize = 50.sp)
 
-                Text(
-                    modifier = Modifier
-                        .padding(start = 42.dp)
-                        .padding(top = 64.dp)
-                        .testTag("mainScreenText1"),
-                    text = "Find your",
-                    fontSize = 50.sp
-                )
+          Text(
+              modifier = Modifier.padding(start = 42.dp).testTag("mainScreenText2"),
+              text = "practice mode",
+              fontSize = 47.sp,
+              fontWeight = FontWeight.Bold)
 
-                Text(
-                    modifier = Modifier
-                        .padding(start = 42.dp)
-                        .testTag("mainScreenText2"),
-                    text = "practice mode",
-                    fontSize = 47.sp,
-                    fontWeight = FontWeight.Bold
-                )
+          ButtonRow()
 
-                ButtonRow()
-
-                // Practice mode cards
-                AnimatedCards()
-            }
-        },
-        bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { route -> navigationActions.navigateTo(route) },
-                tabList = LIST_TOP_LEVEL_DESTINATION,
-                selectedItem = navigationActions.currentRoute()
-            )
+          // Practice mode cards
+          AnimatedCards()
         }
-    )
+      },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = navigationActions.currentRoute())
+      })
 }
-
 
 /**
  * The implementation of the toolbar containing the different selection buttons of the main screen
  */
 @Composable
 fun ButtonRow() {
-    Row(
-        modifier = Modifier
-            .testTag("toolbar")
-            .fillMaxWidth()
-            .padding(top = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
-    ) {
-        // Popular Button
-        SectionButton("Popular")
+  Row(
+      modifier = Modifier.testTag("toolbar").fillMaxWidth().padding(top = 16.dp),
+      horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
+  ) {
+    // Popular Button
+    SectionButton("Popular")
 
-        // Fun Button
-        SectionButton("Fun")
+    // Fun Button
+    SectionButton("Fun")
 
-        // Connect Button
-        SectionButton("Connect")
-    }
+    // Connect Button
+    SectionButton("Connect")
+  }
 }
 
 /**
@@ -125,31 +108,18 @@ fun ButtonRow() {
  */
 @Composable
 fun SectionButton(text: String) {
-    TextButton(
-        onClick = { /* TODO: Add your onClick action */ },
-        modifier = Modifier.testTag("button")
-    ) {
-        Text(
-            text = text,
-            color = Color.Black,
-            fontSize = 20.sp
-        )
-    }
+  TextButton(
+      onClick = { /* TODO: Add your onClick action */}, modifier = Modifier.testTag("button")) {
+        Text(text = text, color = Color.Black, fontSize = 20.sp)
+      }
 }
 
-/**
- * Function to create the sliding animation to browse between modes
- */
+/** Function to create the sliding animation to browse between modes */
 @Composable
 fun AnimatedCards() {
-    Box(
-        modifier = Modifier
-            .height(518.dp)
-            .padding(top = 16.dp)
-            .fillMaxWidth()
-            .testTag("animatedCards")
-    ) {
-
+  Box(
+      modifier =
+          Modifier.height(518.dp).padding(top = 16.dp).fillMaxWidth().testTag("animatedCards")) {
         var visible by remember { mutableStateOf(true) }
         val numberOfModes = 3
 
@@ -158,24 +128,22 @@ fun AnimatedCards() {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            items(numberOfModes) { x ->
+            contentPadding = PaddingValues(16.dp)) {
+              items(numberOfModes) { x ->
                 ModeCard(
                     text = "Prepare for an interview",
                     painter = painterResource(R.drawable.job_interview),
                     visible = visible,
                     onCardClick = {
+                      visible = !visible
+                      LaunchedEffect(visible) {
+                        delay(500)
                         visible = !visible
-                        LaunchedEffect(visible) {
-                            delay(500)
-                            visible = !visible
-                        }
-                    }
-                )
+                      }
+                    })
+              }
             }
-        }
-    }
+      }
 }
 
 /**
@@ -193,44 +161,32 @@ fun ModeCard(
     visible: Boolean,
     onCardClick: @Composable () -> Unit
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = slideInVertically() + fadeIn(),
-        exit = slideOutVertically() + fadeOut()
-    ) {
+  AnimatedVisibility(
+      visible = visible,
+      enter = slideInVertically() + fadeIn(),
+      exit = slideOutVertically() + fadeOut()) {
         Card(
             shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(top = 16.dp)
-                .clickable { onCardClick },
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
+            modifier =
+                Modifier.fillMaxWidth().padding(horizontal = 30.dp).padding(top = 16.dp).clickable {
+                  onCardClick
+                },
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))) {
+              Column(modifier = Modifier.fillMaxWidth()) {
                 // Top image
                 Image(
                     painter = painter,
                     contentDescription = "Interview Preparation",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .height(160.dp)
-                        .fillMaxWidth()
-                )
+                    modifier = Modifier.height(160.dp).fillMaxWidth())
 
                 // Text below the image
                 Text(
                     text = text,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
+                    modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally))
+              }
             }
-        }
-    }
+      }
 }

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -30,108 +29,78 @@ import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var auth: FirebaseAuth
+  private lateinit var auth: FirebaseAuth
 
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    override fun onCreate(savedInstanceState: Bundle?) {
+  @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+  override fun onCreate(savedInstanceState: Bundle?) {
 
-        super.onCreate(savedInstanceState)
+    super.onCreate(savedInstanceState)
 
-        // Initialize Firebase Auth
-        auth = FirebaseAuth.getInstance()
-        auth.currentUser?.let {
-            auth.signOut()
-        }
+    // Initialize Firebase Auth
+    auth = FirebaseAuth.getInstance()
+    auth.currentUser?.let { auth.signOut() }
 
-        setContent {
-            ProjectTheme {
-                Surface(modifier = Modifier.fillMaxSize()) { OratorApp() }
-            }
-        }
-    }
+    setContent { ProjectTheme { Surface(modifier = Modifier.fillMaxSize()) { OratorApp() } } }
+  }
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OratorApp() {
 
-    // Main layout using a Scaffold
-    Scaffold(modifier = Modifier.fillMaxSize()) {
+  // Main layout using a Scaffold
+  Scaffold(modifier = Modifier.fillMaxSize()) {
 
-        // Initialize the navigation controller
-        val navController = rememberNavController()
-        val navigationActions = NavigationActions(navController)
+    // Initialize the navigation controller
+    val navController = rememberNavController()
+    val navigationActions = NavigationActions(navController)
 
-        // Initialize the view models
-        val userProfileViewModel: UserProfileViewModel =
-            viewModel(factory = UserProfileViewModel.Factory)
+    // Initialize the view models
+    val userProfileViewModel: UserProfileViewModel =
+        viewModel(factory = UserProfileViewModel.Factory)
 
+    // Replace the content of the Scaffold with the desired screen
+    NavHost(navController = navController, startDestination = Route.AUTH) {
+      navigation(
+          startDestination = Screen.AUTH,
+          route = Route.AUTH,
+      ) {
 
-        // Replace the content of the Scaffold with the desired screen
-        NavHost(
-            navController = navController,
-            startDestination = Route.AUTH
-        ) {
-            navigation(
-                startDestination = Screen.AUTH,
-                route = Route.AUTH,
-            ) {
+        // Authentication Flow
+        composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
 
-                // Authentication Flow
-                composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
-
-                // Profile Creation Flow
-                composable(Screen.CREATE_PROFILE) {
-                    CreateAccountScreen(navigationActions, userProfileViewModel)
-                }
-            }
-
-
-
-            navigation(
-                startDestination = Screen.HOME,
-                route = Route.HOME,
-            ) {
-                composable(Screen.HOME) {
-                    MainScreen(navigationActions)
-                }
-            }
-
-            navigation(
-                startDestination = Screen.FRIENDS,
-                route = Route.FRIENDS,
-            ) {
-                composable(Screen.FRIENDS) {
-                    ViewFriendsScreen(
-                        navigationActions,
-                        userProfileViewModel
-                    )
-                }
-            }
-
-            navigation(
-                startDestination = Screen.PROFILE,
-                route = Route.PROFILE,
-            ) {
-                composable(Screen.PROFILE) {
-                    ProfileScreen(
-                        navigationActions,
-                        userProfileViewModel
-                    )
-                }
-                composable(Screen.CREATE_PROFILE) {
-                    CreateAccountScreen(
-                        navigationActions,
-                        userProfileViewModel
-                    )
-                }
-                composable(Screen.EDIT_PROFILE) {
-                    EditProfileScreen(
-                        navigationActions,
-                        userProfileViewModel
-                    )
-                }
-            }
+        // Profile Creation Flow
+        composable(Screen.CREATE_PROFILE) {
+          CreateAccountScreen(navigationActions, userProfileViewModel)
         }
+      }
+
+      navigation(
+          startDestination = Screen.HOME,
+          route = Route.HOME,
+      ) {
+        composable(Screen.HOME) { MainScreen(navigationActions) }
+      }
+
+      navigation(
+          startDestination = Screen.FRIENDS,
+          route = Route.FRIENDS,
+      ) {
+        composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
+      }
+
+      navigation(
+          startDestination = Screen.PROFILE,
+          route = Route.PROFILE,
+      ) {
+        composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.CREATE_PROFILE) {
+          CreateAccountScreen(navigationActions, userProfileViewModel)
+        }
+        composable(Screen.EDIT_PROFILE) {
+          EditProfileScreen(navigationActions, userProfileViewModel)
+        }
+      }
     }
+  }
 }
