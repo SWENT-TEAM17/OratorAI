@@ -27,50 +27,60 @@ import com.github.se.orator.ui.navigation.Screen
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
-  // State to control whether the profile picture dialog is open
-  var isDialogOpen by remember { mutableStateOf(false) }
+    // State to control whether the profile picture dialog is open
+    var isDialogOpen by remember { mutableStateOf(false) }
 
-  // Collect the profile data from the ViewModel
-  val userProfile by profileViewModel.userProfile.collectAsState()
+    // Collect the profile data from the ViewModel
+    val userProfile by profileViewModel.userProfile.collectAsState()
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = Color.White,
-            contentColor = Color.Black,
-            elevation = 4.dp,
-            title = { Text(text = "Profile", fontWeight = FontWeight.Bold) },
-            actions = {
-              IconButton(onClick = { /*TODO: Navigate to settings screen */}) {
-                Image(
-                    painter = painterResource(id = R.drawable.settings),
-                    contentDescription = "Settings",
-                    modifier = Modifier.size(32.dp))
-              }
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = {
-                    // TODO: Sign out the user
-                  }) {
-                    Image(
-                        painter = painterResource(id = R.drawable.sign_out),
-                        contentDescription = "Sign out",
-                        modifier = Modifier.size(32.dp))
-                  }
-            })
-      },
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = navigationActions.currentRoute())
-      }) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                backgroundColor = Color.White,
+                contentColor = Color.Black,
+                elevation = 4.dp,
+                title = { Text(text = "Profile", fontWeight = FontWeight.Bold) },
+                actions = {
+                    IconButton(onClick = { navigationActions.navigateTo(Screen.SETTINGS) }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.settings),
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            // Sign out the user
+
+                        }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.sign_out),
+                            contentDescription = "Sign out",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                })
+        },
+        bottomBar = {
+            BottomNavigationMenu(
+                onTabSelect = { route -> navigationActions.navigateTo(route) },
+                tabList = LIST_TOP_LEVEL_DESTINATION,
+                selectedItem = navigationActions.currentRoute()
+            )
+        }) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              userProfile?.let { profile ->
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            userProfile?.let { profile ->
                 // Profile Picture with clickable action to open it in larger format
                 ProfilePicture(
                     profilePictureUrl = profile.profilePic, onClick = { isDialogOpen = true })
@@ -84,7 +94,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
                 // Edit Profile Button
                 Button(onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
-                  Text(text = "Edit Profile")
+                    Text(text = "Edit Profile")
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -93,7 +103,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 CardSection(
                     title = "Achievements",
                     iconId = R.drawable.trophy_frame,
-                    onClick = { /*TODO: Handle achievements click */})
+                    onClick = { /*TODO: Handle achievements click */ })
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -101,75 +111,89 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 CardSection(
                     title = "Previous Sessions",
                     iconId = R.drawable.history_frame,
-                    onClick = { /*TODO: Handle previous sessions click */})
-              }
-                  ?: run {
+                    onClick = { /*TODO: Handle previous sessions click */ })
+            }
+                ?: run {
                     // Show a loading state if the profile is not yet available
                     Text("Loading profile...")
-                  }
-            }
+                }
+        }
 
         // Dialog to show the profile picture in larger format
         if (isDialogOpen && userProfile?.profilePic != null) {
-          ProfilePictureDialog(
-              profilePictureUrl = userProfile!!.profilePic!!, onDismiss = { isDialogOpen = false })
+            ProfilePictureDialog(
+                profilePictureUrl = userProfile!!.profilePic!!,
+                onDismiss = { isDialogOpen = false })
         }
-      }
+    }
 }
 
 @Composable
 fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
-  val painter =
-      if (profilePictureUrl != null) {
-        rememberAsyncImagePainter(model = profilePictureUrl)
-      } else {
-        painterResource(id = R.drawable.profile_picture)
-      }
+    val painter =
+        if (profilePictureUrl != null) {
+            rememberAsyncImagePainter(model = profilePictureUrl)
+        } else {
+            painterResource(id = R.drawable.profile_picture)
+        }
 
-  Image(
-      painter = painter,
-      contentDescription = "Profile Picture",
-      contentScale = ContentScale.Crop,
-      modifier =
-          Modifier.size(128.dp)
-              .clip(CircleShape)
-              .clickable { onClick() } // Trigger the click action to open the image
-              .testTag("ProfilePicture") // Test tag for profile picture
-      )
+    Image(
+        painter = painter,
+        contentDescription = "Profile Picture",
+        contentScale = ContentScale.Crop,
+        modifier =
+        Modifier
+            .size(128.dp)
+            .clip(CircleShape)
+            .clickable { onClick() } // Trigger the click action to open the image
+            .testTag("ProfilePicture") // Test tag for profile picture
+    )
 }
 
 @Composable
 fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
-  Dialog(onDismissRequest = { onDismiss() }) {
-    Box(
-        modifier =
-            Modifier.fillMaxSize().padding(16.dp).clickable {
-              onDismiss()
-            } // Dismiss the dialog when the user clicks outside
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Box(
+            modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .clickable {
+                    onDismiss()
+                } // Dismiss the dialog when the user clicks outside
         ) {
-          Image(
-              painter = rememberAsyncImagePainter(model = profilePictureUrl),
-              contentDescription = "Large Profile Picture",
-              contentScale = ContentScale.Crop,
-              modifier = Modifier.fillMaxSize().align(Alignment.Center).clip(CircleShape))
+            Image(
+                painter = rememberAsyncImagePainter(model = profilePictureUrl),
+                contentDescription = "Large Profile Picture",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center)
+                    .clip(CircleShape)
+            )
         }
-  }
+    }
 }
 
 @Composable
 fun CardSection(title: String, iconId: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
-  Card(
-      modifier = modifier.fillMaxWidth().height(100.dp).clickable { onClick() }, elevation = 4.dp) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .clickable { onClick() }, elevation = 4.dp
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
-          Image(
-              painter = painterResource(id = iconId),
-              contentDescription = title,
-              modifier =
-                  Modifier.size(24.dp)
-                      .testTag("titleIcon") // Test tag for icons in the card sections
-              )
-          Spacer(modifier = Modifier.width(16.dp))
-          Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Image(
+                painter = painterResource(id = iconId),
+                contentDescription = title,
+                modifier =
+                Modifier
+                    .size(24.dp)
+                    .testTag("titleIcon") // Test tag for icons in the card sections
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
-      }
+    }
 }

@@ -14,6 +14,7 @@ object Route {
   const val AUTH = "Auth"
   const val EDIT_PROFILE = "EditProfile"
   const val CREATE_PROFILE = "CreateProfile"
+  const val SETTINGS = "Settings"
 }
 
 object Screen {
@@ -23,6 +24,7 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val EDIT_PROFILE = "EditProfile Screen"
   const val CREATE_PROFILE = "CreateProfile Screen"
+  const val SETTINGS = "Settings Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

@@ -97,7 +97,7 @@ fun CreateAccountScreen(
                       userProfileViewModel.addUserProfile(newProfile)
 
                       // Navigate to the next screen (e.g., profile screen)
-                      navigationActions.navigateTo(TopLevelDestinations.PROFILE)
+                      navigationActions.navigateTo(TopLevelDestinations.HOME)
                     }
                   },
                   modifier = Modifier.fillMaxWidth(),

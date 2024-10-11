@@ -23,6 +23,7 @@ import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
+import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -99,6 +100,9 @@ fun OratorApp() {
         }
         composable(Screen.EDIT_PROFILE) {
           EditProfileScreen(navigationActions, userProfileViewModel)
+        }
+        composable(Screen.SETTINGS){
+          SettingsScreen(navigationActions, userProfileViewModel)
         }
       }
     }

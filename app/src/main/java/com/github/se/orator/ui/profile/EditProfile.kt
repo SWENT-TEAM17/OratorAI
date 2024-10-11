@@ -37,139 +37,168 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.ui.navigation.BottomNavigationMenu
+import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 @Composable
 fun EditProfileScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  // Fetch the user's profile data
-  val userProfile by userProfileViewModel.userProfile.collectAsState()
+    // Fetch the user's profile data
+    val userProfile by userProfileViewModel.userProfile.collectAsState()
 
-  // States for username, bio, and dialog visibility
-  var isDialogOpen by remember { mutableStateOf(false) }
-  var updatedUsername by remember { mutableStateOf(userProfile?.name ?: "") }
-  var updatedBio by remember { mutableStateOf(userProfile?.bio ?: "") }
+    // States for username, bio, and dialog visibility
+    var isDialogOpen by remember { mutableStateOf(false) }
+    var updatedUsername by remember { mutableStateOf(userProfile?.name ?: "") }
+    var updatedBio by remember { mutableStateOf(userProfile?.bio ?: "") }
 
-  // Intent launcher to capture photo or pick image from gallery
-  val context = LocalContext.current
-  val takePictureLauncher =
-      rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) {
-          bitmap ->
-        // Handle the profile picture update here
-        bitmap?.let {
-          // Assuming you have a function in the ViewModel to upload the profile picture
-          userProfileViewModel.uploadProfilePicture(
-              userProfile?.uid ?: "", Uri.EMPTY) // Replace with actual URI logic
+    // Intent launcher to capture photo or pick image from gallery
+    val context = LocalContext.current
+    val takePictureLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) { bitmap ->
+            // Handle the profile picture update here
+            bitmap?.let {
+                // Assuming you have a function in the ViewModel to upload the profile picture
+                userProfileViewModel.uploadProfilePicture(
+                    userProfile?.uid ?: "", Uri.EMPTY
+                ) // Replace with actual URI logic
+            }
         }
-      }
 
-  val pickImageLauncher =
-      rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { userProfileViewModel.uploadProfilePicture(userProfile?.uid ?: "", it) }
-      }
+    val pickImageLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+            uri?.let { userProfileViewModel.uploadProfilePicture(userProfile?.uid ?: "", it) }
+        }
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = Color.White,
-            contentColor = Color.Black,
-            elevation = 4.dp,
-            title = { Text(text = "Edit Profile", fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Image(
-                    painter = painterResource(id = R.drawable.back_arrow),
-                    contentDescription = "Back",
-                    modifier = Modifier.size(32.dp))
-              }
-            },
-            actions = {
-              IconButton(onClick = { /* Handle settings click */}) {
-                Image(
-                    painter = painterResource(id = R.drawable.settings),
-                    contentDescription = "Settings",
-                    modifier = Modifier.size(32.dp))
-              }
-            })
-      },
-      bottomBar = { BottomNavigationBar() }) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                backgroundColor = Color.White,
+                contentColor = Color.Black,
+                elevation = 4.dp,
+                title = { Text(text = "Edit Profile", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = { navigationActions.goBack() }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.back_arrow),
+                            contentDescription = "Back",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navigationActions.navigateTo(Screen.SETTINGS) }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.settings),
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                })
+        },
+        bottomBar = {
+            BottomNavigationMenu(
+                onTabSelect = { route -> navigationActions.navigateTo(route) },
+                tabList = LIST_TOP_LEVEL_DESTINATION,
+                selectedItem = navigationActions.currentRoute()
+            )
+        }) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              // Profile Picture with Camera Icon Overlay
-              Box(contentAlignment = Alignment.Center) {
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Profile Picture with Camera Icon Overlay
+            Box(contentAlignment = Alignment.Center) {
                 ProfilePicture(
                     profilePictureUrl =
-                        userProfile?.profilePic, // Fetch profile picture URL from userProfile
+                    userProfile?.profilePic, // Fetch profile picture URL from userProfile
                     onClick = { isDialogOpen = true } // Open dialog to choose camera/gallery
-                    )
+                )
                 IconButton(
                     onClick = { isDialogOpen = true },
-                    modifier = Modifier.size(32.dp).align(Alignment.BottomEnd)) {
-                      Image(
-                          painter = painterResource(id = R.drawable.camera),
-                          contentDescription = "Change Profile Picture",
-                          modifier = Modifier.size(32.dp))
-                    }
-              }
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(Alignment.BottomEnd)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.camera),
+                        contentDescription = "Change Profile Picture",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
 
-              Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-              // Username Input Field
-              OutlinedTextField(
-                  value = updatedUsername,
-                  onValueChange = { newUsername -> updatedUsername = newUsername },
-                  label = { Text("Username") },
-                  modifier = Modifier.fillMaxWidth())
+            // Username Input Field
+            OutlinedTextField(
+                value = updatedUsername,
+                onValueChange = { newUsername -> updatedUsername = newUsername },
+                label = { Text("Username") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-              Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-              // Bio Input Field
-              Text(
-                  text = "BIO",
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.align(Alignment.Start))
-              OutlinedTextField(
-                  value = updatedBio,
-                  onValueChange = { newBio -> updatedBio = newBio },
-                  placeholder = { Text(text = "Tell us about yourself") },
-                  modifier = Modifier.fillMaxWidth().height(150.dp),
-                  maxLines = 5)
+            // Bio Input Field
+            Text(
+                text = "BIO",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            OutlinedTextField(
+                value = updatedBio,
+                onValueChange = { newBio -> updatedBio = newBio },
+                placeholder = { Text(text = "Tell us about yourself") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp),
+                maxLines = 5
+            )
 
-              Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-              // Save Changes Button
-              Button(
-                  onClick = {
+            // Save Changes Button
+            Button(
+                onClick = {
                     // Save the updated profile information
                     val updatedProfile = userProfile?.copy(name = updatedUsername, bio = updatedBio)
                     if (updatedProfile != null) {
-                      userProfileViewModel.createOrUpdateUserProfile(updatedProfile)
+                        userProfileViewModel.createOrUpdateUserProfile(updatedProfile)
                     }
                     navigationActions.goBack()
-                  },
-                  modifier = Modifier.fillMaxWidth().height(50.dp)) {
-                    Text(text = "Save changes")
-                  }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text(text = "Save changes")
             }
-      }
+        }
+    }
 
-  // Display the dialog to choose between camera and gallery
-  if (isDialogOpen) {
-    ChoosePictureDialog(
-        onDismiss = { isDialogOpen = false },
-        onTakePhoto = {
-          isDialogOpen = false
-          takePictureLauncher.launch(null)
-        },
-        onPickFromGallery = {
-          isDialogOpen = false
-          pickImageLauncher.launch("image/*")
-        })
-  }
+    // Display the dialog to choose between camera and gallery
+    if (isDialogOpen) {
+        ChoosePictureDialog(
+            onDismiss = { isDialogOpen = false },
+            onTakePhoto = {
+                isDialogOpen = false
+                takePictureLauncher.launch(null)
+            },
+            onPickFromGallery = {
+                isDialogOpen = false
+                pickImageLauncher.launch("image/*")
+            })
+    }
 }
 
 @Composable
@@ -178,49 +207,16 @@ fun ChoosePictureDialog(
     onTakePhoto: () -> Unit,
     onPickFromGallery: () -> Unit
 ) {
-  AlertDialog(
-      onDismissRequest = { onDismiss() },
-      title = { Text("Choose Profile Picture") },
-      text = { Text("Select an option to update your profile picture.") },
-      confirmButton = {
-        Column {
-          Button(onClick = { onTakePhoto() }) { Text("Take Photo") }
-          Spacer(modifier = Modifier.height(8.dp))
-          Button(onClick = { onPickFromGallery() }) { Text("Upload from Gallery") }
-        }
-      },
-      dismissButton = { Button(onClick = { onDismiss() }) { Text("Cancel") } })
-}
-
-@Composable
-fun BottomNavigationBar() {
-  BottomNavigation(backgroundColor = Color.White, contentColor = Color.Black) {
-    BottomNavigationItem(
-        icon = {
-          Image(
-              painter = painterResource(id = R.drawable.home),
-              contentDescription = "Home",
-              modifier = Modifier.size(32.dp))
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text("Choose Profile Picture") },
+        text = { Text("Select an option to update your profile picture.") },
+        confirmButton = {
+            Column {
+                Button(onClick = { onTakePhoto() }) { Text("Take Photo") }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { onPickFromGallery() }) { Text("Upload from Gallery") }
+            }
         },
-        selected = true,
-        onClick = { /* Handle home click */})
-    BottomNavigationItem(
-        icon = {
-          Image(
-              painter = painterResource(id = R.drawable.profile),
-              contentDescription = "Profile",
-              modifier = Modifier.size(32.dp))
-        },
-        selected = false,
-        onClick = { /* Handle profile click */})
-    BottomNavigationItem(
-        icon = {
-          Image(
-              painter = painterResource(id = R.drawable.friends),
-              contentDescription = "Friends",
-              modifier = Modifier.size(32.dp))
-        },
-        selected = false,
-        onClick = { /* Handle friends click */})
-  }
+        dismissButton = { Button(onClick = { onDismiss() }) { Text("Cancel") } })
 }
