@@ -37,7 +37,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.ui.navigation.BottomNavigationMenu
+import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 @Composable
 fun EditProfileScreen(
@@ -54,21 +57,21 @@ fun EditProfileScreen(
 
     // Intent launcher to capture photo or pick image from gallery
     val context = LocalContext.current
-    val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        // Handle the profile picture update here
-        bitmap?.let {
-            // Assuming you have a function in the ViewModel to upload the profile picture
-            userProfileViewModel.uploadProfilePicture(userProfile?.uid ?: "", Uri.EMPTY)  // Replace with actual URI logic
+    val takePictureLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) { bitmap ->
+            // Handle the profile picture update here
+            bitmap?.let {
+                // Assuming you have a function in the ViewModel to upload the profile picture
+                userProfileViewModel.uploadProfilePicture(
+                    userProfile?.uid ?: "", Uri.EMPTY
+                ) // Replace with actual URI logic
+            }
         }
-    }
 
-    val pickImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let { userProfileViewModel.uploadProfilePicture(userProfile?.uid ?: "", it) }
-    }
+    val pickImageLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+            uri?.let { userProfileViewModel.uploadProfilePicture(userProfile?.uid ?: "", it) }
+        }
 
     Scaffold(
         topBar = {
@@ -90,20 +93,22 @@ fun EditProfileScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Handle settings click */ }) {
+                    IconButton(onClick = { navigationActions.navigateTo(Screen.SETTINGS) }) {
                         Image(
                             painter = painterResource(id = R.drawable.settings),
                             contentDescription = "Settings",
                             modifier = Modifier.size(32.dp)
                         )
                     }
-                }
-            )
+                })
         },
         bottomBar = {
-            BottomNavigationBar()
-        }
-    ) {
+            BottomNavigationMenu(
+                onTabSelect = { route -> navigationActions.navigateTo(route) },
+                tabList = LIST_TOP_LEVEL_DESTINATION,
+                selectedItem = navigationActions.currentRoute()
+            )
+        }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -114,8 +119,9 @@ fun EditProfileScreen(
             // Profile Picture with Camera Icon Overlay
             Box(contentAlignment = Alignment.Center) {
                 ProfilePicture(
-                    profilePictureUrl = userProfile?.profilePic,  // Fetch profile picture URL from userProfile
-                    onClick = { isDialogOpen = true }  // Open dialog to choose camera/gallery
+                    profilePictureUrl =
+                    userProfile?.profilePic, // Fetch profile picture URL from userProfile
+                    onClick = { isDialogOpen = true } // Open dialog to choose camera/gallery
                 )
                 IconButton(
                     onClick = { isDialogOpen = true },
@@ -191,8 +197,7 @@ fun EditProfileScreen(
             onPickFromGallery = {
                 isDialogOpen = false
                 pickImageLauncher.launch("image/*")
-            }
-        )
+            })
     }
 }
 
@@ -208,61 +213,10 @@ fun ChoosePictureDialog(
         text = { Text("Select an option to update your profile picture.") },
         confirmButton = {
             Column {
-                Button(onClick = { onTakePhoto() }) {
-                    Text("Take Photo")
-                }
+                Button(onClick = { onTakePhoto() }) { Text("Take Photo") }
                 Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = { onPickFromGallery() }) {
-                    Text("Upload from Gallery")
-                }
+                Button(onClick = { onPickFromGallery() }) { Text("Upload from Gallery") }
             }
         },
-        dismissButton = {
-            Button(onClick = { onDismiss() }) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
-fun BottomNavigationBar() {
-    BottomNavigation(
-        backgroundColor = Color.White,
-        contentColor = Color.Black
-    ) {
-        BottomNavigationItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.home),
-                    contentDescription = "Home",
-                    modifier = Modifier.size(32.dp)
-                )
-            },
-            selected = true,
-            onClick = { /* Handle home click */ }
-        )
-        BottomNavigationItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "Profile",
-                    modifier = Modifier.size(32.dp)
-                )
-            },
-            selected = false,
-            onClick = { /* Handle profile click */ }
-        )
-        BottomNavigationItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.friends),
-                    contentDescription = "Friends",
-                    modifier = Modifier.size(32.dp)
-                )
-            },
-            selected = false,
-            onClick = { /* Handle friends click */ }
-        )
-    }
+        dismissButton = { Button(onClick = { onDismiss() }) { Text("Cancel") } })
 }

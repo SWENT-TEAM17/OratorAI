@@ -25,12 +25,8 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
-
 @Composable
-fun ProfileScreen(
-    navigationActions: NavigationActions,
-    profileViewModel: UserProfileViewModel
-) {
+fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
     // State to control whether the profile picture dialog is open
     var isDialogOpen by remember { mutableStateOf(false) }
 
@@ -48,7 +44,7 @@ fun ProfileScreen(
                 elevation = 4.dp,
                 title = { Text(text = "Profile", fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = { /*TODO: Navigate to settings screen */ }) {
+                    IconButton(onClick = { navigationActions.navigateTo(Screen.SETTINGS) }) {
                         Image(
                             painter = painterResource(id = R.drawable.settings),
                             contentDescription = "Settings",
@@ -57,9 +53,11 @@ fun ProfileScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        //TODO: Sign out the user
-                    }) {
+                    IconButton(
+                        onClick = {
+                            // Sign out the user
+
+                        }) {
                         Image(
                             painter = painterResource(id = R.drawable.sign_out),
                             contentDescription = "Sign out",
@@ -85,9 +83,7 @@ fun ProfileScreen(
             userProfile?.let { profile ->
                 // Profile Picture with clickable action to open it in larger format
                 ProfilePicture(
-                    profilePictureUrl = profile.profilePic,
-                    onClick = { isDialogOpen = true }
-                )
+                    profilePictureUrl = profile.profilePic, onClick = { isDialogOpen = true })
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -107,8 +103,7 @@ fun ProfileScreen(
                 CardSection(
                     title = "Achievements",
                     iconId = R.drawable.trophy_frame,
-                    onClick = { /*TODO: Handle achievements click */ }
-                )
+                    onClick = { /*TODO: Handle achievements click */ })
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -116,20 +111,19 @@ fun ProfileScreen(
                 CardSection(
                     title = "Previous Sessions",
                     iconId = R.drawable.history_frame,
-                    onClick = { /*TODO: Handle previous sessions click */ }
-                )
-            } ?: run {
-                // Show a loading state if the profile is not yet available
-                Text("Loading profile...")
+                    onClick = { /*TODO: Handle previous sessions click */ })
             }
+                ?: run {
+                    // Show a loading state if the profile is not yet available
+                    Text("Loading profile...")
+                }
         }
 
         // Dialog to show the profile picture in larger format
         if (isDialogOpen && userProfile?.profilePic != null) {
             ProfilePictureDialog(
                 profilePictureUrl = userProfile!!.profilePic!!,
-                onDismiss = { isDialogOpen = false }
-            )
+                onDismiss = { isDialogOpen = false })
         }
     }
 }
@@ -147,7 +141,8 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
         painter = painter,
         contentDescription = "Profile Picture",
         contentScale = ContentScale.Crop,
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(128.dp)
             .clip(CircleShape)
             .clickable { onClick() } // Trigger the click action to open the image
@@ -159,7 +154,8 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
 fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .clickable {
@@ -185,14 +181,14 @@ fun CardSection(title: String, iconId: Int, onClick: () -> Unit, modifier: Modif
         modifier = modifier
             .fillMaxWidth()
             .height(100.dp)
-            .clickable { onClick() },
-        elevation = 4.dp
+            .clickable { onClick() }, elevation = 4.dp
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
             Image(
                 painter = painterResource(id = iconId),
                 contentDescription = title,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(24.dp)
                     .testTag("titleIcon") // Test tag for icons in the card sections
             )
