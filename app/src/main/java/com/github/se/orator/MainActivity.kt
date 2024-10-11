@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -17,6 +16,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
+import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
@@ -90,33 +90,19 @@ fun OratorApp() {
                 startDestination = Screen.HOME,
                 route = Route.HOME,
             ) {
-//                composable(Screen.HOME) {
-//                    OverviewScreen(
-//                        listToDosViewModel = listToDosViewModel,
-//                        navigationActions = navigationActions
-//                    )
-//                }
-//                composable(Screen.ADD_TODO) {
-//                    AddToDoScreen(
-//                        listToDosViewModel = listToDosViewModel,
-//                        navigationActions = navigationActions,
-//                        locationViewModel = locationViewModel
-//                    )
-//                }
-//                composable(Screen.EDIT_TODO) {
-//                    EditToDoScreen(
-//                        listToDosViewModel = listToDosViewModel,
-//                        navigationActions = navigationActions,
-//                        locationViewModel = locationViewModel
-//                    )
-//                }
+//                composable(Screen.HOME) { HomeScreen(navigationActions) }
             }
 
             navigation(
                 startDestination = Screen.FRIENDS,
                 route = Route.FRIENDS,
             ) {
-//                composable(Screen.FRIENDS) { FriendsScreen(navigationActions) }
+                composable(Screen.FRIENDS) {
+                    ViewFriendsScreen(
+                        navigationActions,
+                        userProfileViewModel
+                    )
+                }
             }
 
             navigation(
