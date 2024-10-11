@@ -24,6 +24,7 @@ import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.theme.ProjectTheme
+import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
@@ -90,26 +91,9 @@ fun OratorApp() {
                 startDestination = Screen.HOME,
                 route = Route.HOME,
             ) {
-//                composable(Screen.HOME) {
-//                    OverviewScreen(
-//                        listToDosViewModel = listToDosViewModel,
-//                        navigationActions = navigationActions
-//                    )
-//                }
-//                composable(Screen.ADD_TODO) {
-//                    AddToDoScreen(
-//                        listToDosViewModel = listToDosViewModel,
-//                        navigationActions = navigationActions,
-//                        locationViewModel = locationViewModel
-//                    )
-//                }
-//                composable(Screen.EDIT_TODO) {
-//                    EditToDoScreen(
-//                        listToDosViewModel = listToDosViewModel,
-//                        navigationActions = navigationActions,
-//                        locationViewModel = locationViewModel
-//                    )
-//                }
+                composable(Screen.HOME){
+                    MainScreen(navigationActions)
+                }
             }
 
             navigation(
