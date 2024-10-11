@@ -99,7 +99,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
         if (!viewModel.isLoading.value && redirectToProfile) {
             isLoading = false
             if (!viewModel.isProfileIncomplete()) {
-                navigationActions.navigateTo(TopLevelDestinations.PROFILE)
+                navigationActions.navigateTo(TopLevelDestinations.HOME)
             } else {
                 navigationActions.navigateTo(Screen.CREATE_PROFILE)
             }

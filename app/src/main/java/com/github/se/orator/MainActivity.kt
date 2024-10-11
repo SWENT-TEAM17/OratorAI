@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -24,6 +25,7 @@ import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.theme.ProjectTheme
+import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
@@ -90,7 +92,9 @@ fun OratorApp() {
                 startDestination = Screen.HOME,
                 route = Route.HOME,
             ) {
-//                composable(Screen.HOME) { HomeScreen(navigationActions) }
+                composable(Screen.HOME) {
+                    MainScreen(navigationActions)
+                }
             }
 
             navigation(
