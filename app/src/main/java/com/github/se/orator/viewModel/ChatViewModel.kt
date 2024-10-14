@@ -8,10 +8,8 @@ import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import android.util.Log
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
-import retrofit2.HttpException
 
 class ChatViewModel(private val chatGPTService: ChatGPTService) : ViewModel() {
 

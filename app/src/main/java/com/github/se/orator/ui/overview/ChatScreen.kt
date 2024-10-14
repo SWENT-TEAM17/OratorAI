@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +25,15 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
     val errorMessage by viewModel.errorMessage.collectAsState()
     var userInput by remember { mutableStateOf(TextFieldValue("")) }
 
+    // State for tracking the scroll position
+    val listState = rememberLazyListState()
+
+    // Auto-scroll to the last message when the chatMessages size changes
+    LaunchedEffect(chatMessages.size) {
+        if (chatMessages.isNotEmpty()) {
+            listState.animateScrollToItem(chatMessages.size - 1)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -36,6 +46,7 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
             ) {
                 // Display chat messages using LazyColumn
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
