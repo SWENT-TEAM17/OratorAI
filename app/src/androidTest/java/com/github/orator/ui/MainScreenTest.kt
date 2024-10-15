@@ -5,19 +5,33 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 
 class MainScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private lateinit var navigationActions: NavigationActions
+
+    @Before
+    fun setUp() {
+        // "mock" navigation for testing
+        navigationActions = mock(NavigationActions::class.java)
+        `when`(navigationActions.currentRoute()).thenReturn(Screen.HOME)
+    }
+
     @Test
     fun testWelcomeTextIsDisplayed() {
         composeTestRule.setContent {
-            MainScreen()
+            MainScreen(navigationActions)
         }
 
         // Check if the welcome text is displayed correctly
@@ -35,7 +49,7 @@ class MainScreenTest {
     @Test
     fun testToolbarIsDisplayedAndClickable() {
         composeTestRule.setContent {
-            MainScreen()
+            MainScreen(navigationActions)
         }
 
         // Check if the toolbar is displayed
@@ -53,7 +67,7 @@ class MainScreenTest {
     @Test
     fun testStackedCardsAreDisplayed() {
         composeTestRule.setContent {
-            MainScreen()
+            MainScreen(navigationActions)
         }
 
         // Check if the animated cards exists
