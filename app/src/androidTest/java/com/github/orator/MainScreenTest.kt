@@ -1,4 +1,4 @@
-package com.github.orator.ui
+package com.github.orator
 
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed

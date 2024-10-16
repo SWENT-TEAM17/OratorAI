@@ -129,24 +129,22 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 }
 
 @Composable
-fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
-    val painter =
-        if (profilePictureUrl != null) {
-            rememberAsyncImagePainter(model = profilePictureUrl)
-        } else {
-            painterResource(id = R.drawable.profile_picture)
-        }
+fun ProfilePicture(
+    profilePictureUrl: String?,
+    onClick: () -> Unit
+) {
+    val painter = rememberAsyncImagePainter(
+        model = profilePictureUrl ?: R.drawable.profile_picture
+    )
 
     Image(
         painter = painter,
         contentDescription = "Profile Picture",
         contentScale = ContentScale.Crop,
-        modifier =
-        Modifier
-            .size(128.dp)
+        modifier = Modifier
+            .size(100.dp)
             .clip(CircleShape)
-            .clickable { onClick() } // Trigger the click action to open the image
-            .testTag("ProfilePicture") // Test tag for profile picture
+            .clickable(onClick = onClick)
     )
 }
 
@@ -154,26 +152,26 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
 fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Box(
-            modifier =
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .clickable {
                     onDismiss()
-                } // Dismiss the dialog when the user clicks outside
+                } // Dismiss the dialog when clicked outside
         ) {
             Image(
                 painter = rememberAsyncImagePainter(model = profilePictureUrl),
                 contentDescription = "Large Profile Picture",
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Crop, // Ensures the image fills the shape and is cropped if necessary
                 modifier = Modifier
-                    .fillMaxSize()
+                    .size(200.dp) // Set the size to twice the original (100.dp * 2 = 200.dp)
                     .align(Alignment.Center)
-                    .clip(CircleShape)
+                    .clip(CircleShape) // Keep the circular shape
             )
         }
     }
 }
+
 
 @Composable
 fun CardSection(title: String, iconId: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {

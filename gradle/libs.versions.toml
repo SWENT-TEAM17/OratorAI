@@ -24,8 +24,8 @@ firebaseAuthKtx = "23.0.0"
 firebaseDatabaseKtx = "21.0.0"
 firebaseFirestore = "25.1.0"
 firebaseUiAuth = "8.0.0"
-firebaseStorage = "20.0.0"
-firebase-bom = "32.1.1"
+firebaseStorage = "21.0.1"
+firebase-bom = "33.4.0"
 
 # Google Service and Maps
 playServicesAuth = "21.2.0"
