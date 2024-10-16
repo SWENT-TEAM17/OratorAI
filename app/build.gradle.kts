@@ -160,11 +160,20 @@ dependencies {
     implementation(libs.play.services.auth)
 
     // Firebase
+
+    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
+
+    // Firebase storage
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.appcheck)
+
+    // Coil
+    implementation(libs.coil.compose)
 
     // Networking with OkHttp
     implementation(libs.okhttp)

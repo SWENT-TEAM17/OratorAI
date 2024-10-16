@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.overview
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,19 +17,48 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.github.se.orator.R
+import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 
 @Composable
-fun SpeakingPublicSpeaking() {
+fun SpeakingPublicSpeaking(navigationActions: NavigationActions) {
     var occasion by remember { mutableStateOf("") }
     var demographic by remember { mutableStateOf("") }
     var main_points by remember { mutableStateOf("") }
     var feedback_language by remember { mutableStateOf("") }
 
-    Scaffold(
-        modifier = Modifier.testTag("speakingStartScreen"),
+    androidx.compose.material.Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("feedbackScreen"),
+        topBar = {
+            androidx.compose.material.TopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                backgroundColor = Color.White,
+                contentColor = Color.Black,
+                elevation = 4.dp,
+                title = { Text("Public Speaking") },
+                navigationIcon = {
+                    androidx.compose.material.IconButton(onClick = { navigationActions.goBack() }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.back_arrow),
+                            contentDescription = "Back",
+                            modifier = Modifier
+                                .size(32.dp)
+                                .testTag("back_button")
+                        )
+                    }
+                }
+            )
+        },
         content = { paddingValues ->
             Column(
                 modifier = Modifier
@@ -91,8 +123,6 @@ fun SpeakingPublicSpeaking() {
                         .testTag("experienceInput")
                 )
 
-                Spacer(modifier = Modifier.height(130.dp))
-
                 // Get Started Button
                 Button(
                     modifier = Modifier
@@ -100,6 +130,7 @@ fun SpeakingPublicSpeaking() {
                         .testTag("getStartedButton"),
                     onClick = {
                         // Leave the onClick action empty for now
+                        navigationActions.navigateTo(Screen.SPEAKING_SCREEN)
                     }
                 ) {
                     Text("Get Started")

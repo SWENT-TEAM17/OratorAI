@@ -1,6 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Camera permission is still required -->
+    <uses-permission android:name="android.permission.CAMERA"
+        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
+
+    <!-- Scoped storage or more granular media access for Android 10 and above -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:targetApi="33"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:targetApi="33"/>
 
     <application
         android:allowBackup="true"

@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.overview
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -22,14 +25,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.orator.R
+import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 @Composable
-fun SpeakingScreen() {
-    Scaffold(
-        modifier = Modifier.fillMaxSize().testTag("speakingSecondScreen"),
+fun SpeakingScreen(navigationActions: NavigationActions) {
+    androidx.compose.material.Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("feedbackScreen"),
+        topBar = {
+            TopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                backgroundColor = Color.White,
+                contentColor = Color.Black,
+                elevation = 4.dp,
+                title = { Text("Orator AI") },
+                navigationIcon = {
+                    androidx.compose.material.IconButton(onClick = { navigationActions.goBack() }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.back_arrow),
+                            contentDescription = "Back",
+                            modifier = Modifier
+                                .size(32.dp)
+                                .testTag("back_button")
+                        )
+                    }
+                }
+            )
+        },
         content = { paddingValues ->
             Column(
                 modifier = Modifier
@@ -81,6 +112,7 @@ fun SpeakingScreen() {
                 Button(
                     onClick = {
                         // No action yet
+                        navigationActions.navigateTo(Screen.FEEDBACK)
                     },
                     modifier = Modifier
                         .fillMaxWidth()

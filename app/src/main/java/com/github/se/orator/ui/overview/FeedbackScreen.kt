@@ -1,27 +1,60 @@
 package com.github.se.orator.ui.overview
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.orator.R
+import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 @Composable
-fun FeedbackScreen() {
+fun FeedbackScreen(navigationActions: NavigationActions) {
     Scaffold(
-        modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("feedbackScreen"),
+        topBar = {
+            TopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                backgroundColor = Color.White,
+                contentColor = Color.Black,
+                elevation = 4.dp,
+                title = { Text("Feedback") },
+                navigationIcon = {
+                    IconButton(onClick = { navigationActions.goBack() }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.back_arrow),
+                            contentDescription = "Back",
+                            modifier = Modifier
+                                .size(32.dp)
+                                .testTag("back_button")
+                        )
+                    }
+                }
+            )
+        },
         content = { paddingValues ->
             Column(
                 modifier = Modifier
@@ -102,13 +135,17 @@ fun FeedbackScreen() {
                         .padding(top = 16.dp)
                 ) {
                     Button(
-                        onClick = { /* Retry logic */ },
+                        onClick = {
+                            navigationActions.navigateTo(Screen.HOME)
+                        },
                         modifier = Modifier.testTag("retryButton")
                     ) {
                         Text("Try Again")
                     }
                     Button(
-                        onClick = { /* Review logic */ },
+                        onClick = {
+                            navigationActions.navigateTo(Screen.HOME) //Change to save previous state of mode and get back to it
+                        },
                         modifier = Modifier.testTag("reviewButton")
                     ) {
                         Text("Review Conversation")
@@ -118,3 +155,4 @@ fun FeedbackScreen() {
         }
     )
 }
+
