@@ -40,6 +40,15 @@ Orator AI remains fully functional even without internet connectivity:
 
 ---
 
+## Architecture Diagram
+Here's a first draft of the architecture of our app. Most of the logic is still to be developed but it gives a great overview of what we're up
+![IMG_0012(1)](https://github.com/user-attachments/assets/d1ca4775-efc0-4561-9205-18d61b1551cf)
+
+
+## Figma Project
+
+[Click here](https://www.figma.com/design/OvKRhZaDIyr1hJv4Nmcsks/swent?node-id=36-15&t=3CUvDmxivQfOh4vY-1) to access our first Figma draft and explore our design.
+
 ## Usage
 
 1. **Sign In**: Users sign in using secure Google authentication.
