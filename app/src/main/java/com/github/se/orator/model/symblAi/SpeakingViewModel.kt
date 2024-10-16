@@ -37,12 +37,13 @@ class SpeakingViewModel(private val repository: SpeakingRepository) : ViewModel(
     }
 
     // Factory for creating SpeakingViewModel with the repository
-    class Factory(private val application: Application) : ViewModelProvider.Factory {
+    class SpeakingViewModelFactory(private val repository: SpeakingRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val context: Context = application.applicationContext
-            val repository = SpeakingRepository(context)
-            return SpeakingViewModel(repository) as T
+            if (modelClass.isAssignableFrom(SpeakingViewModel::class.java)) {
+                return SpeakingViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }
