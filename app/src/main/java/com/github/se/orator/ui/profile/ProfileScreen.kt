@@ -25,6 +25,12 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
+/**
+ * Composable function to display the profile screen.
+ *
+ * @param navigationActions Actions for navigating between screens.
+ * @param profileViewModel ViewModel for managing user profile data.
+ */
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
     // State to control whether the profile picture dialog is open
@@ -128,6 +134,12 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
     }
 }
 
+/**
+ * Composable function to display a profile picture.
+ *
+ * @param profilePictureUrl URL of the profile picture.
+ * @param onClick Callback to handle click events.
+ */
 @Composable
 fun ProfilePicture(
     profilePictureUrl: String?,
@@ -148,6 +160,12 @@ fun ProfilePicture(
     )
 }
 
+/**
+ * Composable function to display a dialog with a larger profile picture.
+ *
+ * @param profilePictureUrl URL of the profile picture.
+ * @param onDismiss Callback to handle dismiss events.
+ */
 @Composable
 fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = { onDismiss() }) {
@@ -172,7 +190,14 @@ fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
     }
 }
 
-
+/**
+ * Composable function to display a card section with an icon and title.
+ *
+ * @param title Title of the card section.
+ * @param iconId Resource ID of the icon.
+ * @param onClick Callback to handle click events.
+ * @param modifier Modifier to be applied to the card.
+ */
 @Composable
 fun CardSection(title: String, iconId: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(

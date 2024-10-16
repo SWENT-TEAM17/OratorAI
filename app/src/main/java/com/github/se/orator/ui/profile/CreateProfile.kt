@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
-import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -29,15 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -85,7 +82,9 @@ fun CreateAccountScreen(
                         Image(
                             painter = painterResource(id = R.drawable.back_arrow),
                             contentDescription = "Back",
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier
+                                .size(32.dp)
+                                .testTag("back_button")
                         )
                     }
                 },
@@ -97,43 +96,29 @@ fun CreateAccountScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(it)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(32.dp))
 
-                // Profile Picture with immediate display
-                Box(
-                    modifier = Modifier
-                        .size(128.dp)
-                        .clip(CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (profilePicUri != null) {
-                        // Display the selected image
-                        Image(
-                            painter = rememberAsyncImagePainter(profilePicUri),
-                            contentDescription = "Profile picture",
-                            modifier = Modifier.size(128.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        // Placeholder profile picture
-                        Icon(
-                            painter = painterResource(id = R.drawable.profile_picture),
-                            contentDescription = "Profile picture placeholder",
-                            modifier = Modifier.size(128.dp),
-                            tint = Color.Gray
-                        )
-                    }
+                // Profile Picture
+                Box(contentAlignment = Alignment.Center) {
+                    ProfilePicture(
+                        profilePictureUrl = profilePicUri?.toString(),
+                        onClick = { isDialogOpen = true }
+                    )
                     IconButton(
                         onClick = { isDialogOpen = true },
-                        modifier = Modifier.align(Alignment.BottomEnd)
+                        modifier = Modifier
+                            .size(32.dp)
+                            .align(Alignment.BottomEnd)
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.camera),
                             contentDescription = "Upload profile picture",
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier
+                                .size(32.dp)
+                                .testTag("upload_profile_picture")
                         )
                     }
                 }
@@ -150,7 +135,9 @@ fun CreateAccountScreen(
                     onValueChange = { username = it },
                     label = { Text("Username") },
                     placeholder = { Text("Enter your username") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("username_input"),
                     singleLine = true
                 )
 
@@ -186,7 +173,9 @@ fun CreateAccountScreen(
                             navigationActions.navigateTo(TopLevelDestinations.HOME)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("save_profile_button"),
                     shape = CircleShape,
                     enabled = username.isNotBlank() && !isUploading
                 ) {
