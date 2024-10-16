@@ -13,8 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
-import com.github.se.orator.ui.overview.SpeakingSecond
-import com.github.se.orator.ui.overview.SpeakingStart
+import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.google.firebase.auth.FirebaseAuth
 
@@ -34,7 +33,7 @@ class MainActivity : ComponentActivity() {
     }
 
     enableEdgeToEdge()
-    setContent { ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { FeedbackScreen() } } }
+    setContent { ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { SpeakingPublicSpeaking() } } }
   }
 }
 

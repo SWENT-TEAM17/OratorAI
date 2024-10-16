@@ -1,6 +1,5 @@
 package com.github.se.orator.ui.overview
 
-import android.widget.GridLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,28 +16,20 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.se.orator.R
 
 @Composable
-fun SpeakingSecond() {
+fun SpeakingScreen() {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().testTag("speakingSecondScreen"),
         content = { paddingValues ->
             Column(
                 modifier = Modifier
@@ -53,7 +44,8 @@ fun SpeakingSecond() {
                     verticalArrangement = Arrangement.Top
                 ) {
                     ChatBubble(
-                        message = "What is your current level of education and what kind of job are you applying for?"
+                        message = "What is your current level of education and what kind of job are you applying for?",
+                        modifier = Modifier.testTag("chatBubbleMessage")
                     )
                 }
 
@@ -61,24 +53,26 @@ fun SpeakingSecond() {
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .fillMaxWidth().padding(2.dp)
+                        .fillMaxWidth()
+                        .padding(2.dp)
                 ) {
                     IconButton(
                         onClick = {
                             // No action yet, just UI
                         },
                         modifier = Modifier
-                            .size(60.dp) // Set the size of the button
+                            .size(60.dp)
                             .background(
                                 color = Color.Gray,
-                                shape = CircleShape // Circle shape for the mic button
+                                shape = CircleShape
                             )
+                            .testTag("micButton") // Added testTag for mic button
                     ) {
                         Icon(
                             imageVector = Icons.Filled.PlayArrow,
                             contentDescription = "Mic Icon",
-                            tint = Color.White, // White color for the mic icon
-                            modifier = Modifier.size(32.dp) // Icon size
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }
@@ -91,6 +85,7 @@ fun SpeakingSecond() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
+                        .testTag("feedbackButton") // Added testTag for feedback button
                 ) {
                     Text("Feedback")
                 }
@@ -101,9 +96,9 @@ fun SpeakingSecond() {
 
 // Chat bubble composable for ChatGPT message
 @Composable
-fun ChatBubble(message: String) {
+fun ChatBubble(message: String, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(8.dp)
             .background(
