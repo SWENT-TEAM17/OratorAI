@@ -146,6 +146,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.material)
+    implementation(libs.material.icons.extended.desktop)
+    implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.7.0")
 
 
     // Navigation

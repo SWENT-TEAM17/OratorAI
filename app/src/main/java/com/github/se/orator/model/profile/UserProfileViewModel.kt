@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.*
 
-class UserProfileViewModel(internal val repository: UserProfileRepositoryFirestore) : ViewModel() {
+class UserProfileViewModel(internal val repository: UserProfileRepository) : ViewModel() {
 
   // Mutable state flow to hold the user profile
   private val userProfile_ = MutableStateFlow<UserProfile?>(null)

@@ -10,17 +10,17 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
-class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
+class UserProfileRepositoryFirestore(private val db: FirebaseFirestore): UserProfileRepository {
 
   private val collectionPath = "user_profiles"
 
   // Get the UID for the current authenticated user
-  fun getCurrentUserUid(): String? {
+  override fun getCurrentUserUid(): String? {
     return Firebase.auth.currentUser?.uid
   }
 
   // Add a new user profile
-  fun addUserProfile(
+  override fun addUserProfile(
       userProfile: UserProfile,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
@@ -32,7 +32,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
   }
 
   // Get user profile by UID
-  fun getUserProfile(
+  override fun getUserProfile(
       uid: String,
       onSuccess: (UserProfile?) -> Unit,
       onFailure: (Exception) -> Unit
@@ -51,7 +51,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
   }
 
   // Update an existing user profile
-  fun updateUserProfile(
+  override fun updateUserProfile(
       userProfile: UserProfile,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
@@ -63,13 +63,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
   }
 
   // Delete a user profile
-  fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  override fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     performFirestoreOperation(
         db.collection(collectionPath).document(uid).delete(), onSuccess, onFailure)
   }
 
   // Upload profile picture to Firebase Storage
-  fun uploadProfilePicture(
+  override fun uploadProfilePicture(
       uid: String,
       imageUri: Uri,
       onSuccess: (String) -> Unit,
@@ -88,7 +88,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
   }
 
   // Update user profile picture in Firestore
-  fun updateUserProfilePicture(
+  override fun updateUserProfilePicture(
       uid: String,
       downloadUrl: String,
       onSuccess: () -> Unit,
@@ -157,7 +157,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
     }
   }
 
-  fun getFriendsProfiles(
+  override fun getFriendsProfiles(
       friendUids: List<String>,
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
