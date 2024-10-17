@@ -170,6 +170,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
 
     // Testing Libraries
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
@@ -179,6 +180,11 @@ dependencies {
     // UI Testing Libraries
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    configurations.all {
+        resolutionStrategy {
+            force(libs.androidx.espresso.core)
+        }
+    }
     androidTestImplementation(libs.androidx.espresso.intents)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -219,13 +225,13 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     }
 
     val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
-        "**/sigchecks/**",
+        "/R.class",
+        "/R$*.class",
+        "/BuildConfig.*",
+        "/Manifest*.*",
+        "/Test.*",
+        "android//.",
+        "/sigchecks/",
     )
     val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
