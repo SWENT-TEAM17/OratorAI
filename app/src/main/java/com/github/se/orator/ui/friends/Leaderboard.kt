@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -42,10 +41,8 @@ fun LeaderboardScreen(
         }
       }
 
-  val focusRequester = FocusRequester()
   val focusManager = LocalFocusManager.current
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-  val scope = rememberCoroutineScope()
 
   ModalNavigationDrawer(
       drawerState = drawerState,
