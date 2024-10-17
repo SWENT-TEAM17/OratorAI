@@ -1,91 +1,30 @@
 # Orator AI - README
 
-## Overview
+## About
 
-**Orator AI** is an AI-powered public speaking coach designed to help users improve their communication skills through personalized feedback. By using the device’s camera, microphone, and other sensors, the app analyzes speech delivery and body language, offering insights to enhance the user's public speaking abilities. This includes real-time feedback on factors such as tone, pace, volume, posture, and body language.
+**Orator AI** is an AI-powered public speaking coach that helps users enhance their communication skills through personalized feedback. Using the device's microphone, the app analyzes not only the content of the user's speech or interview answers, but also provides insights to improve public speaking and interview skills.
 
-The app supports professionals, students, entrepreneurs, and others who want to improve their presentation skills by providing professional-quality coaching accessible anytime, anywhere.
-
+The app is designed for everyone, from beginners to experienced entrepreneurs and pitchers, offering professional-quality coaching that’s accessible anytime, anywhere.
 ---
 
 ## Features
+- **Practice your speech skills**: The user has 3 different practice modes: Sales pitch, public speaking, and interview. The last one works in real-time, meaning the interview questions can change depending on the user's answers thanks to the Chat-GPT API we use.
+- **Real-Time Analysis**: Provides real-time feedback on speech delivery, including aspects such as the emotions that can be derived from the words given as a response (not the tone) as well as what points the user can work on better and how good the response to an interview question/the speech given was.
+- **Friends**: Users can have friends and see how they performed on the same interviews, giving them a sense of competition and a drive to work more on their public speaking skills.
+To add friends, the user should send a request to the person he wants to add and they should accept it, but for now we have a "follow system" where the user can add people as friends and will see them as a friend, but the person added doesn't have them as a friend until they follow back.
 
-### 1. **AI-Powered Feedback**
-- **Real-Time Analysis**: Provides real-time feedback on speech delivery, including aspects such as tone, pace, volume, and clarity.
-- **Body Language Evaluation**: Using the device's camera, Orator AI evaluates posture, gestures, eye contact, and non-verbal cues.
+### **Architecture diagram**
+Below is the architecture diagram we have this far for our application, which we will change as the app progresses:
+https://github.com/user-attachments/assets/d1ca4775-efc0-4561-9205-18d61b1551cf
 
-### 2. **Split-App Architecture**
-Orator AI employs a **split-app model** that leverages Google Firebase services for cloud-based operations, while core AI processing happens on-device. Key components include:
-- **Firebase Authentication**: Secure user login and account management with Google authentication integration.
-- **Firebase Cloud Storage**: Secure storage of user data and practice sessions with cloud synchronization and backup.
-- **Firebase Remote Config**: Allows dynamic updates of AI models and app configurations without requiring full app updates.
-- **Firebase Crashlytics and Analytics**: Monitors app performance and usage patterns to continuously improve user experience.
-
-### 3. **Multi-User Support**
-- **Personalized Profiles**: Each user has their own profile with individualized settings, practice history, progress tracking, and preferences.
-- **Data Isolation**: Secure and private handling of user data, ensuring data isolation across accounts.
-- **Cross-Device Syncing**: Seamless access to personal profiles across multiple devices via cloud sync.
-
-### 4. **Sensor Integration**
-Orator AI leverages several device sensors to enhance user feedback:
-- **Camera**: Captures video for body language analysis.
-- **Microphone**: Records audio for feedback on verbal communication, such as tone, pace, volume, and filler words.
-- **Accelerometer/Gyroscope (Optional)**: Enhances detection of movements and provides more accurate feedback on posture and gestures.
-
-### 5. **Offline Functionality**
+### **Offline Functionality**
 Orator AI remains fully functional even without internet connectivity:
-- **Practice Sessions**: Users can continue recording speeches and receive real-time feedback offline.
+- **Practice Sessions**: Users can continue recording speeches which will be saved on the device, and will recieve feedback once they connect to the internet.
 - **Feedback and Resources**: On-device AI models provide instant feedback, and previously downloaded resources (such as tutorials) are available offline.
-- **Data Sync**: When reconnected to the internet, the app automatically syncs data and updates profiles.
+- **Data Sync**: When reconnected to the internet, the app automatically syncs data and updates profiles. 
 
 ---
-
-## Architecture Diagram
-Here's a first draft of the architecture of our app. Most of the logic is still to be developed but it gives a great overview of what we're up
-![IMG_0012(1)](https://github.com/user-attachments/assets/d1ca4775-efc0-4561-9205-18d61b1551cf)
-
 
 ## Figma Project
 
 [Click here](https://www.figma.com/design/OvKRhZaDIyr1hJv4Nmcsks/swent?node-id=36-15&t=3CUvDmxivQfOh4vY-1) to access our first Figma draft and explore our design.
-
-## Usage
-
-1. **Sign In**: Users sign in using secure Google authentication.
-2. **Profile Setup**: Each user can create a personalized profile to track their progress and customize settings.
-3. **Recording Practice**: Users record their speeches or presentations using their device’s camera and microphone.
-4. **Receive Feedback**: AI-driven real-time feedback is provided on both speech and body language.
-5. **Review and Improve**: Users can track their improvements over time and access personalized coaching materials.
-
----
-
-## Requirements
-
-- Android device with camera and microphone
-- Google Firebase account for cloud-based services (Authentication, Cloud Storage)
-- Internet connection for cloud sync and updates (optional for offline use)
-
----
-
-## Installation
-
-1. Clone the repository or download the APK file.
-2. Ensure that Firebase services are set up and configured as described in the project documentation.
-3. Install the app on your device and sign in with your Google account.
-4. Begin using Orator AI by recording practice sessions and receiving real-time feedback.
-
----
-
-## Technologies Used
-
-- **Google Firebase**: For authentication, cloud storage, real-time configuration, and analytics.
-- **Android SDK**: For app development and integration with device sensors.
-- **Multiple APIs**: For real-time speech and body language analysis.
-- **Camera and Microphone Sensors**: To capture video and audio for feedback.
-
----
-
-## Authors
-
-Developed by the **Orator AI** team.
-SWENT Group 17 
