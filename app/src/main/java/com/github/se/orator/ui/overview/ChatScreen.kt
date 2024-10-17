@@ -13,17 +13,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speaking.AnalysisData
+import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.Message
 
 @Composable
-fun ChatScreen(viewModel: ChatViewModel) {
+fun ChatScreen(navigationActions: NavigationActions, navController: NavHostController, viewModel: ChatViewModel) {
   val chatMessages by viewModel.chatMessages.collectAsState()
   val isLoading by viewModel.isLoading.collectAsState()
   val errorMessage by viewModel.errorMessage.collectAsState()
-  var userInput by remember { mutableStateOf(TextFieldValue("")) }
 
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val transcribedText = savedStateHandle?.get<String>("transcribedText")
+
+    LaunchedEffect(transcribedText) {
+        if (!transcribedText.isNullOrBlank()) {
+            val analysisData = AnalysisData(
+                fillerWordsCount = 0,
+                averagePauseDuration = 0.0,
+                sentimentScore = 0.0
+            )
+            viewModel.sendUserResponse(transcribedText, analysisData)
+            savedStateHandle?.remove<String>("transcribedText")
+        }
+    }
   // State for tracking the scroll position
   val listState = rememberLazyListState()
 
@@ -54,35 +69,45 @@ fun ChatScreen(viewModel: ChatViewModel) {
                 modifier = Modifier.align(Alignment.CenterHorizontally).padding(8.dp))
           }
 
-          // User input text field
-          OutlinedTextField(
-              value = userInput,
-              onValueChange = { userInput = it },
-              modifier = Modifier.fillMaxWidth(),
-              placeholder = { Text(text = "Type your message...") },
-              singleLine = true)
-
-          // Button to send the message
             Button(
                 onClick = {
-                    // Create an AnalysisData object (you can replace with actual data)
-                    val analysisData = AnalysisData(
-                        fillerWordsCount = 0,
-                        averagePauseDuration = 0.0,
-                        sentimentScore = 0.0
-                        // Add other fields as necessary
-                    )
-                    // Send the user response
-                    viewModel.sendUserResponse(userInput.text, analysisData)
-                    userInput = TextFieldValue("") // Clear input after sending
+                    navigationActions.navigateToSpeakingScreen()
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                enabled = userInput.text.isNotBlank() && !isLoading
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                enabled = !isLoading
             ) {
-                Text(text = "Send")
+                Text(text = "Record Response")
             }
+
+          // User input text field
+//          OutlinedTextField(
+//              value = userInput,
+//              onValueChange = { userInput = it },
+//              modifier = Modifier.fillMaxWidth(),
+//              placeholder = { Text(text = "Type your message...") },
+//              singleLine = true)
+//
+//          // Button to send the message
+//            Button(
+//                onClick = {
+//                    // Create an AnalysisData object (you can replace with actual data)
+//                    val analysisData = AnalysisData(
+//                        fillerWordsCount = 0,
+//                        averagePauseDuration = 0.0,
+//                        sentimentScore = 0.0
+//                        // Add other fields as necessary
+//                    )
+//                    // Send the user response
+//                    viewModel.sendUserResponse(userInput.text, analysisData)
+//                    userInput = TextFieldValue("") // Clear input after sending
+//                },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 8.dp),
+//                enabled = userInput.text.isNotBlank() && !isLoading
+//            ) {
+//                Text(text = "Send")
+//            }
 
           Button(
               onClick = { viewModel.requestFeedback() },

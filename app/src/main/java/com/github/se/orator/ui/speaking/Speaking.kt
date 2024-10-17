@@ -1,6 +1,7 @@
 package com.github.se.orator.ui.speaking
 
 import android.Manifest
+import android.annotation.SuppressLint
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.*
@@ -16,10 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
-fun SpeakingScreen(viewModel: SpeakingViewModel) {
+fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostController) {
 
   // State variables
   val isRecording by viewModel.isRecording.collectAsState()
@@ -28,6 +31,13 @@ fun SpeakingScreen(viewModel: SpeakingViewModel) {
   val transcribedText by viewModel.transcribedText.collectAsState()
   val sentimentResult by viewModel.sentimentResult.collectAsState()
   val fillersResult by viewModel.fillersResult.collectAsState()
+
+    LaunchedEffect(transcribedText) {
+        if (transcribedText != null) {
+            navController.previousBackStackEntry?.savedStateHandle?.set("transcribedText", transcribedText)
+            navController.popBackStack()
+        }
+    }
 
   // Permission handling
   var permissionGranted by remember { mutableStateOf(false) }

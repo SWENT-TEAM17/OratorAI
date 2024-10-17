@@ -25,6 +25,7 @@ object Route {
   const val SPEAKING_SCREEN = "SpeakingScreen"
   const val FEEDBACK = "Feedback"
   const val CHAT_SCREEN = "chat_screen"
+  const val SPEAKING = "Speaking"
 }
 
 object Screen {
@@ -44,6 +45,7 @@ object Screen {
   const val CONNECT_SCREEN = "ViewConnectScreen"
   const val FEEDBACK = "Feedback Screen"
   const val CHAT_SCREEN = "chat_screen"
+  const val SPEAKING = "Speaking"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -117,5 +119,9 @@ open class NavigationActions(
     val contextJson = Uri.encode(gson.toJson(practiceContext))
     val feedbackTypeEncoded = Uri.encode(feedbackType)
     navController.navigate("${Screen.CHAT_SCREEN}/$contextJson/$feedbackTypeEncoded")
+  }
+
+  fun navigateToSpeakingScreen() {
+    navController.navigate(Screen.SPEAKING)
   }
 }
