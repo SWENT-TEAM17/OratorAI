@@ -18,7 +18,7 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.ui.network.Message
 
 @Composable
-fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
+fun ChatScreen(viewModel: ChatViewModel) {
   val chatMessages by viewModel.chatMessages.collectAsState()
   val isLoading by viewModel.isLoading.collectAsState()
   val errorMessage by viewModel.errorMessage.collectAsState()
@@ -63,22 +63,26 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
               singleLine = true)
 
           // Button to send the message
-          Button(
-              onClick = {
-                // Create a dummy AnalysisData object for testing
-                val analysisData =
-                    AnalysisData(
-                        fillerWordsCount = 0, averagePauseDuration = 0.0, sentimentScore = 0.0
+            Button(
+                onClick = {
+                    // Create an AnalysisData object (you can replace with actual data)
+                    val analysisData = AnalysisData(
+                        fillerWordsCount = 0,
+                        averagePauseDuration = 0.0,
+                        sentimentScore = 0.0
                         // Add other fields as necessary
-                        )
-                // Send the user response
-                viewModel.sendUserResponse(userInput.text, analysisData)
-                userInput = TextFieldValue("") // Clear input after sending
-              },
-              modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-              enabled = userInput.text.isNotBlank() && !isLoading) {
+                    )
+                    // Send the user response
+                    viewModel.sendUserResponse(userInput.text, analysisData)
+                    userInput = TextFieldValue("") // Clear input after sending
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                enabled = userInput.text.isNotBlank() && !isLoading
+            ) {
                 Text(text = "Send")
-              }
+            }
 
           Button(
               onClick = { viewModel.requestFeedback() },

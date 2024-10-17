@@ -2,6 +2,7 @@ package com.github.se.orator
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,20 +13,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModelFactory
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.speaking.PracticeContext
+import com.github.se.orator.model.speaking.PublicSpeakingContext
+import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.createChatGPTService
+import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
 import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
 import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
@@ -40,6 +48,8 @@ import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
+import com.google.gson.Gson
+import com.google.gson.JsonParser
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
@@ -67,26 +77,26 @@ class MainActivity : ComponentActivity() {
 
     val chatGPTService = createChatGPTService(apiKey, organizationId)
 
-    val factory = ChatViewModelFactory(chatGPTService)
-    chatViewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
+//    val factory = ChatViewModelFactory(chatGPTService)
+//    chatViewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
 
-    val interviewContext =
-        InterviewContext(
-            interviewType = "job interview",
-            role = "Consultant",
-            company = "McKinsey",
-            focusAreas = listOf("Problem-solving", "Leadership", "Teamwork"))
-
-    chatViewModel.initializeConversation(interviewContext)
+//    val interviewContext =
+//        InterviewContext(
+//            interviewType = "job interview",
+//            role = "Consultant",
+//            company = "McKinsey",
+//            focusAreas = listOf("Problem-solving", "Leadership", "Teamwork"))
+//
+//    chatViewModel.initializeConversation(interviewContext)
 
     enableEdgeToEdge()
-    setContent { ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp() } } }
+    setContent { ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp(chatGPTService) } } }
   }
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OratorApp() {
+fun OratorApp(chatGPTService: ChatGPTService) {
 
   // Main layout using a Scaffold
   Scaffold(modifier = Modifier.fillMaxSize()) {
@@ -126,6 +136,38 @@ fun OratorApp() {
         composable(Screen.SPEAKING_SALES_PITCH) { SpeakingSalesPitchModule(navigationActions) }
         composable(Screen.SPEAKING_SCREEN) { SpeakingScreen(navigationActions) }
         composable(Screen.FEEDBACK) { FeedbackScreen(navigationActions) }
+        composable(
+          route = "${Screen.CHAT_SCREEN}/{practiceContext}/{feedbackType}",
+          arguments = listOf(
+            navArgument("practiceContext") { type = NavType.StringType },
+            navArgument("feedbackType") { type = NavType.StringType }
+          )
+        ) { backStackEntry ->
+          val contextJson = backStackEntry.arguments?.getString("practiceContext")
+          val feedbackType = backStackEntry.arguments?.getString("feedbackType") ?: ""
+          val decodedJson = Uri.decode(contextJson)
+
+          val gson = Gson()
+
+          // Parse the JSON string into a JsonObject
+          val jsonObject = JsonParser.parseString(decodedJson).asJsonObject
+          val type = jsonObject.get("type").asString
+
+          // Deserialize based on the type
+          val practiceContext: PracticeContext = when (type) {
+            "InterviewContext" -> gson.fromJson(decodedJson, InterviewContext::class.java)
+            "PublicSpeakingContext" -> gson.fromJson(decodedJson, PublicSpeakingContext::class.java)
+            "SalesPitchContext" -> gson.fromJson(decodedJson, SalesPitchContext::class.java)
+            else -> throw IllegalArgumentException("Unknown PracticeContext type: $type")
+          }
+
+          // Initialize ChatViewModel with the practiceContext and feedbackType
+          val chatViewModelFactory =
+            ChatViewModelFactory(chatGPTService, practiceContext, feedbackType)
+          val chatViewModel: ChatViewModel = viewModel(factory = chatViewModelFactory)
+
+          ChatScreen(viewModel = chatViewModel)
+        }
       }
 
       navigation(

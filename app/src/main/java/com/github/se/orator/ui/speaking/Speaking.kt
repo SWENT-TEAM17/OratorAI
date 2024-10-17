@@ -54,7 +54,8 @@ fun SpeakingScreen(viewModel: SpeakingViewModel) {
                 animationSpec =
                     infiniteRepeatable(
                         animation = tween(500, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse))
+                        repeatMode = RepeatMode.Reverse), label = ""
+            )
 
         // Microphone button with animation
         Button(

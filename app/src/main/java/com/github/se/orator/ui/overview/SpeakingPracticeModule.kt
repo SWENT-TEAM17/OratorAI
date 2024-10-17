@@ -39,7 +39,8 @@ fun SpeakingPracticeModule(
     navigationActions: NavigationActions,
     screenTitle: String,
     headerText: String,
-    inputs: List<InputFieldData>
+    inputs: List<InputFieldData>,
+    onGetStarted: () -> Unit
 ) {
   androidx.compose.material.Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
@@ -89,7 +90,7 @@ fun SpeakingPracticeModule(
                       Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
                   onClick = {
                     // Custom action, can be customized for different modules
-                    navigationActions.navigateTo(Screen.SPEAKING_SCREEN)
+                      onGetStarted()
                   }) {
                     Text("Get Started")
                   }

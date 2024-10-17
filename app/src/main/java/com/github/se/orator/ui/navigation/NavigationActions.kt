@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.navigation
 
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
@@ -7,6 +8,8 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.github.se.orator.model.speaking.PracticeContext
+import com.google.gson.Gson
 
 object Route {
   const val HOME = "Home"
@@ -21,6 +24,7 @@ object Route {
   const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch"
   const val SPEAKING_SCREEN = "SpeakingScreen"
   const val FEEDBACK = "Feedback"
+  const val CHAT_SCREEN = "chat_screen"
 }
 
 object Screen {
@@ -39,6 +43,7 @@ object Screen {
   const val PRACTICE_SCREEN = "ViewPracticeScreen"
   const val CONNECT_SCREEN = "ViewConnectScreen"
   const val FEEDBACK = "Feedback Screen"
+  const val CHAT_SCREEN = "chat_screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -105,5 +110,12 @@ open class NavigationActions(
    */
   open fun currentRoute(): String {
     return navController.currentDestination?.route ?: ""
+  }
+
+  fun navigateToChatScreen(practiceContext: PracticeContext, feedbackType: String) {
+    val gson = Gson()
+    val contextJson = Uri.encode(gson.toJson(practiceContext))
+    val feedbackTypeEncoded = Uri.encode(feedbackType)
+    navController.navigate("${Screen.CHAT_SCREEN}/$contextJson/$feedbackTypeEncoded")
   }
 }
