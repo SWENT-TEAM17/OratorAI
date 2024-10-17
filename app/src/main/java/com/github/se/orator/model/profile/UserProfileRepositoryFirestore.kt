@@ -46,7 +46,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
         performFirestoreOperation(
             db.collection(collectionPath).document(userProfile.uid).set(userProfile),
             onSuccess,
-            onFailure)
+            onFailure
+        )
     }
 
     /**
@@ -74,6 +75,32 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
         }
     }
 
+
+    /**
+     * Fetches all user profiles from the Firestore database.
+     * On success, it returns a list of [UserProfile] objects through the [onSuccess] callback.
+     * On failure, it returns an exception through the [onFailure] callback.
+     *
+     * @param onSuccess A lambda function that receives a list of [UserProfile] objects if the operation succeeds.
+     * @param onFailure A lambda function that receives an [Exception] if the operation fails.
+     */
+    fun getAllUserProfiles(
+        onSuccess: (List<UserProfile>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        db.collection(collectionPath)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val profiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+                onSuccess(profiles)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("UserProfileRepository", "Error fetching all user profiles", exception)
+                onFailure(exception)
+            }
+    }
+
+
     /**
      * Update an existing user profile in Firestore.
      *
@@ -89,7 +116,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
         performFirestoreOperation(
             db.collection(collectionPath).document(userProfile.uid).set(userProfile),
             onSuccess,
-            onFailure)
+            onFailure
+        )
     }
 
     /**
@@ -107,7 +135,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
         onFailure: (Exception) -> Unit
     ) {
         // Create a reference to the location where the profile picture will be stored
-        val storageReference = FirebaseStorage.getInstance().reference.child("profile_pictures/$uid.jpg")
+        val storageReference =
+            FirebaseStorage.getInstance().reference.child("profile_pictures/$uid.jpg")
 
         Log.d("FirebaseStorage", "Uploading to: profile_pictures/$uid.jpg")
 
@@ -145,18 +174,28 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        Log.d("UserProfileRepositoryFirestore", "Attempting to update Firestore for user: $uid with URL: $downloadUrl")
+        Log.d(
+            "UserProfileRepositoryFirestore",
+            "Attempting to update Firestore for user: $uid with URL: $downloadUrl"
+        )
 
         // Update the user's Firestore document with the profile picture download URL
         db.collection(collectionPath)
             .document(uid)
             .update(FIELD_PROFILE_PIC, downloadUrl)
             .addOnSuccessListener {
-                Log.d("UserProfileRepositoryFirestore", "Profile picture URL updated in Firestore successfully.")
+                Log.d(
+                    "UserProfileRepositoryFirestore",
+                    "Profile picture URL updated in Firestore successfully."
+                )
                 onSuccess()
             }
             .addOnFailureListener { exception ->
-                Log.e("UserProfileRepositoryFirestore", "Failed to update profile picture URL in Firestore.", exception)
+                Log.e(
+                    "UserProfileRepositoryFirestore",
+                    "Failed to update profile picture URL in Firestore.",
+                    exception
+                )
                 onFailure(exception)
             }
     }
@@ -186,7 +225,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
                                 duration = run["duration"] as? Int ?: 0,
                                 date = run["date"] as? Timestamp ?: Timestamp.now(),
                                 accuracy = run["accuracy"] as? Float ?: 0.0f,
-                                wordsPerMinute = run["wordsPerMinute"] as? Int ?: 0)
+                                wordsPerMinute = run["wordsPerMinute"] as? Int ?: 0
+                            )
                         } ?: emptyList())
                 } ?: UserStatistics()
 

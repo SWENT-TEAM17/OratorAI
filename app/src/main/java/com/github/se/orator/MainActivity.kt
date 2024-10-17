@@ -16,6 +16,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
+import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
@@ -88,6 +89,7 @@ fun OratorApp() {
           route = Route.FRIENDS,
       ) {
         composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
       }
 
       navigation(
