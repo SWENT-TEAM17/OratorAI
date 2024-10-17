@@ -61,10 +61,10 @@ fun ViewFriendsScreen(
             TextButton(
                 onClick = {
                   // Navigate to Add Friend screen
-                    scope.launch {
-                        drawerState.close() // Close the drawer
-                        navigationActions.navigateTo(Screen.ADD_FRIENDS)
-                    }
+                  scope.launch {
+                    drawerState.close() // Close the drawer
+                    navigationActions.navigateTo(Screen.ADD_FRIENDS)
+                  }
                 }) {
                   Text("➕ Add a friend")
                 }
@@ -174,11 +174,11 @@ fun FriendItem(friend: UserProfile) {
 }
 
 /**
- * A composable function that displays a profile picture.
- * If no profile picture URL is provided, a default image is shown.
- * The image is clickable, triggering the provided [onClick] function.
+ * A composable function that displays a profile picture. If no profile picture URL is provided, a
+ * default image is shown. The image is clickable, triggering the provided [onClick] function.
  *
- * @param profilePictureUrl The URL of the profile picture to be displayed. If null, a default image is shown.
+ * @param profilePictureUrl The URL of the profile picture to be displayed. If null, a default image
+ *   is shown.
  * @param onClick A lambda function that is triggered when the profile picture is clicked.
  */
 @Composable
