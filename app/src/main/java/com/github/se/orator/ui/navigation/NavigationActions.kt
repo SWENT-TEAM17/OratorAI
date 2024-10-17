@@ -124,4 +124,12 @@ open class NavigationActions(
   fun navigateToSpeakingScreen() {
     navController.navigate(Screen.SPEAKING)
   }
+
+  fun navigateToFeedbackScreen() {
+    navController.navigate(Screen.FEEDBACK)
+  }
+
+    fun navigateToHome() {
+        navController.navigate(Route.HOME)
+    }
 }

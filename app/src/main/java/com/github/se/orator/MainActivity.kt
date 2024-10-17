@@ -137,7 +137,6 @@ fun OratorApp(chatGPTService: ChatGPTService) {
         composable(Screen.SPEAKING_JOB_INTERVIEW) { SpeakingJobInterviewModule(navigationActions) }
         composable(Screen.SPEAKING_PUBLIC_SPEAKING) { SpeakingPublicSpeaking(navigationActions) }
         composable(Screen.SPEAKING_SALES_PITCH) { SpeakingSalesPitchModule(navigationActions) }
-        composable(Screen.FEEDBACK) { FeedbackScreen(navigationActions) }
         composable(Screen.SPEAKING) { backStackEntry ->
           val context = LocalContext.current
           val repository = SpeakingRepository(context) // Adjust as needed
@@ -177,6 +176,18 @@ fun OratorApp(chatGPTService: ChatGPTService) {
 
           ChatScreen(
             viewModel = chatViewModel,
+            navController = navController,
+            navigationActions = navigationActions
+          )
+        }
+        composable(Screen.FEEDBACK) {
+
+          // Retrieve the same ChatViewModel instance
+          val chatViewModel: ChatViewModel = viewModel(navController.previousBackStackEntry!!)
+
+          // Navigate to FeedbackScreen
+          FeedbackScreen(
+            chatViewModel = chatViewModel,
             navController = navController,
             navigationActions = navigationActions
           )
