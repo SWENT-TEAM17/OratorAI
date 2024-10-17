@@ -1,3 +1,5 @@
+package com.github.se.orator.ui.friends
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -65,7 +67,10 @@ fun ViewFriendsScreen(
                 modifier = Modifier.testTag("viewFriendsAddFriendButton"),
                 onClick = {
                   // Navigate to Add Friend screen
-                  navigationActions.navigateTo(Screen.ADD_FRIENDS)
+                  scope.launch {
+                    drawerState.close() // Close the drawer
+                    navigationActions.navigateTo(Screen.ADD_FRIENDS)
+                  }
                 }) {
                   Text("➕ Add a friend")
                 }
@@ -178,6 +183,14 @@ fun FriendItem(friend: UserProfile) {
       }
 }
 
+/**
+ * A composable function that displays a profile picture. If no profile picture URL is provided, a
+ * default image is shown. The image is clickable, triggering the provided [onClick] function.
+ *
+ * @param profilePictureUrl The URL of the profile picture to be displayed. If null, a default image
+ *   is shown.
+ * @param onClick A lambda function that is triggered when the profile picture is clicked.
+ */
 @Composable
 fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
   val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)

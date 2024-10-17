@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.overview
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -19,18 +22,42 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.orator.R
+import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
+/**
+ * The SpeakingScreen composable is a composable screen that displays the speaking screen.
+ *
+ * @param navigationActions The navigation actions that can be performed.
+ */
 @Composable
-fun SpeakingSecond() {
-  Scaffold(
-      modifier = Modifier.fillMaxSize(),
+fun SpeakingScreen(navigationActions: NavigationActions) {
+  androidx.compose.material.Scaffold(
+      modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
+      topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+            backgroundColor = Color.White,
+            contentColor = Color.Black,
+            elevation = 4.dp,
+            title = { Text("Orator AI") },
+            navigationIcon = {
+              androidx.compose.material.IconButton(onClick = { navigationActions.goBack() }) {
+                Image(
+                    painter = painterResource(id = R.drawable.back_arrow),
+                    contentDescription = "Back",
+                    modifier = Modifier.size(32.dp).testTag("back_button"))
+              }
+            })
+      },
       content = { paddingValues ->
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
@@ -44,7 +71,8 @@ fun SpeakingSecond() {
                   verticalArrangement = Arrangement.Top) {
                     ChatBubble(
                         message =
-                            "What is your current level of education and what kind of job are you applying for?")
+                            "What is your current level of education and what kind of job are you applying for?",
+                        modifier = Modifier.testTag("chatBubbleMessage"))
                   }
 
               // Microphone Button
@@ -56,17 +84,15 @@ fun SpeakingSecond() {
                           // No action yet, just UI
                         },
                         modifier =
-                            Modifier.size(60.dp) // Set the size of the button
-                                .background(
-                                    color = Color.Gray,
-                                    shape = CircleShape // Circle shape for the mic button
-                                    )) {
+                            Modifier.size(60.dp)
+                                .background(color = Color.Gray, shape = CircleShape)
+                                .testTag("micButton") // Added testTag for mic button
+                        ) {
                           Icon(
                               imageVector = Icons.Filled.PlayArrow,
                               contentDescription = "Mic Icon",
-                              tint = Color.White, // White color for the mic icon
-                              modifier = Modifier.size(32.dp) // Icon size
-                              )
+                              tint = Color.White,
+                              modifier = Modifier.size(32.dp))
                         }
                   }
 
@@ -74,8 +100,13 @@ fun SpeakingSecond() {
               Button(
                   onClick = {
                     // No action yet
+                    navigationActions.navigateTo(Screen.FEEDBACK)
                   },
-                  modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(vertical = 16.dp)
+                          .testTag("feedbackButton") // Added testTag for feedback button
+                  ) {
                     Text("Feedback")
                   }
             }
@@ -84,10 +115,11 @@ fun SpeakingSecond() {
 
 // Chat bubble composable for ChatGPT message
 @Composable
-fun ChatBubble(message: String) {
+fun ChatBubble(message: String, modifier: Modifier = Modifier) {
   Box(
       modifier =
-          Modifier.fillMaxWidth()
+          modifier
+              .fillMaxWidth()
               .padding(8.dp)
               .background(
                   color = Color(0xFFF2F2F2), // Light grey for the bubble

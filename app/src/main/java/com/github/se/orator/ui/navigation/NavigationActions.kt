@@ -11,26 +11,37 @@ import androidx.navigation.NavHostController
 object Route {
   const val HOME = "Home"
   const val FRIENDS = "Friends"
+  const val ADD_FRIENDS = "Add Friends Screen"
   const val PROFILE = "Profile"
   const val AUTH = "Auth"
   const val EDIT_PROFILE = "EditProfile"
   const val CREATE_PROFILE = "CreateProfile"
   const val SETTINGS = "Settings"
+  const val SPEAKING_JOB_INTERVIEW = "SpeakingJobInterview"
+  const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking"
+  const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch"
+  const val SPEAKING_SCREEN = "SpeakingScreen"
+  const val FEEDBACK = "Feedback"
 }
 
 object Screen {
   const val AUTH = "Auth Screen"
   const val HOME = "Home Screen"
   const val FRIENDS = "Friends Screen"
+  const val ADD_FRIENDS = "Add Friends Screen"
   const val PROFILE = "Profile Screen"
   const val EDIT_PROFILE = "EditProfile Screen"
   const val CREATE_PROFILE = "CreateProfile Screen"
   const val SETTINGS = "Settings Screen"
+  const val SPEAKING_JOB_INTERVIEW = "SpeakingJobInterview Screen"
+  const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking Screen"
+  const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch Screen"
+  const val SPEAKING_SCREEN = "SpeakingScreen"
   const val FUN_SCREEN = "ViewFunScreen"
   const val PRACTICE_SCREEN = "ViewPracticeScreen"
   const val CONNECT_SCREEN = "ViewConnectScreen"
   const val LEADERBOARD = "LeaderBoard Screen"
-  const val ADD_FRIENDS = "AddFriends Screen"
+  const val FEEDBACK = "Feedback Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

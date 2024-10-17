@@ -18,6 +18,47 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore): UserPro
     override fun getCurrentUserUid(): String? {
         return Firebase.auth.currentUser?.uid
     }
+  }
+
+  /**
+   * Fetches all user profiles from the Firestore database. On success, it returns a list of
+   * [UserProfile] objects through the [onSuccess] callback. On failure, it returns an exception
+   * through the [onFailure] callback.
+   *
+   * @param onSuccess A lambda function that receives a list of [UserProfile] objects if the
+   *   operation succeeds.
+   * @param onFailure A lambda function that receives an [Exception] if the operation fails.
+   */
+  fun getAllUserProfiles(onSuccess: (List<UserProfile>) -> Unit, onFailure: (Exception) -> Unit) {
+    db.collection(collectionPath)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val profiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(profiles)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error fetching all user profiles", exception)
+          onFailure(exception)
+        }
+  }
+
+  /**
+   * Update an existing user profile in Firestore.
+   *
+   * @param userProfile The user profile to be updated.
+   * @param onSuccess Callback to be invoked on successful update.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  fun updateUserProfile(
+      userProfile: UserProfile,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performFirestoreOperation(
+        db.collection(collectionPath).document(userProfile.uid).set(userProfile),
+        onSuccess,
+        onFailure)
+  }
 
     // Add a new user profile
     override fun addUserProfile(

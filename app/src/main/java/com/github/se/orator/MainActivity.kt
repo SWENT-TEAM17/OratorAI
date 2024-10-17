@@ -1,7 +1,5 @@
 package com.github.se.orator
 
-import LeaderboardScreen
-import ViewFriendsScreen
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -24,10 +22,17 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
+import com.github.se.orator.ui.friends.LeaderboardScreen
+import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.network.createChatGPTService
+import com.github.se.orator.ui.overview.FeedbackScreen
+import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
+import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
+import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
+import com.github.se.orator.ui.overview.SpeakingScreen
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
@@ -39,13 +44,11 @@ import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
-
   private lateinit var auth: FirebaseAuth
   private lateinit var chatViewModel: ChatViewModel
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
-
     super.onCreate(savedInstanceState)
 
     // Initialize Firebase Auth
@@ -119,6 +122,12 @@ fun OratorApp() {
           route = Route.HOME,
       ) {
         composable(Screen.HOME) { MainScreen(navigationActions) }
+
+        composable(Screen.SPEAKING_JOB_INTERVIEW) { SpeakingJobInterviewModule(navigationActions) }
+        composable(Screen.SPEAKING_PUBLIC_SPEAKING) { SpeakingPublicSpeaking(navigationActions) }
+        composable(Screen.SPEAKING_SALES_PITCH) { SpeakingSalesPitchModule(navigationActions) }
+        composable(Screen.SPEAKING_SCREEN) { SpeakingScreen(navigationActions) }
+        composable(Screen.FEEDBACK) { FeedbackScreen(navigationActions) }
       }
 
       navigation(
