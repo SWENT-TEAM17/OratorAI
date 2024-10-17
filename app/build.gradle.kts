@@ -225,13 +225,13 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     }
 
     val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
-        "**/sigchecks/**",
+        "/R.class",
+        "/R$*.class",
+        "/BuildConfig.*",
+        "/Manifest*.*",
+        "/Test.*",
+        "android//.",
+        "/sigchecks/",
     )
     val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)

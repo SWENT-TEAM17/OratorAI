@@ -54,7 +54,10 @@ fun ViewFriendsScreen(
       drawerContent = {
         ModalDrawerSheet {
           Column(modifier = Modifier.fillMaxHeight().padding(16.dp)) {
-            Text("Actions", modifier = Modifier.testTag("viewFriendsDrawerTitle"), style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Actions",
+                modifier = Modifier.testTag("viewFriendsDrawerTitle"),
+                style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(24.dp))
 
             // Option to Add Friend
@@ -131,8 +134,7 @@ fun ViewFriendsScreen(
                                 .padding(bottom = 8.dp)
                                 .focusRequester(
                                     focusRequester) // Attach focusRequester to search bar
-                                .testTag("viewFriendsSearch")
-                        )
+                                .testTag("viewFriendsSearch"))
 
                     if (filteredFriends.isEmpty()) {
                       // Show "No user found" when there are no matches
@@ -161,7 +163,7 @@ fun FriendItem(friend: UserProfile) {
               .clip(RoundedCornerShape(12.dp))
               .background(MaterialTheme.colorScheme.surface)
               .padding(16.dp)
-              .testTag("viewFriendItem#${friend.uid}"),
+              .testTag("viewFriendsItem#${friend.uid}"),
       verticalAlignment = Alignment.CenterVertically) {
         ProfilePicture(profilePictureUrl = friend.profilePic, onClick = {})
         Spacer(modifier = Modifier.width(16.dp))
