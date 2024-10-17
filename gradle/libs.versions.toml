@@ -24,8 +24,8 @@ firebaseAuthKtx = "23.0.0"
 firebaseDatabaseKtx = "21.0.0"
 firebaseFirestore = "25.1.0"
 firebaseUiAuth = "8.0.0"
-firebaseStorage = "20.0.0"
-firebase-bom = "32.1.1"
+firebaseStorage = "21.0.1"
+firebase-bom = "33.4.0"
 
 # Google Service and Maps
 playServicesAuth = "21.2.0"
@@ -67,6 +67,11 @@ androidxCoreKtx = "1.6.1"
 
 # Coil
 coil = "2.0.0"
+uiTestAndroid = "1.7.3"
+
+#Sonar
+sonar = "5.1.0.4882"
+
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -123,10 +128,11 @@ firebase-storage = { module = "com.google.firebase:firebase-storage-ktx", versio
 firebase-appcheck = { module = "com.google.firebase:firebase-appcheck", version = "16.1.2" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-
+androidx-ui-test-android = { group = "androidx.compose.ui", name = "ui-test-android", version.ref = "uiTestAndroid" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
 gms = { id = "com.google.gms.google-services", version.ref = "gms" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonar" }

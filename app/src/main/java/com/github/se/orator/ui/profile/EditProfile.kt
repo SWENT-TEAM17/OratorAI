@@ -1,6 +1,7 @@
 package com.github.se.orator.ui.profile
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -14,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Button
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -32,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,6 +42,12 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
+/**
+ * Composable function for editing the user profile.
+ *
+ * @param navigationActions Actions for navigating between screens.
+ * @param userProfileViewModel ViewModel for managing user profile data.
+ */
 @Composable
 fun EditProfileScreen(
     navigationActions: NavigationActions,
@@ -52,25 +58,20 @@ fun EditProfileScreen(
 
     // States for username, bio, and dialog visibility
     var isDialogOpen by remember { mutableStateOf(false) }
-    var updatedUsername by remember { mutableStateOf(userProfile?.name ?: "") }
-    var updatedBio by remember { mutableStateOf(userProfile?.bio ?: "") }
+    var updatedUsername by remember(key1 = userProfile) { mutableStateOf(userProfile?.name ?: "") }
+    var updatedBio by remember(key1 = userProfile) { mutableStateOf(userProfile?.bio ?: "") }
 
-    // Intent launcher to capture photo or pick image from gallery
+    // State to hold the new profile picture URI
+    var newProfilePicUri by remember { mutableStateOf<Uri?>(null) }
+
     val context = LocalContext.current
-    val takePictureLauncher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            // Handle the profile picture update here
-            bitmap?.let {
-                // Assuming you have a function in the ViewModel to upload the profile picture
-                userProfileViewModel.uploadProfilePicture(
-                    userProfile?.uid ?: "", Uri.EMPTY
-                ) // Replace with actual URI logic
-            }
-        }
 
+    // Create a launcher for picking an image from the gallery
     val pickImageLauncher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
-            uri?.let { userProfileViewModel.uploadProfilePicture(userProfile?.uid ?: "", it) }
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                newProfilePicUri = it
+            }
         }
 
     Scaffold(
@@ -88,7 +89,7 @@ fun EditProfileScreen(
                         Image(
                             painter = painterResource(id = R.drawable.back_arrow),
                             contentDescription = "Back",
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(32.dp).testTag("back_button")
                         )
                     }
                 },
@@ -97,7 +98,7 @@ fun EditProfileScreen(
                         Image(
                             painter = painterResource(id = R.drawable.settings),
                             contentDescription = "Settings",
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(32.dp).testTag("settings_button")
                         )
                     }
                 })
@@ -108,7 +109,8 @@ fun EditProfileScreen(
                 tabList = LIST_TOP_LEVEL_DESTINATION,
                 selectedItem = navigationActions.currentRoute()
             )
-        }) {
+        }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -119,9 +121,8 @@ fun EditProfileScreen(
             // Profile Picture with Camera Icon Overlay
             Box(contentAlignment = Alignment.Center) {
                 ProfilePicture(
-                    profilePictureUrl =
-                    userProfile?.profilePic, // Fetch profile picture URL from userProfile
-                    onClick = { isDialogOpen = true } // Open dialog to choose camera/gallery
+                    profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
+                    onClick = { isDialogOpen = true }
                 )
                 IconButton(
                     onClick = { isDialogOpen = true },
@@ -158,7 +159,7 @@ fun EditProfileScreen(
             OutlinedTextField(
                 value = updatedBio,
                 onValueChange = { newBio -> updatedBio = newBio },
-                placeholder = { Text(text = "Tell us about yourself") },
+                placeholder = { Text("Tell us about yourself")},
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp),
@@ -173,6 +174,16 @@ fun EditProfileScreen(
                     // Save the updated profile information
                     val updatedProfile = userProfile?.copy(name = updatedUsername, bio = updatedBio)
                     if (updatedProfile != null) {
+                        if (newProfilePicUri != null) {
+                            // Upload the new profile picture
+                            userProfile?.let { it1 ->
+                                userProfileViewModel.uploadProfilePicture(
+                                    it1.uid,
+                                    newProfilePicUri!!
+                                )
+                            }
+                        }
+                        // Update the profile
                         userProfileViewModel.createOrUpdateUserProfile(updatedProfile)
                     }
                     navigationActions.goBack()
@@ -186,21 +197,30 @@ fun EditProfileScreen(
         }
     }
 
-    // Display the dialog to choose between camera and gallery
+    // Display the dialog to choose an image from the gallery
     if (isDialogOpen) {
         ChoosePictureDialog(
             onDismiss = { isDialogOpen = false },
             onTakePhoto = {
                 isDialogOpen = false
-                takePictureLauncher.launch(null)
+                Toast.makeText(context, "Taking a photo is not supported yet.", Toast.LENGTH_SHORT)
+                    .show()
             },
             onPickFromGallery = {
                 isDialogOpen = false
                 pickImageLauncher.launch("image/*")
-            })
+            }
+        )
     }
 }
 
+/**
+ * Composable function to display a dialog for choosing a profile picture.
+ *
+ * @param onDismiss Callback to dismiss the dialog.
+ * @param onTakePhoto Callback to take a photo using the camera.
+ * @param onPickFromGallery Callback to pick an image from the gallery.
+ */
 @Composable
 fun ChoosePictureDialog(
     onDismiss: () -> Unit,
@@ -211,12 +231,19 @@ fun ChoosePictureDialog(
         onDismissRequest = { onDismiss() },
         title = { Text("Choose Profile Picture") },
         text = { Text("Select an option to update your profile picture.") },
-        confirmButton = {
-            Column {
+        buttons = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Button(onClick = { onTakePhoto() }) { Text("Take Photo") }
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(onClick = { onPickFromGallery() }) { Text("Upload from Gallery") }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { onDismiss() }) { Text("Cancel") }
             }
-        },
-        dismissButton = { Button(onClick = { onDismiss() }) { Text("Cancel") } })
+        }
+    )
 }

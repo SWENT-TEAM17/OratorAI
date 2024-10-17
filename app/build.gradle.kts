@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
+    alias(libs.plugins.sonarqube)
 }
 
 android {
@@ -131,6 +132,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui.test.android)
     testImplementation(libs.test.core.ktx)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
@@ -238,4 +240,13 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+
+sonar {
+    properties {
+        property("sonar.projectKey", "SWENT-TEAM17_demo-repository")
+        property("sonar.organization", "swent-team17")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
