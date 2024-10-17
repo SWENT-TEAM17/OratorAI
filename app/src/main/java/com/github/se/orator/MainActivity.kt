@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       ProjectTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { ChatScreen(viewModel = chatViewModel) }
+        Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp() }
       }
     }
   }
