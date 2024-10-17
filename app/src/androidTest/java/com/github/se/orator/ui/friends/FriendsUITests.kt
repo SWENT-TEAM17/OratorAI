@@ -1,6 +1,5 @@
 package com.github.se.orator.ui.friends
 
-import ViewFriendsScreen
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule

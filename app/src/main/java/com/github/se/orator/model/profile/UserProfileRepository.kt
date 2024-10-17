@@ -24,7 +24,7 @@ interface UserProfileRepository {
         onSuccess: (String) -> Unit,
         onFailure: (Exception) -> Unit
     )
-    fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+
     fun updateUserProfile(
         userProfile: UserProfile,
         onSuccess: () -> Unit,
