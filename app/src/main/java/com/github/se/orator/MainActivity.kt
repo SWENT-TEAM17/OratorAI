@@ -10,7 +10,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
@@ -29,14 +28,12 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.network.createChatGPTService
-import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.screens.ViewConnectScreen
 import com.github.se.orator.ui.screens.ViewFunScreen
 import com.github.se.orator.ui.settings.SettingsScreen
-import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -82,11 +79,7 @@ class MainActivity : ComponentActivity() {
     chatViewModel.initializeConversation(interviewContext)
 
     enableEdgeToEdge()
-    setContent {
-      ProjectTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp() }
-      }
-    }
+    setContent { ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp() } } }
   }
 }
 
@@ -159,12 +152,8 @@ fun OratorApp() {
         composable(Screen.LEADERBOARD) {
           LeaderboardScreen(navigationActions, userProfileViewModel)
         }
-        composable(Screen.ADD_FRIENDS) {
-          AddFriendsScreen(navigationActions, userProfileViewModel)
-        }
-        composable(Screen.SETTINGS){
-          SettingsScreen(navigationActions, userProfileViewModel)
-        }
+        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
       }
     }
   }
