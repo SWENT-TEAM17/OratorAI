@@ -30,114 +30,50 @@ import com.github.se.orator.ui.navigation.Screen
 fun SpeakingPublicSpeaking(navigationActions: NavigationActions) {
     var occasion by remember { mutableStateOf("") }
     var demographic by remember { mutableStateOf("") }
-    var main_points by remember { mutableStateOf("") }
-    var feedback_language by remember { mutableStateOf("") }
+    var mainPoints by remember { mutableStateOf("") }
+    var feedbackLanguage by remember { mutableStateOf("") }
 
-    androidx.compose.material.Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("feedbackScreen"),
-        topBar = {
-            androidx.compose.material.TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding(),
-                backgroundColor = Color.White,
-                contentColor = Color.Black,
-                elevation = 4.dp,
-                title = { Text("Public Speaking") },
-                navigationIcon = {
-                    androidx.compose.material.IconButton(onClick = { navigationActions.goBack() }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.back_arrow),
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .size(32.dp)
-                                .testTag("back_button")
-                        )
-                    }
-                }
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+    val inputFields = listOf(
+        InputFieldData(
+            value = occasion,
+            onValueChange = { newValue: String -> occasion = newValue }, // Explicitly specify String
+            label = "What is the occasion?",
+            placeholder = "e.g Conference",
+            testTag = "occasionInput"
+        ),
+        InputFieldData(
+            value = demographic,
+            onValueChange = { newValue: String -> demographic = newValue }, // Explicitly specify String
+            label = "What is your audience demographic?",
+            placeholder = "e.g PHDs",
+            testTag = "demographicInput",
+            height = 200
+        ),
+        InputFieldData(
+            value = mainPoints,
+            onValueChange = { newValue: String -> mainPoints = newValue }, // Explicitly specify String
+            label = "What are the key points or themes of your speech?",
+            placeholder = "e.g AI, Machine Learning",
+            height = 85,
+            testTag = "mainPointsInput"
+        ),
+        InputFieldData(
+            value = feedbackLanguage,
+            onValueChange = { newValue: String -> feedbackLanguage = newValue }, // Explicitly specify String
+            label = "Do you want suggestions on intonation or body language?",
+            placeholder = "e.g Intonation",
+            height = 85,
+            testTag = "feedbackLanguageInput"
+        )
+    )
 
-                Text(
-                    text = "Make your speech memorable",
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .testTag("titleText")
-                )
-
-                Spacer(modifier = Modifier.height(45.dp))
-
-                // Level Input
-                OutlinedTextField(
-                    value = occasion,
-                    onValueChange = { occasion = it },
-                    label = { Text("What is the occasion ?") },
-                    placeholder = { Text("e.g Conference") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("levelInput")
-                )
-
-                // Job Input
-                OutlinedTextField(
-                    value = demographic,
-                    onValueChange = { demographic = it },
-                    label = { Text("What is your audience demographic ?") },
-                    placeholder = { Text("e.g PHDs") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .testTag("jobInput")
-                )
-
-                // Time Input
-                OutlinedTextField(
-                    value = main_points,
-                    onValueChange = { main_points = it },
-                    label = { Text("What are the key points or themes of your speech ?") },
-                    placeholder = { Text("e.g AI, Machine Learning") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("timeInput")
-                )
-
-                // Experience Input
-                OutlinedTextField(
-                    value = feedback_language,
-                    onValueChange = { feedback_language = it },
-                    label = { Text("Do you want suggestion on intonation or body language ?") },
-                    placeholder = { Text("e.g Intonation") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("experienceInput")
-                )
-
-                // Get Started Button
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("getStartedButton"),
-                    onClick = {
-                        // Leave the onClick action empty for now
-                        navigationActions.navigateTo(Screen.SPEAKING_SCREEN)
-                    }
-                ) {
-                    Text("Get Started")
-                }
-            }
-        }
+    SpeakingPracticeModule(
+        navigationActions = navigationActions,
+        screenTitle = "Public Speaking",
+        headerText = "Make your speech memorable",
+        inputs = inputFields
     )
 }
+
 
 

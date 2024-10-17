@@ -33,114 +33,49 @@ import com.github.se.orator.ui.navigation.Screen
 
 @Composable
 fun SpeakingSalesPitchModule(navigationActions: NavigationActions) {
-    var type by remember { mutableStateOf("") }
-    var target by remember { mutableStateOf("") }
-    var feedback_type by remember { mutableStateOf("") }
-    var key_points by remember { mutableStateOf("") }
+    var productType by remember { mutableStateOf("") }
+    var targetAudience by remember { mutableStateOf("") }
+    var feedbackType by remember { mutableStateOf("") }
+    var keySellingPoints by remember { mutableStateOf("") }
 
-    androidx.compose.material.Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("feedbackScreen"),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding(),
-                backgroundColor = Color.White,
-                contentColor = Color.Black,
-                elevation = 4.dp,
-                title = { Text("Sales Pitch") },
-                navigationIcon = {
-                    IconButton(onClick = { navigationActions.goBack() }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.back_arrow),
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .size(32.dp)
-                                .testTag("back_button")
-                        )
-                    }
-                }
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+    val inputFields = listOf(
+        InputFieldData(
+            value = productType,
+            onValueChange = { newValue: String -> productType = newValue }, // Explicitly specify String
+            label = "What product or service are you pitching?",
+            placeholder = "e.g Marketing services",
+            testTag = "productTypeInput"
+        ),
+        InputFieldData(
+            value = targetAudience,
+            onValueChange = { newValue: String -> targetAudience = newValue }, // Explicitly specify String
+            label = "What is the target audience?",
+            placeholder = "e.g Investors",
+            testTag = "targetAudienceInput",
+            height = 200
+        ),
+        InputFieldData(
+            value = feedbackType,
+            onValueChange = { newValue: String -> feedbackType = newValue }, // Explicitly specify String
+            label = "Do you want feedback on persuasive language, volume or delivery?",
+            placeholder = "e.g Delivery",
+            height = 85,
+            testTag = "feedbackTypeInput"
+        ),
+        InputFieldData(
+            value = keySellingPoints,
+            onValueChange = { newValue: String -> keySellingPoints = newValue }, // Explicitly specify String
+            label = "What key selling points do you want to emphasize?",
+            placeholder = "e.g Price",
+            height = 85,
+            testTag = "keySellingPointsInput"
+        )
+    )
 
-                Text(
-                    text = "Become a master at sales pitch",
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .testTag("titleText")
-                )
-
-                Spacer(modifier = Modifier.height(45.dp))
-
-                // Level Input
-                OutlinedTextField(
-                    value = type,
-                    onValueChange = { type = it },
-                    label = { Text("What product or service are you pitching ?") },
-                    placeholder = { Text("e.g Marketing services") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("levelInput")
-                )
-
-                // Job Input
-                OutlinedTextField(
-                    value = target,
-                    onValueChange = { target = it },
-                    label = { Text("What is the target audience ?") },
-                    placeholder = { Text("e.g Investors") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .testTag("jobInput")
-                )
-
-                // Time Input
-                OutlinedTextField(
-                    value = feedback_type,
-                    onValueChange = { feedback_type = it },
-                    label = { Text("Do you want feedback on persuasive language, volume or delivery?") },
-                    placeholder = { Text("e.g Delivery") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("timeInput")
-                )
-
-                // Experience Input
-                OutlinedTextField(
-                    value = key_points,
-                    onValueChange = { key_points = it },
-                    label = { Text("What key selling points do you want to emphasize ?") },
-                    placeholder = { Text("e.g Price") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("experienceInput")
-                )
-
-                // Get Started Button
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("getStartedButton"),
-                    onClick = {
-                        // Leave the onClick action empty for now
-                        navigationActions.navigateTo(Screen.SPEAKING_SCREEN)
-                    }
-                ) {
-                    Text("Get Started")
-                }
-            }
-        }
+    SpeakingPracticeModule(
+        navigationActions = navigationActions,
+        screenTitle = "Sales Pitch",
+        headerText = "Become a master at sales pitch",
+        inputs = inputFields
     )
 }

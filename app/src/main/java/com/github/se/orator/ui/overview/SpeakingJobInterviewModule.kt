@@ -28,114 +28,51 @@ import com.github.se.orator.ui.navigation.Screen
 
 @Composable
 fun SpeakingJobInterviewModule(navigationActions: NavigationActions) {
-    var target_position by remember { mutableStateOf("") }
-    var company_name by remember { mutableStateOf("") }
+    var targetPosition by remember { mutableStateOf("") }
+    var companyName by remember { mutableStateOf("") }
     var skills by remember { mutableStateOf("") }
-    var feedback_type by remember { mutableStateOf("") }
+    var feedbackType by remember { mutableStateOf("") }
 
-    androidx.compose.material.Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("feedbackScreen"),
-        topBar = {
-            androidx.compose.material.TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding(),
-                backgroundColor = Color.White,
-                contentColor = Color.Black,
-                elevation = 4.dp,
-                title = { Text("Job Interview") },
-                navigationIcon = {
-                    androidx.compose.material.IconButton(onClick = { navigationActions.goBack() }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.back_arrow),
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .size(32.dp)
-                                .testTag("back_button")
-                        )
-                    }
-                }
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+    val inputFields = listOf(
+        InputFieldData(
+            value = targetPosition,
+            onValueChange = { newValue: String -> targetPosition = newValue }, // Explicitly specify String for newValue
+            label = "What is your target job position?",
+            placeholder = "e.g Senior executive",
+            testTag = "levelInput"
+        ),
+        InputFieldData(
+            value = companyName,
+            onValueChange = { newValue: String -> companyName = newValue }, // Explicitly specify String
+            label = "Which company are you applying to?",
+            placeholder = "e.g McKinsey",
+            testTag = "jobInput",
+            height = 200
+        ),
+        InputFieldData(
+            value = skills,
+            onValueChange = { newValue: String -> skills = newValue }, // Explicitly specify String
+            label = "What skills or qualifications do you want to highlight?",
+            placeholder = "e.g Problem solving",
+            height = 85,
+            testTag = "timeInput"
+        ),
+        InputFieldData(
+            value = feedbackType,
+            onValueChange = { newValue: String -> feedbackType = newValue }, // Explicitly specify String
+            label = "Do you want feedback on persuasive language, volume, or delivery?",
+            placeholder = "e.g Persuasive language",
+            height = 85,
+            testTag = "experienceInput"
+        )
+    )
 
-                Text(
-                    text = "Ace your next job interview",
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .testTag("titleText")
-                )
-
-                Spacer(modifier = Modifier.height(45.dp))
-
-                // Level Input
-                OutlinedTextField(
-                    value = target_position,
-                    onValueChange = { target_position = it },
-                    label = { Text("What is your target job position ?") },
-                    placeholder = { Text("e.g Senior executive") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("levelInput")
-                )
-
-                // Job Input
-                OutlinedTextField(
-                    value = company_name,
-                    onValueChange = { company_name = it },
-                    label = { Text("Which company are you applying to ?") },
-                    placeholder = { Text("e.g McKinsey") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .testTag("jobInput")
-                )
-
-                // Time Input
-                OutlinedTextField(
-                    value = skills,
-                    onValueChange = { skills = it },
-                    label = { Text("What skills or qualifications do you want to highlight ?") },
-                    placeholder = { Text("e.g Problem solving") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("timeInput")
-                )
-
-                // Experience Input
-                OutlinedTextField(
-                    value = feedback_type,
-                    onValueChange = { feedback_type = it },
-                    label = { Text("Do you want feedback on persuasive language, volume, or delivery ?") },
-                    placeholder = { Text("e.g Persuasive language") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("experienceInput")
-                )
-
-                // Get Started Button
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("getStartedButton"),
-                    onClick = {
-                        navigationActions.navigateTo(Screen.SPEAKING_SCREEN)
-                    }
-                ) {
-                    Text("Get Started")
-                }
-            }
-        }
+    SpeakingPracticeModule(
+        navigationActions = navigationActions,
+        screenTitle = "Job Interview",
+        headerText = "Ace your next job interview",
+        inputs = inputFields
     )
 }
+
 
