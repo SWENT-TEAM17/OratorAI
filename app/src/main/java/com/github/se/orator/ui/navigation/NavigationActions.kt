@@ -16,6 +16,11 @@ object Route {
   const val EDIT_PROFILE = "EditProfile"
   const val CREATE_PROFILE = "CreateProfile"
   const val SETTINGS = "Settings"
+  const val SPEAKING_JOB_INTERVIEW = "SpeakingJobInterview"
+  const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking"
+  const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch"
+  const val SPEAKING_SCREEN = "SpeakingScreen"
+  const val FEEDBACK = "Feedback"
 }
 
 object Screen {
@@ -26,6 +31,10 @@ object Screen {
   const val EDIT_PROFILE = "EditProfile Screen"
   const val CREATE_PROFILE = "CreateProfile Screen"
   const val SETTINGS = "Settings Screen"
+  const val SPEAKING_JOB_INTERVIEW = "SpeakingJobInterview Screen"
+  const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking Screen"
+  const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch Screen"
+  const val SPEAKING_SCREEN = "SpeakingScreen"
   const val FUN_SCREEN = "ViewFunScreen"
   const val PRACTICE_SCREEN = "ViewPracticeScreen"
   const val CONNECT_SCREEN = "ViewConnectScreen"

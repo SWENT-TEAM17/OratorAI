@@ -25,6 +25,11 @@ import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.overview.FeedbackScreen
+import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
+import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
+import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
+import com.github.se.orator.ui.overview.SpeakingScreen
 import com.github.se.orator.ui.network.createChatGPTService
 import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.profile.CreateAccountScreen
@@ -120,6 +125,12 @@ fun OratorApp() {
           route = Route.HOME,
       ) {
         composable(Screen.HOME) { MainScreen(navigationActions) }
+
+        composable(Screen.SPEAKING_JOB_INTERVIEW) { SpeakingJobInterviewModule(navigationActions) }
+        composable(Screen.SPEAKING_PUBLIC_SPEAKING) { SpeakingPublicSpeaking(navigationActions) }
+        composable(Screen.SPEAKING_SALES_PITCH) { SpeakingSalesPitchModule(navigationActions) }
+        composable(Screen.SPEAKING_SCREEN) { SpeakingScreen(navigationActions) }
+        composable(Screen.FEEDBACK) { FeedbackScreen(navigationActions) }
       }
 
       navigation(
