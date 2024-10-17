@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 object Route {
   const val HOME = "Home"
   const val FRIENDS = "Friends"
+  const val ADD_FRIENDS = "Add Friends Screen"
   const val PROFILE = "Profile"
   const val AUTH = "Auth"
   const val EDIT_PROFILE = "EditProfile"
@@ -27,6 +28,7 @@ object Screen {
   const val AUTH = "Auth Screen"
   const val HOME = "Home Screen"
   const val FRIENDS = "Friends Screen"
+  const val ADD_FRIENDS = "Add Friends Screen"
   const val PROFILE = "Profile Screen"
   const val EDIT_PROFILE = "EditProfile Screen"
   const val CREATE_PROFILE = "CreateProfile Screen"
