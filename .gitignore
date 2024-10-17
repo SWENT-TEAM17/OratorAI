@@ -40,5 +40,5 @@ sonar-project.properties
 # MacOS
 **/.DS_Store
 
-# API keys
+# API keys.txt
 *.env

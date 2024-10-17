@@ -68,7 +68,7 @@ fun MainScreen(navigationActions: NavigationActions) {
               fontSize = 47.sp,
               fontWeight = FontWeight.Bold)
 
-            ButtonRow(navigationActions)
+          ButtonRow(navigationActions)
 
           // Practice mode cards
           AnimatedCards()
@@ -87,43 +87,33 @@ fun MainScreen(navigationActions: NavigationActions) {
  */
 @Composable
 fun ButtonRow(navigationActions: NavigationActions) {
-    Row(
-        modifier = Modifier.testTag("toolbar").fillMaxWidth().padding(top = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
-    ) {
-        SectionButton("Popular") {
-            // Do nothing, stays on the same screen
-        }
-
-        // Fun Button
-        SectionButton("Fun") {
-            navigationActions.navigateTo(Screen.FUN_SCREEN)
-        }
-
-        // Connect Button
-        SectionButton("Connect") {
-            navigationActions.navigateTo(Screen.CONNECT_SCREEN)
-        }
+  Row(
+      modifier = Modifier.testTag("toolbar").fillMaxWidth().padding(top = 16.dp),
+      horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
+  ) {
+    SectionButton("Popular") {
+      // Do nothing, stays on the same screen
     }
-}
 
+    // Fun Button
+    SectionButton("Fun") { navigationActions.navigateTo(Screen.FUN_SCREEN) }
+
+    // Connect Button
+    SectionButton("Connect") { navigationActions.navigateTo(Screen.CONNECT_SCREEN) }
+  }
+}
 
 /**
  * @param text the text displayed in each button describing the different selections
  *
  * The implementation of a button
  */
-
 @Composable
 fun SectionButton(text: String, onClick: () -> Unit) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.testTag("button")
-    ) {
-        Text(text = text, color = Color.Black, fontSize = 20.sp)
-    }
+  TextButton(onClick = onClick, modifier = Modifier.testTag("button")) {
+    Text(text = text, color = Color.Black, fontSize = 20.sp)
+  }
 }
-
 
 /** Function to create the sliding animation to browse between modes */
 @Composable

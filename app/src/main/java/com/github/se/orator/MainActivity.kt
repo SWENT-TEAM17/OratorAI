@@ -94,10 +94,12 @@ fun OratorApp() {
 
       //// temporarily adding those empty screens before we implement their functionalities
       composable(Screen.FUN_SCREEN) {
-        ViewFunScreen(navigationActions, userProfileViewModel) // Your composable function for Fun Screen
+        ViewFunScreen(
+            navigationActions, userProfileViewModel) // Your composable function for Fun Screen
       }
       composable(Screen.CONNECT_SCREEN) {
-        ViewConnectScreen(navigationActions, userProfileViewModel) // Your composable function for Connect Screen
+        ViewConnectScreen(
+            navigationActions, userProfileViewModel) // Your composable function for Connect Screen
       }
 
       navigation(
@@ -111,9 +113,7 @@ fun OratorApp() {
         composable(Screen.EDIT_PROFILE) {
           EditProfileScreen(navigationActions, userProfileViewModel)
         }
-        composable(Screen.SETTINGS){
-          SettingsScreen(navigationActions, userProfileViewModel)
-        }
+        composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
       }
     }
   }
