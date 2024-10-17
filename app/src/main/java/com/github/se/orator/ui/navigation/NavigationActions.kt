@@ -25,6 +25,8 @@ object Screen {
   const val EDIT_PROFILE = "EditProfile Screen"
   const val CREATE_PROFILE = "CreateProfile Screen"
   const val SETTINGS = "Settings Screen"
+  const val LEADERBOARD = "LeaderBoard Screen"
+  const val ADD_FRIENDS = "AddFriends Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
