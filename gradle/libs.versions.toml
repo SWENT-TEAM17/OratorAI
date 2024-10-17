@@ -68,6 +68,10 @@ androidxCoreKtx = "1.6.1"
 # Coil
 coil = "2.0.0"
 
+#Sonar
+sonar = "5.1.0.4882"
+
+
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -124,9 +128,9 @@ firebase-appcheck = { module = "com.google.firebase:firebase-appcheck", version 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
-
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
 gms = { id = "com.google.gms.google-services", version.ref = "gms" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonar" }
