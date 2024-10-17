@@ -1,7 +1,6 @@
 package com.github.se.orator.ui.overview
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -15,7 +14,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.orator.model.speaking.AnalysisData
-import com.github.se.orator.viewModel.ChatViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.network.Message
 
 @Composable

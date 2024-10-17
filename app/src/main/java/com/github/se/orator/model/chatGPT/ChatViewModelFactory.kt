@@ -1,4 +1,4 @@
-package com.github.se.orator.viewModel
+package com.github.se.orator.model.chatGPT
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

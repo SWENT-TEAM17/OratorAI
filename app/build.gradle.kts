@@ -23,6 +23,8 @@ android {
 
     val symblAppId: String = localProperties.getProperty("SYMBL_APP_ID") ?: ""
     val symblAppSecret: String = localProperties.getProperty("SYMBL_APP_SECRET") ?: ""
+    val gptApiKey: String = localProperties.getProperty("GPT_API_KEY") ?: ""
+    val organizationId: String = localProperties.getProperty("GPT_ORGANIZATION_ID") ?: ""
 
     defaultConfig {
         applicationId = "com.github.se.orator"
@@ -39,6 +41,8 @@ android {
         // Pass API keys to the manifest
         manifestPlaceholders["SYMBL_APP_ID"] = symblAppId
         manifestPlaceholders["SYMBL_APP_SECRET"] = symblAppSecret
+        manifestPlaceholders["GPT_API_KEY"] = gptApiKey
+        manifestPlaceholders["GPT_ORGANIZATION_ID"] = organizationId
     }
 
     buildTypes {

@@ -46,6 +46,14 @@
             android:name="SYMBL_APP_SECRET"
             android:value="${SYMBL_APP_SECRET}" />
 
+        <meta-data
+            android:name="GPT_API_KEY"
+            android:value="${GPT_API_KEY}" />
+
+        <meta-data
+            android:name="GPT_ORGANIZATION_ID"
+            android:value="${GPT_ORGANIZATION_ID}" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

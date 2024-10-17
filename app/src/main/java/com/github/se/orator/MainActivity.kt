@@ -1,16 +1,15 @@
 package com.github.se.orator
 
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.orator.model.speaking.InterviewContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,9 +21,6 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.network.createChatGPTService
 import com.github.se.orator.ui.overview.ChatScreen
-import com.github.se.orator.ui.overview.FeedbackScreen
-import com.github.se.orator.ui.overview.SpeakingSecond
-import com.github.se.orator.ui.overview.SpeakingStart
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
@@ -36,8 +32,8 @@ import com.github.se.orator.ui.screens.ViewConnectScreen
 import com.github.se.orator.ui.screens.ViewFunScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.theme.ProjectTheme
-import com.github.se.orator.viewModel.ChatViewModel
-import com.github.se.orator.viewModel.ChatViewModelFactory
+import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModelFactory
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
 
@@ -57,10 +53,16 @@ class MainActivity : ComponentActivity() {
       auth.signOut()
     }
 
+    val appInfo = packageManager.getApplicationInfo(
+      packageName,
+      PackageManager.GET_META_DATA
+    )
+    val apiKey = appInfo.metaData.getString("GPT_API_KEY")
+    val organizationId = appInfo.metaData.getString("GPT_ORGANIZATION_ID")
 
-
-    val apiKey = "sk-1biCkCzmuVEldxLy8fUBG9UtxUCvXM2Sp90lhbaUJzT3BlbkFJg8gOeJefosH5MJrRjMI30LSAvM8x9H6bXGWwjIlBsA"
-    val organizationId = "org-btfcw6ORfA1BTBtUq4lHB8cO"
+    // Ensure apiKey and organizationId are not null
+    requireNotNull(apiKey) { "GPT API Key is missing in the manifest" }
+    requireNotNull(organizationId) { "GPT Organization ID is missing in the manifest" }
 
     val chatGPTService = createChatGPTService(apiKey, organizationId)
 
