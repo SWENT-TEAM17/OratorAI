@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.overview
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -7,20 +8,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.speaking.PublicSpeakingContext
+import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
 
 /**
- * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch
- * module.
+ * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch module.
  *
  * @param navigationActions The navigation actions that can be performed.
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun SpeakingSalesPitchModule(navigationActions: NavigationActions) {
   var productType by remember { mutableStateOf("") }
   var targetAudience by remember { mutableStateOf("") }
   var feedbackType by remember { mutableStateOf("") }
   var keySellingPoints by remember { mutableStateOf("") }
+    var feedbackLanguage by remember { mutableStateOf("") }
 
   val inputFields =
       listOf(
@@ -60,9 +64,21 @@ fun SpeakingSalesPitchModule(navigationActions: NavigationActions) {
               height = 85,
               testTag = "keySellingPointsInput"))
 
-  SpeakingPracticeModule(
-      navigationActions = navigationActions,
-      screenTitle = "Sales Pitch",
-      headerText = "Become a master at sales pitch",
-      inputs = inputFields)
+    SpeakingPracticeModule(
+        navigationActions = navigationActions,
+        screenTitle = "Public Speaking",
+        headerText = "Make your speech memorable",
+        inputs = inputFields,
+        onGetStarted = {
+            // Create a PublicSpeakingContext object with the user's inputs
+            val salesPitchContext = SalesPitchContext(
+                product = productType,
+                targetAudience = targetAudience,
+                keyFeatures = keySellingPoints.split(", ")
+            )
+
+            // Navigate to ChatScreen, passing the context and feedbackLanguage
+            navigationActions.navigateToChatScreen(salesPitchContext, feedbackLanguage)
+        }
+    )
 }

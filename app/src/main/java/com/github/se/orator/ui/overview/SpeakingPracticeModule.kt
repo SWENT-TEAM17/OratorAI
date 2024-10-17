@@ -27,19 +27,22 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
 /**
- * A composable function that displays the Speaking Practice module.
+ * The SpeakingPracticeModule composable is a composable screen that displays the speaking practice
+ * module.
  *
  * @param navigationActions The navigation actions that can be performed.
  * @param screenTitle The title of the screen.
- * @param headerText The header text of the module.
- * @param inputs The list of input fields to be displayed.
+ * @param headerText The header text.
+ * @param inputs The input fields.
+ * @param onGetStarted The action to perform when the Get Started button is clicked.
  */
 @Composable
 fun SpeakingPracticeModule(
     navigationActions: NavigationActions,
     screenTitle: String,
     headerText: String,
-    inputs: List<InputFieldData>
+    inputs: List<InputFieldData>,
+    onGetStarted: () -> Unit
 ) {
   androidx.compose.material.Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
@@ -89,7 +92,7 @@ fun SpeakingPracticeModule(
                       Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
                   onClick = {
                     // Custom action, can be customized for different modules
-                    navigationActions.navigateTo(Screen.SPEAKING_SCREEN)
+                      onGetStarted()
                   }) {
                     Text("Get Started")
                   }
