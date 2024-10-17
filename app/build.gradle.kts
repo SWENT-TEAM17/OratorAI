@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
-
+    alias(libs.plugins.sonarqube)
 }
 
 android {
@@ -245,7 +245,13 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     })
 }
 
-
+sonar {
+    properties {
+        property("sonar.projectKey", "SWENT-TEAM17_demo-repository")
+        property("sonar.organization", "swent-team17")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
 
 
 
