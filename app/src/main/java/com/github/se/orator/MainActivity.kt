@@ -54,6 +54,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 
+/**
+ * The MainActivity class is the main entry point for the OratorAI application.
+ */
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
   private lateinit var chatViewModel: ChatViewModel
@@ -97,6 +100,11 @@ class MainActivity : ComponentActivity() {
   }
 }
 
+/**
+ * The OratorApp composable is the main entry point for the OratorAI application.
+ *
+ * @param chatGPTService The ChatGPTService instance used for chat conversations.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OratorApp(chatGPTService: ChatGPTService) {

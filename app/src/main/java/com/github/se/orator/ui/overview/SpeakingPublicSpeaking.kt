@@ -12,8 +12,7 @@ import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.ui.navigation.NavigationActions
 
 /**
- * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview
- * module.
+ * The SpeakingPublicSpeaking composable is a composable screen that displays the public speaking module.
  *
  * @param navigationActions The navigation actions that can be performed.
  */

@@ -114,6 +114,12 @@ open class NavigationActions(
     return navController.currentDestination?.route ?: ""
   }
 
+  /**
+   * Navigate to the specified screen with the given practice context and feedback type.
+   *
+   * @param practiceContext The practice context to pass to the screen
+   * @param feedbackType The feedback type to pass to the screen
+   */
   fun navigateToChatScreen(practiceContext: PracticeContext, feedbackType: String) {
     val gson = Gson()
     val contextJson = Uri.encode(gson.toJson(practiceContext))
@@ -121,14 +127,23 @@ open class NavigationActions(
     navController.navigate("${Screen.CHAT_SCREEN}/$contextJson/$feedbackTypeEncoded")
   }
 
+  /**
+   * Navigate to the speaking screen.
+   */
   fun navigateToSpeakingScreen() {
     navController.navigate(Screen.SPEAKING)
   }
 
+  /**
+   * Navigate to the feedback screen.
+   */
   fun navigateToFeedbackScreen() {
     navController.navigate(Screen.FEEDBACK)
   }
 
+  /**
+   * Navigate to the home screen.
+   */
     fun navigateToHome() {
         navController.navigate(Route.HOME)
     }

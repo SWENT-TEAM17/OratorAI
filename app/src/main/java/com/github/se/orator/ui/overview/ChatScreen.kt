@@ -25,7 +25,13 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.Message
 import androidx.compose.material.TopAppBar
 
-
+/**
+ * The ChatScreen composable is a composable screen that displays the chat screen.
+ *
+ * @param navigationActions The navigation actions that can be performed.
+ * @param navController The navigation controller.
+ * @param viewModel The view model for the chat.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(

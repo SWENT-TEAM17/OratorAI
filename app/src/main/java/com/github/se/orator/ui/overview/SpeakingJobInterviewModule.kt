@@ -17,8 +17,7 @@ import com.github.se.orator.ui.navigation.Screen
 
 
 /**
- * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview
- * module.
+ * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview module.
  *
  * @param navigationActions The navigation actions that can be performed.
  */

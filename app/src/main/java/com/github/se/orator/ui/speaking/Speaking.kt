@@ -20,6 +20,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 
+/**
+ * The SpeakingScreen composable is a composable screen that displays the speaking screen.
+ *
+ * @param viewModel The view model for the speaking screen.
+ * @param navController The navigation controller.
+ */
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostController) {

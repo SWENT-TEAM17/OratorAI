@@ -42,6 +42,8 @@ import com.google.gson.Gson
 /**
  * The FeedbackScreen composable is a composable screen that displays the feedback screen.
  *
+ * @param chatViewModel The view model for the chat.
+ * @param navController The navigation controller.
  * @param navigationActions The navigation actions that can be performed.
  */
 @Composable

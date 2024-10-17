@@ -13,8 +13,7 @@ import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
 
 /**
- * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch
- * module.
+ * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch module.
  *
  * @param navigationActions The navigation actions that can be performed.
  */
