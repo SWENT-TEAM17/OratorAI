@@ -8,6 +8,9 @@ interface UserProfileRepository {
         onSuccess: (List<UserProfile>) -> Unit,
         onFailure: (Exception) -> Unit
     )
+
+    fun getAllUserProfiles(onSuccess: (List<UserProfile>) -> Unit, onFailure: (Exception) -> Unit)
+
     fun updateUserProfilePicture(
         uid: String,
         downloadUrl: String,
