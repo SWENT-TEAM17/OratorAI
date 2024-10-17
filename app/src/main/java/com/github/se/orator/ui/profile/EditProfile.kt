@@ -203,7 +203,7 @@ fun ChoosePictureDialog(
       text = { Text("Select an option to update your profile picture.") },
       buttons = {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("upload_dialog"),
             horizontalAlignment = Alignment.CenterHorizontally) {
               Button(onClick = { onTakePhoto() }) { Text("Take Photo") }
               Spacer(modifier = Modifier.height(8.dp))

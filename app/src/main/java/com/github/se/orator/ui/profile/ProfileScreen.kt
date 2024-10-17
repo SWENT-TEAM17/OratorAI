@@ -138,7 +138,7 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
       painter = painter,
       contentDescription = "Profile Picture",
       contentScale = ContentScale.Crop,
-      modifier = Modifier.size(100.dp).clip(CircleShape).clickable(onClick = onClick))
+      modifier = Modifier.size(100.dp).clip(CircleShape).clickable(onClick = onClick).testTag("upload_profile_picture"))
 }
 
 /**
