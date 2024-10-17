@@ -42,7 +42,6 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
-import kotlinx.coroutines.delay
 
 /**
  * The main screen's composable responsible to display the welcome text, the practice mode cards and

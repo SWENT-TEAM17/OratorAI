@@ -75,9 +75,8 @@ fun SpeakingPracticeModule(
                 OutlinedTextField(
                     value = input.value,
                     onValueChange =
-                        input
-                            .onValueChange, // Correctly uses the lambda with an explicitly typed
-                                            // String parameter
+                        input.onValueChange, // Correctly uses the lambda with an explicitly typed
+                    // String parameter
                     label = { Text(input.label) },
                     placeholder = { Text(input.placeholder) },
                     modifier =
