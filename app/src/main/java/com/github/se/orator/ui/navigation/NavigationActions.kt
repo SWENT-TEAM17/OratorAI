@@ -40,6 +40,7 @@ object Screen {
   const val CONNECT_SCREEN = "ViewConnectScreen"
   const val LEADERBOARD = "LeaderBoard Screen"
   const val ADD_FRIENDS = "AddFriends Screen"
+  const val FEEDBACK = "Feedback Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

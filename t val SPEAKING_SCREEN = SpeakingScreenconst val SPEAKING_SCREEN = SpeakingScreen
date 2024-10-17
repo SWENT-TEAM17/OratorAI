@@ -1,0 +1,33 @@
+[1mdiff --git a/app/src/main/java/com/github/se/orator/MainActivity.kt b/app/src/main/java/com/github/se/orator/MainActivity.kt[m
+[1mindex 494a2d0..535382e 100644[m
+[1m--- a/app/src/main/java/com/github/se/orator/MainActivity.kt[m
+[1m+++ b/app/src/main/java/com/github/se/orator/MainActivity.kt[m
+[36m@@ -28,6 +28,7 @@[m [mimport com.github.se.orator.ui.navigation.NavigationActions[m
+ import com.github.se.orator.ui.navigation.Route[m
+ import com.github.se.orator.ui.navigation.Screen[m
+ import com.github.se.orator.ui.network.createChatGPTService[m
+[32m+[m[32mimport com.github.se.orator.ui.overview.ChatScreen[m
+ import com.github.se.orator.ui.overview.FeedbackScreen[m
+ import com.github.se.orator.ui.overview.SpeakingJobInterviewModule[m
+ import com.github.se.orator.ui.overview.SpeakingPublicSpeaking[m
+[36m@@ -84,7 +85,7 @@[m [mclass MainActivity : ComponentActivity() {[m
+     enableEdgeToEdge()[m
+     setContent {[m
+       ProjectTheme {[m
+[31m-        Scaffold(modifier = Modifier.fillMaxSize()) { ChatScreen(viewModel = chatViewModel) }[m
+[32m+[m[32m        Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp()}[m
+       }[m
+     }[m
+   }[m
+[1mdiff --git a/app/src/main/java/com/github/se/orator/ui/navigation/NavigationActions.kt b/app/src/main/java/com/github/se/orator/ui/navigation/NavigationActions.kt[m
+[1mindex a314b62..ade9b28 100644[m
+[1m--- a/app/src/main/java/com/github/se/orator/ui/navigation/NavigationActions.kt[m
+[1m+++ b/app/src/main/java/com/github/se/orator/ui/navigation/NavigationActions.kt[m
+[36m@@ -40,6 +40,7 @@[m [mobject Screen {[m
+   const val CONNECT_SCREEN = "ViewConnectScreen"[m
+   const val LEADERBOARD = "LeaderBoard Screen"[m
+   const val ADD_FRIENDS = "AddFriends Screen"[m
+[32m+[m[32m  const val FEEDBACK = "Feedback Screen"[m
+ }[m
+ [m
+ data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)[m

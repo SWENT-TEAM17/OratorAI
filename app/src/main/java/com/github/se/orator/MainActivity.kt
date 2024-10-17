@@ -28,6 +28,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.network.createChatGPTService
+import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
 import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
 import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
@@ -84,7 +85,7 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       ProjectTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { ChatScreen(viewModel = chatViewModel) }
+        Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp()}
       }
     }
   }
