@@ -14,6 +14,7 @@ import com.google.gson.Gson
 object Route {
   const val HOME = "Home"
   const val FRIENDS = "Friends"
+  const val ADD_FRIENDS = "Add Friends Screen"
   const val PROFILE = "Profile"
   const val AUTH = "Auth"
   const val EDIT_PROFILE = "EditProfile"
@@ -32,6 +33,7 @@ object Screen {
   const val AUTH = "Auth Screen"
   const val HOME = "Home Screen"
   const val FRIENDS = "Friends Screen"
+  const val ADD_FRIENDS = "Add Friends Screen"
   const val PROFILE = "Profile Screen"
   const val EDIT_PROFILE = "EditProfile Screen"
   const val CREATE_PROFILE = "CreateProfile Screen"
@@ -43,6 +45,7 @@ object Screen {
   const val FUN_SCREEN = "ViewFunScreen"
   const val PRACTICE_SCREEN = "ViewPracticeScreen"
   const val CONNECT_SCREEN = "ViewConnectScreen"
+  const val LEADERBOARD = "LeaderBoard Screen"
   const val FEEDBACK = "Feedback Screen"
   const val CHAT_SCREEN = "chat_screen"
   const val SPEAKING = "Speaking"

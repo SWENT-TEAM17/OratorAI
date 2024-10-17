@@ -30,6 +30,8 @@ import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
+import com.github.se.orator.ui.friends.AddFriendsScreen
+import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
@@ -228,6 +230,10 @@ fun OratorApp(chatGPTService: ChatGPTService) {
         composable(Screen.EDIT_PROFILE) {
           EditProfileScreen(navigationActions, userProfileViewModel)
         }
+        composable(Screen.LEADERBOARD) {
+          LeaderboardScreen(navigationActions, userProfileViewModel)
+        }
+        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
         composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
       }
     }

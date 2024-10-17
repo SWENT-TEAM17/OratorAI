@@ -75,6 +75,28 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
   }
 
   /**
+   * Fetches all user profiles from the Firestore database. On success, it returns a list of
+   * [UserProfile] objects through the [onSuccess] callback. On failure, it returns an exception
+   * through the [onFailure] callback.
+   *
+   * @param onSuccess A lambda function that receives a list of [UserProfile] objects if the
+   *   operation succeeds.
+   * @param onFailure A lambda function that receives an [Exception] if the operation fails.
+   */
+  fun getAllUserProfiles(onSuccess: (List<UserProfile>) -> Unit, onFailure: (Exception) -> Unit) {
+    db.collection(collectionPath)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val profiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(profiles)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error fetching all user profiles", exception)
+          onFailure(exception)
+        }
+  }
+
+  /**
    * Update an existing user profile in Firestore.
    *
    * @param userProfile The user profile to be updated.

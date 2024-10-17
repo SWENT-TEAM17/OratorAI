@@ -8,6 +8,8 @@ data class UserProfile(
     val age: Int,
     val profilePic: String? = null,
     val statistics: UserStatistics,
+    // Temp list of all users for hardcoding
+    val allUsers: List<String> = emptyList(),
     val friends: List<String> = emptyList(),
     val bio: String? = null
 )
