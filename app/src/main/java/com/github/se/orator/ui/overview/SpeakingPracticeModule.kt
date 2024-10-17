@@ -41,80 +41,59 @@ fun SpeakingPracticeModule(
     headerText: String,
     inputs: List<InputFieldData>
 ) {
-    androidx.compose.material.Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("speakingPracticeScreen"),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding(),
-                backgroundColor = Color.White,
-                contentColor = Color.Black,
-                elevation = 4.dp,
-                title = { Text(screenTitle) },
-                navigationIcon = {
-                    IconButton(onClick = { navigationActions.goBack() }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.back_arrow),
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .size(32.dp)
-                                .testTag("back_button")
-                        )
-                    }
-                }
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+  androidx.compose.material.Scaffold(
+      modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
+      topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+            backgroundColor = Color.White,
+            contentColor = Color.Black,
+            elevation = 4.dp,
+            title = { Text(screenTitle) },
+            navigationIcon = {
+              IconButton(onClick = { navigationActions.goBack() }) {
+                Image(
+                    painter = painterResource(id = R.drawable.back_arrow),
+                    contentDescription = "Back",
+                    modifier = Modifier.size(32.dp).testTag("back_button"))
+              }
+            })
+      },
+      content = { paddingValues ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp).padding(paddingValues),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+              Text(
+                  text = headerText,
+                  style = MaterialTheme.typography.h6,
+                  modifier = Modifier.padding(16.dp).testTag("titleText"))
 
-                Text(
-                    text = headerText,
-                    style = MaterialTheme.typography.h6,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .testTag("titleText")
-                )
+              Spacer(modifier = Modifier.height(45.dp))
 
-                Spacer(modifier = Modifier.height(45.dp))
+              // Dynamically generated input fields based on the provided data
+              inputs.forEach { input ->
+                OutlinedTextField(
+                    value = input.value,
+                    onValueChange =
+                        input
+                            .onValueChange, // Correctly uses the lambda with an explicitly typed
+                                            // String parameter
+                    label = { Text(input.label) },
+                    placeholder = { Text(input.placeholder) },
+                    modifier =
+                        Modifier.fillMaxWidth().height(input.height.dp).testTag(input.testTag))
+              }
 
-                // Dynamically generated input fields based on the provided data
-                inputs.forEach { input ->
-                    OutlinedTextField(
-                        value = input.value,
-                        onValueChange = input.onValueChange, // Correctly uses the lambda with an explicitly typed String parameter
-                        label = { Text(input.label) },
-                        placeholder = { Text(input.placeholder) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(input.height.dp)
-                            .testTag(input.testTag)
-                    )
-                }
-
-
-                // Get Started Button
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 100.dp)
-                        .testTag("getStartedButton"),
-                    onClick = {
-                        // Custom action, can be customized for different modules
-                        navigationActions.navigateTo(Screen.SPEAKING_SCREEN)
-                    }
-                ) {
+              // Get Started Button
+              Button(
+                  modifier =
+                      Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
+                  onClick = {
+                    // Custom action, can be customized for different modules
+                    navigationActions.navigateTo(Screen.SPEAKING_SCREEN)
+                  }) {
                     Text("Get Started")
-                }
+                  }
             }
-        }
-    )
+      })
 }

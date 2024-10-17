@@ -87,21 +87,11 @@ fun OratorApp() {
       ) {
         composable(Screen.HOME) { MainScreen(navigationActions) }
 
-        composable(Screen.SPEAKING_JOB_INTERVIEW) {
-          SpeakingJobInterviewModule(navigationActions)
-        }
-        composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-          SpeakingPublicSpeaking(navigationActions)
-        }
-        composable(Screen.SPEAKING_SALES_PITCH) {
-          SpeakingSalesPitchModule(navigationActions)
-        }
-        composable(Screen.SPEAKING_SCREEN) {
-          SpeakingScreen(navigationActions)
-        }
-        composable(Screen.FEEDBACK) {
-          FeedbackScreen(navigationActions)
-        }
+        composable(Screen.SPEAKING_JOB_INTERVIEW) { SpeakingJobInterviewModule(navigationActions) }
+        composable(Screen.SPEAKING_PUBLIC_SPEAKING) { SpeakingPublicSpeaking(navigationActions) }
+        composable(Screen.SPEAKING_SALES_PITCH) { SpeakingSalesPitchModule(navigationActions) }
+        composable(Screen.SPEAKING_SCREEN) { SpeakingScreen(navigationActions) }
+        composable(Screen.FEEDBACK) { FeedbackScreen(navigationActions) }
       }
 
       navigation(
@@ -122,9 +112,7 @@ fun OratorApp() {
         composable(Screen.EDIT_PROFILE) {
           EditProfileScreen(navigationActions, userProfileViewModel)
         }
-        composable(Screen.SETTINGS){
-          SettingsScreen(navigationActions, userProfileViewModel)
-        }
+        composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
       }
     }
   }

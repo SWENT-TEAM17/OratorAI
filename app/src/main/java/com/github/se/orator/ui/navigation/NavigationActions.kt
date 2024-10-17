@@ -20,7 +20,6 @@ object Route {
   const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch"
   const val SPEAKING_SCREEN = "SpeakingScreen"
   const val FEEDBACK = "Feedback"
-
 }
 
 object Screen {
@@ -35,7 +34,7 @@ object Screen {
   const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking Screen"
   const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch Screen"
   const val SPEAKING_SCREEN = "SpeakingScreen"
-    const val FEEDBACK = "Feedback Screen"
+  const val FEEDBACK = "Feedback Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

@@ -40,114 +40,92 @@ import com.github.se.orator.ui.navigation.Screen
  */
 @Composable
 fun SpeakingScreen(navigationActions: NavigationActions) {
-    androidx.compose.material.Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("feedbackScreen"),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding(),
-                backgroundColor = Color.White,
-                contentColor = Color.Black,
-                elevation = 4.dp,
-                title = { Text("Orator AI") },
-                navigationIcon = {
-                    androidx.compose.material.IconButton(onClick = { navigationActions.goBack() }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.back_arrow),
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .size(32.dp)
-                                .testTag("back_button")
-                        )
-                    }
-                }
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween // Ensures elements are spaced from top to bottom
+  androidx.compose.material.Scaffold(
+      modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
+      topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+            backgroundColor = Color.White,
+            contentColor = Color.Black,
+            elevation = 4.dp,
+            title = { Text("Orator AI") },
+            navigationIcon = {
+              androidx.compose.material.IconButton(onClick = { navigationActions.goBack() }) {
+                Image(
+                    painter = painterResource(id = R.drawable.back_arrow),
+                    contentDescription = "Back",
+                    modifier = Modifier.size(32.dp).testTag("back_button"))
+              }
+            })
+      },
+      content = { paddingValues ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
+            verticalArrangement =
+                Arrangement.SpaceBetween // Ensures elements are spaced from top to bottom
             ) {
-                // Chat Message from ChatGPT
-                Column(
-                    modifier = Modifier.weight(1f), // This makes the chat take as much space as possible
-                    verticalArrangement = Arrangement.Top
-                ) {
+              // Chat Message from ChatGPT
+              Column(
+                  modifier =
+                      Modifier.weight(1f), // This makes the chat take as much space as possible
+                  verticalArrangement = Arrangement.Top) {
                     ChatBubble(
-                        message = "What is your current level of education and what kind of job are you applying for?",
-                        modifier = Modifier.testTag("chatBubbleMessage")
-                    )
-                }
+                        message =
+                            "What is your current level of education and what kind of job are you applying for?",
+                        modifier = Modifier.testTag("chatBubbleMessage"))
+                  }
 
-                // Microphone Button
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(2.dp)
-                ) {
+              // Microphone Button
+              Row(
+                  horizontalArrangement = Arrangement.Center,
+                  modifier = Modifier.fillMaxWidth().padding(2.dp)) {
                     IconButton(
                         onClick = {
-                            // No action yet, just UI
+                          // No action yet, just UI
                         },
-                        modifier = Modifier
-                            .size(60.dp)
-                            .background(
-                                color = Color.Gray,
-                                shape = CircleShape
-                            )
-                            .testTag("micButton") // Added testTag for mic button
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = "Mic Icon",
-                            tint = Color.White,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                }
+                        modifier =
+                            Modifier.size(60.dp)
+                                .background(color = Color.Gray, shape = CircleShape)
+                                .testTag("micButton") // Added testTag for mic button
+                        ) {
+                          Icon(
+                              imageVector = Icons.Filled.PlayArrow,
+                              contentDescription = "Mic Icon",
+                              tint = Color.White,
+                              modifier = Modifier.size(32.dp))
+                        }
+                  }
 
-                // Feedback Button at the Bottom
-                Button(
-                    onClick = {
-                        // No action yet
-                        navigationActions.navigateTo(Screen.FEEDBACK)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp)
-                        .testTag("feedbackButton") // Added testTag for feedback button
-                ) {
+              // Feedback Button at the Bottom
+              Button(
+                  onClick = {
+                    // No action yet
+                    navigationActions.navigateTo(Screen.FEEDBACK)
+                  },
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(vertical = 16.dp)
+                          .testTag("feedbackButton") // Added testTag for feedback button
+                  ) {
                     Text("Feedback")
-                }
+                  }
             }
-        }
-    )
+      })
 }
 
 // Chat bubble composable for ChatGPT message
 @Composable
 fun ChatBubble(message: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .background(
-                color = Color(0xFFF2F2F2), // Light grey for the bubble
-                shape = RoundedCornerShape(8.dp) // Rounded corners for the bubble
-            )
-            .padding(16.dp)
-    ) {
-        Text(
-            text = message,
-            color = Color.Black,
-            style = TextStyle(fontSize = 16.sp)
-        )
-    }
+  Box(
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .padding(8.dp)
+              .background(
+                  color = Color(0xFFF2F2F2), // Light grey for the bubble
+                  shape = RoundedCornerShape(8.dp) // Rounded corners for the bubble
+                  )
+              .padding(16.dp)) {
+        Text(text = message, color = Color.Black, style = TextStyle(fontSize = 16.sp))
+      }
 }
