@@ -43,6 +43,7 @@ import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 import kotlinx.coroutines.delay
 
 /**
@@ -67,7 +68,7 @@ fun MainScreen(navigationActions: NavigationActions) {
               fontSize = 47.sp,
               fontWeight = FontWeight.Bold)
 
-          ButtonRow()
+          ButtonRow(navigationActions)
 
           // Practice mode cards
           AnimatedCards()
@@ -85,19 +86,20 @@ fun MainScreen(navigationActions: NavigationActions) {
  * The implementation of the toolbar containing the different selection buttons of the main screen
  */
 @Composable
-fun ButtonRow() {
+fun ButtonRow(navigationActions: NavigationActions) {
   Row(
       modifier = Modifier.testTag("toolbar").fillMaxWidth().padding(top = 16.dp),
       horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
   ) {
-    // Popular Button
-    SectionButton("Popular")
+    SectionButton("Popular") {
+      // Do nothing, stays on the same screen
+    }
 
     // Fun Button
-    SectionButton("Fun")
+    SectionButton("Fun") { navigationActions.navigateTo(Screen.FUN_SCREEN) }
 
     // Connect Button
-    SectionButton("Connect")
+    SectionButton("Connect") { navigationActions.navigateTo(Screen.CONNECT_SCREEN) }
   }
 }
 
@@ -107,11 +109,10 @@ fun ButtonRow() {
  * The implementation of a button
  */
 @Composable
-fun SectionButton(text: String) {
-  TextButton(
-      onClick = { /* TODO: Add your onClick action */}, modifier = Modifier.testTag("button")) {
-        Text(text = text, color = Color.Black, fontSize = 20.sp)
-      }
+fun SectionButton(text: String, onClick: () -> Unit) {
+  TextButton(onClick = onClick, modifier = Modifier.testTag("button")) {
+    Text(text = text, color = Color.Black, fontSize = 20.sp)
+  }
 }
 
 /** Function to create the sliding animation to browse between modes */

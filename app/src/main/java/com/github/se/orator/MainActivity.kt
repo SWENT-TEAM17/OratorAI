@@ -3,29 +3,40 @@ package com.github.se.orator
 import LeaderboardScreen
 import ViewFriendsScreen
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModelFactory
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.network.createChatGPTService
+import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
+import com.github.se.orator.ui.screens.ViewConnectScreen
+import com.github.se.orator.ui.screens.ViewFunScreen
 import com.github.se.orator.ui.settings.SettingsScreen
+import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -33,6 +44,7 @@ import com.google.firebase.auth.FirebaseAuth
 class MainActivity : ComponentActivity() {
 
   private lateinit var auth: FirebaseAuth
+  private lateinit var chatViewModel: ChatViewModel
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,9 +53,40 @@ class MainActivity : ComponentActivity() {
 
     // Initialize Firebase Auth
     auth = FirebaseAuth.getInstance()
-    auth.currentUser?.let { auth.signOut() }
+    auth.currentUser?.let {
+      // Sign out the user if they are already signed in
+      // This is useful for testing purposes
+      auth.signOut()
+    }
 
-    setContent { ProjectTheme { Surface(modifier = Modifier.fillMaxSize()) { OratorApp() } } }
+    val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+    val apiKey = appInfo.metaData.getString("GPT_API_KEY")
+    val organizationId = appInfo.metaData.getString("GPT_ORGANIZATION_ID")
+
+    // Ensure apiKey and organizationId are not null
+    requireNotNull(apiKey) { "GPT API Key is missing in the manifest" }
+    requireNotNull(organizationId) { "GPT Organization ID is missing in the manifest" }
+
+    val chatGPTService = createChatGPTService(apiKey, organizationId)
+
+    val factory = ChatViewModelFactory(chatGPTService)
+    chatViewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
+
+    val interviewContext =
+        InterviewContext(
+            interviewType = "job interview",
+            role = "Consultant",
+            company = "McKinsey",
+            focusAreas = listOf("Problem-solving", "Leadership", "Teamwork"))
+
+    chatViewModel.initializeConversation(interviewContext)
+
+    enableEdgeToEdge()
+    setContent {
+      ProjectTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp() }
+      }
+    }
   }
 }
 
@@ -90,6 +133,16 @@ fun OratorApp() {
           route = Route.FRIENDS,
       ) {
         composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
+      }
+
+      //// temporarily adding those empty screens before we implement their functionalities
+      composable(Screen.FUN_SCREEN) {
+        ViewFunScreen(
+            navigationActions, userProfileViewModel) // Your composable function for Fun Screen
+      }
+      composable(Screen.CONNECT_SCREEN) {
+        ViewConnectScreen(
+            navigationActions, userProfileViewModel) // Your composable function for Connect Screen
       }
 
       navigation(
