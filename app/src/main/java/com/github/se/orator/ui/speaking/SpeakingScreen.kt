@@ -27,126 +27,116 @@ import java.io.File
 
 @Composable
 fun SpeakingScreen() {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    // State variables
-    var isRecording by remember { mutableStateOf(false) }
-    var feedbackMessage by remember { mutableStateOf("Tap the mic to start recording.") }
-    var transcribedText by remember { mutableStateOf("Transcribed Text: ") }
-    var sentimentResult by remember { mutableStateOf("Sentiment Analysis: ") }
-    var fillersResult by remember { mutableStateOf("Filler Words: ") }
+  // State variables
+  var isRecording by remember { mutableStateOf(false) }
+  var feedbackMessage by remember { mutableStateOf("Tap the mic to start recording.") }
+  var transcribedText by remember { mutableStateOf("Transcribed Text: ") }
+  var sentimentResult by remember { mutableStateOf("Sentiment Analysis: ") }
+  var fillersResult by remember { mutableStateOf("Filler Words: ") }
 
-    // Instantiate AudioRecorder and SymblApiClient
-    val audioRecorder = remember { AudioRecorder(context) }
-    val symblApiClient = remember { SymblApiClient(context) }
+  // Instantiate AudioRecorder and SymblApiClient
+  val audioRecorder = remember { AudioRecorder(context) }
+  val symblApiClient = remember { SymblApiClient(context) }
 
-    // Set listeners
-    val symblListener = object : SymblApiClient.SymblListener {
+  // Set listeners
+  val symblListener =
+      object : SymblApiClient.SymblListener {
         override fun onProcessingComplete(
             transcribedTextResult: String,
             sentimentResultData: String,
             fillersResultData: String
         ) {
-            // Update UI with the results
-            transcribedText = transcribedTextResult
-            sentimentResult = sentimentResultData
-            fillersResult = fillersResultData
-            feedbackMessage = "Processing complete."
+          // Update UI with the results
+          transcribedText = transcribedTextResult
+          sentimentResult = sentimentResultData
+          fillersResult = fillersResultData
+          feedbackMessage = "Processing complete."
         }
 
         override fun onError(message: String) {
-            feedbackMessage = message
-            Log.e("SymblApiClient", message)
+          feedbackMessage = message
+          Log.e("SymblApiClient", message)
         }
-    }
+      }
 
-    val recordingListener = object : AudioRecorder.RecordingListener {
+  val recordingListener =
+      object : AudioRecorder.RecordingListener {
         override fun onRecordingFinished(audioFile: File) {
-            // Send audio file to SymblApiClient
-            feedbackMessage = "Recording finished, sending audio for processing..."
-            symblApiClient.sendAudioToSymbl(audioFile)
+          // Send audio file to SymblApiClient
+          feedbackMessage = "Recording finished, sending audio for processing..."
+          symblApiClient.sendAudioToSymbl(audioFile)
         }
+      }
+
+  // Set the listeners
+  LaunchedEffect(Unit) {
+    symblApiClient.setListener(symblListener)
+    audioRecorder.setRecordingListener(recordingListener)
+  }
+
+  // Permission handling
+  val permissionGranted = remember { mutableStateOf(false) }
+  val permissionLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.RequestPermission(),
+          onResult = { isGranted -> permissionGranted.value = isGranted })
+
+  LaunchedEffect(Unit) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) !=
+          PackageManager.PERMISSION_GRANTED) {
+        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+      } else {
+        permissionGranted.value = true
+      }
+    } else {
+      permissionGranted.value = true
     }
+  }
 
-    // Set the listeners
-    LaunchedEffect(Unit) {
-        symblApiClient.setListener(symblListener)
-        audioRecorder.setRecordingListener(recordingListener)
-    }
-
-    // Permission handling
-    val permissionGranted = remember { mutableStateOf(false) }
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            permissionGranted.value = isGranted
-        }
-    )
-
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            } else {
-                permissionGranted.value = true
-            }
-        } else {
-            permissionGranted.value = true
-        }
-    }
-
-    // UI Components
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+  // UI Components
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         // Animated recording indicator
         val infiniteTransition = rememberInfiniteTransition()
 
         // Animation for pulsing effect during recording
-        val scale by infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = 1.5f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(500, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
-            )
-        )
+        val scale by
+            infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.5f,
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(500, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse))
 
         // Microphone button with animation
         Button(
             onClick = {
-                if (permissionGranted.value) {
-                    if (isRecording) {
-                        audioRecorder.stopRecording()
-                        feedbackMessage = "Recording stopped, processing..."
-                    } else {
-                        audioRecorder.startRecording()
-                        feedbackMessage = "Recording started..."
-                    }
-                    isRecording = !isRecording
+              if (permissionGranted.value) {
+                if (isRecording) {
+                  audioRecorder.stopRecording()
+                  feedbackMessage = "Recording stopped, processing..."
                 } else {
-                    feedbackMessage = "Microphone permission not granted."
+                  audioRecorder.startRecording()
+                  feedbackMessage = "Recording started..."
                 }
+                isRecording = !isRecording
+              } else {
+                feedbackMessage = "Microphone permission not granted."
+              }
             },
-            modifier = Modifier
-                .size(80.dp)
-                .scale(if (isRecording) scale else 1f),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Icon(
-                imageVector = if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
-                contentDescription = if (isRecording) "Stop recording" else "Start recording",
-                modifier = Modifier.size(48.dp)
-            )
-        }
+            modifier = Modifier.size(80.dp).scale(if (isRecording) scale else 1f),
+            contentPadding = PaddingValues(0.dp)) {
+              Icon(
+                  imageVector = if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
+                  contentDescription = if (isRecording) "Stop recording" else "Start recording",
+                  modifier = Modifier.size(48.dp))
+            }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -167,5 +157,5 @@ fun SpeakingScreen() {
 
         // Display filler words result
         Text(fillersResult)
-    }
+      }
 }
