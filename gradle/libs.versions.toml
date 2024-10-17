@@ -67,6 +67,7 @@ androidxCoreKtx = "1.6.1"
 
 # Coil
 coil = "2.0.0"
+uiTestAndroid = "1.7.3"
 
 #Sonar
 sonar = "5.1.0.4882"
@@ -127,6 +128,7 @@ firebase-storage = { module = "com.google.firebase:firebase-storage-ktx", versio
 firebase-appcheck = { module = "com.google.firebase:firebase-appcheck", version = "16.1.2" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+androidx-ui-test-android = { group = "androidx.compose.ui", name = "ui-test-android", version.ref = "uiTestAndroid" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
