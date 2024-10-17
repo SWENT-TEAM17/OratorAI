@@ -31,6 +31,11 @@ import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
+/**
+ * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch module.
+ *
+ * @param navigationActions The navigation actions that can be performed.
+ */
 @Composable
 fun SpeakingSalesPitchModule(navigationActions: NavigationActions) {
     var productType by remember { mutableStateOf("") }

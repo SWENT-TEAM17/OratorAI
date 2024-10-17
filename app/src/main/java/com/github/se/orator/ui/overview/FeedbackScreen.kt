@@ -27,6 +27,11 @@ import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
+/**
+ * The FeedbackScreen composable is a composable screen that displays the feedback screen.
+ *
+ * @param navigationActions The navigation actions that can be performed.
+ */
 @Composable
 fun FeedbackScreen(navigationActions: NavigationActions) {
     Scaffold(

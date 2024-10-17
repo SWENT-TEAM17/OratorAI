@@ -25,7 +25,11 @@ import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
-
+/**
+ * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview module.
+ *
+ * @param navigationActions The navigation actions that can be performed.
+ */
 @Composable
 fun SpeakingPublicSpeaking(navigationActions: NavigationActions) {
     var occasion by remember { mutableStateOf("") }

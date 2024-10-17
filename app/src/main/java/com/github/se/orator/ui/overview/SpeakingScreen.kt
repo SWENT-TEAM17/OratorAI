@@ -33,6 +33,11 @@ import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
+/**
+ * The SpeakingScreen composable is a composable screen that displays the speaking screen.
+ *
+ * @param navigationActions The navigation actions that can be performed.
+ */
 @Composable
 fun SpeakingScreen(navigationActions: NavigationActions) {
     androidx.compose.material.Scaffold(
