@@ -169,10 +169,8 @@ fun OratorApp(chatGPTService: ChatGPTService) {
 
           // Parse the JSON string into a JsonObject
           val jsonObject = JsonParser.parseString(decodedJson).asJsonObject
-          val type = jsonObject.get("type").asString
-
           // Deserialize based on the type
-          val practiceContext: PracticeContext = when (type) {
+          val practiceContext: PracticeContext = when (val type = jsonObject.get("type").asString) {
             "InterviewContext" -> gson.fromJson(decodedJson, InterviewContext::class.java)
             "PublicSpeakingContext" -> gson.fromJson(decodedJson, PublicSpeakingContext::class.java)
             "SalesPitchContext" -> gson.fromJson(decodedJson, SalesPitchContext::class.java)

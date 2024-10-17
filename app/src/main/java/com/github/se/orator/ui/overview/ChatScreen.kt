@@ -54,7 +54,7 @@ fun ChatScreen(
                 sentimentScore = 0.0
             )
             viewModel.sendUserResponse(transcribedText, analysisData)
-            savedStateHandle?.remove<String>("transcribedText")
+            savedStateHandle.remove<String>("transcribedText")
         }
     }
     // State for tracking the scroll position
