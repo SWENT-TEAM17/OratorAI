@@ -60,7 +60,13 @@ class MainScreenTest {
 
         // Check if the buttons are clickable
         composeTestRule
-            .onNodeWithTag("button")
+            .onNodeWithTag("toolbarPopularButton")
+            .assertHasClickAction()
+        composeTestRule
+            .onNodeWithTag("toolbarFunButton")
+            .assertHasClickAction()
+        composeTestRule
+            .onNodeWithTag("toolbarConnectButton")
             .assertHasClickAction()
     }
 
@@ -73,6 +79,19 @@ class MainScreenTest {
         // Check if the animated cards exists
         composeTestRule
             .onNodeWithTag("animatedCards")
+            .assertExists()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun testBottomNavigationMenuIsDisplayed() {
+        composeTestRule.setContent {
+            MainScreen(navigationActions)
+        }
+
+        // Check if the bottom navigation menu is displayed
+        composeTestRule
+            .onNodeWithTag("bottomNavigationMenu")
             .assertExists()
             .assertIsDisplayed()
     }
