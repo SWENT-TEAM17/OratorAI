@@ -127,7 +127,7 @@ fun ButtonRow() {
 fun SectionButton(text: String) {
     TextButton(
         onClick = { /* TODO: Add your onClick action */ },
-        modifier = Modifier.testTag("button")
+        modifier = Modifier.testTag("toolbar" + text + "Button")
     ) {
         Text(
             text = text,
