@@ -1,6 +1,5 @@
 package com.github.se.orator.ui.overview
 
-import android.widget.GridLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,105 +16,84 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.se.orator.R
 
 @Composable
 fun SpeakingSecond() {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween // Ensures elements are spaced from top to bottom
+  Scaffold(
+      modifier = Modifier.fillMaxSize(),
+      content = { paddingValues ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
+            verticalArrangement =
+                Arrangement.SpaceBetween // Ensures elements are spaced from top to bottom
             ) {
-                // Chat Message from ChatGPT
-                Column(
-                    modifier = Modifier.weight(1f), // This makes the chat take as much space as possible
-                    verticalArrangement = Arrangement.Top
-                ) {
+              // Chat Message from ChatGPT
+              Column(
+                  modifier =
+                      Modifier.weight(1f), // This makes the chat take as much space as possible
+                  verticalArrangement = Arrangement.Top) {
                     ChatBubble(
-                        message = "What is your current level of education and what kind of job are you applying for?"
-                    )
-                }
+                        message =
+                            "What is your current level of education and what kind of job are you applying for?")
+                  }
 
-                // Microphone Button
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth().padding(2.dp)
-                ) {
+              // Microphone Button
+              Row(
+                  horizontalArrangement = Arrangement.Center,
+                  modifier = Modifier.fillMaxWidth().padding(2.dp)) {
                     IconButton(
                         onClick = {
-                            // No action yet, just UI
+                          // No action yet, just UI
                         },
-                        modifier = Modifier
-                            .size(60.dp) // Set the size of the button
-                            .background(
-                                color = Color.Gray,
-                                shape = CircleShape // Circle shape for the mic button
-                            )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = "Mic Icon",
-                            tint = Color.White, // White color for the mic icon
-                            modifier = Modifier.size(32.dp) // Icon size
-                        )
-                    }
-                }
+                        modifier =
+                            Modifier.size(60.dp) // Set the size of the button
+                                .background(
+                                    color = Color.Gray,
+                                    shape = CircleShape // Circle shape for the mic button
+                                    )) {
+                          Icon(
+                              imageVector = Icons.Filled.PlayArrow,
+                              contentDescription = "Mic Icon",
+                              tint = Color.White, // White color for the mic icon
+                              modifier = Modifier.size(32.dp) // Icon size
+                              )
+                        }
+                  }
 
-                // Feedback Button at the Bottom
-                Button(
-                    onClick = {
-                        // No action yet
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp)
-                ) {
+              // Feedback Button at the Bottom
+              Button(
+                  onClick = {
+                    // No action yet
+                  },
+                  modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
                     Text("Feedback")
-                }
+                  }
             }
-        }
-    )
+      })
 }
 
 // Chat bubble composable for ChatGPT message
 @Composable
 fun ChatBubble(message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .background(
-                color = Color(0xFFF2F2F2), // Light grey for the bubble
-                shape = RoundedCornerShape(8.dp) // Rounded corners for the bubble
-            )
-            .padding(16.dp)
-    ) {
-        Text(
-            text = message,
-            color = Color.Black,
-            style = TextStyle(fontSize = 16.sp)
-        )
-    }
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(8.dp)
+              .background(
+                  color = Color(0xFFF2F2F2), // Light grey for the bubble
+                  shape = RoundedCornerShape(8.dp) // Rounded corners for the bubble
+                  )
+              .padding(16.dp)) {
+        Text(text = message, color = Color.Black, style = TextStyle(fontSize = 16.sp))
+      }
 }

@@ -3,7 +3,6 @@ package com.github.se.orator.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -28,7 +27,7 @@ object Screen {
   const val CREATE_PROFILE = "CreateProfile Screen"
   const val SETTINGS = "Settings Screen"
   const val FUN_SCREEN = "ViewFunScreen"
-  const val PRACTICE_SCREEN= "ViewPracticeScreen"
+  const val PRACTICE_SCREEN = "ViewPracticeScreen"
   const val CONNECT_SCREEN = "ViewConnectScreen"
 }
 

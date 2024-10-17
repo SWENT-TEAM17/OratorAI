@@ -1,20 +1,18 @@
 package com.github.se.orator.ui.network
 
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 
 // Define the ChatGPTService interface
 interface ChatGPTService {
-    @Headers("Content-Type: application/json")
-    @POST("v1/chat/completions")
-    suspend fun getChatCompletion(
-        @Body request: ChatRequest
-    ): ChatResponse
+  @Headers("Content-Type: application/json")
+  @POST("v1/chat/completions")
+  suspend fun getChatCompletion(@Body request: ChatRequest): ChatResponse
 }
 
 // Define the request body structure
@@ -41,44 +39,41 @@ data class ChatResponse(
 )
 
 // Define the choices in the response
-data class Choice(
-    val index: Int,
-    val message: Message,
-    val finish_reason: String?
-)
+data class Choice(val index: Int, val message: Message, val finish_reason: String?)
 
 // Define usage data
-data class Usage(
-    val prompt_tokens: Int,
-    val completion_tokens: Int,
-    val total_tokens: Int
-)
+data class Usage(val prompt_tokens: Int, val completion_tokens: Int, val total_tokens: Int)
 
 // Create a Retrofit instance with logging and API key header
-fun createChatGPTService(apiKey: String,  organizationId: String): ChatGPTService {
-    // Configure logging for debugging network calls
-    val logging = HttpLoggingInterceptor()
-    logging.level = HttpLoggingInterceptor.Level.BODY
+fun createChatGPTService(apiKey: String, organizationId: String): ChatGPTService {
+  // Configure logging for debugging network calls
+  val logging = HttpLoggingInterceptor()
+  logging.level = HttpLoggingInterceptor.Level.BODY
 
-    // Create an OkHttpClient with logging and the API key header
-    val client = OkHttpClient.Builder()
-        .addInterceptor(logging)
-        .addInterceptor { chain ->
-            val request = chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $apiKey")
-                .addHeader("Openai-Organization", organizationId)
-                .build()
+  // Create an OkHttpClient with logging and the API key header
+  val client =
+      OkHttpClient.Builder()
+          .addInterceptor(logging)
+          .addInterceptor { chain ->
+            val request =
+                chain
+                    .request()
+                    .newBuilder()
+                    .addHeader("Authorization", "Bearer $apiKey")
+                    .addHeader("Openai-Organization", organizationId)
+                    .build()
             chain.proceed(request)
-        }
-        .build()
+          }
+          .build()
 
-    // Create a Retrofit instance with the base URL and the OkHttpClient
-    val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.openai.com/")
-        .client(client)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+  // Create a Retrofit instance with the base URL and the OkHttpClient
+  val retrofit =
+      Retrofit.Builder()
+          .baseUrl("https://api.openai.com/")
+          .client(client)
+          .addConverterFactory(GsonConverterFactory.create())
+          .build()
 
-    // Return an implementation of the ChatGPTService
-    return retrofit.create(ChatGPTService::class.java)
+  // Return an implementation of the ChatGPTService
+  return retrofit.create(ChatGPTService::class.java)
 }

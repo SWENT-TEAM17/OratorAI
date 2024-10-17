@@ -1,7 +1,6 @@
 package com.github.se.orator.ui.speaking
 
 import android.Manifest
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.*
@@ -22,93 +21,81 @@ import com.github.se.orator.model.symblAi.SpeakingViewModel
 @Composable
 fun SpeakingScreen(viewModel: SpeakingViewModel) {
 
-    // State variables
-    val isRecording by viewModel.isRecording.collectAsState()
-    val isProcessing by viewModel.isProcessing.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    val transcribedText by viewModel.transcribedText.collectAsState()
-    val sentimentResult by viewModel.sentimentResult.collectAsState()
-    val fillersResult by viewModel.fillersResult.collectAsState()
+  // State variables
+  val isRecording by viewModel.isRecording.collectAsState()
+  val isProcessing by viewModel.isProcessing.collectAsState()
+  val errorMessage by viewModel.errorMessage.collectAsState()
+  val transcribedText by viewModel.transcribedText.collectAsState()
+  val sentimentResult by viewModel.sentimentResult.collectAsState()
+  val fillersResult by viewModel.fillersResult.collectAsState()
 
-    // Permission handling
-    var permissionGranted by remember { mutableStateOf(false) }
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            permissionGranted = isGranted
-        }
-    )
+  // Permission handling
+  var permissionGranted by remember { mutableStateOf(false) }
+  val permissionLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.RequestPermission(),
+          onResult = { isGranted -> permissionGranted = isGranted })
 
-    LaunchedEffect(Unit) {
-        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-    }
+  LaunchedEffect(Unit) { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
 
-    // UI Components
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+  // UI Components
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         // Animated recording indicator
         val infiniteTransition = rememberInfiniteTransition()
 
         // Animation for pulsing effect during recording
-        val scale by infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = 1.5f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(500, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
-            )
-        )
+        val scale by
+            infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.5f,
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(500, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse))
 
         // Microphone button with animation
         Button(
-            onClick = {
-                viewModel.onMicButtonClicked(permissionGranted)
-            },
-            modifier = Modifier
-                .size(80.dp)
-                .scale(if (isRecording) scale else 1f),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Icon(
-                imageVector = if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
-                contentDescription = if (isRecording) "Stop recording" else "Start recording",
-                modifier = Modifier.size(48.dp)
-            )
-        }
+            onClick = { viewModel.onMicButtonClicked(permissionGranted) },
+            modifier = Modifier.size(80.dp).scale(if (isRecording) scale else 1f),
+            contentPadding = PaddingValues(0.dp)) {
+              Icon(
+                  imageVector = if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
+                  contentDescription = if (isRecording) "Stop recording" else "Start recording",
+                  modifier = Modifier.size(48.dp))
+            }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Display feedback messages
-        val feedbackMessage = when {
-            isRecording -> "Recording..."
-            isProcessing -> "Processing..."
-            errorMessage != null -> "Error: $errorMessage"
-            else -> "Tap the mic to start recording."
-        }
+        val feedbackMessage =
+            when {
+              isRecording -> "Recording..."
+              isProcessing -> "Processing..."
+              errorMessage != null -> "Error: $errorMessage"
+              else -> "Tap the mic to start recording."
+            }
         Text(feedbackMessage)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Display transcribed text
         if (transcribedText != null) {
-            Text("Transcribed Text: $transcribedText")
-            Spacer(modifier = Modifier.height(16.dp))
+          Text("Transcribed Text: $transcribedText")
+          Spacer(modifier = Modifier.height(16.dp))
         }
 
         // Display sentiment analysis result
         if (sentimentResult != null) {
-            Text("Sentiment Analysis: $sentimentResult")
-            Spacer(modifier = Modifier.height(16.dp))
+          Text("Sentiment Analysis: $sentimentResult")
+          Spacer(modifier = Modifier.height(16.dp))
         }
 
         // Display filler words result
         if (fillersResult != null) {
-            Text("Filler Words: $fillersResult")
+          Text("Filler Words: $fillersResult")
         }
-    }
+      }
 }

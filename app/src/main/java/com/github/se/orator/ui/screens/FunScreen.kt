@@ -15,13 +15,13 @@ fun ViewFunScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-    Scaffold(
-        bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { route -> navigationActions.navigateTo(route) },
-                tabList = LIST_TOP_LEVEL_DESTINATION,
-                selectedItem = navigationActions.currentRoute())
-        }) {
+  Scaffold(
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = navigationActions.currentRoute())
+      }) {
         Text("Fun Mode Screen")
-    }
+      }
 }
