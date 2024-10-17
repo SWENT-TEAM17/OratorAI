@@ -38,6 +38,8 @@ object Screen {
   const val FUN_SCREEN = "ViewFunScreen"
   const val PRACTICE_SCREEN = "ViewPracticeScreen"
   const val CONNECT_SCREEN = "ViewConnectScreen"
+  const val LEADERBOARD = "LeaderBoard Screen"
+  const val ADD_FRIENDS = "AddFriends Screen"
   const val FEEDBACK = "Feedback Screen"
 }
 

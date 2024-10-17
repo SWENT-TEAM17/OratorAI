@@ -21,6 +21,8 @@ import com.github.se.orator.model.chatGPT.ChatViewModelFactory
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.authentification.SignInScreen
+import com.github.se.orator.ui.friends.AddFriendsScreen
+import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
@@ -156,6 +158,10 @@ fun OratorApp() {
         composable(Screen.EDIT_PROFILE) {
           EditProfileScreen(navigationActions, userProfileViewModel)
         }
+        composable(Screen.LEADERBOARD) {
+          LeaderboardScreen(navigationActions, userProfileViewModel)
+        }
+        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
         composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
       }
     }
