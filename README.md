@@ -15,7 +15,8 @@ To add friends, the user should send a request to the person he wants to add and
 
 ### **Architecture diagram**
 Below is the architecture diagram we have this far for our application, which we will change as the app progresses:
-https://github.com/user-attachments/assets/d1ca4775-efc0-4561-9205-18d61b1551cf
+![IMG_0014(1)](https://github.com/user-attachments/assets/27ae3eee-a38f-4585-b7cf-e867ce6f4485)
+
 
 ### **Offline Functionality**
 Orator AI remains fully functional even without internet connectivity:
