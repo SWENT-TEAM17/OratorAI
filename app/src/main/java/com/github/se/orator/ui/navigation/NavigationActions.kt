@@ -2,7 +2,8 @@ package com.github.se.orator.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -34,7 +35,9 @@ object Screen {
   const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking Screen"
   const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch Screen"
   const val SPEAKING_SCREEN = "SpeakingScreen"
-  const val FEEDBACK = "Feedback Screen"
+  const val FUN_SCREEN = "ViewFunScreen"
+  const val PRACTICE_SCREEN = "ViewPracticeScreen"
+  const val CONNECT_SCREEN = "ViewConnectScreen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -42,9 +45,9 @@ data class TopLevelDestination(val route: String, val icon: ImageVector, val tex
 object TopLevelDestinations {
   val HOME = TopLevelDestination(route = Route.HOME, icon = Icons.Outlined.Menu, textId = "Home")
   val FRIENDS =
-      TopLevelDestination(route = Route.FRIENDS, icon = Icons.Outlined.Place, textId = "Friends")
+      TopLevelDestination(route = Route.FRIENDS, icon = Icons.Outlined.Star, textId = "Friends")
   val PROFILE =
-      TopLevelDestination(route = Route.PROFILE, icon = Icons.Outlined.Place, textId = "Profile")
+      TopLevelDestination(route = Route.PROFILE, icon = Icons.Outlined.Person, textId = "Profile")
 }
 
 val LIST_TOP_LEVEL_DESTINATION =
