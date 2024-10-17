@@ -1,15 +1,31 @@
+<!-- AndroidManifest.xml -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.se.orator"
     xmlns:tools="http://schemas.android.com/tools">
+
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Remove if not needed -->
+    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> -->
+    <!-- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> -->
 
     <!-- Camera permission is still required -->
     <uses-permission android:name="android.permission.CAMERA"
         tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
 
-    <!-- Scoped storage or more granular media access for Android 10 and above -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
-        tools:targetApi="33"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
-        tools:targetApi="33"/>
+
+    <!-- Optional: Camera and Media Permissions -->
+    <!-- Remove if not using camera or media storage -->
+    <!--
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:targetApi="33"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:targetApi="33"/>
+    -->
 
     <application
         android:allowBackup="true"
@@ -21,13 +37,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Project"
         tools:targetApi="31">
+
+        <!-- Symbl.ai Credentials -->
+        <meta-data
+            android:name="SYMBL_APP_ID"
+            android:value="${SYMBL_APP_ID}" />
+        <meta-data
+            android:name="SYMBL_APP_SECRET"
+            android:value="${SYMBL_APP_SECRET}" />
+
+        <meta-data
+            android:name="GPT_API_KEY"
+            android:value="${GPT_API_KEY}" />
+
+        <meta-data
+            android:name="GPT_ORGANIZATION_ID"
+            android:value="${GPT_ORGANIZATION_ID}" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Project">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

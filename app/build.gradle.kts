@@ -1,4 +1,3 @@
-
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -8,23 +7,24 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
-
+    alias(libs.plugins.sonarqube)
 }
 
 android {
     namespace = "com.github.se.orator"
     compileSdk = 34
 
-
-    // Load the API key from local.properties
+    // Load API keys from local.properties
     val localProperties = Properties()
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
         localProperties.load(FileInputStream(localPropertiesFile))
     }
 
-    val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
-
+    val symblAppId: String = localProperties.getProperty("SYMBL_APP_ID") ?: ""
+    val symblAppSecret: String = localProperties.getProperty("SYMBL_APP_SECRET") ?: ""
+    val gptApiKey: String = localProperties.getProperty("GPT_API_KEY") ?: ""
+    val organizationId: String = localProperties.getProperty("GPT_ORGANIZATION_ID") ?: ""
 
     defaultConfig {
         applicationId = "com.github.se.orator"
@@ -37,7 +37,12 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+
+        // Pass API keys to the manifest
+        manifestPlaceholders["SYMBL_APP_ID"] = symblAppId
+        manifestPlaceholders["SYMBL_APP_SECRET"] = symblAppSecret
+        manifestPlaceholders["GPT_API_KEY"] = gptApiKey
+        manifestPlaceholders["GPT_ORGANIZATION_ID"] = organizationId
     }
 
     buildTypes {
@@ -52,19 +57,25 @@ android {
             enableAndroidTestCoverage = true
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -82,7 +93,6 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
-
             isReturnDefaultValues = true
         }
         packagingOptions {
@@ -92,23 +102,9 @@ android {
         }
     }
 
-
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
-    // The next lines transfers the src/test/* from shared to the testDebug one
-    //
-    // This prevent errors from occurring during unit tests
+    // Robolectric testing setup
     sourceSets.getByName("testDebug") {
         val test = sourceSets.getByName("test")
-
         java.setSrcDirs(test.java.srcDirs)
         res.setSrcDirs(test.res.srcDirs)
         resources.setSrcDirs(test.resources.srcDirs)
@@ -121,10 +117,8 @@ android {
     }
 }
 
-
 dependencies {
-
-    // Core
+    // Core Libraries
     implementation(libs.core.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -142,72 +136,80 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui.test.android)
     testImplementation(libs.test.core.ktx)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.material)
 
-
-    // Navigation
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-
-    // Google Service and Maps
+    // Google Maps and Services
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
     implementation(libs.maps.compose.utils)
     implementation(libs.play.services.auth)
 
     // Firebase
-
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
-
-    // Firebase storage
     implementation(libs.firebase.storage)
     implementation(libs.firebase.appcheck)
 
     // Coil
     implementation(libs.coil.compose)
 
-    // Networking with OkHttp
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
     implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
 
-    // Testing Unit
+    // Compose Material Icons for Mic and MicOff
+    implementation(libs.androidx.material.icons.extended)
+
+    // Testing Libraries
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
     testImplementation(libs.json)
 
-    // Test UI
+    // UI Testing Libraries
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    configurations.all {
+        resolutionStrategy {
+            force(libs.androidx.espresso.core)
+        }
+    }
     androidTestImplementation(libs.androidx.espresso.intents)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+
+    // Mockito for Unit Testing
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
     testImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.mockito.kotlin)
+
+    // Robolectric
     testImplementation(libs.robolectric)
+
+    // Kaspresso
     androidTestImplementation(libs.kaspresso)
     androidTestImplementation(libs.kaspresso.allure.support)
     androidTestImplementation(libs.kaspresso.compose.support)
 
+    // Coroutines Testing
     testImplementation(libs.kotlinx.coroutines.test)
-
 }
 
-
 tasks.withType<Test> {
-    // Configure Jacoco for each tests
+    // Configure Jacoco for each test
     configure<JacocoTaskExtension> {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
@@ -223,13 +225,13 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     }
 
     val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
-        "**/sigchecks/**",
+        "/R.class",
+        "/R$*.class",
+        "/BuildConfig.*",
+        "/Manifest*.*",
+        "/Test.*",
+        "android//.",
+        "/sigchecks/",
     )
     val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
@@ -245,6 +247,10 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
 }
 
 
-
-
-
+sonar {
+    properties {
+        property("sonar.projectKey", "SWENT-TEAM17_demo-repository")
+        property("sonar.organization", "swent-team17")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
