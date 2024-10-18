@@ -252,5 +252,7 @@ sonar {
         property("sonar.projectKey", "SWENT-TEAM17_demo-repository")
         property("sonar.organization", "swent-team17")
         property("sonar.host.url", "https://sonarcloud.io")
+
+        property("sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
 }

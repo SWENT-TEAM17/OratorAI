@@ -1,10 +1,11 @@
+package com.github.se.orator.ui.settings
+
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
-import com.github.se.orator.ui.settings.SettingsScreen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
