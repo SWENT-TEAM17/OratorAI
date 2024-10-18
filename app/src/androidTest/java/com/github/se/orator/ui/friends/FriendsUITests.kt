@@ -46,6 +46,9 @@ class FriendsUITests {
     `when`(mockUserProfileRepository.getUserProfile(any(), any(), any())).then {
       it.getArgument<(UserProfile) -> Unit>(1)(testProfile)
     }
+    `when`(mockUserProfileRepository.getAllUserProfiles(any(), any())).then {
+      it.getArgument<(List<UserProfile>) -> Unit>(0)(listOf(profile1, profile2))
+    }
 
     userProfileViewModel = UserProfileViewModel(mockUserProfileRepository)
     userProfileViewModel.getUserProfile(testProfile.uid)
@@ -105,6 +108,48 @@ class FriendsUITests {
     composeTestRule
         .onNodeWithTag("viewFriendsItem#2", useUnmergedTree = true)
         .assertIsNotDisplayed()
+  }
+
+  @Test
+  fun testAddFriendsScreenElementsAreDisplayed() {
+
+    `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.ADD_FRIENDS)
+    composeTestRule.setContent { AddFriendsScreen(mockNavigationActions, userProfileViewModel) }
+
+    // Check if the add friend screen elements are displayed
+    composeTestRule.onNodeWithTag("addFriendTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addFriendSearchField").assertIsDisplayed()
+  }
+
+  @Test
+  fun testAddFriendSearch() {
+    `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.ADD_FRIENDS)
+    composeTestRule.setContent { AddFriendsScreen(mockNavigationActions, userProfileViewModel) }
+
+    composeTestRule.onNodeWithTag("addFriendSearchField").performTextInput("John")
+
+    composeTestRule.onNodeWithTag("addFriendUserItem#1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addFriendUserItem#2").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun testLeaderboardScreenElementsAreDisplayed() {
+    `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LEADERBOARD)
+    composeTestRule.setContent { LeaderboardScreen(mockNavigationActions, userProfileViewModel) }
+
+    // Check if the leaderboard screen elements are displayed
+    composeTestRule.onNodeWithTag("leaderboardTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("leaderboardList").assertIsDisplayed()
+  }
+
+  @Test
+  fun testLeaderboardItemElementsAreDisplayed() {
+    `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LEADERBOARD)
+    composeTestRule.setContent { LeaderboardScreen(mockNavigationActions, userProfileViewModel) }
+
+    // Check if the leaderboard item elements are displayed
+    composeTestRule.onNodeWithTag("leaderboardItem#1", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("leaderboardItem#2", useUnmergedTree = true).assertIsDisplayed()
   }
 
   /** Function used to setup a testing environment for the ViewFriendsScreen tests */
