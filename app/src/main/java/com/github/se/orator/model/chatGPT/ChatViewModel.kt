@@ -14,7 +14,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ChatViewModel(private val chatGPTService: ChatGPTService, val practiceContext: PracticeContext, val feedbackType: String) : ViewModel() {
+class ChatViewModel(
+    private val chatGPTService: ChatGPTService,
+    val practiceContext: PracticeContext,
+    val feedbackType: String
+) : ViewModel() {
 
   private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
   val chatMessages = _chatMessages.asStateFlow()
@@ -27,33 +31,40 @@ class ChatViewModel(private val chatGPTService: ChatGPTService, val practiceCont
 
   private val collectedAnalysisData = mutableListOf<AnalysisData>()
 
-    init {
-        initializeConversation()
-    }
+  init {
+    initializeConversation()
+  }
 
-    fun initializeConversation() {
-      val systemMessageContent = when (practiceContext) {
-          is InterviewContext -> """
+  fun initializeConversation() {
+    val systemMessageContent =
+        when (practiceContext) {
+          is InterviewContext ->
+              """
                 You are simulating a ${practiceContext.interviewType} for the position of ${practiceContext.role} at ${practiceContext.company}. 
                 Focus on the following areas: ${practiceContext.focusAreas.joinToString(", ")}. 
                 Ask questions one at a time and wait for the user's response before proceeding. 
                 Do not provide feedback until the end.
-            """.trimIndent()
-          is PublicSpeakingContext -> """
+            """
+                  .trimIndent()
+          is PublicSpeakingContext ->
+              """
                 You are helping the user prepare a speech for a ${practiceContext.occasion}. 
                 The audience is ${practiceContext.audienceDemographic}. 
                 The main points of the speech are: ${practiceContext.mainPoints.joinToString(", ")}.
                 Please guide the user through practicing their speech, asking for their input on each point.
-            """.trimIndent()
-          is SalesPitchContext -> """
+            """
+                  .trimIndent()
+          is SalesPitchContext ->
+              """
                 You are helping the user prepare a sales pitch for the product ${practiceContext.product}. 
                 The target audience is ${practiceContext.targetAudience}. 
                 The key features of the product are: ${practiceContext.keyFeatures.joinToString(", ")}.
                 Please guide the user through practicing their sales pitch, asking for their input on each feature.
-            """.trimIndent()
+            """
+                  .trimIndent()
           // Add cases for other context types like SalesPitchContext
           else -> "You are assisting the user with their speaking practice."
-      }
+        }
 
     val systemMessage = Message(role = "system", content = systemMessageContent)
 
@@ -124,38 +135,36 @@ class ChatViewModel(private val chatGPTService: ChatGPTService, val practiceCont
   //        getNextGPTResponse()
   //    }
 
+  private fun getAnalysisSummary(): String {
+    return generateAnalysisSummary(collectedAnalysisData)
+  }
 
-    private fun getAnalysisSummary(): String {
-        return generateAnalysisSummary(collectedAnalysisData)
-    }
+  private fun generateAnalysisSummary(analysisDataList: List<AnalysisData>): String {
+    // Implement logic to summarize analysis data
+    return analysisDataList.joinToString("\n") { it.toString() }
+  }
 
-    private fun generateAnalysisSummary(analysisDataList: List<AnalysisData>): String {
-        // Implement logic to summarize analysis data
-        return analysisDataList.joinToString("\n") { it.toString() }
-    }
-
-    // Add a method to generate feedback
-    suspend fun generateFeedback(): String? {
-        val analysisSummary = getAnalysisSummary()
-        val feedbackRequestMessage = Message(
+  // Add a method to generate feedback
+  suspend fun generateFeedback(): String? {
+    val analysisSummary = getAnalysisSummary()
+    val feedbackRequestMessage =
+        Message(
             role = "user",
-            content = """
+            content =
+                """
                 The interview is now over. Please provide feedback on my performance, considering the following analysis of my responses:
 
                 $analysisSummary
-            """.trimIndent()
-        )
+            """
+                    .trimIndent())
 
-        val messages = _chatMessages.value + feedbackRequestMessage
+    val messages = _chatMessages.value + feedbackRequestMessage
 
-        val request = ChatRequest(
-            model = "gpt-3.5-turbo",
-            messages = messages
-        )
+    val request = ChatRequest(model = "gpt-3.5-turbo", messages = messages)
 
-        val response = chatGPTService.getChatCompletion(request)
-        return response.choices.firstOrNull()?.message?.content
-    }
+    val response = chatGPTService.getChatCompletion(request)
+    return response.choices.firstOrNull()?.message?.content
+  }
 
   private fun handleError(e: Exception) {
     // Handle exceptions and update _errorMessage

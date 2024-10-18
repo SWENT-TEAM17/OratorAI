@@ -12,7 +12,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -56,9 +55,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 
-/**
- * The MainActivity class is the main entry point for the OratorAI application.
- */
+/** The MainActivity class is the main entry point for the OratorAI application. */
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
   private lateinit var chatViewModel: ChatViewModel
@@ -85,20 +82,22 @@ class MainActivity : ComponentActivity() {
 
     val chatGPTService = createChatGPTService(apiKey, organizationId)
 
-//    val factory = ChatViewModelFactory(chatGPTService)
-//    chatViewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
+    //    val factory = ChatViewModelFactory(chatGPTService)
+    //    chatViewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
 
-//    val interviewContext =
-//        InterviewContext(
-//            interviewType = "job interview",
-//            role = "Consultant",
-//            company = "McKinsey",
-//            focusAreas = listOf("Problem-solving", "Leadership", "Teamwork"))
-//
-//    chatViewModel.initializeConversation(interviewContext)
+    //    val interviewContext =
+    //        InterviewContext(
+    //            interviewType = "job interview",
+    //            role = "Consultant",
+    //            company = "McKinsey",
+    //            focusAreas = listOf("Problem-solving", "Leadership", "Teamwork"))
+    //
+    //    chatViewModel.initializeConversation(interviewContext)
 
     enableEdgeToEdge()
-    setContent { ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp(chatGPTService) } } }
+    setContent {
+      ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp(chatGPTService) } }
+    }
   }
 }
 
@@ -120,13 +119,13 @@ fun OratorApp(chatGPTService: ChatGPTService) {
 
     // Initialize the view models
     val userProfileViewModel: UserProfileViewModel =
-      viewModel(factory = UserProfileViewModel.Factory)
+        viewModel(factory = UserProfileViewModel.Factory)
 
     // Replace the content of the Scaffold with the desired screen
     NavHost(navController = navController, startDestination = Route.AUTH) {
       navigation(
-        startDestination = Screen.AUTH,
-        route = Route.AUTH,
+          startDestination = Screen.AUTH,
+          route = Route.AUTH,
       ) {
 
         // Authentication Flow
@@ -139,8 +138,8 @@ fun OratorApp(chatGPTService: ChatGPTService) {
       }
 
       navigation(
-        startDestination = Screen.HOME,
-        route = Route.HOME,
+          startDestination = Screen.HOME,
+          route = Route.HOME,
       ) {
         composable(Screen.HOME) { MainScreen(navigationActions) }
 
@@ -155,39 +154,39 @@ fun OratorApp(chatGPTService: ChatGPTService) {
           SpeakingScreen(viewModel = speakingViewModel, navController = navController)
         }
         composable(
-          route = "${Screen.CHAT_SCREEN}/{practiceContext}/{feedbackType}",
-          arguments = listOf(
-            navArgument("practiceContext") { type = NavType.StringType },
-            navArgument("feedbackType") { type = NavType.StringType }
-          )
-        ) { backStackEntry ->
-          val contextJson = backStackEntry.arguments?.getString("practiceContext")
-          val feedbackType = backStackEntry.arguments?.getString("feedbackType") ?: ""
-          val decodedJson = Uri.decode(contextJson)
+            route = "${Screen.CHAT_SCREEN}/{practiceContext}/{feedbackType}",
+            arguments =
+                listOf(
+                    navArgument("practiceContext") { type = NavType.StringType },
+                    navArgument("feedbackType") { type = NavType.StringType })) { backStackEntry ->
+              val contextJson = backStackEntry.arguments?.getString("practiceContext")
+              val feedbackType = backStackEntry.arguments?.getString("feedbackType") ?: ""
+              val decodedJson = Uri.decode(contextJson)
 
-          val gson = Gson()
+              val gson = Gson()
 
-          // Parse the JSON string into a JsonObject
-          val jsonObject = JsonParser.parseString(decodedJson).asJsonObject
-          // Deserialize based on the type
-          val practiceContext: PracticeContext = when (val type = jsonObject.get("type").asString) {
-            "InterviewContext" -> gson.fromJson(decodedJson, InterviewContext::class.java)
-            "PublicSpeakingContext" -> gson.fromJson(decodedJson, PublicSpeakingContext::class.java)
-            "SalesPitchContext" -> gson.fromJson(decodedJson, SalesPitchContext::class.java)
-            else -> throw IllegalArgumentException("Unknown PracticeContext type: $type")
-          }
+              // Parse the JSON string into a JsonObject
+              val jsonObject = JsonParser.parseString(decodedJson).asJsonObject
+              // Deserialize based on the type
+              val practiceContext: PracticeContext =
+                  when (val type = jsonObject.get("type").asString) {
+                    "InterviewContext" -> gson.fromJson(decodedJson, InterviewContext::class.java)
+                    "PublicSpeakingContext" ->
+                        gson.fromJson(decodedJson, PublicSpeakingContext::class.java)
+                    "SalesPitchContext" -> gson.fromJson(decodedJson, SalesPitchContext::class.java)
+                    else -> throw IllegalArgumentException("Unknown PracticeContext type: $type")
+                  }
 
-          // Initialize ChatViewModel with the practiceContext and feedbackType
-          val chatViewModelFactory =
-            ChatViewModelFactory(chatGPTService, practiceContext, feedbackType)
-          val chatViewModel: ChatViewModel = viewModel(factory = chatViewModelFactory)
+              // Initialize ChatViewModel with the practiceContext and feedbackType
+              val chatViewModelFactory =
+                  ChatViewModelFactory(chatGPTService, practiceContext, feedbackType)
+              val chatViewModel: ChatViewModel = viewModel(factory = chatViewModelFactory)
 
-          ChatScreen(
-            viewModel = chatViewModel,
-            navController = navController,
-            navigationActions = navigationActions
-          )
-        }
+              ChatScreen(
+                  viewModel = chatViewModel,
+                  navController = navController,
+                  navigationActions = navigationActions)
+            }
         composable(Screen.FEEDBACK) {
 
           // Retrieve the same ChatViewModel instance
@@ -195,31 +194,28 @@ fun OratorApp(chatGPTService: ChatGPTService) {
 
           // Navigate to FeedbackScreen
           FeedbackScreen(
-            chatViewModel = chatViewModel,
-            navController = navController,
-            navigationActions = navigationActions
-          )
+              chatViewModel = chatViewModel,
+              navController = navController,
+              navigationActions = navigationActions)
         }
       }
 
       navigation(
-        startDestination = Screen.FRIENDS,
-        route = Route.FRIENDS,
+          startDestination = Screen.FRIENDS,
+          route = Route.FRIENDS,
       ) {
         composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
       }
 
       // Temporary screens
-      composable(Screen.FUN_SCREEN) {
-        ViewFunScreen(navigationActions, userProfileViewModel)
-      }
+      composable(Screen.FUN_SCREEN) { ViewFunScreen(navigationActions, userProfileViewModel) }
       composable(Screen.CONNECT_SCREEN) {
         ViewConnectScreen(navigationActions, userProfileViewModel)
       }
 
       navigation(
-        startDestination = Screen.PROFILE,
-        route = Route.PROFILE,
+          startDestination = Screen.PROFILE,
+          route = Route.PROFILE,
       ) {
         composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
         composable(Screen.CREATE_PROFILE) {

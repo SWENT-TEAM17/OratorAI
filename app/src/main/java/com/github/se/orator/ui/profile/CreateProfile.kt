@@ -43,7 +43,8 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 
 /**
- * The CreateAccountScreen composable is a composable screen that displays the create account screen.
+ * The CreateAccountScreen composable is a composable screen that displays the create account
+ * screen.
  *
  * @param navigationActions The navigation actions that can be performed.
  * @param userProfileViewModel The view model for the user profile.

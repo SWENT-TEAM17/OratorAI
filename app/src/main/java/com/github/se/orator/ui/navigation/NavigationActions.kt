@@ -130,24 +130,18 @@ open class NavigationActions(
     navController.navigate("${Screen.CHAT_SCREEN}/$contextJson/$feedbackTypeEncoded")
   }
 
-  /**
-   * Navigate to the speaking screen.
-   */
+  /** Navigate to the speaking screen. */
   fun navigateToSpeakingScreen() {
     navController.navigate(Screen.SPEAKING)
   }
 
-  /**
-   * Navigate to the feedback screen.
-   */
+  /** Navigate to the feedback screen. */
   fun navigateToFeedbackScreen() {
     navController.navigate(Screen.FEEDBACK)
   }
 
-  /**
-   * Navigate to the home screen.
-   */
-    fun navigateToHome() {
-        navController.navigate(Route.HOME)
-    }
+  /** Navigate to the home screen. */
+  fun navigateToHome() {
+    navController.navigate(Route.HOME)
+  }
 }

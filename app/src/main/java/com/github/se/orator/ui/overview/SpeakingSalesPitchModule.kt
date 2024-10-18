@@ -8,12 +8,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.testTag
-import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
 
 /**
- * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch module.
+ * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch
+ * module.
  *
  * @param navigationActions The navigation actions that can be performed.
  */
@@ -24,7 +24,7 @@ fun SpeakingSalesPitchModule(navigationActions: NavigationActions) {
   var targetAudience by remember { mutableStateOf("") }
   var feedbackType by remember { mutableStateOf("") }
   var keySellingPoints by remember { mutableStateOf("") }
-    var feedbackLanguage by remember { mutableStateOf("") }
+  var feedbackLanguage by remember { mutableStateOf("") }
 
   val inputFields =
       listOf(
@@ -64,21 +64,20 @@ fun SpeakingSalesPitchModule(navigationActions: NavigationActions) {
               height = 85,
               testTag = "keySellingPointsInput"))
 
-    SpeakingPracticeModule(
-        navigationActions = navigationActions,
-        screenTitle = "Public Speaking",
-        headerText = "Make your speech memorable",
-        inputs = inputFields,
-        onGetStarted = {
-            // Create a PublicSpeakingContext object with the user's inputs
-            val salesPitchContext = SalesPitchContext(
+  SpeakingPracticeModule(
+      navigationActions = navigationActions,
+      screenTitle = "Public Speaking",
+      headerText = "Make your speech memorable",
+      inputs = inputFields,
+      onGetStarted = {
+        // Create a PublicSpeakingContext object with the user's inputs
+        val salesPitchContext =
+            SalesPitchContext(
                 product = productType,
                 targetAudience = targetAudience,
-                keyFeatures = keySellingPoints.split(", ")
-            )
+                keyFeatures = keySellingPoints.split(", "))
 
-            // Navigate to ChatScreen, passing the context and feedbackLanguage
-            navigationActions.navigateToChatScreen(salesPitchContext, feedbackLanguage)
-        }
-    )
+        // Navigate to ChatScreen, passing the context and feedbackLanguage
+        navigationActions.navigateToChatScreen(salesPitchContext, feedbackLanguage)
+      })
 }
