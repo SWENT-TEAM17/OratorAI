@@ -90,9 +90,11 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Edit Profile Button
-                Button(onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
-                  Text(text = "Edit Profile")
-                }
+                Button(
+                    modifier = Modifier.testTag("edit_button"),
+                    onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
+                      Text(text = "Edit Profile")
+                    }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -138,7 +140,11 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
       painter = painter,
       contentDescription = "Profile Picture",
       contentScale = ContentScale.Crop,
-      modifier = Modifier.size(100.dp).clip(CircleShape).clickable(onClick = onClick))
+      modifier =
+          Modifier.size(100.dp)
+              .clip(CircleShape)
+              .clickable(onClick = onClick)
+              .testTag("upload_profile_picture"))
 }
 
 /**

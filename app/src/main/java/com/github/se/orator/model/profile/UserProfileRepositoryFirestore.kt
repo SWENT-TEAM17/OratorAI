@@ -117,6 +117,16 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         onFailure)
   }
 
+  // Delete a user profile
+  override fun deleteUserProfile(
+      uid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performFirestoreOperation(
+        db.collection(collectionPath).document(uid).delete(), onSuccess, onFailure)
+  }
+
   /**
    * Upload profile picture to Firebase Storage.
    *
@@ -136,7 +146,6 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         FirebaseStorage.getInstance().reference.child("profile_pictures/$uid.jpg")
 
     Log.d("FirebaseStorage", "Uploading to: profile_pictures/$uid.jpg")
-
     // Upload the image to Firebase Storage
     storageReference
         .putFile(imageUri)

@@ -113,7 +113,6 @@ fun SectionButton(text: String, onClick: () -> Unit) {
 }
 
 data class Mode(val text: String, val imageRes: Int, val destinationScreen: String)
-
 /** Function to create the sliding animation to browse between modes */
 @Composable
 fun AnimatedCards(navigationActions: NavigationActions) {

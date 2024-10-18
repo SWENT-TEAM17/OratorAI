@@ -105,6 +105,7 @@ class SymblApiClient(private val context: Context) {
 
         // Specify the correct media type for the audio file
         val mediaType = "audio/wav".toMediaTypeOrNull() // For WAV files
+
         val requestBody = audioFile.asRequestBody(mediaType)
 
         // Corrected API request URL with 'filler_words'

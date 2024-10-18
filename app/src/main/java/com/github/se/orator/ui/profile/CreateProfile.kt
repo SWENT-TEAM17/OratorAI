@@ -79,12 +79,14 @@ fun CreateAccountScreen(
         TopAppBar(
             title = { Text("Create an OratorAI account") },
             navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Image(
-                    painter = painterResource(id = R.drawable.back_arrow),
-                    contentDescription = "Back",
-                    modifier = Modifier.size(32.dp).testTag("back_button"))
-              }
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.back_arrow),
+                        contentDescription = "Back",
+                        modifier = Modifier.size(32.dp))
+                  }
             },
             backgroundColor = Color.White,
             contentColor = Color.Black)

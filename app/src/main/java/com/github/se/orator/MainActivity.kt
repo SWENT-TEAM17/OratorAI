@@ -206,11 +206,14 @@ fun OratorApp(chatGPTService: ChatGPTService) {
       ) {
         composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
       }
-
-      // Temporary screens
-      composable(Screen.FUN_SCREEN) { ViewFunScreen(navigationActions, userProfileViewModel) }
+      //// temporarily adding those empty screens before we implement their functionalities
+      composable(Screen.FUN_SCREEN) {
+        ViewFunScreen(
+            navigationActions, userProfileViewModel) // Your composable function for Fun Screen
+      }
       composable(Screen.CONNECT_SCREEN) {
-        ViewConnectScreen(navigationActions, userProfileViewModel)
+        ViewConnectScreen(
+            navigationActions, userProfileViewModel) // Your composable function for Connect Screen
       }
 
       navigation(
@@ -224,6 +227,7 @@ fun OratorApp(chatGPTService: ChatGPTService) {
         composable(Screen.EDIT_PROFILE) {
           EditProfileScreen(navigationActions, userProfileViewModel)
         }
+
         composable(Screen.LEADERBOARD) {
           LeaderboardScreen(navigationActions, userProfileViewModel)
         }

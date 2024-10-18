@@ -33,7 +33,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   // Loading state to indicate if the profile is being fetched
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
-
   // Init block to fetch user profile automatically after authentication
   init {
     val uid = repository.getCurrentUserUid()
@@ -85,7 +84,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
         onSuccess = {
           userProfile_.value = userProfile // Set the newly added profile
           Log.d("UserProfileViewModel", "Profile added successfully.")
-
           // Add the profile to the list containing all profiles
           allProfiles_.value += userProfile
         },
@@ -171,7 +169,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       Log.e("UserProfileViewModel", "Failed to add friend: Current user profile is null.")
     }
   }
-
   /**
    * Updates the user profile.
    *
