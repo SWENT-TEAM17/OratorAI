@@ -131,7 +131,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
         })
   }
 
-
   /** Fetches all the user profiles */
   private fun fetchAllUserProfiles() {
     repository.getAllUserProfiles(

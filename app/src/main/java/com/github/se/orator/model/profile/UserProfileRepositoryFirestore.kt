@@ -38,7 +38,6 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
    * @param onSuccess Callback to be invoked on successful addition.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
-
   override fun addUserProfile(
       userProfile: UserProfile,
       onSuccess: () -> Unit,
@@ -75,7 +74,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
     }
   }
 
-    /**
+  /**
    * Fetches all user profiles from the Firestore database. On success, it returns a list of
    * [UserProfile] objects through the [onSuccess] callback. On failure, it returns an exception
    * through the [onFailure] callback.
@@ -271,7 +270,6 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
    * @param onSuccess Callback to be invoked with the list of friends' profiles.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
-
   override fun getFriendsProfiles(
       friendUids: List<String>,
       onSuccess: (List<UserProfile>) -> Unit,
