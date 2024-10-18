@@ -35,9 +35,10 @@ keystore.properties
 /app/release
 upload-keystore.jks
 /scraping/firebase_credentials.json
+sonar-project.properties
 
 # MacOS
 **/.DS_Store
 
-# API keys
+# API keys.txt
 *.env

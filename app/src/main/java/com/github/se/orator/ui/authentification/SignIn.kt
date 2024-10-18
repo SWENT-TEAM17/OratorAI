@@ -83,8 +83,8 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             val uid = result.user?.uid
 
             // Fetch the user profile and check if it's incomplete
-            uid?.let { uid ->
-              viewModel.getUserProfile(uid)
+            uid?.let { u ->
+              viewModel.getUserProfile(u)
               redirectToProfile = true
             }
           },
