@@ -81,11 +81,15 @@ class FriendsUITests {
 
     composeTestRule.onNodeWithTag("viewFriendsMenuButton").performClick()
 
-    composeTestRule.onNodeWithTag("viewFriendsAddFriendButton", useUnmergedTree = true).performClick()
+    composeTestRule
+        .onNodeWithTag("viewFriendsAddFriendButton", useUnmergedTree = true)
+        .performClick()
     composeTestRule.waitForIdle()
     verify(mockNavigationActions).navigateTo(eq(Screen.ADD_FRIENDS))
 
-    composeTestRule.onNodeWithTag("viewFriendsLeaderboardButton", useUnmergedTree = true).performClick()
+    composeTestRule
+        .onNodeWithTag("viewFriendsLeaderboardButton", useUnmergedTree = true)
+        .performClick()
     composeTestRule.waitForIdle()
     verify(mockNavigationActions).navigateTo(eq(Screen.LEADERBOARD))
   }
