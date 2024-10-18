@@ -128,7 +128,7 @@ fun EditProfileScreen(
                   value = updatedUsername,
                   onValueChange = { newUsername -> updatedUsername = newUsername },
                   label = { Text("Username") },
-                  modifier = Modifier.fillMaxWidth())
+                  modifier = Modifier.fillMaxWidth().testTag("username_field"))
 
               Spacer(modifier = Modifier.height(16.dp))
 
@@ -141,7 +141,7 @@ fun EditProfileScreen(
                   value = updatedBio,
                   onValueChange = { newBio -> updatedBio = newBio },
                   placeholder = { Text("Tell us about yourself") },
-                  modifier = Modifier.fillMaxWidth().height(150.dp),
+                  modifier = Modifier.fillMaxWidth().height(150.dp).testTag("bio_field"),
                   maxLines = 5)
 
               Spacer(modifier = Modifier.height(24.dp))

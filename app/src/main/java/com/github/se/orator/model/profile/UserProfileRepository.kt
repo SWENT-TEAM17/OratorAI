@@ -92,12 +92,12 @@ interface UserProfileRepository {
       onFailure: (Exception) -> Unit
   )
 
-    /**
-     * Delete a user profile from the data store.
-     *
-     * @param uid The UID of the user whose profile is to be deleted.
-     * @param onSuccess Callback to be invoked on successful deletion.
-     * @param onFailure Callback to be invoked on failure with the exception.
-     */
-    fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  /**
+   * Delete a user profile from the data store.
+   *
+   * @param uid The UID of the user whose profile is to be deleted.
+   * @param onSuccess Callback to be invoked on successful deletion.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 }

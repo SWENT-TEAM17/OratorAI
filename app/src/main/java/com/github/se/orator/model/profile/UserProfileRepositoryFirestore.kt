@@ -74,7 +74,6 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
     }
   }
 
-
   /**
    * Fetches all user profiles from the Firestore database. On success, it returns a list of
    * [UserProfile] objects through the [onSuccess] callback. On failure, it returns an exception
@@ -119,7 +118,11 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
   }
 
   // Delete a user profile
-  override fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  override fun deleteUserProfile(
+      uid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
     performFirestoreOperation(
         db.collection(collectionPath).document(uid).delete(), onSuccess, onFailure)
   }
@@ -282,21 +285,21 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-      if (friendUids.isEmpty()) {
-          onSuccess(emptyList()) // Return an empty list if no friends
-          return
-      }
+    if (friendUids.isEmpty()) {
+      onSuccess(emptyList()) // Return an empty list if no friends
+      return
+    }
 
-      db.collection(collectionPath)
-          .whereIn("uid", friendUids)
-          .get()
-          .addOnSuccessListener { querySnapshot ->
-              val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
-              onSuccess(friends)
-          }
-          .addOnFailureListener { exception ->
-              Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
-              onFailure(exception)
-          }
+    db.collection(collectionPath)
+        .whereIn("uid", friendUids)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(friends)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
+          onFailure(exception)
+        }
   }
 }
