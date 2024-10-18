@@ -6,9 +6,9 @@ import com.github.se.orator.model.speaking.PracticeContext
 import com.github.se.orator.ui.network.ChatGPTService
 
 class ChatViewModelFactory(
-  private val chatGPTService: ChatGPTService,
-  private val practiceContext: PracticeContext,
-  private val feedbackType: String
+    private val chatGPTService: ChatGPTService,
+    private val practiceContext: PracticeContext,
+    private val feedbackType: String
 ) : ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     if (modelClass.isAssignableFrom(ChatViewModel::class.java)) {

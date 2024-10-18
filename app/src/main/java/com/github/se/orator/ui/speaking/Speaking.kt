@@ -38,12 +38,14 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
   val sentimentResult by viewModel.sentimentResult.collectAsState()
   val fillersResult by viewModel.fillersResult.collectAsState()
 
-    LaunchedEffect(transcribedText) {
-        if (transcribedText != null) {
-            navController.previousBackStackEntry?.savedStateHandle?.set("transcribedText", transcribedText)
-            navController.popBackStack()
-        }
+  LaunchedEffect(transcribedText) {
+    if (transcribedText != null) {
+      navController.previousBackStackEntry
+          ?.savedStateHandle
+          ?.set("transcribedText", transcribedText)
+      navController.popBackStack()
     }
+  }
 
   // Permission handling
   var permissionGranted by remember { mutableStateOf(false) }
@@ -70,8 +72,8 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
                 animationSpec =
                     infiniteRepeatable(
                         animation = tween(500, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse), label = ""
-            )
+                        repeatMode = RepeatMode.Reverse),
+                label = "")
 
         // Microphone button with animation
         Button(

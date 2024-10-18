@@ -24,7 +24,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
-import com.github.se.orator.ui.navigation.Screen
 
 /**
  * The SpeakingPracticeModule composable is a composable screen that displays the speaking practice
@@ -92,7 +91,7 @@ fun SpeakingPracticeModule(
                       Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
                   onClick = {
                     // Custom action, can be customized for different modules
-                      onGetStarted()
+                    onGetStarted()
                   }) {
                     Text("Get Started")
                   }
