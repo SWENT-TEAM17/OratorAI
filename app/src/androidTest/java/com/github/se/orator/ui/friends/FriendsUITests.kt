@@ -54,6 +54,12 @@ class FriendsUITests {
     userProfileViewModel.getUserProfile(testProfile.uid)
   }
 
+
+  /**
+   * Tests that the action button works correctly on the View Friends screen.
+   * It verifies that the menu button exists, is displayed, and can be clicked.
+   * After clicking, it checks that the drawer menu and its elements are displayed.
+   */
   @Test
   fun testActionButtonWorks() {
     viewFriendsTestsSetup()
@@ -70,6 +76,11 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("viewFriendsLeaderboardButton").assertIsDisplayed()
   }
 
+  /**
+   * Tests that the friends list is displayed correctly on the View Friends screen.
+   * It verifies that the friends list exists and is displayed.
+   * It also checks that the first friend item is displayed.
+   */
   @Test
   fun testFriendsListIsDisplayed() {
     viewFriendsTestsSetup()
@@ -78,6 +89,12 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("viewFriendsItem#1", useUnmergedTree = true).assertIsDisplayed()
   }
 
+
+  /**
+   * Tests that the friends list is displayed correctly on the View Friends screen.
+   * It verifies that the friends list exists and is displayed.
+   * It also checks that the first friend item is displayed.
+   */
   @Test
   fun testCanGoToAddFriendAndLeaderboardScreens() {
     viewFriendsTestsSetup()
@@ -97,6 +114,12 @@ class FriendsUITests {
     verify(mockNavigationActions).navigateTo(eq(Screen.LEADERBOARD))
   }
 
+  /**
+   * Tests that the search functionality works correctly on the View Friends screen.
+   * It verifies that the search field exists and is displayed, can be clicked and text
+   * can be inputted. After inputting text, it checks that the first friend item is displayed
+   * and the second is not.
+   */
   @Test
   fun testCanSearchForFriends() {
     viewFriendsTestsSetup()
@@ -110,6 +133,10 @@ class FriendsUITests {
         .assertIsNotDisplayed()
   }
 
+  /**
+   * Tests that the friends list is displayed correctly on the View Friends screen.
+   * It also checks that the first friend item is displayed.
+   */
   @Test
   fun testAddFriendsScreenElementsAreDisplayed() {
 
@@ -121,6 +148,12 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("addFriendSearchField").assertIsDisplayed()
   }
 
+
+  /**
+   * Tests that the search functionality works correctly on the Add Friends screen.
+   * After inputting text, it checks that the first friend item is displayed
+   * and the second is not.
+   */
   @Test
   fun testAddFriendSearch() {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.ADD_FRIENDS)
@@ -132,6 +165,9 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("addFriendUserItem#2").assertIsNotDisplayed()
   }
 
+  /**
+   * Tests that the leaderboard screen elements are displayed correctly.
+   */
   @Test
   fun testLeaderboardScreenElementsAreDisplayed() {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LEADERBOARD)
@@ -142,6 +178,9 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("leaderboardList").assertIsDisplayed()
   }
 
+    /**
+     * Tests that the leaderboard item elements are displayed correctly.
+     */
   @Test
   fun testLeaderboardItemElementsAreDisplayed() {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LEADERBOARD)
