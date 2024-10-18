@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.overview
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -8,14 +9,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.ui.navigation.Screen
+
 
 /**
- * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview
- * module.
+ * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview module.
  *
  * @param navigationActions The navigation actions that can be performed.
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun SpeakingJobInterviewModule(navigationActions: NavigationActions) {
   var targetPosition by remember { mutableStateOf("") }
@@ -61,9 +67,20 @@ fun SpeakingJobInterviewModule(navigationActions: NavigationActions) {
               height = 85,
               testTag = "experienceInput"))
 
-  SpeakingPracticeModule(
-      navigationActions = navigationActions,
-      screenTitle = "Job Interview",
-      headerText = "Ace your next job interview",
-      inputs = inputFields)
+    SpeakingPracticeModule(
+        navigationActions = navigationActions,
+        screenTitle = "Job Interview",
+        headerText = "Ace your next job interview",
+        inputs = inputFields,
+        onGetStarted = {
+            // Collect the inputs and create an InterviewContext object
+            val interviewContext = InterviewContext(
+                interviewType = "job interview",
+                role = targetPosition,
+                company = companyName,
+                focusAreas = skills.split(",").map { it.trim() }
+            )
+            // Navigate to ChatScreen with the collected data
+            navigationActions.navigateToChatScreen(interviewContext, feedbackType)
+        })
 }
