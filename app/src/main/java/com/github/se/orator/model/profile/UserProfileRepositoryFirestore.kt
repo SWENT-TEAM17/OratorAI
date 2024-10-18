@@ -14,7 +14,7 @@ import com.google.firebase.storage.FirebaseStorage
  *
  * @property db The Firestore database instance.
  */
-class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
+class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserProfileRepository {
 
   private val collectionPath = "user_profiles"
 
@@ -27,7 +27,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
    *
    * @return The UID of the current user, or null if not authenticated.
    */
-  fun getCurrentUserUid(): String? {
+  override fun getCurrentUserUid(): String? {
     return FirebaseAuth.getInstance().currentUser?.uid
   }
 
@@ -38,7 +38,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param onSuccess Callback to be invoked on successful addition.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
-  fun addUserProfile(
+
+  override fun addUserProfile(
       userProfile: UserProfile,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
@@ -56,7 +57,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param onSuccess Callback to be invoked with the fetched user profile.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
-  fun getUserProfile(
+  override fun getUserProfile(
       uid: String,
       onSuccess: (UserProfile?) -> Unit,
       onFailure: (Exception) -> Unit
@@ -74,6 +75,31 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
     }
   }
 
+    /**
+   * Fetches all user profiles from the Firestore database. On success, it returns a list of
+   * [UserProfile] objects through the [onSuccess] callback. On failure, it returns an exception
+   * through the [onFailure] callback.
+   *
+   * @param onSuccess A lambda function that receives a list of [UserProfile] objects if the
+   *   operation succeeds.
+   * @param onFailure A lambda function that receives an [Exception] if the operation fails.
+   */
+  override fun getAllUserProfiles(
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val profiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(profiles)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error fetching all user profiles", exception)
+          onFailure(exception)
+        }
+  }
+
   /**
    * Update an existing user profile in Firestore.
    *
@@ -81,7 +107,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param onSuccess Callback to be invoked on successful update.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
-  fun updateUserProfile(
+  override fun updateUserProfile(
       userProfile: UserProfile,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
@@ -100,7 +126,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param onSuccess Callback to be invoked with the download URL of the uploaded image.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
-  fun uploadProfilePicture(
+  override fun uploadProfilePicture(
       uid: String,
       imageUri: Uri,
       onSuccess: (String) -> Unit,
@@ -111,7 +137,6 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
         FirebaseStorage.getInstance().reference.child("profile_pictures/$uid.jpg")
 
     Log.d("FirebaseStorage", "Uploading to: profile_pictures/$uid.jpg")
-
     // Upload the image to Firebase Storage
     storageReference
         .putFile(imageUri)
@@ -141,7 +166,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param onSuccess Callback to be invoked on successful update.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
-  fun updateUserProfilePicture(
+  override fun updateUserProfilePicture(
       uid: String,
       downloadUrl: String,
       onSuccess: () -> Unit,
@@ -246,7 +271,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param onSuccess Callback to be invoked with the list of friends' profiles.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
-  fun getFriendsProfiles(
+
+  override fun getFriendsProfiles(
       friendUids: List<String>,
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit

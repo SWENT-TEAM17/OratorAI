@@ -43,10 +43,11 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 
 /**
- * Composable function for creating a new user account.
+ * The CreateAccountScreen composable is a composable screen that displays the create account
+ * screen.
  *
- * @param navigationActions Actions for navigating between screens.
- * @param userProfileViewModel ViewModel for managing user profile data.
+ * @param navigationActions The navigation actions that can be performed.
+ * @param userProfileViewModel The view model for the user profile.
  */
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable

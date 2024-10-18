@@ -9,6 +9,7 @@ import java.io.File
 import java.io.IOException
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
 import org.json.JSONObject
 
 class SymblApiClient(private val context: Context) {
@@ -104,7 +105,8 @@ class SymblApiClient(private val context: Context) {
 
         // Specify the correct media type for the audio file
         val mediaType = "audio/wav".toMediaTypeOrNull() // For WAV files
-        val requestBody = RequestBody.create(mediaType, audioFile)
+
+        val requestBody = audioFile.asRequestBody(mediaType)
 
         // Corrected API request URL with 'filler_words'
         val request =

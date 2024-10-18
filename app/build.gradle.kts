@@ -23,6 +23,8 @@ android {
 
     val symblAppId: String = localProperties.getProperty("SYMBL_APP_ID") ?: ""
     val symblAppSecret: String = localProperties.getProperty("SYMBL_APP_SECRET") ?: ""
+    val gptApiKey: String = localProperties.getProperty("GPT_API_KEY") ?: ""
+    val organizationId: String = localProperties.getProperty("GPT_ORGANIZATION_ID") ?: ""
 
     defaultConfig {
         applicationId = "com.github.se.orator"
@@ -39,6 +41,8 @@ android {
         // Pass API keys to the manifest
         manifestPlaceholders["SYMBL_APP_ID"] = symblAppId
         manifestPlaceholders["SYMBL_APP_SECRET"] = symblAppSecret
+        manifestPlaceholders["GPT_API_KEY"] = gptApiKey
+        manifestPlaceholders["GPT_ORGANIZATION_ID"] = organizationId
     }
 
     buildTypes {
@@ -157,21 +161,16 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    // Networking with OkHttp
-    // Replace existing okhttp dependency with the specific version needed
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
-    // Symbl.ai dependencies
-    implementation("org.java-websocket:Java-WebSocket:1.5.1")
-    implementation("ai.symbl:android.extension:0.0.2")
-
-    // Gson for JSON parsing
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
 
     // Compose Material Icons for Mic and MicOff
-    implementation("androidx.compose.material:material-icons-extended:1.0.5")
+    implementation(libs.androidx.material.icons.extended)
 
     // Testing Libraries
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
@@ -226,13 +225,13 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     }
 
     val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
-        "**/sigchecks/**",
+        "/R.class",
+        "/R$*.class",
+        "/BuildConfig.*",
+        "/Manifest*.*",
+        "/Test.*",
+        "android//.",
+        "/sigchecks/",
     )
     val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)

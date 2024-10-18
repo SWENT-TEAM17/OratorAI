@@ -12,11 +12,15 @@ import kotlinx.coroutines.flow.*
  *
  * @property repository The repository for accessing user profile data.
  */
-class UserProfileViewModel(internal val repository: UserProfileRepositoryFirestore) : ViewModel() {
+class UserProfileViewModel(internal val repository: UserProfileRepository) : ViewModel() {
 
   // Mutable state flow to hold the user profile
   private val userProfile_ = MutableStateFlow<UserProfile?>(null)
   val userProfile: StateFlow<UserProfile?> = userProfile_.asStateFlow()
+
+  // Mutable state flow to hold the list of all profiles
+  private val allProfiles_ = MutableStateFlow<List<UserProfile>>(emptyList())
+  val allProfiles: StateFlow<List<UserProfile>> = allProfiles_.asStateFlow()
 
   // Mutable state flow to hold the list of friends' profiles
   private val friendsProfiles_ = MutableStateFlow<List<UserProfile>>(emptyList())
@@ -29,7 +33,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepositoryFiresto
   // Loading state to indicate if the profile is being fetched
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
-
   // Init block to fetch user profile automatically after authentication
   init {
     val uid = repository.getCurrentUserUid()
@@ -81,6 +84,8 @@ class UserProfileViewModel(internal val repository: UserProfileRepositoryFiresto
         onSuccess = {
           userProfile_.value = userProfile // Set the newly added profile
           Log.d("UserProfileViewModel", "Profile added successfully.")
+          // Add the profile to the list containing all profiles
+          allProfiles_.value += userProfile
         },
         onFailure = { Log.e("UserProfileViewModel", "Failed to add user profile.", it) })
   }
@@ -96,7 +101,10 @@ class UserProfileViewModel(internal val repository: UserProfileRepositoryFiresto
         uid = uid,
         onSuccess = { profile ->
           userProfile_.value = profile
-          profile?.friends?.let { fetchFriendsProfiles(it) }
+          profile?.friends?.let {
+            fetchFriendsProfiles(it)
+            fetchAllUserProfiles()
+          }
           isLoading_.value = false
           Log.d("UserProfileViewModel", "User profile fetched successfully.")
           Log.d("UserProfileViewModel", "Friends: ${profile?.name}")
@@ -123,6 +131,45 @@ class UserProfileViewModel(internal val repository: UserProfileRepositoryFiresto
         })
   }
 
+
+  /** Fetches all the user profiles */
+  private fun fetchAllUserProfiles() {
+    repository.getAllUserProfiles(
+        onSuccess = { profiles -> allProfiles_.value = profiles },
+        onFailure = {
+          // Handle error
+          Log.e("UserProfileViewModel", "Failed to fetch friends' profiles.", it)
+        })
+  }
+
+  /**
+   * Adds a user profile to the current user's list of friends.
+   *
+   * @param friend The user profile of the friend to be added.
+   */
+  fun addFriend(friend: UserProfile) {
+    val currentUserProfile = userProfile_.value
+    if (currentUserProfile != null) {
+      // Check if the friend is already in the list to avoid duplicates
+      if (!currentUserProfile.friends.contains(friend.uid)) {
+        val updatedFriendsList =
+            currentUserProfile.friends.toMutableList().apply { add(friend.uid) }
+
+        // Create a new profile object with the updated friends list
+        val updatedProfile = currentUserProfile.copy(friends = updatedFriendsList)
+
+        // Update the user profile with the new friends list
+        updateUserProfile(updatedProfile)
+
+        // Optionally: Update the state with the new friend in friendsProfiles
+        friendsProfiles_.value += friend
+      } else {
+        Log.d("UserProfileViewModel", "Friend ${friend.name} is already in the list.")
+      }
+    } else {
+      Log.e("UserProfileViewModel", "Failed to add friend: Current user profile is null.")
+    }
+  }
   /**
    * Updates the user profile.
    *
