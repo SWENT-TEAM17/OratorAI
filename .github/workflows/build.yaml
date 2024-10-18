@@ -46,7 +46,15 @@ jobs:
 
       - name: Create local.properties and set API key
         run: |
-          echo "API_KEY=\${{ secrets.API_KEY }}" > local.properties
+          echo "GOOGLE_SERVICES=${{ secrets.GOOGLE_SERVICES }}" >> local.properties
+          echo "GPT_API_KEY=${{ secrets.GPT_API_KEY }}" >> local.properties
+          echo "GPT_ORGANIZATION_ID=${{ secrets.GPT_ORGANIZATION_ID }}" >> local.properties
+          echo "LOCAL_PROPERTIES=${{ secrets.LOCAL_PROPERTIES }}" >> local.properties
+          echo "SONAR_TOKEN=${{ secrets.SONAR_TOKEN }}" >> local.properties
+          echo "SYMBL_APP_ID=${{ secrets.SYMBL_APP_ID }}" >> local.properties
+          echo "SYMBL_APP_SECRET=${{ secrets.SYMBL_APP_SECRET }}" >> local.properties
+          # Add more keys as needed
+      
 
       - name: Build APK
         run: |
@@ -99,5 +107,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           asset_path: ${{steps.sign_app.outputs.signedReleaseFile}}
-          asset_name: TripTracker.apk
+          asset_name: OratorAI.apk
           asset_content_type: application/zip
