@@ -76,7 +76,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.PROFILE)
       }) {
-      Log.d("aa", "the current route is ${navigationActions.currentRoute()}")
+        Log.d("aa", "the current route is ${navigationActions.currentRoute()}")
         Column(
             modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {

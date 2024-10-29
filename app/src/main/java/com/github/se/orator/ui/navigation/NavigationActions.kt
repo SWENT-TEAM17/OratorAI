@@ -3,14 +3,10 @@ package com.github.se.orator.ui.navigation
 import android.net.Uri
 import android.util.Log
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Contacts
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
@@ -60,16 +56,32 @@ object Screen {
   const val SPEAKING = "Speaking"
 }
 
-data class TopLevelDestination(val route: String, val outlinedIcon: ImageVector,
-                               val coloredIcon: ImageVector, val textId: String)
+data class TopLevelDestination(
+    val route: String,
+    val outlinedIcon: ImageVector,
+    val coloredIcon: ImageVector,
+    val textId: String
+)
 
 object TopLevelDestinations {
   val HOME =
-    TopLevelDestination(route = Route.HOME, outlinedIcon = Icons.Outlined.Home, coloredIcon = Icons.Filled.Home, textId = "Home")
+      TopLevelDestination(
+          route = Route.HOME,
+          outlinedIcon = Icons.Outlined.Home,
+          coloredIcon = Icons.Filled.Home,
+          textId = "Home")
   val FRIENDS =
-      TopLevelDestination(route = Route.FRIENDS, outlinedIcon = Icons.Outlined.StarOutline, coloredIcon = Icons.Filled.Star, textId = "Friends")
+      TopLevelDestination(
+          route = Route.FRIENDS,
+          outlinedIcon = Icons.Outlined.StarOutline,
+          coloredIcon = Icons.Filled.Star,
+          textId = "Friends")
   val PROFILE =
-      TopLevelDestination(route = Route.PROFILE, outlinedIcon = Icons.Outlined.Person, coloredIcon = Icons.Filled.Person, textId = "Profile")
+      TopLevelDestination(
+          route = Route.PROFILE,
+          outlinedIcon = Icons.Outlined.Person,
+          coloredIcon = Icons.Filled.Person,
+          textId = "Profile")
 }
 
 val LIST_TOP_LEVEL_DESTINATION =
