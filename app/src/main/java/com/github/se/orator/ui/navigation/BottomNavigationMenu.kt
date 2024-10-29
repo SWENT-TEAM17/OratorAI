@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +27,16 @@ fun BottomNavigationMenu(
       content = {
         tabList.forEach { tab ->
           BottomNavigationItem(
-              icon = { Icon(tab.icon, contentDescription = null) },
+              icon = {
+                  Log.d("ji", "The selected item is $selectedItem")
+                  if (tab.route == selectedItem) {
+                      Log.d("aa", "selected this tab $tab")
+                      Icon(tab.coloredIcon, contentDescription = null)
+                  } else {
+                      Log.d("aa", "did not select this tab $tab")
+                      Icon(tab.outlinedIcon, contentDescription = null)
+                  }
+              },
               label = { Text(tab.textId) },
               selected = tab.route == selectedItem,
               onClick = { onTabSelect(tab) },

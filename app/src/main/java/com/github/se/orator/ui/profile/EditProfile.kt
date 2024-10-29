@@ -40,6 +40,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 
 /**
@@ -101,7 +102,7 @@ fun EditProfileScreen(
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.PROFILE)
       }) {
         Column(
             modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),

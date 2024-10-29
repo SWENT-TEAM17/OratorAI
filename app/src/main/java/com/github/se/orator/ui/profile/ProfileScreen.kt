@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.profile
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 
 /**
@@ -72,8 +74,9 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.PROFILE)
       }) {
+      Log.d("aa", "the current route is ${navigationActions.currentRoute()}")
         Column(
             modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {

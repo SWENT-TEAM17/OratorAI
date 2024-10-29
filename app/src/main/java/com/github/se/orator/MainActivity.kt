@@ -216,17 +216,32 @@ fun OratorApp(chatGPTService: ChatGPTService) {
             navigationActions, userProfileViewModel) // Your composable function for Connect Screen
       }
 
+        navigation(
+            startDestination = Screen.CREATE_PROFILE,
+            route = Route.CREATE_PROFILE
+        ) {
+            composable(Screen.CREATE_PROFILE) {
+                CreateAccountScreen(navigationActions, userProfileViewModel)
+            }
+        }
+
+        navigation(
+            startDestination = Screen.CREATE_PROFILE,
+            route = Route.CREATE_PROFILE
+        ) {
+            composable(Screen.EDIT_PROFILE) {
+                EditProfileScreen(navigationActions, userProfileViewModel)
+            }
+        }
+        
+
       navigation(
           startDestination = Screen.PROFILE,
           route = Route.PROFILE,
       ) {
         composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
-        composable(Screen.CREATE_PROFILE) {
-          CreateAccountScreen(navigationActions, userProfileViewModel)
-        }
-        composable(Screen.EDIT_PROFILE) {
-          EditProfileScreen(navigationActions, userProfileViewModel)
-        }
+
+
 
         composable(Screen.LEADERBOARD) {
           LeaderboardScreen(navigationActions, userProfileViewModel)
