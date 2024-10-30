@@ -15,11 +15,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.github.se.orator.R
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speaking.AnalysisData
+import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.Message
 
@@ -28,30 +27,16 @@ import com.github.se.orator.ui.network.Message
  *
  * @param navigationActions The navigation actions that can be performed.
  * @param navController The navigation controller.
- * @param viewModel The view model for the chat.
+ * @param chatViewModel The view model for the chat.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     navigationActions: NavigationActions,
-    navController: NavHostController,
-    viewModel: ChatViewModel
+    chatViewModel: ChatViewModel
 ) {
-  val chatMessages by viewModel.chatMessages.collectAsState()
-  val isLoading by viewModel.isLoading.collectAsState()
-  val errorMessage by viewModel.errorMessage.collectAsState()
-
-  val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
-  val transcribedText = savedStateHandle?.get<String>("transcribedText")
-
-  LaunchedEffect(transcribedText) {
-    if (!transcribedText.isNullOrBlank()) {
-      val analysisData =
-          AnalysisData(fillerWordsCount = 0, averagePauseDuration = 0.0, sentimentScore = 0.0)
-      viewModel.sendUserResponse(transcribedText, analysisData)
-      savedStateHandle.remove<String>("transcribedText")
-    }
-  }
+  val chatMessages by chatViewModel.chatMessages.collectAsState()
+  val isLoading by chatViewModel.isLoading.collectAsState()
   // State for tracking the scroll position
   val listState = rememberLazyListState()
 

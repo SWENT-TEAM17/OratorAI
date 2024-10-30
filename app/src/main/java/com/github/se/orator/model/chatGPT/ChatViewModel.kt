@@ -1,7 +1,9 @@
 package com.github.se.orator.model.chatGPT
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.se.orator.model.apiLink.apiLinkViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PracticeContext
@@ -11,13 +13,16 @@ import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val chatGPTService: ChatGPTService,
     val practiceContext: PracticeContext,
-    val feedbackType: String
+    val feedbackType: String,
+    private val apiLinkViewModel: apiLinkViewModel
 ) : ViewModel() {
 
   private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
@@ -33,6 +38,7 @@ class ChatViewModel(
 
   init {
     initializeConversation()
+      observeTranscribedText()      // Observe the transcribed text from the API link view model
   }
 
   fun initializeConversation() {
@@ -118,7 +124,7 @@ class ChatViewModel(
             """
                     .trimIndent())
 
-    _chatMessages.value = _chatMessages.value + feedbackRequestMessage
+      _chatMessages.value += feedbackRequestMessage
 
     getNextGPTResponse()
   }
@@ -170,6 +176,21 @@ class ChatViewModel(
     // Handle exceptions and update _errorMessage
     _errorMessage.value = e.localizedMessage
   }
+
+    /**
+     * Observes the transcribed text from the API link view model and sends it to the GPT chat
+     * on change.
+     */
+    private fun observeTranscribedText() {
+        viewModelScope.launch {
+            apiLinkViewModel.transcribedText.collectLatest { text ->
+                text?.let {
+                    //sendUserResponse(it, AnalysisData(fillerWordsCount = 0, averagePauseDuration = 0.0, sentimentScore = 0.0))
+                    Log.d("ChatViewModel", "Transcribed text received: $it")
+                }
+            }
+        }
+    }
 
   //    fun sendMessage(userMessage: String) {
   //        val newMessage = Message(role = "user", content = userMessage)
