@@ -56,7 +56,7 @@ jobs:
           SYMBL_APP_SECRET: ${{ secrets.SYMBL_APP_SECRET }}
         run: |
           # Decode google-services.json into the appropriate location
-          echo "$GOOGLE_SERVICES" | base64 --decode > ./${{ env.main_project_module }}/google-services.json
+          echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
 
           # Decode local.properties and add additional keys directly
           echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
