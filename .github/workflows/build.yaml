@@ -44,16 +44,28 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Create local.properties and set API key
+      # Decode secrets for google-services.json and local.properties
+      - name: Decode and configure secrets
+        env:
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
+          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+          GPT_API_KEY: ${{ secrets.GPT_API_KEY }}
+          GPT_ORGANIZATION_ID: ${{ secrets.GPT_ORGANIZATION_ID }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SYMBL_APP_ID: ${{ secrets.SYMBL_APP_ID }}
+          SYMBL_APP_SECRET: ${{ secrets.SYMBL_APP_SECRET }}
         run: |
-          echo "GOOGLE_SERVICES=${{ secrets.GOOGLE_SERVICES }}" >> local.properties
-          echo "GPT_API_KEY=${{ secrets.GPT_API_KEY }}" >> local.properties
-          echo "GPT_ORGANIZATION_ID=${{ secrets.GPT_ORGANIZATION_ID }}" >> local.properties
-          echo "LOCAL_PROPERTIES=${{ secrets.LOCAL_PROPERTIES }}" >> local.properties
-          echo "SONAR_TOKEN=${{ secrets.SONAR_TOKEN }}" >> local.properties
-          echo "SYMBL_APP_ID=${{ secrets.SYMBL_APP_ID }}" >> local.properties
-          echo "SYMBL_APP_SECRET=${{ secrets.SYMBL_APP_SECRET }}" >> local.properties
-          # Add more keys as needed
+          # Decode google-services.json into the appropriate location
+          echo "$GOOGLE_SERVICES" | base64 --decode > ./${{ env.main_project_module }}/google-services.json
+
+          # Decode local.properties and add additional keys directly
+          echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
+          echo "GPT_API_KEY=$GPT_API_KEY" >> ./local.properties
+          echo "GPT_ORGANIZATION_ID=$GPT_ORGANIZATION_ID" >> ./local.properties
+          echo "SONAR_TOKEN=$SONAR_TOKEN" >> ./local.properties
+          echo "SYMBL_APP_ID=$SYMBL_APP_ID" >> ./local.properties
+          echo "SYMBL_APP_SECRET=$SYMBL_APP_SECRET" >> ./local.properties
+      
       
 
       - name: Build APK
