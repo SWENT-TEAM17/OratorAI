@@ -17,8 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.model.chatGPT.ChatViewModel
-import com.github.se.orator.model.speaking.AnalysisData
-import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.Message
 
@@ -31,10 +29,7 @@ import com.github.se.orator.ui.network.Message
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(
-    navigationActions: NavigationActions,
-    chatViewModel: ChatViewModel
-) {
+fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewModel) {
   val chatMessages by chatViewModel.chatMessages.collectAsState()
   val isLoading by chatViewModel.isLoading.collectAsState()
   // State for tracking the scroll position

@@ -120,7 +120,7 @@ fun OratorApp(chatGPTService: ChatGPTService) {
     // Initialize the view models
     val userProfileViewModel: UserProfileViewModel =
         viewModel(factory = UserProfileViewModel.Factory)
-      val apiLinkViewModel: ApiLinkViewModel = viewModel(factory = ApiLinkViewModel.Factory)
+    val apiLinkViewModel: ApiLinkViewModel = viewModel(factory = ApiLinkViewModel.Factory)
 
     // Replace the content of the Scaffold with the desired screen
     NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -180,12 +180,13 @@ fun OratorApp(chatGPTService: ChatGPTService) {
 
               // Initialize ChatViewModel with the practiceContext and feedbackType
 
-              val chatViewModel: ChatViewModel = ChatViewModel(chatGPTService, practiceContext, feedbackType, apiLinkViewModel)
+              val chatViewModel: ChatViewModel =
+                  ChatViewModel(chatGPTService, practiceContext, feedbackType, apiLinkViewModel)
 
               ChatScreen(
-                    navigationActions = navigationActions,
-                    chatViewModel = chatViewModel,
-                  )
+                  navigationActions = navigationActions,
+                  chatViewModel = chatViewModel,
+              )
             }
         composable(Screen.FEEDBACK) {
 

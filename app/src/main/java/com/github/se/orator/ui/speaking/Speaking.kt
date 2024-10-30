@@ -38,7 +38,7 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
   val sentimentResult by viewModel.sentimentResult.collectAsState()
   val fillersResult by viewModel.fillersResult.collectAsState()
 
-    val analysisData by viewModel.getLinkViewModel().transcribedText.collectAsState()
+  val analysisData by viewModel.getLinkViewModel().transcribedText.collectAsState()
 
   LaunchedEffect(transcribedText) {
     if (transcribedText != null) {
@@ -63,51 +63,47 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
       modifier = Modifier.fillMaxSize().padding(16.dp),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
-      // Animated recording indicator
-      val infiniteTransition = rememberInfiniteTransition()
+        // Animated recording indicator
+        val infiniteTransition = rememberInfiniteTransition()
 
-      // Animation for pulsing effect during recording
-      val scale by
-      infiniteTransition.animateFloat(
-          initialValue = 1f,
-          targetValue = 1.5f,
-          animationSpec =
-          infiniteRepeatable(
-              animation = tween(500, easing = LinearEasing),
-              repeatMode = RepeatMode.Reverse
-          ),
-          label = ""
-      )
+        // Animation for pulsing effect during recording
+        val scale by
+            infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.5f,
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(500, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse),
+                label = "")
 
-      // Microphone button with animation
-      Button(
-          onClick = { viewModel.onMicButtonClicked(permissionGranted) },
-          modifier = Modifier.size(80.dp).scale(if (isRecording) scale else 1f),
-          contentPadding = PaddingValues(0.dp)
-      ) {
-          Icon(
-              imageVector = if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
-              contentDescription = if (isRecording) "Stop recording" else "Start recording",
-              modifier = Modifier.size(48.dp)
-          )
-      }
+        // Microphone button with animation
+        Button(
+            onClick = { viewModel.onMicButtonClicked(permissionGranted) },
+            modifier = Modifier.size(80.dp).scale(if (isRecording) scale else 1f),
+            contentPadding = PaddingValues(0.dp)) {
+              Icon(
+                  imageVector = if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
+                  contentDescription = if (isRecording) "Stop recording" else "Start recording",
+                  modifier = Modifier.size(48.dp))
+            }
 
-      Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-      // Display feedback messages
-      val feedbackMessage =
-          when {
+        // Display feedback messages
+        val feedbackMessage =
+            when {
               isRecording -> "Recording..."
               isProcessing -> "Processing..."
               errorMessage != null -> "Error: $errorMessage"
               else -> "Tap the mic to start recording."
-          }
-      Text(feedbackMessage)
+            }
+        Text(feedbackMessage)
 
-      Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-      // Display transcribed text
-      if (analysisData != null) {
+        // Display transcribed text
+        if (analysisData != null) {
           Text("Transcribed Text: ${analysisData!!.transcription}")
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -117,8 +113,8 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
 
           // Display filler words result
           if (fillersResult != null) {
-              Text("Filler Words: $fillersResult")
+            Text("Filler Words: $fillersResult")
           }
+        }
       }
-  }
 }

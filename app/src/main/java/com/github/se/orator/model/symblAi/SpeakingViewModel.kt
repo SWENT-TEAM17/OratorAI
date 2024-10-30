@@ -7,7 +7,10 @@ import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class SpeakingViewModel(private val repository: SpeakingRepository, private val apiLinkViewModel: ApiLinkViewModel = ApiLinkViewModel()) : ViewModel() {
+class SpeakingViewModel(
+    private val repository: SpeakingRepository,
+    private val apiLinkViewModel: ApiLinkViewModel = ApiLinkViewModel()
+) : ViewModel() {
 
   // Expose StateFlows from the repository
   val isProcessing: StateFlow<Boolean> = repository.isProcessing
@@ -37,11 +40,8 @@ class SpeakingViewModel(private val repository: SpeakingRepository, private val 
         _isRecording.value = false
       } else {
         repository.setupAnalysisResultsUsage(
-          onSuccess = { analysisData ->
-            apiLinkViewModel.updateAnalysisData(analysisData)
-          },
-          onFailure = {}
-        )
+            onSuccess = { analysisData -> apiLinkViewModel.updateAnalysisData(analysisData) },
+            onFailure = {})
         repository.startRecording()
         _isRecording.value = true
       }

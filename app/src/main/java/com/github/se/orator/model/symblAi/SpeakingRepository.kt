@@ -1,9 +1,6 @@
 package com.github.se.orator.model.symblAi
 
 import android.content.Context
-import android.content.pm.PackageManager
-import android.util.Log
-import coil.compose.AsyncImagePainter
 import com.github.se.orator.model.speaking.AnalysisData
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +41,6 @@ class SpeakingRepository(private val context: Context) {
     audioRecorder.stopRecording()
   }
 
-
   /**
    * Sets up how the analysis data will be used after the recording is finished.
    *
@@ -53,11 +49,11 @@ class SpeakingRepository(private val context: Context) {
    */
   fun setupAnalysisResultsUsage(onSuccess: (AnalysisData) -> Unit, onFailure: (Exception) -> Unit) {
     audioRecorder.setRecordingListener(
-      object : AudioRecorder.RecordingListener {
-        override fun onRecordingFinished(audioFile: File) {
-          isProcessing_.value = true
-          symblApiClient.getTranscription(audioFile, onSuccess, onFailure)
-        }
-      })
+        object : AudioRecorder.RecordingListener {
+          override fun onRecordingFinished(audioFile: File) {
+            isProcessing_.value = true
+            symblApiClient.getTranscription(audioFile, onSuccess, onFailure)
+          }
+        })
   }
 }
