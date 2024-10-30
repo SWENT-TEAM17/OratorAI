@@ -3,18 +3,16 @@ package com.github.se.orator.model.apiLink
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.se.orator.model.profile.UserProfileRepositoryFirestore
-import com.github.se.orator.model.profile.UserProfileViewModel
-import com.google.firebase.firestore.FirebaseFirestore
+import com.github.se.orator.model.speaking.AnalysisData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class apiLinkViewModel : ViewModel() {
-    private val _transcribedText = MutableStateFlow<String?>(null)
+class ApiLinkViewModel : ViewModel() {
+    private val _transcribedText = MutableStateFlow<AnalysisData?>(null)
     val transcribedText = _transcribedText.asStateFlow()
 
-    fun updateTranscribedText(text: String) {
-        _transcribedText.value = text
+    fun updateAnalysisData(analysisData: AnalysisData) {
+        _transcribedText.value = analysisData
     }
 
 companion object {
@@ -22,7 +20,7 @@ companion object {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return apiLinkViewModel() as T
+                return ApiLinkViewModel() as T
             }
         }
 }

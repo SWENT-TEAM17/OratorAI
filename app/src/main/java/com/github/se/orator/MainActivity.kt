@@ -19,8 +19,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
-import com.github.se.orator.model.chatGPT.ChatViewModelFactory
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PracticeContext
@@ -120,6 +120,7 @@ fun OratorApp(chatGPTService: ChatGPTService) {
     // Initialize the view models
     val userProfileViewModel: UserProfileViewModel =
         viewModel(factory = UserProfileViewModel.Factory)
+      val apiLinkViewModel: ApiLinkViewModel = viewModel(factory = ApiLinkViewModel.Factory)
 
     // Replace the content of the Scaffold with the desired screen
     NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -178,14 +179,13 @@ fun OratorApp(chatGPTService: ChatGPTService) {
                   }
 
               // Initialize ChatViewModel with the practiceContext and feedbackType
-              val chatViewModelFactory =
-                  ChatViewModelFactory(chatGPTService, practiceContext, feedbackType)
-              val chatViewModel: ChatViewModel = viewModel(factory = chatViewModelFactory)
+
+              val chatViewModel: ChatViewModel = ChatViewModel(chatGPTService, practiceContext, feedbackType, apiLinkViewModel)
 
               ChatScreen(
-                  viewModel = chatViewModel,
-                  navController = navController,
-                  navigationActions = navigationActions)
+                    navigationActions = navigationActions,
+                    chatViewModel = chatViewModel,
+                  )
             }
         composable(Screen.FEEDBACK) {
 

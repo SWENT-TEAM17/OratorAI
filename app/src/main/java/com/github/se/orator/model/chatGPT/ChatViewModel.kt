@@ -1,9 +1,10 @@
 package com.github.se.orator.model.chatGPT
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.se.orator.model.apiLink.apiLinkViewModel
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PracticeContext
@@ -13,7 +14,6 @@ import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -22,7 +22,7 @@ class ChatViewModel(
     private val chatGPTService: ChatGPTService,
     val practiceContext: PracticeContext,
     val feedbackType: String,
-    private val apiLinkViewModel: apiLinkViewModel
+    private val apiLinkViewModel: ApiLinkViewModel
 ) : ViewModel() {
 
   private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
@@ -39,6 +39,8 @@ class ChatViewModel(
   init {
     initializeConversation()
       observeTranscribedText()      // Observe the transcribed text from the API link view model
+
+
   }
 
   fun initializeConversation() {
@@ -109,6 +111,10 @@ class ChatViewModel(
       }
     }
   }
+
+    fun getAnalysisData(): List<AnalysisData> {
+        return collectedAnalysisData
+    }
 
   fun requestFeedback() {
     val analysisSummary = generateAnalysisSummary(collectedAnalysisData)
@@ -185,7 +191,8 @@ class ChatViewModel(
         viewModelScope.launch {
             apiLinkViewModel.transcribedText.collectLatest { text ->
                 text?.let {
-                    //sendUserResponse(it, AnalysisData(fillerWordsCount = 0, averagePauseDuration = 0.0, sentimentScore = 0.0))
+
+                    sendUserResponse(text.transcription, text)
                     Log.d("ChatViewModel", "Transcribed text received: $it")
                 }
             }

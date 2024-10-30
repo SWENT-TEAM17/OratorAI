@@ -1,7 +1,10 @@
 package com.github.se.orator.model.symblAi
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
+import coil.compose.AsyncImagePainter
+import com.github.se.orator.model.speaking.AnalysisData
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,39 +23,6 @@ class SpeakingRepository(private val context: Context) {
   val errorMessage: StateFlow<String?> = errorMessage_
 
   // Listeners for audio recording and Symbl API processing
-  init {
-    // Listener for Symbl API processing
-    symblApiClient.setListener(
-        object : SymblApiClient.SymblListener {
-          override fun onProcessingComplete(
-              transcribedTextResult: String,
-              sentimentResultData: String,
-              fillersResultData: String
-          ) {
-            // Update the StateFlows with the results
-            _transcribedText.value = transcribedTextResult
-            _sentimentResult.value = sentimentResultData
-            _fillersResult.value = fillersResultData
-            isProcessing_.value = false
-          }
-
-          override fun onError(message: String) {
-            errorMessage_.value = message
-            isProcessing_.value = false
-            Log.e("SymblApiClient", message)
-          }
-        })
-
-    // Listener for audio recording completion
-    audioRecorder.setRecordingListener(
-        object : AudioRecorder.RecordingListener {
-          override fun onRecordingFinished(audioFile: File) {
-            // Start processing the audio file
-            isProcessing_.value = true
-            symblApiClient.sendAudioToSymbl(audioFile)
-          }
-        })
-  }
 
   // MutableStateFlows for results
   private val _transcribedText = MutableStateFlow<String?>(null)
@@ -66,10 +36,28 @@ class SpeakingRepository(private val context: Context) {
 
   // Functions to start and stop recording
   fun startRecording() {
+    isProcessing_.value = false
     audioRecorder.startRecording()
   }
 
   fun stopRecording() {
     audioRecorder.stopRecording()
+  }
+
+
+  /**
+   * Sets up how the analysis data will be used after the recording is finished.
+   *
+   * @param onSuccess Dictating what to do with data if the analysis goes well
+   * @param onFailure Dictating what to do with data if the analysis fails
+   */
+  fun setupAnalysisResultsUsage(onSuccess: (AnalysisData) -> Unit, onFailure: (Exception) -> Unit) {
+    audioRecorder.setRecordingListener(
+      object : AudioRecorder.RecordingListener {
+        override fun onRecordingFinished(audioFile: File) {
+          isProcessing_.value = true
+          symblApiClient.getTranscription(audioFile, onSuccess, onFailure)
+        }
+      })
   }
 }
