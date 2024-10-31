@@ -8,7 +8,7 @@ import java.io.Serializable
  *
  * @param type The type of the practice context.
  */
-sealed class PracticeContext(val type: String) : Serializable
+sealed class PracticeContext : Serializable
 
 /**
  * The InterviewContext data class represents the context in which an interview practice session
@@ -24,7 +24,7 @@ data class InterviewContext(
     val role: String,
     val company: String,
     val focusAreas: List<String>
-) : PracticeContext("InterviewContext")
+) : PracticeContext()
 
 /**
  * The PublicSpeakingContext data class represents the context in which a public speaking practice
@@ -38,7 +38,7 @@ data class PublicSpeakingContext(
     val occasion: String,
     val audienceDemographic: String,
     val mainPoints: List<String>
-) : PracticeContext("PublicSpeakingContext")
+) : PracticeContext()
 
 /**
  * The SalesPitchContext data class represents the context in which a sales pitch practice session
@@ -52,4 +52,4 @@ data class SalesPitchContext(
     val product: String,
     val targetAudience: String,
     val keyFeatures: List<String>
-) : PracticeContext("SalesPitchContext")
+) : PracticeContext()

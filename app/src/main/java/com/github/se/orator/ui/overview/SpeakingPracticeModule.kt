@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.overview
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,15 +11,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -43,13 +47,16 @@ fun SpeakingPracticeModule(
     inputs: List<InputFieldData>,
     onGetStarted: () -> Unit
 ) {
-  androidx.compose.material.Scaffold(
+
+  val context = LocalContext.current
+
+  Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = Color.White,
-            contentColor = Color.Black,
+            backgroundColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
             elevation = 4.dp,
             title = { Text(screenTitle) },
             navigationIcon = {
@@ -63,11 +70,15 @@ fun SpeakingPracticeModule(
       },
       content = { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp).padding(paddingValues),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(16.dp)
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
               Text(
                   text = headerText,
-                  style = MaterialTheme.typography.h6,
+                  style = MaterialTheme.typography.headlineMedium,
                   modifier = Modifier.padding(16.dp).testTag("titleText"))
 
               Spacer(modifier = Modifier.height(45.dp))
@@ -88,10 +99,15 @@ fun SpeakingPracticeModule(
               // Get Started Button
               Button(
                   modifier =
-                      Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
+                      Modifier.fillMaxWidth().padding(top = 50.dp).testTag("getStartedButton"),
                   onClick = {
                     // Custom action, can be customized for different modules
-                    onGetStarted()
+                    if (inputs.foldRight(true) { input, acc -> acc && input.value.isNotEmpty() }) {
+                      onGetStarted()
+                    } else {
+                      Toast.makeText(context, "Please fill all the fields !", Toast.LENGTH_SHORT)
+                          .show()
+                    }
                   }) {
                     Text("Get Started")
                   }

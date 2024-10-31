@@ -7,6 +7,6 @@ interface VoiceAnalysisApi {
   fun getTranscription(
       audioFile: File,
       onSuccess: (AnalysisData) -> Unit,
-      onFailure: (Exception) -> Unit
+      onFailure: (SpeakingError) -> Unit
   )
 }

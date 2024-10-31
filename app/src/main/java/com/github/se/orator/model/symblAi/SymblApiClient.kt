@@ -8,23 +8,29 @@ import android.util.Log
 import com.github.se.orator.model.speaking.AnalysisData
 import java.io.File
 import java.io.IOException
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.Response
 import org.json.JSONObject
+
+private const val CLASS_LOG_ID = "SymblApiClient"
 
 class SymblApiClient(context: Context) : VoiceAnalysisApi {
 
   // Variables to hold Symbl.ai credentials
-  private lateinit var symblAppId: String
+  private var symblAppId: String
 
-  private lateinit var symblAppSecret: String
+  private var symblAppSecret: String
 
   private var accessToken: String? = null
 
   // Variables to store results
-  private var transcribedText: String = ""
-  private var sentimentResult: String = ""
   private var fillersResult: String = ""
   private var insightsResult: String = ""
 
@@ -35,14 +41,16 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       symblAppId = appInfo.metaData.getString("SYMBL_APP_ID")!!
       symblAppSecret = appInfo.metaData.getString("SYMBL_APP_SECRET")!!
     } catch (e: Exception) {
-      Log.e("SymblApiClient", "Error getting Symbl.ai credentials", e)
+      Log.e(CLASS_LOG_ID, e.message, e)
+      throw e
     }
   }
 
   // Function to get access token
-  fun getAccessToken(onFailure: (Exception) -> Unit) {
-    if (symblAppId.isNullOrEmpty() || symblAppSecret.isNullOrEmpty()) {
-      Log.e("Symbl Error", "Symbl.ai credentials not found.")
+  private fun getAccessToken(onFailure: (SpeakingError) -> Unit) {
+    if (symblAppId.isEmpty() || symblAppSecret.isEmpty()) {
+      Log.e(CLASS_LOG_ID, "Symbl.ai credentials are missing or invalid")
+      onFailure(SpeakingError.CREDENTIALS_ERROR)
       return
     }
 
@@ -63,24 +71,29 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       val response: Response = client.newCall(request).execute()
 
       val responseData = response.body?.string()
-      Log.d("Access Token Response", responseData ?: "No Response")
+      Log.d(CLASS_LOG_ID, "Access token received")
       if (response.isSuccessful && responseData != null) {
-        val json = JSONObject(responseData)
-        accessToken = json.getString("accessToken")
+        try {
+          val json = JSONObject(responseData)
+          accessToken = json.getString("accessToken")
+        } catch (e: Exception) {
+          Log.e(CLASS_LOG_ID, "Failed to parse access token", e)
+          onFailure(SpeakingError.JSON_PARSING_ERROR)
+        }
       } else {
-        Log.e("Access Token Error", "Response: $responseData")
-        onFailure(Exception("Failed to get access token: ${response.message}"))
+        Log.e(CLASS_LOG_ID, "Failed to retrieve access token. Response: $responseData")
+        onFailure(SpeakingError.ACCESS_TOKEN_ERROR)
       }
     } catch (e: Exception) {
-      onFailure(e)
-      Log.e("Symbl Error", "Failed to get access token", e)
+      Log.e(CLASS_LOG_ID, "Failed to get access token", e)
+      onFailure(SpeakingError.ACCESS_TOKEN_ERROR)
     }
   }
 
   private fun parseSentimentResponse(
       sentimentJson: JSONObject,
       onSuccess: (AnalysisData) -> Unit,
-      onFailure: (Exception) -> Unit
+      onFailure: (SpeakingError) -> Unit
   ) {
     try {
       val messagesArray = sentimentJson.getJSONArray("messages")
@@ -140,12 +153,12 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
                         .getJSONObject("polarity")
                         .getDouble("score")))
       } else {
-        onFailure(Exception("No messages found in the response."))
-        Log.e("Symbl Error", "No messages found in the response.")
+        onFailure(SpeakingError.NO_MESSAGES_FOUND_ERROR)
+        Log.e(CLASS_LOG_ID, "No messages found in the response.")
       }
     } catch (e: Exception) {
-      onFailure(e)
-      Log.e("Parsing Error", e.message ?: "Unknown error")
+      Log.e(CLASS_LOG_ID, "Failed to parse the response: ${e.message}", e)
+      onFailure(SpeakingError.JSON_PARSING_ERROR)
     }
   }
 
@@ -191,9 +204,9 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
   override fun getTranscription(
       audioFile: File,
       onSuccess: (AnalysisData) -> Unit,
-      onFailure: (Exception) -> Unit
+      onFailure: (SpeakingError) -> Unit
   ) {
-    getAccessToken({})
+    getAccessToken(onFailure)
     accessToken ?: return // Return if access token is null
 
     // Specify the correct media type for the audio file
@@ -216,34 +229,34 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
             val conversationId = jsonObject.getString("conversationId")
             val jobId = jsonObject.getString("jobId")
 
-            Log.d("SymblAi", "Job started. Waiting for completion...")
-            while (getJobStatus(jobId) == "in_progress") {
+            Log.d(CLASS_LOG_ID, "Job started. Waiting for completion...")
+
+            while (getJobStatus(jobId, onFailure) == "in_progress") {
               Thread.sleep(2000)
             }
 
-            if (getJobStatus(jobId) == "completed") {
+            if (getJobStatus(jobId, onFailure) == "completed") {
               fetchAnalysis(conversationId, onSuccess, onFailure)
               // pollForFillers(conversationId, accessToken!!)
             } else {
-              onFailure(Exception("Job failed to complete."))
-              Log.e("Symbl Error", "Job failed to complete.")
+              Log.e(CLASS_LOG_ID, "Job failed to complete.")
+              onFailure(SpeakingError.JOB_PROCESSING_ERROR)
             }
-            // Start polling for filler words
           } else {
-            onFailure(Exception("No valid conversationId found. Response: $response"))
-            Log.e("Symbl Error", "No conversationId: $response")
+            Log.e(CLASS_LOG_ID, "No conversationId: $response")
+            onFailure(SpeakingError.MISSING_CONV_ID_ERROR)
           }
         },
-        onFailure = { e ->
-          onFailure(e)
-          Log.e("Symbl Error", "Request failed: ${e.message}", e)
+        onFailure = { _ ->
+          Log.e(CLASS_LOG_ID, "Request failed")
+          onFailure(SpeakingError.HTTP_REQUEST_ERROR)
         })
   }
 
   private fun fetchAnalysis(
       conversationId: String,
       onSuccess: (AnalysisData) -> Unit,
-      onFailure: (Exception) -> Unit
+      onFailure: (SpeakingError) -> Unit
   ) {
     urlCallRequest(
         request =
@@ -253,7 +266,10 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
         onSuccess = { response ->
           parseSentimentResponse(JSONObject(response), onSuccess, onFailure)
         },
-        onFailure = { onFailure(it) })
+        onFailure = {
+          Log.e(CLASS_LOG_ID, "Failed to fetch analysis data online")
+          onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+        })
   }
 
   /**
@@ -263,7 +279,7 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
    * @return The status (String?) of the job : either "completed", "failed", "in_progress" or null
    *   if the call to the api was unsuccessful.
    */
-  private fun getJobStatus(jobId: String): String? {
+  private fun getJobStatus(jobId: String, onFailure: (SpeakingError) -> Unit): String? {
     var status: String? = null
 
     urlCallRequestBlocking(
@@ -272,7 +288,7 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
           val jsonObject = JSONObject(response)
           status = jsonObject.getString("status")
         },
-        onFailure = {})
+        onFailure = onFailure)
 
     return status
   }
@@ -333,7 +349,7 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
   private fun urlCallRequest(
       request: Request,
       onSuccess: (String) -> Unit,
-      onFailure: (Exception) -> Unit
+      onFailure: (SpeakingError) -> Unit
   ) {
     val client = OkHttpClient()
 
@@ -342,18 +358,18 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
         .enqueue(
             object : Callback {
               override fun onFailure(call: Call, e: IOException) {
-                onFailure(e)
-                Log.e("Symbl Error", "Failed to fetch data", e)
+                Log.e(CLASS_LOG_ID, "Failed to fetch data", e)
+                onFailure(SpeakingError.HTTP_REQUEST_ERROR)
               }
 
               override fun onResponse(call: Call, response: Response) {
                 val responseData = response.body?.string() ?: "No Response"
-                Log.d("Symbl Response", responseData)
+                Log.d(CLASS_LOG_ID, responseData)
                 if (response.isSuccessful) {
                   onSuccess(responseData)
                 } else {
-                  onFailure(Exception("Request failed: $responseData"))
-                  Log.e("Symbl Error", "Request failed: $responseData")
+                  onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+                  Log.e(CLASS_LOG_ID, "HTTP request failed: $responseData")
                 }
               }
             })
@@ -369,18 +385,18 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
   private fun urlCallRequestBlocking(
       request: Request,
       onSuccess: (String) -> Unit,
-      onFailure: (Exception) -> Unit
+      onFailure: (SpeakingError) -> Unit
   ) {
     val client = OkHttpClient()
 
     client.newCall(request).execute().use { response ->
       val responseData = response.body?.string() ?: "No Response"
-      Log.d("Symbl Response", responseData)
+      Log.d(CLASS_LOG_ID, responseData)
       if (response.isSuccessful) {
         onSuccess(responseData)
       } else {
-        onFailure(Exception("Request failed: $responseData"))
-        Log.e("Symbl Error", "Request failed: $responseData")
+        onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+        Log.e(CLASS_LOG_ID, "HTTP request failed: $responseData")
       }
     }
   }
