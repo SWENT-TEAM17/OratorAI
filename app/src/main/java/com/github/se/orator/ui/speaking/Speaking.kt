@@ -35,16 +35,16 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
   val isProcessing by viewModel.isProcessing.collectAsState()
   val errorMessage by viewModel.errorMessage.collectAsState()
   val transcribedText by viewModel.transcribedText.collectAsState()
-  val sentimentResult by viewModel.sentimentResult.collectAsState()
+  // val sentimentResult by viewModel.sentimentResult.collectAsState()
   val fillersResult by viewModel.fillersResult.collectAsState()
 
   val analysisData by viewModel.getLinkViewModel().transcribedText.collectAsState()
 
-  LaunchedEffect(transcribedText) {
-    if (transcribedText != null) {
+  LaunchedEffect(analysisData) {
+    if (analysisData != null) {
       navController.previousBackStackEntry
           ?.savedStateHandle
-          ?.set("transcribedText", transcribedText)
+          ?.set("transcribedText", analysisData!!.transcription)
       navController.popBackStack()
     }
   }

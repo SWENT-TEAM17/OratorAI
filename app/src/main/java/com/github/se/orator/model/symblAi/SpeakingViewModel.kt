@@ -2,7 +2,6 @@ package com.github.se.orator.model.symblAi
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,18 +46,6 @@ class SpeakingViewModel(
       }
     } else {
       Log.e("SpeakingViewModel", "Microphone permission not granted.")
-    }
-  }
-
-  // Factory for creating SpeakingViewModel with the repository
-  class SpeakingViewModelFactory(private val repository: SpeakingRepository) :
-      ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-      if (modelClass.isAssignableFrom(SpeakingViewModel::class.java)) {
-        return SpeakingViewModel(repository) as T
-      }
-      throw IllegalArgumentException("Unknown ViewModel class")
     }
   }
 }

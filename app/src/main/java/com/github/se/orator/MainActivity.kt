@@ -58,7 +58,6 @@ import com.google.gson.JsonParser
 /** The MainActivity class is the main entry point for the OratorAI application. */
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
-  private lateinit var chatViewModel: ChatViewModel
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,7 +119,8 @@ fun OratorApp(chatGPTService: ChatGPTService) {
     // Initialize the view models
     val userProfileViewModel: UserProfileViewModel =
         viewModel(factory = UserProfileViewModel.Factory)
-    val apiLinkViewModel: ApiLinkViewModel = viewModel(factory = ApiLinkViewModel.Factory)
+    val speakingViewModel = SpeakingViewModel(SpeakingRepository(LocalContext.current))
+    val apiLinkViewModel: ApiLinkViewModel = speakingViewModel.getLinkViewModel()
 
     // Replace the content of the Scaffold with the desired screen
     NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -148,10 +148,6 @@ fun OratorApp(chatGPTService: ChatGPTService) {
         composable(Screen.SPEAKING_PUBLIC_SPEAKING) { SpeakingPublicSpeaking(navigationActions) }
         composable(Screen.SPEAKING_SALES_PITCH) { SpeakingSalesPitchModule(navigationActions) }
         composable(Screen.SPEAKING) { backStackEntry ->
-          val context = LocalContext.current
-          val repository = SpeakingRepository(context) // Adjust as needed
-          val factory = SpeakingViewModel.SpeakingViewModelFactory(repository)
-          val speakingViewModel: SpeakingViewModel = viewModel(factory = factory)
           SpeakingScreen(viewModel = speakingViewModel, navController = navController)
         }
         composable(
@@ -180,7 +176,7 @@ fun OratorApp(chatGPTService: ChatGPTService) {
 
               // Initialize ChatViewModel with the practiceContext and feedbackType
 
-              val chatViewModel: ChatViewModel =
+              val chatViewModel =
                   ChatViewModel(chatGPTService, practiceContext, feedbackType, apiLinkViewModel)
 
               ChatScreen(

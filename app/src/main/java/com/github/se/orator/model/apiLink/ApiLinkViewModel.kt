@@ -1,5 +1,6 @@
 package com.github.se.orator.model.apiLink
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.orator.model.speaking.AnalysisData
@@ -12,6 +13,7 @@ class ApiLinkViewModel : ViewModel() {
 
   fun updateAnalysisData(analysisData: AnalysisData) {
     _transcribedText.value = analysisData
+    Log.e("ApiLinkViewModel", "Transcribed text: ${transcribedText.value}")
   }
 
   companion object {

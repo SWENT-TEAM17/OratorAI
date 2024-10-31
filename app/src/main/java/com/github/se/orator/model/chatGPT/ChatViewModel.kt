@@ -82,7 +82,7 @@ class ChatViewModel(
 
   fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
     val userMessage = Message(role = "user", content = transcript)
-    _chatMessages.value = _chatMessages.value + userMessage
+    _chatMessages.value += userMessage
 
     collectedAnalysisData.add(analysisData)
 
@@ -99,7 +99,7 @@ class ChatViewModel(
         val response = chatGPTService.getChatCompletion(request)
 
         response.choices.firstOrNull()?.message?.let { responseMessage ->
-          _chatMessages.value = _chatMessages.value + responseMessage
+          _chatMessages.value += responseMessage
         }
       } catch (e: Exception) {
         handleError(e)
