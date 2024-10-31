@@ -24,16 +24,16 @@ class SpeakingViewModel(
   private val _analysisError = MutableStateFlow(SpeakingError.NO_ERROR)
   val analysisError = _analysisError.asStateFlow()
 
+  private val _isRecording = MutableStateFlow(false)
+  /** True if the user is currently recording their speech, false otherwise. */
+  val isRecording: StateFlow<Boolean> = _isRecording
+
   /** To be called when the speaking screen is opened again. */
   fun endAndSave() {
     if (_analysisData.value != null) apiLinkViewModel.updateAnalysisData(_analysisData.value!!)
     repository.resetRecorder()
     _analysisData.value = null
   }
-
-  // MutableStateFlow for recording state
-  private val _isRecording = MutableStateFlow(false)
-  val isRecording: StateFlow<Boolean> = _isRecording
 
   // Function to handle microphone button click
   fun onMicButtonClicked(permissionGranted: Boolean) {
