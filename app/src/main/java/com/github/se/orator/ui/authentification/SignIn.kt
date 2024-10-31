@@ -181,7 +181,9 @@ fun LoadingScreen() {
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
         CircularProgressIndicator(
-            color = Color(0xFF442DAA), strokeWidth = 8.dp, modifier = Modifier.size(64.dp))
+            color = Color(0xFF442DAA),
+            strokeWidth = 8.dp,
+            modifier = Modifier.size(64.dp).testTag("loadingIndicator"))
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Loading...", fontSize = 18.sp, color = Color.Gray)
       }
