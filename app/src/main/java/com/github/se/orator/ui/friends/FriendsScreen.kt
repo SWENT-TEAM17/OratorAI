@@ -29,6 +29,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import kotlinx.coroutines.launch
 
@@ -117,7 +118,7 @@ fun ViewFriendsScreen(
                     }
                   },
                   tabList = LIST_TOP_LEVEL_DESTINATION,
-                  selectedItem = navigationActions.currentRoute())
+                  selectedItem = Route.FRIENDS)
             }) { innerPadding ->
               // Main container that will remove focus from the search bar when clicked
               Column(

@@ -47,7 +47,6 @@ class EditProfileTest {
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
     `when`(navigationActions.currentRoute()).thenReturn(Screen.HOME)
-
     `when`(userProfileRepository.getUserProfile(any(), any(), any())).then {
       it.getArgument<(UserProfile) -> Unit>(1)(testUserProfile)
     }
@@ -76,17 +75,18 @@ class EditProfileTest {
   @Test
   fun saveChangesWorks() {
     composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
-    composeTestRule.onNodeWithText("Save changes")
+    composeTestRule.onNodeWithText("Save changes").performClick()
 
-    Mockito.verify(navigationActions).currentRoute()
+    verify(navigationActions).goBack()
   }
 
   @Test
   fun backArrowWorks() {
     composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
-    composeTestRule.onNodeWithTag("back_button")
+    composeTestRule.onNodeWithTag("back_button", useUnmergedTree = true).performClick()
 
-    Mockito.verify(navigationActions).currentRoute()
+    Thread.sleep(5000)
+    verify(navigationActions).goBack()
   }
 
   @Test
