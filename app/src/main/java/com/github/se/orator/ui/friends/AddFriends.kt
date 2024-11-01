@@ -63,7 +63,10 @@ fun AddFriendsScreen(
             title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.testTag("back_button"))
               }
             },
         )

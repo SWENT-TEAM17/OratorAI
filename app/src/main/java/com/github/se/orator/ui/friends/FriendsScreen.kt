@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.friends
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -70,8 +71,8 @@ fun ViewFriendsScreen(
                   // Navigate to Add Friend screen
                   scope.launch {
                     drawerState.close() // Close the drawer
-                    navigationActions.navigateTo(Screen.ADD_FRIENDS)
                   }
+                  navigationActions.navigateTo(Screen.ADD_FRIENDS)
                 }) {
                   Text("➕ Add a friend")
                 }
@@ -82,11 +83,12 @@ fun ViewFriendsScreen(
             TextButton(
                 modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
                 onClick = {
+                  Log.d("hi", "Currently clicking: ViewFriendsLeaderboardButton!!!")
                   // Close drawer and navigate to Leaderboard screen
                   scope.launch {
                     drawerState.close() // Close the drawer
-                    navigationActions.navigateTo(Screen.LEADERBOARD)
                   }
+                  navigationActions.navigateTo(Screen.LEADERBOARD)
                 }) {
                   Text("⭐ Leaderboard")
                 }
@@ -114,8 +116,8 @@ fun ViewFriendsScreen(
                   onTabSelect = { route ->
                     scope.launch {
                       drawerState.close() // Close the drawer before navigating
-                      navigationActions.navigateTo(route)
                     }
+                    navigationActions.navigateTo(route)
                   },
                   tabList = LIST_TOP_LEVEL_DESTINATION,
                   selectedItem = Route.FRIENDS)

@@ -77,7 +77,10 @@ fun LeaderboardScreen(
                         onClick = {
                           navigationActions.goBack() // Only navigate back, no drawer action
                         }) {
-                          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                          Icon(
+                              Icons.AutoMirrored.Filled.ArrowBack,
+                              contentDescription = "Back",
+                              modifier = Modifier.testTag("back_button"))
                         }
                   })
             },
