@@ -1,6 +1,5 @@
 package com.github.se.orator.ui.navigation
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -13,8 +12,6 @@ import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.github.se.orator.model.speaking.PracticeContext
-import com.google.gson.Gson
 
 object Route {
   const val HOME = "Home"
@@ -140,33 +137,5 @@ open class NavigationActions(
   open fun currentRoute(): String {
     Log.d("inside nav actions", "currentRoute called, returned ${navController.currentDestination}")
     return navController.currentDestination?.route ?: ""
-  }
-
-  /**
-   * Navigate to the specified screen with the given practice context and feedback type.
-   *
-   * @param practiceContext The practice context to pass to the screen
-   * @param feedbackType The feedback type to pass to the screen
-   */
-  fun navigateToChatScreen(practiceContext: PracticeContext, feedbackType: String) {
-    val gson = Gson()
-    val contextJson = Uri.encode(gson.toJson(practiceContext))
-    val feedbackTypeEncoded = Uri.encode(feedbackType)
-    navController.navigate("${Screen.CHAT_SCREEN}/$contextJson/$feedbackTypeEncoded")
-  }
-
-  /** Navigate to the speaking screen. */
-  fun navigateToSpeakingScreen() {
-    navController.navigate(Screen.SPEAKING)
-  }
-
-  /** Navigate to the feedback screen. */
-  fun navigateToFeedbackScreen() {
-    navController.navigate(Screen.FEEDBACK)
-  }
-
-  /** Navigate to the home screen. */
-  fun navigateToHome() {
-    navController.navigate(Route.HOME)
   }
 }

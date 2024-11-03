@@ -34,6 +34,7 @@ import androidx.navigation.NavHostController
 import com.github.se.orator.R
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopLevelDestinations
 
 /**
  * The FeedbackScreen composable is a composable screen that displays the feedback screen.
@@ -124,7 +125,7 @@ fun FeedbackScreen(
                     Button(
                         onClick = {
                           // Use navigationActions to navigate to Home
-                          navigationActions.navigateToHome()
+                          navigationActions.navigateTo(TopLevelDestinations.HOME)
                         },
                         modifier = Modifier.testTag("retryButton")) {
                           Text("Try Again")
