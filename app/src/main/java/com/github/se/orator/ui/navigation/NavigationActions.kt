@@ -1,6 +1,5 @@
 package com.github.se.orator.ui.navigation
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -17,8 +16,19 @@ import androidx.navigation.NavHostController
 object Route {
   const val HOME = "Home"
   const val FRIENDS = "Friends"
+  const val ADD_FRIENDS = "Add Friends Screen"
   const val PROFILE = "Profile"
   const val AUTH = "Auth"
+  const val EDIT_PROFILE = "EditProfile"
+  const val CREATE_PROFILE = "CreateProfile"
+  const val SETTINGS = "Settings"
+  const val SPEAKING_JOB_INTERVIEW = "SpeakingJobInterview"
+  const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking"
+  const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch"
+  const val SPEAKING_SCREEN = "SpeakingScreen"
+  const val FEEDBACK = "Feedback"
+  const val CHAT_SCREEN = "chat_screen"
+  const val SPEAKING = "Speaking"
 }
 
 object Screen {
@@ -33,7 +43,9 @@ object Screen {
   const val SPEAKING_JOB_INTERVIEW = "SpeakingJobInterview Screen"
   const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking Screen"
   const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch Screen"
+  const val SPEAKING_SCREEN = "SpeakingScreen"
   const val FUN_SCREEN = "ViewFunScreen"
+  const val PRACTICE_SCREEN = "ViewPracticeScreen"
   const val CONNECT_SCREEN = "ViewConnectScreen"
   const val LEADERBOARD = "LeaderBoard Screen"
   const val FEEDBACK = "Feedback Screen"
