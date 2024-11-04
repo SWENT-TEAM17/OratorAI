@@ -1,0 +1,272 @@
+[1mdiff --git a/app/src/androidTest/java/com/github/se/orator/model/symblAi/SpakingRepositoyTest.kt b/app/src/androidTest/java/com/github/se/orator/model/symblAi/SpakingRepositoyTest.kt[m
+[1mindex c05eb10..5db7723 100644[m
+[1m--- a/app/src/androidTest/java/com/github/se/orator/model/symblAi/SpakingRepositoyTest.kt[m
+[1m+++ b/app/src/androidTest/java/com/github/se/orator/model/symblAi/SpakingRepositoyTest.kt[m
+[36m@@ -1,50 +1,59 @@[m
+ package com.github.se.orator.model.symblAi[m
+ [m
+ import android.content.Context[m
+[32m+[m[32mimport androidx.test.core.app.ApplicationProvider[m
+[32m+[m[32mimport androidx.test.ext.junit.runners.AndroidJUnit4[m
+[32m+[m[32mimport com.github.se.orator.model.speaking.AnalysisData[m
+[32m+[m[32mimport com.github.se.orator.model.symblAi.SpeakingError[m
+[32m+[m[32mimport androidx.test.rule.GrantPermissionRule[m
+ import org.junit.Assert.*[m
+ import org.junit.Before[m
+[32m+[m[32mimport org.junit.Rule[m
+ import org.junit.Test[m
+[31m-import org.mockito.Mockito[m
+[32m+[m[32mimport org.junit.runner.RunWith[m
+ [m
+[32m+[m[32m@RunWith(AndroidJUnit4::class)[m
+ class SpeakingRepositoryTest {[m
+ [m
+[31m-  private lateinit var context: Context[m
+[31m-  private lateinit var speakingRepository: SpeakingRepository[m
+[31m-[m
+[31m-  @Before[m
+[31m-  fun setUp() {[m
+[31m-    // Mock the Android Context[m
+[31m-    context = Mockito.mock(Context::class.java)[m
+[31m-[m
+[31m-    // Initialize SpeakingRepository with the mocked context[m
+[31m-    speakingRepository = SpeakingRepository(context)[m
+[31m-  }[m
+[31m-[m
+[31m-  @Test[m
+[31m-  fun `initial state should be IDLE`() {[m
+[31m-    // Assert that the initial state is IDLE[m
+[31m-    assertEquals(AnalysisState.IDLE, speakingRepository.analysisState.value)[m
+[31m-  }[m
+[31m-[m
+[31m-  @Test[m
+[31m-  fun `startRecording should update state to RECORDING`() {[m
+[31m-    // Act[m
+[31m-    speakingRepository.startRecording()[m
+[31m-[m
+[31m-    // Assert[m
+[31m-    assertEquals(AnalysisState.RECORDING, speakingRepository.analysisState.value)[m
+[31m-  }[m
+[31m-[m
+[31m-  @Test[m
+[31m-  fun `resetRecorder should set state back to IDLE`() {[m
+[31m-    // Arrange[m
+[31m-    speakingRepository.startRecording()[m
+[31m-    assertEquals(AnalysisState.RECORDING, speakingRepository.analysisState.value)[m
+[31m-[m
+[31m-    // Act[m
+[31m-    speakingRepository.resetRecorder()[m
+[31m-[m
+[31m-    // Assert[m
+[31m-    assertEquals(AnalysisState.IDLE, speakingRepository.analysisState.value)[m
+[31m-  }[m
+[32m+[m[32m    private lateinit var context: Context[m
+[32m+[m[32m    private lateinit var speakingRepository: SpeakingRepository[m
+[32m+[m[32m    @get:Rule[m
+[32m+[m[32m    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)[m
+[32m+[m
+[32m+[m[32m    @Before[m
+[32m+[m[32m    fun setUp() {[m
+[32m+[m[32m        // Obtain the application context[m
+[32m+[m[32m        context = ApplicationProvider.getApplicationContext()[m
+[32m+[m
+[32m+[m[32m        // Initialize SpeakingRepository with the context[m
+[32m+[m[32m        speakingRepository = SpeakingRepository(context)[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    fun initial_state_should_be_IDLE() {[m
+[32m+[m[32m        // Assert that the initial state is IDLE[m
+[32m+[m[32m        assertEquals(AnalysisState.IDLE, speakingRepository.analysisState.value)[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    fun startRecording_should_update_state_to_RECORDING() {[m
+[32m+[m[32m        // Act[m
+[32m+[m[32m        speakingRepository.startRecording()[m
+[32m+[m
+[32m+[m[32m        // Assert[m
+[32m+[m[32m        assertEquals(AnalysisState.RECORDING, speakingRepository.analysisState.value)[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    fun resetRecorder_should_set_state_back_to_IDLE() {[m
+[32m+[m[32m        // Arrange[m
+[32m+[m[32m        speakingRepository.startRecording()[m
+[32m+[m[32m        assertEquals(AnalysisState.RECORDING, speakingRepository.analysisState.value)[m
+[32m+[m
+[32m+[m[32m        // Act[m
+[32m+[m[32m        speakingRepository.resetRecorder()[m
+[32m+[m
+[32m+[m[32m        // Assert[m
+[32m+[m[32m        assertEquals(AnalysisState.IDLE, speakingRepository.analysisState.value)[m
+[32m+[m[32m    }[m
+ }[m
+[1mdiff --git a/app/src/androidTest/java/com/github/se/orator/model/symblAi/SymblApiClientTest.kt b/app/src/androidTest/java/com/github/se/orator/model/symblAi/SymblApiClientTest.kt[m
+[1mindex 3a29073..a56382f 100644[m
+[1m--- a/app/src/androidTest/java/com/github/se/orator/model/symblAi/SymblApiClientTest.kt[m
+[1m+++ b/app/src/androidTest/java/com/github/se/orator/model/symblAi/SymblApiClientTest.kt[m
+[36m@@ -5,83 +5,95 @@[m [mimport android.util.Log[m
+ import androidx.test.core.app.ApplicationProvider[m
+ import androidx.test.ext.junit.runners.AndroidJUnit4[m
+ import com.github.se.orator.model.speaking.AnalysisData[m
+[31m-import com.github.se.orator.model.symblAi.SpeakingError[m
+[32m+[m[32mimport java.io.File[m
+[32m+[m[32mimport java.util.concurrent.CountDownLatch[m
+[32m+[m[32mimport java.util.concurrent.TimeUnit[m
+ import org.junit.Assert[m
+ import org.junit.Before[m
+ import org.junit.Test[m
+ import org.junit.runner.RunWith[m
+[31m-import java.io.File[m
+[31m-import java.util.concurrent.CountDownLatch[m
+[31m-import java.util.concurrent.TimeUnit[m
+ [m
+ @RunWith(AndroidJUnit4::class)[m
+[31m-class SymblApiClientInstrumentedTest {[m
+[32m+[m[32mclass SymblApiClientTest {[m
+ [m
+[31m-    private lateinit var context: Context[m
+[31m-    private lateinit var symblApiClient: SymblApiClient[m
+[32m+[m[32m  private lateinit var context: Context[m
+[32m+[m[32m  private lateinit var symblApiClient: SymblApiClient[m
+ [m
+[31m-    @Before[m
+[31m-    fun setUp() {[m
+[31m-        // Obtain the application context[m
+[31m-        context = ApplicationProvider.getApplicationContext()[m
+[32m+[m[32m  @Before[m
+[32m+[m[32m  fun setUp() {[m
+[32m+[m[32m    // Obtain the application context[m
+[32m+[m[32m    context = ApplicationProvider.getApplicationContext()[m
+ [m
+[31m-        // Initialize SymblApiClient with the context[m
+[31m-        symblApiClient = SymblApiClient(context)[m
+[31m-    }[m
+[32m+[m[32m    // Initialize SymblApiClient with the context[m
+[32m+[m[32m    symblApiClient = SymblApiClient(context)[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  @Test[m
+[32m+[m[32m  fun testGetTranscription() {[m
+[32m+[m[32m    // Arrange[m
+[32m+[m[32m    val assetManager = context.assets[m
+[32m+[m
+[32m+[m[32m    // Name of the audio file in the assets directory[m
+[32m+[m[32m    val audioFileName = "test_audio.wav"[m
+[32m+[m
+[32m+[m[32m    // Copy the audio file from assets to a temporary file[m
+[32m+[m[32m    val inputStream = assetManager.open(audioFileName)[m
+[32m+[m[32m    val audioFile = File(context.cacheDir, audioFileName)[m
+[32m+[m[32m    inputStream.use { input -> audioFile.outputStream().use { output -> input.copyTo(output) } }[m
+[32m+[m
+[32m+[m[32m    // Prepare a CountDownLatch to wait for asynchronous callback[m
+[32m+[m[32m    val latch = CountDownLatch(1)[m
+[32m+[m
+[32m+[m[32m    // Variables to capture the results[m
+[32m+[m[32m    var analysisData: AnalysisData? = null[m
+[32m+[m[32m    var failureError: SpeakingError? = null[m
+[32m+[m
+[32m+[m[32m    // Act[m
+[32m+[m[32m    symblApiClient.getTranscription([m
+[32m+[m[32m        audioFile = audioFile,[m
+[32m+[m[32m        onSuccess = { data ->[m
+[32m+[m[32m          analysisData = data[m
+[32m+[m[32m          latch.countDown() // Signal that the operation is complete[m
+[32m+[m[32m        },[m
+[32m+[m[32m        onFailure = { error ->[m
+[32m+[m[32m          failureError = error[m
+[32m+[m[32m          latch.countDown() // Signal that the operation is complete[m
+[32m+[m[32m        })[m
+[32m+[m
+[32m+[m[32m    // Wait for up to 120 seconds for the operation to complete[m
+[32m+[m[32m    val completed = latch.await(120, TimeUnit.SECONDS)[m
+[32m+[m
+[32m+[m[32m    // Assert[m
+[32m+[m[32m    Assert.assertTrue("Test timed out", completed)[m
+[32m+[m[32m    Assert.assertNull("Expected no error but got: $failureError", failureError)[m
+[32m+[m[32m    Assert.assertNotNull("AnalysisData should not be null", analysisData)[m
+[32m+[m
+[32m+[m[32m    // Additional assertions on analysisData[m
+[32m+[m[32m    analysisData?.let { data ->[m
+[32m+[m[32m      Log.d("SymblApiClientTest", "Transcription: ${data.transcription}")[m
+[32m+[m[32m      Log.d("SymblApiClientTest", "Sentiment Score: ${data.sentimentScore}")[m
+[32m+[m
+[32m+[m[32m      // You can add assertions based on expected values[m
+[32m+[m[32m      Assert.assertTrue([m
+[32m+[m[32m          "Sentiment score should be between -1 and 1", data.sentimentScore in -1.0..1.0)[m
+[32m+[m[32m      Assert.assertTrue("Transcription should not be empty", data.transcription.isNotEmpty())[m
+[32m+[m
+[32m+[m[32m      val expectedTranscription =[m
+[32m+[m[32m          """[m
+[32m+[m[32m            You said: Thank you for reaching out to us.[m
+[32m+[m[32m            You said: All lines are currently busy.[m
+[32m+[m[32m            You said: Your call is very important to us.[m
+[32m+[m[32m        """[m
+[32m+[m[32m              .trimIndent()[m
+[32m+[m
+[32m+[m[32m      // Log the actual transcription for debugging[m
+[32m+[m[32m      Log.d("SymblApiClientTest", "Transcription: ${data.transcription}")[m
+ [m
+[31m-    @Test[m
+[31m-    fun testGetTranscription() {[m
+[31m-        // Arrange[m
+[31m-        val assetManager = context.assets[m
+[31m-[m
+[31m-        // Name of the audio file in the assets directory[m
+[31m-        val audioFileName = "test_audio.wav"[m
+[31m-[m
+[31m-        // Copy the audio file from assets to a temporary file[m
+[31m-        val inputStream = assetManager.open(audioFileName)[m
+[31m-        val audioFile = File(context.cacheDir, audioFileName)[m
+[31m-        inputStream.use { input ->[m
+[31m-            audioFile.outputStream().use { output ->[m
+[31m-                input.copyTo(output)[m
+[31m-            }[m
+[31m-        }[m
+[31m-[m
+[31m-        // Prepare a CountDownLatch to wait for asynchronous callback[m
+[31m-        val latch = CountDownLatch(1)[m
+[31m-[m
+[31m-        // Variables to capture the results[m
+[31m-        var analysisData: AnalysisData? = null[m
+[31m-        var failureError: SpeakingError? = null[m
+[31m-[m
+[31m-        // Act[m
+[31m-        symblApiClient.getTranscription([m
+[31m-            audioFile = audioFile,[m
+[31m-            onSuccess = { data ->[m
+[31m-                analysisData = data[m
+[31m-                latch.countDown() // Signal that the operation is complete[m
+[31m-            },[m
+[31m-            onFailure = { error ->[m
+[31m-                failureError = error[m
+[31m-                latch.countDown() // Signal that the operation is complete[m
+[31m-            }[m
+[31m-        )[m
+[31m-[m
+[31m-        // Wait for up to 120 seconds for the operation to complete[m
+[31m-        val completed = latch.await(120, TimeUnit.SECONDS)[m
+[31m-[m
+[31m-        // Assert[m
+[31m-        Assert.assertTrue("Test timed out", completed)[m
+[31m-        Assert.assertNull("Expected no error but got: $failureError", failureError)[m
+[31m-        Assert.assertNotNull("AnalysisData should not be null", analysisData)[m
+[31m-[m
+[31m-        // Additional assertions on analysisData[m
+[31m-        analysisData?.let { data ->[m
+[31m-            Log.d("SymblApiClientTest", "Transcription: ${data.transcription}")[m
+[31m-            Log.d("SymblApiClientTest", "Sentiment Score: ${data.sentimentScore}")[m
+[31m-[m
+[31m-            // You can add assertions based on expected values[m
+[31m-            Assert.assertTrue("Sentiment score should be between -1 and 1", data.sentimentScore in -1.0..1.0)[m
+[31m-            Assert.assertTrue("Transcription should not be empty", data.transcription.isNotEmpty())[m
+[31m-        }[m
+[32m+[m[32m      // Assert that the transcription matches the expected transcription[m
+[32m+[m[32m      Assert.assertEquals([m
+[32m+[m[32m          "Transcription does not match expected",[m
+[32m+[m[32m          expectedTranscription.trim(),[m
+[32m+[m[32m          data.transcription.trim())[m
+     }[m
+[32m+[m[32m  }[m
+ }[m
