@@ -137,6 +137,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui.test.android)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.test.core.ktx)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
@@ -206,6 +207,9 @@ dependencies {
 
     // Coroutines Testing
     testImplementation(libs.kotlinx.coroutines.test)
+
+    // for exectutor testing (NetworkChangeReceiverTest)
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
 }
 
 tasks.withType<Test> {

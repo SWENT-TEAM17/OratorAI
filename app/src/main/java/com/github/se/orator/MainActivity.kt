@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -21,6 +22,7 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
+import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
@@ -45,10 +47,21 @@ import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import androidx.activity.viewModels
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.lifecycleScope
+import com.github.se.orator.network.OfflineViewModel
+import com.github.se.orator.ui.network.OfflineScreen
+import kotlinx.coroutines.launch
+
 
 /** The MainActivity class is the main entry point for the OratorAI application. */
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
+  private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
+  private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,38 +69,44 @@ class MainActivity : ComponentActivity() {
 
     // Initialize Firebase Auth
     auth = FirebaseAuth.getInstance()
-    auth.currentUser?.let {
-      // Sign out the user if they are already signed in
-      // This is useful for testing purposes
-      auth.signOut()
-    }
+    auth.currentUser?.let { auth.signOut() }
 
     val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
     val apiKey = appInfo.metaData.getString("GPT_API_KEY")
     val organizationId = appInfo.metaData.getString("GPT_ORGANIZATION_ID")
 
-    // Ensure apiKey and organizationId are not null
     requireNotNull(apiKey) { "GPT API Key is missing in the manifest" }
     requireNotNull(organizationId) { "GPT Organization ID is missing in the manifest" }
 
     val chatGPTService = createChatGPTService(apiKey, organizationId)
 
-    //    val factory = ChatViewModelFactory(chatGPTService)
-    //    chatViewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
+    // Initialize NetworkChangeReceiver and register it
+    networkConnectivityObserver = NetworkConnectivityObserver()
+    val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+    registerReceiver(networkConnectivityObserver, filter)
 
-    //    val interviewContext =
-    //        InterviewContext(
-    //            interviewType = "job interview",
-    //            role = "Consultant",
-    //            company = "McKinsey",
-    //            focusAreas = listOf("Problem-solving", "Leadership", "Teamwork"))
-    //
-    //    chatViewModel.initializeConversation(interviewContext)
+    // Observe network status updates and update offline mode in ViewModel
+    lifecycleScope.launch {
+      NetworkConnectivityObserver.isNetworkAvailable.collect { isConnected ->
+        offlineViewModel.setOfflineMode(!isConnected) // Update offline mode status in ViewModel
+      }
+    }
 
     enableEdgeToEdge()
     setContent {
-      ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp(chatGPTService) } }
+      ProjectTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) {
+          // Pass chatGPTService and offline status from ViewModel
+          val isOffline by offlineViewModel.isOffline.observeAsState(false)
+          OratorApp(chatGPTService, isOffline)
+        }
+      }
     }
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    unregisterReceiver(networkConnectivityObserver) // Unregister receiver to prevent leaks
   }
 }
 
@@ -98,14 +117,19 @@ class MainActivity : ComponentActivity() {
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OratorApp(chatGPTService: ChatGPTService) {
+fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
+
+  // Initialize the navigation controller
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
 
   // Main layout using a Scaffold
   Scaffold(modifier = Modifier.fillMaxSize()) {
 
-    // Initialize the navigation controller
-    val navController = rememberNavController()
-    val navigationActions = NavigationActions(navController)
+    if (isOffline) {
+      // Display OfflineScreen when there is no network connection
+      OfflineScreen(navigationActions)
+    } else {
 
     // Initialize the view models
     val userProfileViewModel: UserProfileViewModel =
@@ -201,4 +225,5 @@ fun OratorApp(chatGPTService: ChatGPTService) {
       }
     }
   }
+}
 }
