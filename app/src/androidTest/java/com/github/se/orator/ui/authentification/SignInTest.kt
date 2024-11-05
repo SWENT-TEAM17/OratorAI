@@ -39,22 +39,22 @@ class SignInScreenTest {
     composeTestRule.onNodeWithTag("loginButton").assertIsDisplayed()
   }
 
-  //  @Test
-  //  fun signInScreen_whenLoading_showsLoadingScreen() {
-  //    // Arrange
-  //    val navigationActions = mock(NavigationActions::class.java)
-  //    userProfileRepository = mock(UserProfileRepository::class.java)
-  //    userProfileViewModel = UserProfileViewModel(userProfileRepository)
+  //    @Test
+  //    fun signInScreen_whenLoading_showsLoadingScreen() {
+  //      // Arrange
+  //      val navigationActions = mock(NavigationActions::class.java)
+  //      userProfileRepository = mock(UserProfileRepository::class.java)
+  //      userProfileViewModel = UserProfileViewModel(userProfileRepository)
   //
-  //    // Act
-  //    composeTestRule.setContent {
-  //      SignInScreen(navigationActions = navigationActions, viewModel = userProfileViewModel)
+  //      // Act
+  //      composeTestRule.setContent {
+  //        SignInScreen(navigationActions = navigationActions, viewModel = userProfileViewModel)
+  //      }
+  //
+  //      // Assert
+  //      composeTestRule.onNodeWithText("Loading...").assertIsDisplayed()
+  //      composeTestRule.onNodeWithTag("loadingIndicator").assertIsDisplayed()
   //    }
-  //
-  //    // Assert
-  //    composeTestRule.onNodeWithText("Loading...").assertIsDisplayed()
-  //    composeTestRule.onNodeWithTag("loadingIndicator").assertIsDisplayed()
-  //  }
 
   @Test
   fun signInScreen_onClickLoginButton_triggersSignInFlow() {
