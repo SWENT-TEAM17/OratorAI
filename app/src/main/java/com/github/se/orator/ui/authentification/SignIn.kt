@@ -85,7 +85,9 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             // Fetch the user profile and check if it's incomplete
             uid?.let { u ->
               viewModel.getUserProfile(u)
-              redirectToProfile = true
+              viewModel.updateLoginStreak() // Update the login streak here
+
+                redirectToProfile = true
             }
           },
           onAuthError = {
