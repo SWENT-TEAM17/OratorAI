@@ -4,51 +4,59 @@ import android.Manifest
 import android.annotation.SuppressLint
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import com.github.se.orator.model.symblAi.AnalysisState
+import com.github.se.orator.model.symblAi.SpeakingError
 import com.github.se.orator.model.symblAi.SpeakingViewModel
-import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.AppTypography
+import com.github.se.orator.ui.navigation.NavigationActions
 
 /**
  * The SpeakingScreen composable is a composable screen that displays the speaking screen.
  *
  * @param viewModel The view model for the speaking screen.
- * @param navController The navigation controller.
+ * @param navigationActions The NavigationActions instance to navigate between screens.
  */
-@SuppressLint("SuspiciousIndentation")
+@SuppressLint("SuspiciousIndentation", "StateFlowValueCalledInComposition")
 @Composable
-fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostController) {
+fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingViewModel) {
 
   // State variables
-  val isRecording by viewModel.isRecording.collectAsState()
-  val isProcessing by viewModel.isProcessing.collectAsState()
-  val errorMessage by viewModel.errorMessage.collectAsState()
-  val transcribedText by viewModel.transcribedText.collectAsState()
-  val sentimentResult by viewModel.sentimentResult.collectAsState()
-  val fillersResult by viewModel.fillersResult.collectAsState()
+  val analysisState = viewModel.analysisState.collectAsState()
+  // val sentimentResult by viewModel.sentimentResult.collectAsState()
+  // val fillersResult by viewModel.fillersResult.collectAsState()
 
-  LaunchedEffect(transcribedText) {
-    if (transcribedText != null) {
-      navController.previousBackStackEntry
-          ?.savedStateHandle
-          ?.set("transcribedText", transcribedText)
-      navController.popBackStack()
-    }
-  }
+  val analysisData by viewModel.analysisData.collectAsState()
 
   // Permission handling
   var permissionGranted by remember { mutableStateOf(false) }
@@ -57,13 +65,15 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
           contract = ActivityResultContracts.RequestPermission(),
           onResult = { isGranted -> permissionGranted = isGranted })
 
-  LaunchedEffect(Unit) { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
+  DisposableEffect(Unit) {
+    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+
+    onDispose { viewModel.endAndSave() }
+  }
 
   // UI Components
   Column(
-      modifier =
-          Modifier.fillMaxSize()
-              .padding(AppDimensions.paddingMedium), // Replaced 16.dp with paddingMedium
+      modifier = Modifier.fillMaxSize().padding(16.dp),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
         // Animated recording indicator
@@ -84,74 +94,52 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
         Button(
             onClick = { viewModel.onMicButtonClicked(permissionGranted) },
             modifier =
-                Modifier.size(
-                        AppDimensions.buttonHeightLarge) // Replaced 80.dp with buttonSizeLarge
-                    .scale(if (isRecording) scale else 1f)
-                    .testTag("micButton"), // Added testTag for mic button
-            contentPadding = PaddingValues(0.dp) // Removed default padding
-            ) {
+                Modifier.size(80.dp)
+                    .scale(if (analysisState.value == AnalysisState.RECORDING) scale else 1f),
+            contentPadding = PaddingValues(0.dp)) {
               Icon(
-                  imageVector = if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
-                  contentDescription = if (isRecording) "Stop recording" else "Start recording",
-                  modifier =
-                      Modifier.size(AppDimensions.iconSizeLarge)
-                          .testTag("IconStopRecording") // Replaced 48.dp with iconSizeLarge
-                  )
+                  imageVector =
+                      if (analysisState.value == AnalysisState.RECORDING) Icons.Filled.Mic
+                      else Icons.Filled.MicOff,
+                  contentDescription =
+                      if (analysisState.value == AnalysisState.RECORDING) "Stop recording"
+                      else "Start recording",
+                  modifier = Modifier.size(48.dp))
             }
 
-        Spacer(
-            modifier =
-                Modifier.height(AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Display feedback messages
         val feedbackMessage =
-            when {
-              isRecording -> "Recording..."
-              isProcessing -> "Processing..."
-              errorMessage != null -> "Error: $errorMessage"
-              else -> "Tap the mic to start recording."
+            when (analysisState.value) {
+              AnalysisState.RECORDING -> "Recording..."
+              AnalysisState.PROCESSING -> "Processing..."
+              AnalysisState.IDLE -> "Tap the mic to start recording."
+              else ->
+                  when (viewModel.analysisError.value) {
+                    SpeakingError.NO_ERROR -> "Analysis finished."
+                    else -> "Error : ${viewModel.analysisError.value}"
+                  }
             }
-        Text(
-            text = feedbackMessage,
-            style = AppTypography.bodyLargeStyle,
-            modifier = Modifier.testTag("FeedbackText") // Replaced manual styling
-            )
+        Text(feedbackMessage)
 
-        Spacer(
-            modifier =
-                Modifier.height(AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Display transcribed text
-        if (transcribedText != null) {
-          Text(
-              text = "Transcribed Text: $transcribedText",
-              style = AppTypography.bodyLargeStyle,
-              modifier = Modifier.testTag("TranscribedText") // Replaced manual styling
-              )
-          Spacer(
-              modifier =
-                  Modifier.height(AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
+        if (analysisData != null) {
+          Text("Transcribed Text: ${analysisData!!.transcription}")
+          Spacer(modifier = Modifier.height(16.dp))
+
+          // Display sentiment analysis result
+          Text("Sentiment Analysis: ${analysisData!!.sentimentScore}")
+          Spacer(modifier = Modifier.height(16.dp))
+
+          /*// Display filler words result
+          if (fillersResult != null) {
+            Text("Filler Words: $fillersResult")
+          }*/
         }
 
-        // Display sentiment analysis result
-        if (sentimentResult != null) {
-          Text(
-              text = "Sentiment Analysis: $sentimentResult",
-              style = AppTypography.bodyLargeStyle,
-              modifier = Modifier.testTag("SentimentAnalysisText") // Replaced manual styling
-              )
-          Spacer(
-              modifier =
-                  Modifier.height(AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
-        }
-
-        // Display filler words result
-        if (fillersResult != null) {
-          Text(
-              text = "Filler Words: $fillersResult",
-              style = AppTypography.bodyLargeStyle,
-              modifier = Modifier.testTag("FillerWordsText") // Replaced manual styling
-              )
-        }
+        Row { Button(onClick = { navigationActions.goBack() }) { Text("Back") } }
       }
 }

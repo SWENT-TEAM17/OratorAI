@@ -149,10 +149,7 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
               .padding(AppDimensions.paddingMedium)
               .testTag("leaderboardItem#$rank"),
       verticalAlignment = Alignment.CenterVertically) {
-        ProfilePicture(
-            profilePictureUrl = profile.profilePic,
-            onClick = {},
-            modifier = Modifier.size(AppDimensions.profilePictureSize))
+        ProfilePicture(profilePictureUrl = profile.profilePic, onClick = {})
         Spacer(modifier = Modifier.width(AppDimensions.spacerWidthMedium))
 
         Column {

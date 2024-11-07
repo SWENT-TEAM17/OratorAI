@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
@@ -130,9 +131,7 @@ fun AddFriendsScreen(
                               UserItem(
                                   user = user,
                                   userProfileViewModel = userProfileViewModel,
-                                  modifier =
-                                      Modifier.testTag("userItem_${user.uid}") // Added testTag
-                                  )
+                              )
                             }
                       }
                 }
@@ -148,19 +147,13 @@ fun AddFriendsScreen(
  * @param user The [UserProfile] object representing the user being displayed.
  * @param userProfileViewModel The [UserProfileViewModel] that handles the logic of adding a user as
  *   a friend.
- * @param modifier Modifier to allow adding testTags from the parent composable.
  */
 @Composable
-fun UserItem(
-    user: UserProfile,
-    userProfileViewModel: UserProfileViewModel,
-    modifier: Modifier = Modifier // Added parameter for modifier
-) {
+fun UserItem(user: UserProfile, userProfileViewModel: UserProfileViewModel) {
   Row(
       modifier =
-          modifier
-              .fillMaxWidth()
-              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
+          Modifier.fillMaxWidth()
+              .clip(RoundedCornerShape(12.dp))
               .background(MaterialTheme.colorScheme.surface)
               .padding(AppDimensions.paddingMedium)
               .testTag("addFriendUserItem#${user.uid}"),

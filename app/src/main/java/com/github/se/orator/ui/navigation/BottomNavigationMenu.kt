@@ -29,7 +29,13 @@ fun BottomNavigationMenu(
       content = {
         tabList.forEach { tab ->
           BottomNavigationItem(
-              icon = { Icon(tab.icon, contentDescription = null) },
+              icon = {
+                if (tab.route == selectedItem) {
+                  Icon(tab.coloredIcon, contentDescription = null)
+                } else {
+                  Icon(tab.outlinedIcon, contentDescription = null)
+                }
+              },
               label = { Text(tab.textId) },
               selected = tab.route == selectedItem,
               onClick = { onTabSelect(tab) },

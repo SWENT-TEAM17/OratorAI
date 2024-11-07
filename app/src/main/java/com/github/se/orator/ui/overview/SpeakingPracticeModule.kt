@@ -1,14 +1,27 @@
 package com.github.se.orator.ui.overview
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -19,7 +32,8 @@ import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
 
 /**
- * The SpeakingPracticeModule composable displays the speaking practice module.
+ * The SpeakingPracticeModule composable is a composable screen that displays the speaking practice
+ * module.
  *
  * @param navigationActions The navigation actions that can be performed.
  * @param screenTitle The title of the screen.
@@ -35,7 +49,10 @@ fun SpeakingPracticeModule(
     inputs: List<InputFieldData>,
     onGetStarted: () -> Unit
 ) {
-  androidx.compose.material.Scaffold(
+
+  val context = LocalContext.current
+
+  Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
         TopAppBar(
@@ -67,6 +84,7 @@ fun SpeakingPracticeModule(
                 Modifier.fillMaxSize()
                     .padding(AppDimensions.paddingMedium)
                     .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
                     .testTag("content"),
             verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)) {
               Text(
@@ -90,12 +108,15 @@ fun SpeakingPracticeModule(
               // Get Started Button
               Button(
                   modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(top = AppDimensions.paddingExtraLarge)
-                          .testTag("getStartedButton"),
+                      Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
                   onClick = {
                     // Custom action, can be customized for different modules
-                    onGetStarted()
+                    if (inputs.foldRight(true) { input, acc -> acc && input.value.isNotEmpty() }) {
+                      onGetStarted()
+                    } else {
+                      Toast.makeText(context, "Please fill all the fields !", Toast.LENGTH_SHORT)
+                          .show()
+                    }
                   }) {
                     Text("Get Started", modifier = Modifier.testTag("getStartedText"))
                   }

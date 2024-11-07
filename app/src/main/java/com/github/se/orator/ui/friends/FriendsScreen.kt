@@ -190,8 +190,7 @@ fun FriendItem(friend: UserProfile) {
         ProfilePicture(
             profilePictureUrl = friend.profilePic,
             onClick = {},
-            modifier = Modifier.testTag("friendProfilePicture#${friend.uid}") // Added testTag
-            )
+        )
         Spacer(modifier = Modifier.width(AppDimensions.spacerWidthMedium))
 
         Column {
@@ -216,19 +215,14 @@ fun FriendItem(friend: UserProfile) {
  * @param profilePictureUrl The URL of the profile picture to be displayed. If null, a default image
  *   is shown.
  * @param onClick A lambda function that is triggered when the profile picture is clicked.
- * @param modifier Modifier to apply to the Image, allowing testTags to be added.
  */
 @Composable
-fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
   val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
   Image(
       painter = painter,
       contentDescription = "Profile Picture",
       contentScale = ContentScale.Crop,
       modifier =
-          Modifier.size(AppDimensions.iconSize)
-              .clip(CircleShape)
-              .clickable(onClick = onClick)
-              .then(modifier) // Apply the passed modifier, including testTag
-      )
+          Modifier.size(AppDimensions.iconSize).clip(CircleShape).clickable(onClick = onClick))
 }
