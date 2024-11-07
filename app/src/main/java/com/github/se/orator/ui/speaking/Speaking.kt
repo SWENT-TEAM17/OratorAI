@@ -74,7 +74,7 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
 
   // UI Components
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
+      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ui_column"),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
         // Animated recording indicator
@@ -98,7 +98,7 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
                 Modifier.size(80.dp)
                     .scale(
                         if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) scale
-                        else 1f),
+                        else 1f).testTag("mic_button"),
             contentPadding = PaddingValues(0.dp)) {
               Icon(
                   imageVector =
@@ -126,18 +126,18 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
                     else -> "Error : ${viewModel.analysisError.value}"
                   }
             }
-        Text(feedbackMessage)
+        Text(feedbackMessage, modifier = Modifier.testTag("mic_text"))
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Display transcribed text
         if (analysisData != null) {
           Text("Transcribed Text: ${analysisData!!.transcription}")
-          Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(16.dp).testTag("transcript"))
 
           // Display sentiment analysis result
           Text("Sentiment Analysis: ${analysisData!!.sentimentScore}")
-          Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(16.dp).testTag("sentiment_analysis"))
 
           /*// Display filler words result
           if (fillersResult != null) {

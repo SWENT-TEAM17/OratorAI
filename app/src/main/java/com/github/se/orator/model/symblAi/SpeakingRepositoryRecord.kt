@@ -1,6 +1,7 @@
 package com.github.se.orator.model.symblAi
 
 import android.content.Context
+import androidx.compose.runtime.collectAsState
 import com.github.se.orator.model.speaking.AnalysisData
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,11 +14,8 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
 
   // MutableStateFlow to hold the processing state
   private val _analysisState = MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)
-  private val analysisState: StateFlow<SpeakingRepository.AnalysisState> = _analysisState
+    override val analysisState: StateFlow<SpeakingRepository.AnalysisState> = _analysisState
 
-  override fun getAnalysisState(): StateFlow<SpeakingRepository.AnalysisState> {
-    return analysisState
-  }
   // Functions to start and stop recording
   override fun startRecording() {
     _analysisState.value = SpeakingRepository.AnalysisState.RECORDING
