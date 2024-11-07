@@ -60,13 +60,11 @@ jobs:
 
           # Decode local.properties and add additional keys directly
           echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
-          echo "GPT_API_KEY=$GPT_API_KEY" >> ./local.properties
-          echo "GPT_ORGANIZATION_ID=$GPT_ORGANIZATION_ID" >> ./local.properties
-          echo "SONAR_TOKEN=$SONAR_TOKEN" >> ./local.properties
-          echo "SYMBL_APP_ID=$SYMBL_APP_ID" >> ./local.properties
-          echo "SYMBL_APP_SECRET=$SYMBL_APP_SECRET" >> ./local.properties
-      
-      
+          echo "GPT_API_KEY=$GPT_API_KEY" | base64 --decode>> ./local.properties
+          echo "GPT_ORGANIZATION_ID=$GPT_ORGANIZATION_ID" | base64 --decode>> ./local.properties
+          echo "SONAR_TOKEN=$SONAR_TOKEN" | base64 --decode>> ./local.properties
+          echo "SYMBL_APP_ID=$SYMBL_APP_ID" | base64 --decode >> ./local.properties
+          echo "SYMBL_APP_SECRET=$SYMBL_APP_SECRET" | base64 --decode>> ./local.properties
 
       - name: Build APK
         run: |
@@ -81,7 +79,7 @@ jobs:
           releaseDirectory: ${{ env.main_project_module }}/build/outputs/apk/release/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
         env:
           # override default build-tools version (33.0.0) -- optional
