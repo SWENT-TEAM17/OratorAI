@@ -1,20 +1,23 @@
 package com.github.se.orator.ui.friends
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -25,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -33,18 +37,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
-import com.github.se.orator.ui.navigation.BottomNavigationMenu
-import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
-import com.github.se.orator.ui.navigation.Route
+import com.github.se.orator.ui.theme.LightPurpleGrey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -56,57 +61,81 @@ fun AddFriendsScreen(
   var query by remember { mutableStateOf("") }
   var expanded by remember { mutableStateOf(false) }
   val allProfiles by userProfileViewModel.allProfiles.collectAsState()
+  val focusManager = LocalFocusManager.current
+  val focusRequester = FocusRequester()
 
   Scaffold(
       topBar = {
         TopAppBar(
             title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
             navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-              }
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("addFriendBackButton")) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                  }
             },
         )
-      },
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.FRIENDS)
-      }) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
-          // Text field with search icon and clear button
-          OutlinedTextField(
-              value = query,
-              onValueChange = { newValue ->
-                query = newValue
-                expanded = newValue.isNotEmpty()
-              },
-              modifier = Modifier.fillMaxWidth().testTag("addFriendSearchField"),
-              label = { Text("Username") },
-              leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-              trailingIcon = {
-                if (query.isNotEmpty()) {
-                  IconButton(onClick = { query = "" }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Clear Icon")
+        Divider()
+      }) { innerPadding ->
+        Column(
+            modifier =
+                Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp).clickable {
+                  focusManager.clearFocus()
+                }) {
+              Box(
+                  modifier = Modifier.padding(vertical = 20.dp) // Apply padding to the container
+                  ) {
+                    // Text field with search icon and clear button
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { newValue ->
+                          query = newValue
+                          expanded = newValue.isNotEmpty()
+                        },
+                        modifier =
+                            Modifier.fillMaxWidth(0.55f)
+                                .height(64.dp)
+                                .focusRequester(focusRequester)
+                                .testTag("addFriendSearchField"),
+                        label = {
+                          Text("Username", modifier = Modifier.testTag("searchFieldLabel"))
+                        },
+                        leadingIcon = {
+                          Icon(
+                              Icons.Default.Search,
+                              contentDescription = "Search Icon",
+                              modifier = Modifier.testTag("searchIcon"))
+                        },
+                        trailingIcon = {
+                          if (query.isNotEmpty()) {
+                            IconButton(
+                                onClick = { query = "" },
+                                modifier = Modifier.testTag("clearSearchButton")) {
+                                  Icon(
+                                      Icons.Default.Clear,
+                                      contentDescription = "Clear Icon",
+                                      modifier = Modifier.testTag("clearIcon"))
+                                }
+                          }
+                        },
+                        singleLine = true,
+                        keyboardActions = KeyboardActions.Default)
                   }
-                }
-              },
-              singleLine = true,
-              keyboardActions = KeyboardActions.Default)
-          if (query.isNotEmpty()) {
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                  items(
-                      allProfiles.filter { profile ->
-                        profile.name.contains(query, ignoreCase = true)
-                      }) { user ->
-                        UserItem(user = user, userProfileViewModel = userProfileViewModel)
-                      }
-                }
-          }
-        }
+              if (query.isNotEmpty()) {
+                LazyColumn(
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.testTag("searchResultsList")) {
+                      items(
+                          allProfiles.filter { profile ->
+                            profile.name.contains(query, ignoreCase = true)
+                          }) { user ->
+                            UserItem(user = user, userProfileViewModel = userProfileViewModel)
+                          }
+                    }
+              }
+            }
       }
 }
 
@@ -120,26 +149,33 @@ fun AddFriendsScreen(
  */
 @Composable
 fun UserItem(user: UserProfile, userProfileViewModel: UserProfileViewModel) {
-  Row(
+  Surface(
       modifier =
           Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(12.dp))
-              .background(MaterialTheme.colorScheme.surface)
-              .padding(16.dp)
-              .testTag("addFriendUserItem#${user.uid}"),
-      verticalAlignment = Alignment.CenterVertically) {
-        // Displays the profile picture and allows the user to be added as a friend when clicked
-        ProfilePicture(
-            profilePictureUrl = user.profilePic, onClick = { userProfileViewModel.addFriend(user) })
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-          // Displays the user's name
-          Text(text = user.name, style = MaterialTheme.typography.titleMedium)
-          // Displays the user's bio, or a default text if the bio is null
-          Text(
-              text = user.bio ?: "No bio available",
-              style = MaterialTheme.typography.bodySmall,
-              color = Color.Gray)
-        }
+              .padding(horizontal = 4.dp) // Side padding for each item
+              .clip(RoundedCornerShape(20.dp)),
+      color = LightPurpleGrey,
+      shadowElevation = 4.dp // Subtle shadow with low elevation
+      ) {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth().padding(16.dp).testTag("addFriendUserItem#${user.uid}")) {
+              ProfilePicture(
+                  profilePictureUrl = user.profilePic,
+                  onClick = { userProfileViewModel.addFriend(user) })
+              Spacer(modifier = Modifier.width(12.dp))
+              Column {
+                Text(
+                    text = user.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 4.dp))
+                Text(
+                    text = user.bio ?: "No bio available",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
+              }
+            }
       }
 }
