@@ -79,7 +79,7 @@ jobs:
           releaseDirectory: ${{ env.main_project_module }}/build/outputs/apk/release/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
         env:
           # override default build-tools version (33.0.0) -- optional
