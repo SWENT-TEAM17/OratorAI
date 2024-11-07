@@ -1,6 +1,5 @@
 package com.github.se.orator.ui.profile
 
-import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
@@ -58,9 +57,9 @@ class EditProfileTest {
 
     composeTestRule.onNodeWithText("Edit Profile").assertIsDisplayed()
     composeTestRule.onNodeWithTag("back_button", useUnmergedTree = true).assertIsDisplayed()
-    //composeTestRule.onNodeWithTag("BackArrowImage").assertContentDescriptionEquals("Back")
+    // composeTestRule.onNodeWithTag("BackArrowImage").assertContentDescriptionEquals("Back")
     composeTestRule.onNodeWithTag("settings_button", useUnmergedTree = true).assertIsDisplayed()
-    //composeTestRule
+    // composeTestRule
     //    .onNodeWithTag("settings_button", useUnmergedTree = true)
     //    .assertContentDescriptionEquals("Settings")
     composeTestRule.onNodeWithContentDescription("Change Profile Picture").assertIsDisplayed()
