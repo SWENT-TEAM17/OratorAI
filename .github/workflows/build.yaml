@@ -23,6 +23,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      packages: write
+      actions: read
+
     env:
       KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
       KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
