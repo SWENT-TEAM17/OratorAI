@@ -3,25 +3,53 @@ package com.github.se.orator.ui.friends
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
@@ -29,8 +57,9 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
-import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.ProjectTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,115 +79,132 @@ fun ViewFriendsScreen(
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
-  // ModalDrawer Scaffold
-  ModalNavigationDrawer(
-      modifier = Modifier.testTag("viewFriendsDrawerMenu"),
-      drawerState = drawerState,
-      drawerContent = {
-        ModalDrawerSheet {
-          Column(modifier = Modifier.fillMaxHeight().padding(16.dp)) {
-            Text(
-                "Actions",
-                modifier = Modifier.testTag("viewFriendsDrawerTitle"),
-                style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(24.dp))
+  ProjectTheme {
+    // ModalDrawer Scaffold
+    ModalNavigationDrawer(
+        modifier = Modifier.testTag("viewFriendsDrawerMenu"),
+        drawerState = drawerState,
+        drawerContent = {
+          ModalDrawerSheet {
+            Column(modifier = Modifier.fillMaxHeight().padding(AppDimensions.drawerPadding)) {
+              Text(
+                  "Actions",
+                  modifier = Modifier.testTag("viewFriendsDrawerTitle"),
+                  style = MaterialTheme.typography.titleMedium)
+              Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
-            // Option to Add Friend
-            TextButton(
-                modifier = Modifier.testTag("viewFriendsAddFriendButton"),
-                onClick = {
-                  // Navigate to Add Friend screen
-                  scope.launch {
-                    drawerState.close() // Close the drawer
-                    navigationActions.navigateTo(Screen.ADD_FRIENDS)
-                  }
-                }) {
-                  Text("➕ Add a friend")
-                }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Option to Leaderboard
-            TextButton(
-                modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
-                onClick = {
-                  // Close drawer and navigate to Leaderboard screen
-                  scope.launch {
-                    drawerState.close() // Close the drawer
-                    navigationActions.navigateTo(Screen.LEADERBOARD)
-                  }
-                }) {
-                  Text("⭐ Leaderboard")
-                }
-          }
-        }
-      }) {
-        Scaffold(
-            topBar = {
-              TopAppBar(
-                  title = { Text("My Friends") },
-                  navigationIcon = {
-                    IconButton(
-                        modifier = Modifier.testTag("viewFriendsMenuButton"),
-                        onClick = {
-                          scope.launch {
-                            drawerState.open() // Open the drawer
-                          }
-                        }) {
-                          Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
-                  })
-            },
-            bottomBar = {
-              BottomNavigationMenu(
-                  onTabSelect = { route ->
+              // Option to Add Friend
+              TextButton(
+                  modifier = Modifier.testTag("viewFriendsAddFriendButton"),
+                  onClick = {
+                    // Navigate to Add Friend screen
                     scope.launch {
-                      drawerState.close() // Close the drawer before navigating
-                      navigationActions.navigateTo(route)
+                      drawerState.close() // Close the drawer
+                      navigationActions.navigateTo(Screen.ADD_FRIENDS)
                     }
-                  },
-                  tabList = LIST_TOP_LEVEL_DESTINATION,
-                  selectedItem = Route.FRIENDS)
-            }) { innerPadding ->
-              // Main container that will remove focus from the search bar when clicked
-              Column(
-                  modifier =
-                      Modifier.fillMaxSize()
-                          .padding(innerPadding)
-                          .padding(horizontal = 16.dp, vertical = 8.dp)
-                          .clickable {
-                            focusManager.clearFocus()
-                          } // Clear focus when clicking outside the search bar
-                  ) {
-                    // Search bar to filter friends by name
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        label = { Text("Search for a friend") },
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(bottom = 8.dp)
-                                .focusRequester(
-                                    focusRequester) // Attach focusRequester to search bar
-                                .testTag("viewFriendsSearch"))
+                  }) {
+                    Text("➕ Add a friend")
+                  }
 
-                    if (filteredFriends.isEmpty()) {
-                      // Show "No user found" when there are no matches
-                      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "No user found", style = MaterialTheme.typography.bodyLarge)
-                      }
-                    } else {
-                      // LazyColumn for displaying friends
-                      LazyColumn(
-                          modifier = Modifier.testTag("viewFriendsList"),
-                          contentPadding = PaddingValues(vertical = 8.dp),
-                          verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(filteredFriends) { friend -> FriendItem(friend = friend) }
-                          }
+              Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
+              // Option to Leaderboard
+              TextButton(
+                  modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
+                  onClick = {
+                    // Close drawer and navigate to Leaderboard screen
+                    scope.launch {
+                      drawerState.close() // Close the drawer
+                      navigationActions.navigateTo(Screen.LEADERBOARD)
                     }
+                  }) {
+                    Text("⭐ Leaderboard")
                   }
             }
-      }
+          }
+        }) {
+          Scaffold(
+              topBar = {
+                TopAppBar(
+                    title = {
+                      Text(
+                          "My Friends",
+                          modifier = Modifier.testTag("myFriendsTitle") // Added testTag
+                          )
+                    },
+                    navigationIcon = {
+                      IconButton(
+                          modifier = Modifier.testTag("viewFriendsMenuButton"),
+                          onClick = {
+                            scope.launch {
+                              drawerState.open() // Open the drawer
+                            }
+                          }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                          }
+                    })
+              },
+              bottomBar = {
+                BottomNavigationMenu(
+                    onTabSelect = { route ->
+                      scope.launch {
+                        drawerState.close() // Close the drawer before navigating
+                        navigationActions.navigateTo(route)
+                      }
+                    },
+                    tabList = LIST_TOP_LEVEL_DESTINATION,
+                    selectedItem = navigationActions.currentRoute())
+              }) { innerPadding ->
+                // Main container that will remove focus from the search bar when clicked
+                Column(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .padding(innerPadding)
+                            .padding(
+                                horizontal = AppDimensions.paddingMedium,
+                                vertical = AppDimensions.paddingSmall)
+                            .clickable {
+                              focusManager.clearFocus()
+                            } // Clear focus when clicking outside the search bar
+                    ) {
+                      // Search bar to filter friends by name
+                      OutlinedTextField(
+                          value = searchQuery,
+                          onValueChange = { searchQuery = it },
+                          label = { Text("Search for a friend") },
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .padding(bottom = AppDimensions.paddingSmall)
+                                  .focusRequester(
+                                      focusRequester) // Attach focusRequester to search bar
+                                  .testTag("viewFriendsSearch"))
+
+                      if (filteredFriends.isEmpty()) {
+                        // Show "No user found" when there are no matches
+                        Box(
+                            modifier =
+                                Modifier.fillMaxSize().testTag("noUserFound"), // Added testTag
+                            contentAlignment = Alignment.Center) {
+                              Text(
+                                  text = "No user found",
+                                  style = MaterialTheme.typography.bodyLarge,
+                                  modifier = Modifier.testTag("noUserFoundText") // Added testTag
+                                  )
+                            }
+                      } else {
+                        // LazyColumn for displaying friends
+                        LazyColumn(
+                            modifier = Modifier.testTag("viewFriendsList"),
+                            contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                            verticalArrangement =
+                                Arrangement.spacedBy(AppDimensions.paddingSmall)) {
+                              items(filteredFriends) { friend -> FriendItem(friend = friend) }
+                            }
+                      }
+                    }
+              }
+        }
+  }
 }
 
 @Composable
@@ -166,20 +212,28 @@ fun FriendItem(friend: UserProfile) {
   Row(
       modifier =
           Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(12.dp))
+              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .background(MaterialTheme.colorScheme.surface)
-              .padding(16.dp)
+              .padding(AppDimensions.paddingMedium)
               .testTag("viewFriendsItem#${friend.uid}"),
       verticalAlignment = Alignment.CenterVertically) {
-        ProfilePicture(profilePictureUrl = friend.profilePic, onClick = {})
-        Spacer(modifier = Modifier.width(16.dp))
+        ProfilePicture(
+            profilePictureUrl = friend.profilePic,
+            onClick = {},
+        )
+        Spacer(modifier = Modifier.width(AppDimensions.spacerWidthMedium))
 
         Column {
-          Text(text = friend.name, style = MaterialTheme.typography.titleMedium)
+          Text(
+              text = friend.name,
+              style = MaterialTheme.typography.titleMedium,
+              modifier = Modifier.testTag("friendName#${friend.uid}") // Added testTag
+              )
           Text(
               text = friend.bio ?: "No bio available",
               style = MaterialTheme.typography.bodySmall,
-              color = Color.Gray)
+              modifier = Modifier.testTag("friendBio#${friend.uid}") // Added testTag
+              )
         }
       }
 }
@@ -199,5 +253,6 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
       painter = painter,
       contentDescription = "Profile Picture",
       contentScale = ContentScale.Crop,
-      modifier = Modifier.size(100.dp).clip(CircleShape).clickable(onClick = onClick))
+      modifier =
+          Modifier.size(AppDimensions.iconSize).clip(CircleShape).clickable(onClick = onClick))
 }

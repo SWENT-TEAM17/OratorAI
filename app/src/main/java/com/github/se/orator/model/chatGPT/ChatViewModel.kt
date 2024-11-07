@@ -56,7 +56,11 @@ class ChatViewModel(
               """
                 You are helping the user prepare a speech for a ${practiceContextAsValue.occasion}. 
                 The audience is ${practiceContextAsValue.audienceDemographic}. 
-                The main points of the speech are: ${practiceContextAsValue.mainPoints.joinToString(", ")}.
+                The main points of the speech are: ${
+                        practiceContextAsValue.mainPoints.joinToString(
+                            ", "
+                        )
+                    }.
                 Please guide the user through practicing their speech, asking for their input on each point.
             """
                   .trimIndent()
@@ -64,7 +68,11 @@ class ChatViewModel(
               """
                 You are helping the user prepare a sales pitch for the product ${practiceContextAsValue.product}. 
                 The target audience is ${practiceContextAsValue.targetAudience}. 
-                The key features of the product are: ${practiceContextAsValue.keyFeatures.joinToString(", ")}.
+                The key features of the product are: ${
+                        practiceContextAsValue.keyFeatures.joinToString(
+                            ", "
+                        )
+                    }.
                 Please guide the user through practicing their sales pitch, asking for their input on each feature.
             """
                   .trimIndent()

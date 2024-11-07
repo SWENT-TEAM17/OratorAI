@@ -25,6 +25,7 @@ class SpeakingViewModel(
   val analysisError = _analysisError.asStateFlow()
 
   private val _isRecording = MutableStateFlow(false)
+
   /** True if the user is currently recording their speech, false otherwise. */
   val isRecording: StateFlow<Boolean> = _isRecording
 
