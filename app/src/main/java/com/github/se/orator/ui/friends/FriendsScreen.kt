@@ -33,7 +33,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
-import com.github.se.orator.ui.theme.LightPurpleGrey
+import com.github.se.orator.ui.theme.AppColors.LightPurpleGrey
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

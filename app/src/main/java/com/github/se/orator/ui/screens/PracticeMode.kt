@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
@@ -22,6 +24,6 @@ fun ViewPracticeScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = navigationActions.currentRoute())
       }) {
-        Text("Practice Mode x")
+        Text("Practice Mode x", modifier = Modifier.testTag("practiceScreen"))
       }
 }

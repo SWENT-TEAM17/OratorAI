@@ -24,7 +24,7 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
-import com.github.se.orator.ui.theme.LightPurpleGrey
+import com.github.se.orator.ui.theme.AppColors.LightPurpleGrey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

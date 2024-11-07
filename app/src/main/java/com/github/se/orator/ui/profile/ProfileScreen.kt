@@ -3,19 +3,37 @@ package com.github.se.orator.ui.profile
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Button
+import androidx.compose.material.Card
+import androidx.compose.material.IconButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
@@ -26,6 +44,10 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppShapes
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * Composable function to display the profile screen.
@@ -45,28 +67,42 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
       topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = Color.White,
-            contentColor = Color.Black,
-            elevation = 4.dp,
-            title = { Text(text = "Profile", fontWeight = FontWeight.Bold) },
+            backgroundColor = AppColors.surfaceColor, // Replaced Color.White
+            contentColor = AppColors.textColor, // Replaced Color.Black
+            elevation = AppDimensions.appBarElevation, // Replaced 4.dp
+            title = {
+              Text(
+                  modifier = Modifier.testTag("profile_title"),
+                  text = "Profile",
+                  fontWeight = FontWeight.Bold,
+                  style = AppTypography.appBarTitleStyle)
+            },
             actions = {
-              IconButton(onClick = { navigationActions.navigateTo(Screen.SETTINGS) }) {
-                Image(
-                    painter = painterResource(id = R.drawable.settings),
-                    contentDescription = "Settings",
-                    modifier = Modifier.size(32.dp))
-              }
+              IconButton(
+                  onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
+                  modifier = Modifier.testTag("settings_button")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.settings),
+                        contentDescription = "Settings",
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeMedium)
+                                .testTag("SettingsImage") // Replaced 32.dp with iconSizeMedium
+                        )
+                  }
             },
             navigationIcon = {
               IconButton(
                   onClick = {
-                    // Sign out the user
-
-                  }) {
+                    // TODO: Implement sign-out functionality
+                  },
+                  modifier = Modifier.testTag("sign_out_button")) {
                     Image(
                         painter = painterResource(id = R.drawable.sign_out),
                         contentDescription = "Sign out",
-                        modifier = Modifier.size(32.dp))
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeMedium)
+                                .testTag("SignOutImage") // Replaced 32.dp with iconSizeMedium
+                        )
                   }
             })
       },
@@ -78,46 +114,72 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
       }) {
         Log.d("aa", "the current route is ${navigationActions.currentRoute()}")
         Column(
-            modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(it)
+                    .padding(AppDimensions.paddingMedium), // Replaced 16.dp with paddingMedium
             horizontalAlignment = Alignment.CenterHorizontally) {
               userProfile?.let { profile ->
                 // Profile Picture with clickable action to open it in larger format
                 ProfilePicture(
                     profilePictureUrl = profile.profilePic, onClick = { isDialogOpen = true })
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            AppDimensions.paddingSmall)) // Replaced 8.dp with paddingSmall
 
                 // Username
-                Text(text = profile.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = profile.name,
+                    fontSize = 20.sp, // Kept as is since no corresponding theme variable
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.testTag("profile_name"))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
 
                 // Edit Profile Button
                 Button(
-                    modifier = Modifier.testTag("edit_button"),
-                    onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
-                      Text(text = "Edit Profile")
+                    onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
+                    modifier = Modifier.testTag("edit_button").fillMaxWidth(),
+                    shape = AppShapes.circleShape // Replaced CircleShape with theme shape
+                    ) {
+                      Text(text = "Edit Profile", fontWeight = FontWeight.Bold)
                     }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            AppDimensions.paddingLarge)) // Replaced 24.dp with paddingLarge
 
                 // Achievements Section
                 CardSection(
                     title = "Achievements",
                     iconId = R.drawable.trophy_frame,
-                    onClick = { /*TODO: Handle achievements click */})
+                    onClick = { /*TODO: Handle achievements click */},
+                    modifier = Modifier.testTag("achievements_section"))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            AppDimensions.paddingSmall)) // Replaced 16.dp with paddingSmall
 
-                // Old Training Sessions Section
+                // Previous Sessions Section
                 CardSection(
                     title = "Previous Sessions",
                     iconId = R.drawable.history_frame,
-                    onClick = { /*TODO: Handle previous sessions click */})
+                    onClick = { /*TODO: Handle previous sessions click */},
+                    modifier = Modifier.testTag("previous_sessions_section"))
               }
                   ?: run {
                     // Show a loading state if the profile is not yet available
-                    Text("Loading profile...")
+                    Text(
+                        text = "Loading profile...",
+                        style = AppTypography.bodyLargeStyle, // Replaced manual styling
+                        modifier = Modifier.testTag("loading_profile_text"))
                   }
             }
 
@@ -144,10 +206,10 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
       contentDescription = "Profile Picture",
       contentScale = ContentScale.Crop,
       modifier =
-          Modifier.size(100.dp)
+          Modifier.size(AppDimensions.profilePictureSize) // Replaced 100.dp with profilePictureSize
               .clip(CircleShape)
               .clickable(onClick = onClick)
-              .testTag("upload_profile_picture"))
+              .testTag("profile_picture"))
 }
 
 /**
@@ -161,21 +223,20 @@ fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
   Dialog(onDismissRequest = { onDismiss() }) {
     Box(
         modifier =
-            Modifier.fillMaxSize().padding(16.dp).clickable {
-              onDismiss()
-            } // Dismiss the dialog when clicked outside
-        ) {
+            Modifier.fillMaxSize()
+                .padding(AppDimensions.paddingMedium) // Replaced 16.dp with paddingMedium
+                .clickable { onDismiss() }
+                .testTag("OnDismiss"), // Dismiss the dialog when clicked outside
+        contentAlignment = Alignment.Center) {
           Image(
               painter = rememberAsyncImagePainter(model = profilePictureUrl),
               contentDescription = "Large Profile Picture",
-              contentScale =
-                  ContentScale
-                      .Crop, // Ensures the image fills the shape and is cropped if necessary
+              contentScale = ContentScale.Crop,
               modifier =
-                  Modifier.size(200.dp) // Set the size to twice the original (100.dp * 2 = 200.dp)
-                      .align(Alignment.Center)
-                      .clip(CircleShape) // Keep the circular shape
-              )
+                  Modifier.size(AppDimensions.profilePictureDialogSize) // Replaced 200.dp with
+                      // profilePictureDialogSize
+                      .clip(CircleShape)
+                      .testTag("profile_picture_dialog"))
         }
   }
 }
@@ -191,17 +252,37 @@ fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
 @Composable
 fun CardSection(title: String, iconId: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
   Card(
-      modifier = modifier.fillMaxWidth().height(100.dp).clickable { onClick() }, elevation = 4.dp) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
-          Image(
-              painter = painterResource(id = iconId),
-              contentDescription = title,
-              modifier =
-                  Modifier.size(24.dp)
-                      .testTag("titleIcon") // Test tag for icons in the card sections
-              )
-          Spacer(modifier = Modifier.width(16.dp))
-          Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        }
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .height(AppDimensions.cardSectionHeight) // Replaced 100.dp with cardSectionHeight
+              .clickable { onClick() }
+              .testTag("cardSection"),
+      elevation = AppDimensions.elevationSmall // Replaced 4.dp with elevationSmall
+      ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier.padding(
+                    AppDimensions.paddingSmallMedium) // Replaced 16.dp with paddingSmallMedium
+            ) {
+              Image(
+                  painter = painterResource(id = iconId),
+                  contentDescription = title,
+                  modifier =
+                      Modifier.size(
+                              AppDimensions.iconSizeMedium) // Replaced 24.dp with iconSizeMedium
+                          .testTag("titleIcon"))
+              Spacer(
+                  modifier =
+                      Modifier.width(
+                          AppDimensions
+                              .paddingSmallMedium)) // Replaced 16.dp with paddingSmallMedium
+              Text(
+                  text = title,
+                  fontSize = 18.sp, // Kept as is since no corresponding theme variable
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("titleText"))
+            }
       }
 }
