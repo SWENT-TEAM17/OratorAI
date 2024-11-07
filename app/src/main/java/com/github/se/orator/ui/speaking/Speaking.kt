@@ -35,9 +35,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.github.se.orator.model.symblAi.AnalysisState
 import com.github.se.orator.model.symblAi.SpeakingError
+import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 
@@ -95,14 +96,18 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
             onClick = { viewModel.onMicButtonClicked(permissionGranted) },
             modifier =
                 Modifier.size(80.dp)
-                    .scale(if (analysisState.value == AnalysisState.RECORDING) scale else 1f),
+                    .scale(
+                        if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) scale
+                        else 1f),
             contentPadding = PaddingValues(0.dp)) {
               Icon(
                   imageVector =
-                      if (analysisState.value == AnalysisState.RECORDING) Icons.Filled.Mic
+                      if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING)
+                          Icons.Filled.Mic
                       else Icons.Filled.MicOff,
                   contentDescription =
-                      if (analysisState.value == AnalysisState.RECORDING) "Stop recording"
+                      if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING)
+                          "Stop recording"
                       else "Start recording",
                   modifier = Modifier.size(48.dp))
             }
@@ -112,9 +117,9 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
         // Display feedback messages
         val feedbackMessage =
             when (analysisState.value) {
-              AnalysisState.RECORDING -> "Recording..."
-              AnalysisState.PROCESSING -> "Processing..."
-              AnalysisState.IDLE -> "Tap the mic to start recording."
+              SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
+              SpeakingRepository.AnalysisState.PROCESSING -> "Processing..."
+              SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
               else ->
                   when (viewModel.analysisError.value) {
                     SpeakingError.NO_ERROR -> "Analysis finished."
@@ -140,6 +145,12 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
           }*/
         }
 
-        Row { Button(onClick = { navigationActions.goBack() }) { Text("Back") } }
+        Row {
+          Button(
+              onClick = { navigationActions.goBack() },
+              modifier = Modifier.testTag("back_button")) {
+                Text("Back")
+              }
+        }
       }
 }
