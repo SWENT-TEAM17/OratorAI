@@ -16,9 +16,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.github.se.orator.model.symblAi.SpeakingViewModel
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * The SpeakingScreen composable is a composable screen that displays the speaking screen.
@@ -58,7 +61,9 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
 
   // UI Components
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(AppDimensions.paddingMedium), // Replaced 16.dp with paddingMedium
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
         // Animated recording indicator
@@ -78,15 +83,25 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
         // Microphone button with animation
         Button(
             onClick = { viewModel.onMicButtonClicked(permissionGranted) },
-            modifier = Modifier.size(80.dp).scale(if (isRecording) scale else 1f),
-            contentPadding = PaddingValues(0.dp)) {
+            modifier =
+                Modifier.size(
+                        AppDimensions.buttonHeightLarge) // Replaced 80.dp with buttonSizeLarge
+                    .scale(if (isRecording) scale else 1f)
+                    .testTag("micButton"), // Added testTag for mic button
+            contentPadding = PaddingValues(0.dp) // Removed default padding
+            ) {
               Icon(
                   imageVector = if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
                   contentDescription = if (isRecording) "Stop recording" else "Start recording",
-                  modifier = Modifier.size(48.dp))
+                  modifier =
+                      Modifier.size(AppDimensions.iconSizeLarge)
+                          .testTag("IconStopRecording") // Replaced 48.dp with iconSizeLarge
+                  )
             }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier =
+                Modifier.height(AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
 
         // Display feedback messages
         val feedbackMessage =
@@ -96,25 +111,47 @@ fun SpeakingScreen(viewModel: SpeakingViewModel, navController: NavHostControlle
               errorMessage != null -> "Error: $errorMessage"
               else -> "Tap the mic to start recording."
             }
-        Text(feedbackMessage)
+        Text(
+            text = feedbackMessage,
+            style = AppTypography.bodyLargeStyle,
+            modifier = Modifier.testTag("FeedbackText") // Replaced manual styling
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier =
+                Modifier.height(AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
 
         // Display transcribed text
         if (transcribedText != null) {
-          Text("Transcribed Text: $transcribedText")
-          Spacer(modifier = Modifier.height(16.dp))
+          Text(
+              text = "Transcribed Text: $transcribedText",
+              style = AppTypography.bodyLargeStyle,
+              modifier = Modifier.testTag("TranscribedText") // Replaced manual styling
+              )
+          Spacer(
+              modifier =
+                  Modifier.height(AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
         }
 
         // Display sentiment analysis result
         if (sentimentResult != null) {
-          Text("Sentiment Analysis: $sentimentResult")
-          Spacer(modifier = Modifier.height(16.dp))
+          Text(
+              text = "Sentiment Analysis: $sentimentResult",
+              style = AppTypography.bodyLargeStyle,
+              modifier = Modifier.testTag("SentimentAnalysisText") // Replaced manual styling
+              )
+          Spacer(
+              modifier =
+                  Modifier.height(AppDimensions.paddingMedium)) // Replaced 16.dp with paddingMedium
         }
 
         // Display filler words result
         if (fillersResult != null) {
-          Text("Filler Words: $fillersResult")
+          Text(
+              text = "Filler Words: $fillersResult",
+              style = AppTypography.bodyLargeStyle,
+              modifier = Modifier.testTag("FillerWordsText") // Replaced manual styling
+              )
         }
       }
 }

@@ -32,6 +32,7 @@ import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
+import com.github.se.orator.ui.mainScreen.MainScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
@@ -50,7 +51,6 @@ import com.github.se.orator.ui.screens.ViewFunScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
-import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.JsonParser

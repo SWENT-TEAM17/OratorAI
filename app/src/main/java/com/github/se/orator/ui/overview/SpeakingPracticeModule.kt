@@ -1,33 +1,25 @@
 package com.github.se.orator.ui.overview
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
- * The SpeakingPracticeModule composable is a composable screen that displays the speaking practice
- * module.
+ * The SpeakingPracticeModule composable displays the speaking practice module.
  *
  * @param navigationActions The navigation actions that can be performed.
  * @param screenTitle The title of the screen.
@@ -47,38 +39,48 @@ fun SpeakingPracticeModule(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
         TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = Color.White,
-            contentColor = Color.Black,
-            elevation = 4.dp,
-            title = { Text(screenTitle) },
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("topAppBar"),
+            backgroundColor = AppColors.surfaceColor,
+            contentColor = AppColors.textColor,
+            elevation = AppDimensions.elevationSmall,
+            title = {
+              Text(
+                  screenTitle,
+                  style = AppTypography.appBarTitleStyle,
+                  modifier = Modifier.testTag("screenTitle"))
+            },
             navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Image(
-                    painter = painterResource(id = R.drawable.back_arrow),
-                    contentDescription = "Back",
-                    modifier = Modifier.size(32.dp).testTag("back_button"))
-              }
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.back_arrow),
+                        contentDescription = "Back",
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeSmall).testTag("back_button"))
+                  }
             })
       },
       content = { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp).padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(AppDimensions.paddingMedium)
+                    .padding(paddingValues)
+                    .testTag("content"),
+            verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)) {
               Text(
                   text = headerText,
-                  style = MaterialTheme.typography.h6,
-                  modifier = Modifier.padding(16.dp).testTag("titleText"))
+                  style = AppTypography.mediumTitleStyle,
+                  modifier = Modifier.padding(AppDimensions.paddingMedium).testTag("titleText"))
 
-              Spacer(modifier = Modifier.height(45.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.spacerHeightLarge))
 
               // Dynamically generated input fields based on the provided data
               inputs.forEach { input ->
                 OutlinedTextField(
                     value = input.value,
-                    onValueChange =
-                        input.onValueChange, // Correctly uses the lambda with an explicitly typed
-                    // String parameter
+                    onValueChange = input.onValueChange,
                     label = { Text(input.label) },
                     placeholder = { Text(input.placeholder) },
                     modifier =
@@ -88,12 +90,14 @@ fun SpeakingPracticeModule(
               // Get Started Button
               Button(
                   modifier =
-                      Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
+                      Modifier.fillMaxWidth()
+                          .padding(top = AppDimensions.paddingExtraLarge)
+                          .testTag("getStartedButton"),
                   onClick = {
                     // Custom action, can be customized for different modules
                     onGetStarted()
                   }) {
-                    Text("Get Started")
+                    Text("Get Started", modifier = Modifier.testTag("getStartedText"))
                   }
             }
       })
