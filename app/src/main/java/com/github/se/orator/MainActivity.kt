@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -101,7 +102,7 @@ class MainActivity : ComponentActivity() {
 fun OratorApp(chatGPTService: ChatGPTService) {
 
   // Main layout using a Scaffold
-  Scaffold(modifier = Modifier.fillMaxSize()) {
+  Scaffold(modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold")) {
 
     // Initialize the navigation controller
     val navController = rememberNavController()
