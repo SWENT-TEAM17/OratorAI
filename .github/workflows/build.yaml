@@ -23,6 +23,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
     steps:
       - uses: actions/checkout@v3
 
@@ -49,22 +54,15 @@ jobs:
         env:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
           LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
-          GPT_API_KEY: ${{ secrets.GPT_API_KEY }}
-          GPT_ORGANIZATION_ID: ${{ secrets.GPT_ORGANIZATION_ID }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SYMBL_APP_ID: ${{ secrets.SYMBL_APP_ID }}
-          SYMBL_APP_SECRET: ${{ secrets.SYMBL_APP_SECRET }}
+
         run: |
+          
           # Decode google-services.json into the appropriate location
           echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
 
           # Decode local.properties and add additional keys directly
           echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
-          echo "GPT_API_KEY=$GPT_API_KEY" | base64 --decode>> ./local.properties
-          echo "GPT_ORGANIZATION_ID=$GPT_ORGANIZATION_ID" | base64 --decode>> ./local.properties
-          echo "SONAR_TOKEN=$SONAR_TOKEN" | base64 --decode>> ./local.properties
-          echo "SYMBL_APP_ID=$SYMBL_APP_ID" | base64 --decode >> ./local.properties
-          echo "SYMBL_APP_SECRET=$SYMBL_APP_SECRET" | base64 --decode>> ./local.properties
+
 
       - name: Build APK
         run: |
