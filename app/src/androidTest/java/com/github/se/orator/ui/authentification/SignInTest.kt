@@ -43,21 +43,6 @@ class SignInScreenTest {
     composeTestRule.onNodeWithTag("loginButton").assertIsDisplayed()
   }
 
-  //    @Test
-  //    fun signInScreen_whenLoading_showsLoadingScreen() {
-  //      val navigationActions = mock(NavigationActions::class.java)
-  //      userProfileRepository = mock(UserProfileRepository::class.java)
-  //      userProfileViewModel = UserProfileViewModel(userProfileRepository)
-  //
-  //
-  //      composeTestRule.setContent {
-  //        SignInScreen(navigationActions = navigationActions, viewModel = userProfileViewModel)
-  //      }
-  //
-  //      composeTestRule.onNodeWithText("Loading...").assertIsDisplayed()
-  //      composeTestRule.onNodeWithTag("loadingIndicator").assertIsDisplayed()
-  //    }
-
   @Test
   fun signInScreen_onClickLoginButton_triggersSignInFlow() {
 
@@ -74,39 +59,12 @@ class SignInScreenTest {
     composeTestRule.onNodeWithTag("loginButton").performClick()
   }
 
-  //  @Test
-  //  fun signInScreen_whenProfileComplete_navigatesToHome() {
-  //    val navigationActions = mock(NavigationActions::class.java)
-  //    userProfileRepository = mock(UserProfileRepository::class.java)
-  //    userProfileViewModel = UserProfileViewModel(userProfileRepository)
-  //
-  //    composeTestRule.setContent {
-  //      SignInScreen(navigationActions = navigationActions, viewModel = userProfileViewModel)
-  //    }
-  //
-  //    // Simulate the state where the user has signed in and profile is fetched
-  //    composeTestRule.runOnIdle {
-  //    }
-  //
-  //    // Verify that navigation to HOME was called
-  //    verify(navigationActions).navigateTo(TopLevelDestinations.HOME)
-  //  }
+  @Test
+  fun checkLoadingScreenIsDisplayed() {
+    composeTestRule.setContent { LoadingScreen() }
 
-  //  @Test
-  //  fun signInScreen_whenProfileIncomplete_navigatesToCreateProfile() {
-  //    val navigationActions = mock(NavigationActions::class.java)
-  //    userProfileRepository = mock(UserProfileRepository::class.java)
-  //    userProfileViewModel = UserProfileViewModel(userProfileRepository)
-  //    composeTestRule.setContent {
-  //      SignInScreen(navigationActions = navigationActions, viewModel = userProfileViewModel)
-  //    }
-  //
-  //    // Simulate the state where the user has signed in but profile is incomplete
-  //    composeTestRule.runOnIdle {
-  //      // Simulate the LaunchedEffect being triggered
-  //    }
-  //
-  //    // Verify that navigation to CREATE_PROFILE was called
-  //    verify(navigationActions).navigateTo(Screen.CREATE_PROFILE)
-  //  }
+    // Check if the LoadingScreen displays the loading indicator
+    composeTestRule.onNodeWithText("Loading...").assertExists()
+    composeTestRule.onNodeWithTag("loadingIndicator").assertExists()
+  }
 }
