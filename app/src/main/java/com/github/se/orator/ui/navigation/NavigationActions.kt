@@ -1,15 +1,16 @@
 package com.github.se.orator.ui.navigation
 
-import android.net.Uri
+import android.util.Log
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.github.se.orator.model.speaking.PracticeContext
-import com.google.gson.Gson
 
 object Route {
   const val HOME = "Home"
@@ -51,14 +52,32 @@ object Screen {
   const val SPEAKING = "Speaking"
 }
 
-data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
+data class TopLevelDestination(
+    val route: String,
+    val outlinedIcon: ImageVector,
+    val coloredIcon: ImageVector,
+    val textId: String
+)
 
 object TopLevelDestinations {
-  val HOME = TopLevelDestination(route = Route.HOME, icon = Icons.Outlined.Menu, textId = "Home")
+  val HOME =
+      TopLevelDestination(
+          route = Route.HOME,
+          outlinedIcon = Icons.Outlined.Home,
+          coloredIcon = Icons.Filled.Home,
+          textId = "Home")
   val FRIENDS =
-      TopLevelDestination(route = Route.FRIENDS, icon = Icons.Outlined.Star, textId = "Friends")
+      TopLevelDestination(
+          route = Route.FRIENDS,
+          outlinedIcon = Icons.Outlined.StarOutline,
+          coloredIcon = Icons.Filled.Star,
+          textId = "Friends")
   val PROFILE =
-      TopLevelDestination(route = Route.PROFILE, icon = Icons.Outlined.Person, textId = "Profile")
+      TopLevelDestination(
+          route = Route.PROFILE,
+          outlinedIcon = Icons.Outlined.Person,
+          coloredIcon = Icons.Filled.Person,
+          textId = "Profile")
 }
 
 val LIST_TOP_LEVEL_DESTINATION =
@@ -77,6 +96,7 @@ open class NavigationActions(
   open fun navigateTo(destination: TopLevelDestination) {
 
     navController.navigate(destination.route) {
+      Log.d("inside of navigationActions!", "route is: ${destination.route}")
       // Pop up to the start destination of the graph to
       // avoid building up a large stack of destinations
       popUpTo(navController.graph.findStartDestination().id) {
@@ -114,34 +134,7 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
+    Log.d("inside nav actions", "currentRoute called, returned ${navController.currentDestination}")
     return navController.currentDestination?.route ?: ""
-  }
-
-  /**
-   * Navigate to the specified screen with the given practice context and feedback type.
-   *
-   * @param practiceContext The practice context to pass to the screen
-   * @param feedbackType The feedback type to pass to the screen
-   */
-  fun navigateToChatScreen(practiceContext: PracticeContext, feedbackType: String) {
-    val gson = Gson()
-    val contextJson = Uri.encode(gson.toJson(practiceContext))
-    val feedbackTypeEncoded = Uri.encode(feedbackType)
-    navController.navigate("${Screen.CHAT_SCREEN}/$contextJson/$feedbackTypeEncoded")
-  }
-
-  /** Navigate to the speaking screen. */
-  fun navigateToSpeakingScreen() {
-    navController.navigate(Screen.SPEAKING)
-  }
-
-  /** Navigate to the feedback screen. */
-  fun navigateToFeedbackScreen() {
-    navController.navigate(Screen.FEEDBACK)
-  }
-
-  /** Navigate to the home screen. */
-  fun navigateToHome() {
-    navController.navigate(Route.HOME)
   }
 }

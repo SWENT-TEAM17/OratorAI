@@ -36,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.profile.UserProfile
@@ -44,6 +43,8 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.ProjectTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -56,57 +57,87 @@ fun AddFriendsScreen(
   var expanded by remember { mutableStateOf(false) }
   val allProfiles by userProfileViewModel.allProfiles.collectAsState()
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-              }
-            },
-        )
-      },
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = navigationActions.currentRoute())
-      }) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
-          // Text field with search icon and clear button
-          OutlinedTextField(
-              value = query,
-              onValueChange = { newValue ->
-                query = newValue
-                expanded = newValue.isNotEmpty()
+  ProjectTheme {
+    Scaffold(
+        topBar = {
+          TopAppBar(
+              title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
+              navigationIcon = {
+                IconButton(
+                    onClick = { navigationActions.goBack() },
+                    modifier = Modifier.testTag("addFriendBackButton") // Added testTag
+                    ) {
+                      Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
               },
-              modifier = Modifier.fillMaxWidth().testTag("addFriendSearchField"),
-              label = { Text("Username") },
-              leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-              trailingIcon = {
+          )
+        },
+        bottomBar = {
+          BottomNavigationMenu(
+              onTabSelect = { route -> navigationActions.navigateTo(route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION,
+              selectedItem = navigationActions.currentRoute(),
+          )
+        }) { paddingValues ->
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(paddingValues)
+                      .padding(AppDimensions.paddingMedium)) {
+                // Text field with search icon and clear button
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { newValue ->
+                      query = newValue
+                      expanded = newValue.isNotEmpty()
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("addFriendSearchField"),
+                    label = {
+                      Text("Username", modifier = Modifier.testTag("searchFieldLabel"))
+                    }, // Added testTag
+                    leadingIcon = {
+                      Icon(
+                          Icons.Default.Search,
+                          contentDescription = "Search Icon",
+                          modifier = Modifier.testTag("searchIcon") // Added testTag
+                          )
+                    },
+                    trailingIcon = {
+                      if (query.isNotEmpty()) {
+                        IconButton(
+                            onClick = { query = "" },
+                            modifier = Modifier.testTag("clearSearchButton") // Added testTag
+                            ) {
+                              Icon(
+                                  Icons.Default.Clear,
+                                  contentDescription = "Clear Icon",
+                                  modifier = Modifier.testTag("clearIcon") // Added testTag
+                                  )
+                            }
+                      }
+                    },
+                    singleLine = true,
+                    keyboardActions = KeyboardActions.Default)
                 if (query.isNotEmpty()) {
-                  IconButton(onClick = { query = "" }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Clear Icon")
-                  }
-                }
-              },
-              singleLine = true,
-              keyboardActions = KeyboardActions.Default)
-          if (query.isNotEmpty()) {
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                  items(
-                      allProfiles.filter { profile ->
-                        profile.name.contains(query, ignoreCase = true)
-                      }) { user ->
-                        UserItem(user = user, userProfileViewModel = userProfileViewModel)
+                  LazyColumn(
+                      contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                      verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
+                      modifier = Modifier.testTag("searchResultsList") // Added testTag
+                      ) {
+                        items(
+                            allProfiles.filter { profile ->
+                              profile.name.contains(query, ignoreCase = true)
+                            }) { user ->
+                              UserItem(
+                                  user = user,
+                                  userProfileViewModel = userProfileViewModel,
+                              )
+                            }
                       }
                 }
-          }
+              }
         }
-      }
+  }
 }
 
 /**
@@ -124,21 +155,28 @@ fun UserItem(user: UserProfile, userProfileViewModel: UserProfileViewModel) {
           Modifier.fillMaxWidth()
               .clip(RoundedCornerShape(12.dp))
               .background(MaterialTheme.colorScheme.surface)
-              .padding(16.dp)
+              .padding(AppDimensions.paddingMedium)
               .testTag("addFriendUserItem#${user.uid}"),
       verticalAlignment = Alignment.CenterVertically) {
         // Displays the profile picture and allows the user to be added as a friend when clicked
         ProfilePicture(
-            profilePictureUrl = user.profilePic, onClick = { userProfileViewModel.addFriend(user) })
-        Spacer(modifier = Modifier.width(16.dp))
+            profilePictureUrl = user.profilePic,
+            onClick = { userProfileViewModel.addFriend(user) },
+        )
+        Spacer(modifier = Modifier.width(AppDimensions.spacerWidthMedium))
         Column {
           // Displays the user's name
-          Text(text = user.name, style = MaterialTheme.typography.titleMedium)
+          Text(
+              text = user.name,
+              style = MaterialTheme.typography.titleMedium,
+              modifier = Modifier.testTag("userName_${user.uid}") // Added testTag
+              )
           // Displays the user's bio, or a default text if the bio is null
           Text(
               text = user.bio ?: "No bio available",
               style = MaterialTheme.typography.bodySmall,
-              color = Color.Gray)
+              modifier = Modifier.testTag("userBio_${user.uid}") // Added testTag
+              )
         }
       }
 }

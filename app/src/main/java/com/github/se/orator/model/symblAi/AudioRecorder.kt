@@ -81,7 +81,7 @@ class AudioRecorder(
     audioRecord = null
   }
 
-  private fun saveAsWavFile(audioData: ByteArray, audioFile: File) {
+  fun saveAsWavFile(audioData: ByteArray, audioFile: File) {
     val totalDataLen = audioData.size + 36
     val totalAudioLen = audioData.size.toLong()
     val channels = 1
@@ -123,14 +123,14 @@ class AudioRecorder(
   }
 
   // Helper functions to write data to header
-  private fun writeInt(header: ByteArray, offset: Int, value: Int) {
+  fun writeInt(header: ByteArray, offset: Int, value: Int) {
     header[offset] = (value and 0xff).toByte()
     header[offset + 1] = ((value shr 8) and 0xff).toByte()
     header[offset + 2] = ((value shr 16) and 0xff).toByte()
     header[offset + 3] = ((value shr 24) and 0xff).toByte()
   }
 
-  private fun writeShort(header: ByteArray, offset: Int, value: Short) {
+  fun writeShort(header: ByteArray, offset: Int, value: Short) {
     header[offset] = (value.toInt() and 0xff).toByte()
     header[offset + 1] = ((value.toInt() shr 8) and 0xff).toByte()
   }

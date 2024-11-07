@@ -35,31 +35,25 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.navigation.TopLevelDestinations
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -126,36 +120,29 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             Image(
                 painter = painterResource(id = R.drawable.app_logo),
                 contentDescription = "App Logo",
-                modifier = Modifier.size(250.dp))
+                modifier = Modifier.size(AppDimensions.logoSize).testTag("appLogo") // Added testTag
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
             Text(
                 text = "OratorAI",
-                style =
-                    TextStyle(
-                        fontSize = 64.sp,
-                        fontFamily = FontFamily(Font(R.font.manrope_variablefont_wght)),
-                        fontWeight = FontWeight(600),
-                        brush =
-                            Brush.linearGradient(
-                                colors = listOf(Color(0xFF442DAA), Color(0xFF00A6A6))),
-                        textAlign = TextAlign.Center),
-                modifier = Modifier.width(276.dp).height(141.dp))
+                style = AppTypography.largeTitleStyle.copy(brush = AppColors.primaryGradient),
+                modifier =
+                    Modifier.width(AppDimensions.logoTextWidth)
+                        .height(AppDimensions.logoTextHeight)
+                        .testTag("appTitle") // Added testTag
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
             Text(
                 text = "Welcome !",
-                style =
-                    TextStyle(
-                        fontSize = 55.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFF000000),
-                        textAlign = TextAlign.Center,
-                    ))
+                style = AppTypography.mediumTitleStyle,
+                modifier = Modifier.testTag("welcomeText") // Added testTag
+                )
 
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.largeSpacerHeight))
 
             // Authenticate With Google Button
             GoogleSignInButton(
@@ -177,15 +164,24 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
 fun LoadingScreen() {
   // Show a loading indicator in the center of the screen
   Column(
-      modifier = Modifier.fillMaxSize(),
+      modifier =
+          Modifier.fillMaxSize()
+              .testTag("loadingScreen"), // Optional: Add a testTag for the entire loading screen
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
         CircularProgressIndicator(
-            color = Color(0xFF442DAA),
-            strokeWidth = 8.dp,
-            modifier = Modifier.size(64.dp).testTag("loadingIndicator"))
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Loading...", fontSize = 18.sp, color = Color.Gray)
+            color = AppColors.loadingIndicatorColor,
+            strokeWidth = AppDimensions.strokeWidth,
+            modifier =
+                Modifier.size(AppDimensions.loadingIndicatorSize)
+                    .testTag("loadingIndicator") // Added testTag
+            )
+        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+        Text(
+            text = "Loading...",
+            style = AppTypography.loadingTextStyle,
+            modifier = Modifier.testTag("loadingText") // Added testTag
+            )
       }
 }
 
@@ -193,32 +189,35 @@ fun LoadingScreen() {
 fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
       onClick = onSignInClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
+      colors = ButtonDefaults.buttonColors(containerColor = AppColors.buttonBackgroundColor),
       shape = RoundedCornerShape(50), // Circular edges for the button
-      border = BorderStroke(1.dp, Color.LightGray),
+      border = BorderStroke(AppDimensions.borderStrokeWidth, AppColors.buttonBorderColor),
       modifier =
-          Modifier.padding(8.dp)
-              .height(48.dp) // Adjust height as needed
-              .testTag("loginButton")) {
+          Modifier.padding(AppDimensions.paddingSmall)
+              .height(AppDimensions.buttonHeight)
+              .testTag("loginButton") // Existing testTag
+      ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()) {
               // Load the Google logo from resources
               Image(
-                  painter = painterResource(id = R.drawable.google_logo), // Ensure this
-                  // drawable exists
+                  painter =
+                      painterResource(id = R.drawable.google_logo), // Ensure this drawable exists
                   contentDescription = "Google Logo",
                   modifier =
-                      Modifier.size(30.dp) // Size of the Google logo
-                          .padding(end = 8.dp))
+                      Modifier.size(AppDimensions.googleLogoSize)
+                          .padding(end = AppDimensions.paddingSmall)
+                          .testTag("googleLogo") // Added testTag
+                  )
 
               // Text for the button
               Text(
                   text = "Sign in with Google",
-                  color = Color.Gray, // Text color
-                  fontSize = 16.sp, // Font size
-                  fontWeight = FontWeight.Medium)
+                  style = AppTypography.buttonTextStyle,
+                  modifier = Modifier.testTag("signInWithGoogleText") // Added testTag
+                  )
             }
       }
 }

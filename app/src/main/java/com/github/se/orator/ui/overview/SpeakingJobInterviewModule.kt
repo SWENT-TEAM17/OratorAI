@@ -1,16 +1,15 @@
 package com.github.se.orator.ui.overview
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 /**
  * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview
@@ -20,7 +19,10 @@ import com.github.se.orator.ui.navigation.NavigationActions
  */
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun SpeakingJobInterviewModule(navigationActions: NavigationActions) {
+fun SpeakingJobInterviewModule(
+    navigationActions: NavigationActions,
+    apiLinkViewModel: ApiLinkViewModel
+) {
   var targetPosition by remember { mutableStateOf("") }
   var companyName by remember { mutableStateOf("") }
   var skills by remember { mutableStateOf("") }
@@ -77,7 +79,9 @@ fun SpeakingJobInterviewModule(navigationActions: NavigationActions) {
                 role = targetPosition,
                 company = companyName,
                 focusAreas = skills.split(",").map { it.trim() })
+
+        apiLinkViewModel.updatePracticeContext(interviewContext)
         // Navigate to ChatScreen with the collected data
-        navigationActions.navigateToChatScreen(interviewContext, feedbackType)
+        navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }
