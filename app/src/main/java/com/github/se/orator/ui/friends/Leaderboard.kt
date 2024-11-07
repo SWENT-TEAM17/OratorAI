@@ -32,72 +32,66 @@ fun LeaderboardScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-    val userProfile by userProfileViewModel.userProfile.collectAsState()
-    val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
+  val userProfile by userProfileViewModel.userProfile.collectAsState()
+  val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
 
-    val leaderboardEntries =
-        remember(userProfile, friendsProfiles) {
-            (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
-                it.statistics.improvement
-            }
+  val leaderboardEntries =
+      remember(userProfile, friendsProfiles) {
+        (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
+          it.statistics.improvement
         }
+      }
 
-    ProjectTheme {
+  ProjectTheme {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Leaderboard", modifier = Modifier.testTag("leaderboardTitle")) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navigationActions.goBack() // Only navigate back, no drawer action
-                        },
-                        modifier = Modifier.testTag("leaderboardBackButton")
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            modifier = Modifier.testTag("leaderboardBackIcon")
-                        )
+          TopAppBar(
+              title = { Text("Leaderboard", modifier = Modifier.testTag("leaderboardTitle")) },
+              navigationIcon = {
+                IconButton(
+                    onClick = {
+                      navigationActions.goBack() // Only navigate back, no drawer action
+                    },
+                    modifier = Modifier.testTag("leaderboardBackButton")) {
+                      Icon(
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          modifier = Modifier.testTag("leaderboardBackIcon"))
                     }
-                })
+              })
         },
         bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { route -> navigationActions.navigateTo(route) },
-                tabList = LIST_TOP_LEVEL_DESTINATION,
-                selectedItem = Route.FRIENDS
-            )
+          BottomNavigationMenu(
+              onTabSelect = { route -> navigationActions.navigateTo(route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION,
+              selectedItem = Route.FRIENDS)
         }) { innerPadding ->
-        Column(
-            modifier =
-            Modifier.fillMaxSize()
-                .padding(innerPadding)
-                .padding(
-                    horizontal = AppDimensions.paddingMedium,
-                    vertical = AppDimensions.paddingSmall
-                )
-                .testTag("leaderboardList"),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Dropdown selector
-            PracticeModeSelector()
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(innerPadding)
+                      .padding(
+                          horizontal = AppDimensions.paddingMedium,
+                          vertical = AppDimensions.paddingSmall)
+                      .testTag("leaderboardList"),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                // Dropdown selector
+                PracticeModeSelector()
 
-            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-            // Leaderboard list
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
-                modifier = Modifier.testTag("leaderboardLazyColumn")
-            ) {
-                itemsIndexed(leaderboardEntries) { index, profile ->
-                    LeaderboardItem(rank = index + 1, profile = profile)
-                }
-            }
+                // Leaderboard list
+                LazyColumn(
+                    contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                    verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
+                    modifier = Modifier.testTag("leaderboardLazyColumn")) {
+                      itemsIndexed(leaderboardEntries) { index, profile ->
+                        LeaderboardItem(rank = index + 1, profile = profile)
+                      }
+                    }
+              }
         }
-    }
-}
+  }
 }
 
 @Composable
@@ -110,13 +104,15 @@ fun PracticeModeSelector() {
           Modifier.clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
               .clickable { expanded = true }
-              .padding(AppDimensions.paddingSmallMedium),
+              .padding(AppDimensions.paddingSmallMedium)
+              .testTag("practiceModeSelector"),
       contentAlignment = Alignment.Center) {
         Text(
             text = selectedMode,
             fontSize = AppDimensions.mediumText,
             color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold)
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.testTag("selectedMode"))
 
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
           DropdownMenuItem(
@@ -124,13 +120,15 @@ fun PracticeModeSelector() {
               onClick = {
                 selectedMode = "Practice mode 1"
                 expanded = false
-              })
+              },
+              modifier = Modifier.testTag("practiceModeOption1"))
           DropdownMenuItem(
               text = { Text("Practice mode 2") },
               onClick = {
                 selectedMode = "Practice mode 2"
                 expanded = false
-              })
+              },
+              modifier = Modifier.testTag("practiceModeOption2"))
           // Add more items as needed
         }
       }
@@ -147,30 +145,35 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
       color = LightPurpleGrey,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium).testTag("leaderboardItem#$rank")) {
-          ProfilePicture(profilePictureUrl = profile.profilePic, onClick = {})
-          Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(AppDimensions.paddingMedium)
+                    .testTag("leaderboardItem#$rank")) {
+              ProfilePicture(profilePictureUrl = profile.profilePic, onClick = {})
+              Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
 
-          Column {
-            Text(
-                text = profile.name,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            )
-            Text(
-                text = "Improvement: ${profile.statistics.improvement}",
-                style = MaterialTheme.typography.bodySmall,
-                color = AppColors.secondaryTextColor,
-                modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
-          }
+              Column {
+                Text(
+                    text = profile.name,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                )
+                Text(
+                    text = "Improvement: ${profile.statistics.improvement}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppColors.secondaryTextColor,
+                    modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
+              }
 
-          Spacer(modifier = Modifier.weight(AppDimensions.full))
+              Spacer(modifier = Modifier.weight(AppDimensions.full))
 
-          // Display rank as badge on the left side
-          Text(
-              text = "#$rank",
-              fontWeight = FontWeight.Bold,
-              modifier =
-                  Modifier.align(Alignment.CenterVertically).testTag("leaderboardItemName#$rank"))
-        }
+              // Display rank as badge on the left side
+              Text(
+                  text = "#$rank",
+                  fontWeight = FontWeight.Bold,
+                  modifier =
+                      Modifier.align(Alignment.CenterVertically)
+                          .testTag("leaderboardItemName#$rank"))
+            }
       }
 }

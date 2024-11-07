@@ -187,4 +187,20 @@ class FriendsUITests {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.FRIENDS)
     composeTestRule.setContent { ViewFriendsScreen(mockNavigationActions, userProfileViewModel) }
   }
+
+  @Test
+  fun testPracticeModeSelector() {
+    // Set up the content with the PracticeModeSelector composable
+    composeTestRule.setContent { PracticeModeSelector() }
+
+    // Open the dropdown menu
+    composeTestRule.onNodeWithTag("practiceModeSelector").performClick()
+
+    // Verify the dropdown menu options are displayed
+    composeTestRule.onNodeWithTag("practiceModeOption1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("practiceModeOption2").assertIsDisplayed()
+
+    // Select "Practice mode 2"
+    composeTestRule.onNodeWithTag("practiceModeOption2").performClick()
+  }
 }

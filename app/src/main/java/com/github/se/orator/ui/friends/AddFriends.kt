@@ -59,90 +59,92 @@ fun AddFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-    var query by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-    val allProfiles by userProfileViewModel.allProfiles.collectAsState()
-    val focusManager = LocalFocusManager.current
-    val focusRequester = FocusRequester()
+  var query by remember { mutableStateOf("") }
+  var expanded by remember { mutableStateOf(false) }
+  val allProfiles by userProfileViewModel.allProfiles.collectAsState()
+  val focusManager = LocalFocusManager.current
+  val focusRequester = FocusRequester()
 
-    ProjectTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { navigationActions.goBack() },
-                            modifier = Modifier.testTag("addFriendBackButton") // Added testTag
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
-                    },
-                )
-                Divider()
-            }) { paddingValues ->
-            Column(
-                modifier =
-                Modifier.fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(AppDimensions.paddingMedium)) {
+  ProjectTheme {
+    Scaffold(
+        topBar = {
+          TopAppBar(
+              title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
+              navigationIcon = {
+                IconButton(
+                    onClick = { navigationActions.goBack() },
+                    modifier = Modifier.testTag("addFriendBackButton") // Added testTag
+                    ) {
+                      Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+              },
+          )
+          Divider()
+        }) { paddingValues ->
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(paddingValues)
+                      .padding(AppDimensions.paddingMedium)) {
                 // Text field with search icon and clear button
                 OutlinedTextField(
                     value = query,
                     onValueChange = { newValue ->
-                        query = newValue
-                        expanded = newValue.isNotEmpty()
+                      query = newValue
+                      expanded = newValue.isNotEmpty()
                     },
-                    modifier =  Modifier.wrapContentWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .height(AppDimensions.mediumHeight)
-                        .focusRequester(focusRequester).testTag("addFriendSearchField"),
+                    modifier =
+                        Modifier.wrapContentWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .height(AppDimensions.mediumHeight)
+                            .focusRequester(focusRequester)
+                            .testTag("addFriendSearchField"),
                     label = {
-                        Text("Username", modifier = Modifier.testTag("searchFieldLabel"))
+                      Text("Username", modifier = Modifier.testTag("searchFieldLabel"))
                     }, // Added testTag
                     leadingIcon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Search Icon",
-                            modifier = Modifier.testTag("searchIcon") // Added testTag
-                        )
+                      Icon(
+                          Icons.Default.Search,
+                          contentDescription = "Search Icon",
+                          modifier = Modifier.testTag("searchIcon") // Added testTag
+                          )
                     },
                     trailingIcon = {
-                        if (query.isNotEmpty()) {
-                            IconButton(
-                                onClick = { query = "" },
-                                modifier = Modifier.testTag("clearSearchButton") // Added testTag
+                      if (query.isNotEmpty()) {
+                        IconButton(
+                            onClick = { query = "" },
+                            modifier = Modifier.testTag("clearSearchButton") // Added testTag
                             ) {
-                                Icon(
-                                    Icons.Default.Clear,
-                                    contentDescription = "Clear Icon",
-                                    modifier = Modifier.testTag("clearIcon") // Added testTag
-                                )
+                              Icon(
+                                  Icons.Default.Clear,
+                                  contentDescription = "Clear Icon",
+                                  modifier = Modifier.testTag("clearIcon") // Added testTag
+                                  )
                             }
-                        }
+                      }
                     },
                     singleLine = true,
                     keyboardActions = KeyboardActions.Default)
                 if (query.isNotEmpty()) {
-                    LazyColumn(
-                        contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                        verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
-                        modifier = Modifier.testTag("searchResultsList") // Added testTag
-                    ) {
+                  LazyColumn(
+                      contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                      verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
+                      modifier = Modifier.testTag("searchResultsList") // Added testTag
+                      ) {
                         items(
                             allProfiles.filter { profile ->
-                                profile.name.contains(query, ignoreCase = true)
+                              profile.name.contains(query, ignoreCase = true)
                             }) { user ->
-                            UserItem(
-                                user = user,
-                                userProfileViewModel = userProfileViewModel,
-                            )
-                        }
-                    }
+                              UserItem(
+                                  user = user,
+                                  userProfileViewModel = userProfileViewModel,
+                              )
+                            }
+                      }
                 }
-            }
+              }
         }
-    }
+  }
 }
 
 /**
@@ -155,22 +157,24 @@ fun AddFriendsScreen(
  */
 @Composable
 fun UserItem(user: UserProfile, userProfileViewModel: UserProfileViewModel) {
-    Surface(
-        modifier =
-        Modifier.fillMaxWidth()
-            .padding(horizontal = AppDimensions.smallPadding) // Side padding for each item
-            .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius)),
-        color = AppColors.LightPurpleGrey,
-        shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
-    ) {
+  Surface(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = AppDimensions.smallPadding) // Side padding for each item
+              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius)),
+      color = AppColors.LightPurpleGrey,
+      shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
+      ) {
         Row(
             modifier =
-            Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium).testTag("addFriendUserItem#${user.uid}")) {
-            ProfilePicture(
-                profilePictureUrl = user.profilePic,
-                onClick = { userProfileViewModel.addFriend(user) })
-            Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-            Column {
+                Modifier.fillMaxWidth()
+                    .padding(AppDimensions.paddingMedium)
+                    .testTag("addFriendUserItem#${user.uid}")) {
+              ProfilePicture(
+                  profilePictureUrl = user.profilePic,
+                  onClick = { userProfileViewModel.addFriend(user) })
+              Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+              Column {
                 Text(
                     text = user.name,
                     style = MaterialTheme.typography.titleMedium,
@@ -181,7 +185,7 @@ fun UserItem(user: UserProfile, userProfileViewModel: UserProfileViewModel) {
                     color = AppColors.secondaryTextColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis)
+              }
             }
-        }
-    }
+      }
 }
