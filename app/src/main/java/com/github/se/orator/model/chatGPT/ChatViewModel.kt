@@ -30,7 +30,8 @@ class ChatViewModel(
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage = _errorMessage.asStateFlow()
 
-  private val collectedAnalysisData = mutableListOf<AnalysisData>()
+  private val _collectedAnalysisData = MutableStateFlow<MutableList<AnalysisData>>(mutableListOf())
+  val collectedAnalysisData = _collectedAnalysisData.asStateFlow()
 
   private val practiceContext = apiLinkViewModel.practiceContext
 
@@ -40,7 +41,7 @@ class ChatViewModel(
 
   fun initializeConversation() {
 
-    collectedAnalysisData.clear() // Resets the analysis data history
+    _collectedAnalysisData.value.clear() // Resets the analysis data history
     val practiceContextAsValue = practiceContext.value ?: return
     val systemMessageContent =
         when (practiceContextAsValue) {
@@ -85,7 +86,7 @@ class ChatViewModel(
     val userMessage = Message(role = "user", content = transcript)
     _chatMessages.value += userMessage
 
-    collectedAnalysisData.add(analysisData)
+    _collectedAnalysisData.value.add(analysisData)
 
     getNextGPTResponse()
   }
@@ -147,7 +148,7 @@ class ChatViewModel(
   //    }
 
   private fun getAnalysisSummary(): String {
-    return generateAnalysisSummary(collectedAnalysisData)
+    return generateAnalysisSummary(_collectedAnalysisData.value)
   }
 
   private fun generateAnalysisSummary(analysisDataList: List<AnalysisData>): String {
