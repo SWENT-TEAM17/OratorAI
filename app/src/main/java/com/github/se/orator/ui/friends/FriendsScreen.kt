@@ -3,9 +3,11 @@ package com.github.se.orator.ui.friends
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,7 +25,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
@@ -34,6 +35,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppColors.LightPurpleGrey
+import com.github.se.orator.ui.theme.AppDimensions
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,12 +59,12 @@ fun ViewFriendsScreen(
       drawerState = drawerState,
       drawerContent = {
         ModalDrawerSheet {
-          Column(modifier = Modifier.fillMaxHeight().padding(16.dp)) {
+          Column(modifier = Modifier.fillMaxHeight().padding(AppDimensions.paddingMedium)) {
             Text(
                 "Actions",
                 modifier = Modifier.testTag("viewFriendsDrawerTitle"),
                 style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.heightMedium))
             TextButton(
                 modifier = Modifier.testTag("viewFriendsAddFriendButton"),
                 onClick = {
@@ -73,7 +75,7 @@ fun ViewFriendsScreen(
                 }) {
                   Text("➕ Add a friend")
                 }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
             TextButton(
                 modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
                 onClick = {
@@ -123,11 +125,11 @@ fun ViewFriendsScreen(
                   modifier =
                       Modifier.fillMaxSize()
                           .padding(innerPadding)
-                          .padding(horizontal = 16.dp)
+                          .padding(horizontal = AppDimensions.paddingMedium)
                           .clickable { focusManager.clearFocus() }) {
                     Box(
                         modifier =
-                            Modifier.padding(vertical = 20.dp) // Apply padding to the container
+                            Modifier.padding(vertical = AppDimensions.paddingMediumSmall) // Apply padding to the container
                         ) {
                           OutlinedTextField(
                               value = searchQuery,
@@ -139,8 +141,9 @@ fun ViewFriendsScreen(
                                     contentDescription = "Search Icon")
                               },
                               modifier =
-                                  Modifier.fillMaxWidth(0.55f)
-                                      .height(64.dp)
+                                  Modifier.wrapContentWidth()
+                                      .horizontalScroll(rememberScrollState())
+                                      .height(AppDimensions.mediumHeight)
                                       .focusRequester(focusRequester)
                                       .testTag("viewFriendsSearch"))
                         }
@@ -157,8 +160,8 @@ fun ViewFriendsScreen(
                     } else {
                       LazyColumn(
                           modifier = Modifier.testTag("viewFriendsList"),
-                          contentPadding = PaddingValues(vertical = 8.dp),
-                          verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                          contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                          verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)) {
                             items(filteredFriends) { friend -> FriendItem(friend = friend) }
                           }
                     }
@@ -172,20 +175,20 @@ fun FriendItem(friend: UserProfile) {
   Surface(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(horizontal = 4.dp) // Side padding for each item
-              .clip(RoundedCornerShape(20.dp))
+              .padding(horizontal = AppDimensions.smallPadding) // Side padding for each item
+              .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
               .testTag("viewFriendsItem#${friend.uid}"),
       color = LightPurpleGrey,
-      shadowElevation = 4.dp // Subtle shadow with low elevation
+      shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
           ProfilePicture(profilePictureUrl = friend.profilePic, onClick = {})
-          Spacer(modifier = Modifier.width(12.dp))
+          Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
           Column {
             Text(
                 text = friend.name,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 4.dp).testTag("friendName#${friend.uid}"))
+                modifier = Modifier.padding(bottom = AppDimensions.smallPadding).testTag("friendName#${friend.uid}"))
             Text(
                 text = friend.bio ?: "No bio available",
                 style = MaterialTheme.typography.bodySmall,
@@ -206,7 +209,7 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
       contentDescription = "Profile Picture",
       contentScale = ContentScale.Crop,
       modifier =
-          Modifier.size(48.dp)
+          Modifier.size(AppDimensions.buttonHeight)
               .clip(CircleShape)
               .background(Color.LightGray)
               .clickable(onClick = onClick))
