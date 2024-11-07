@@ -117,7 +117,7 @@ fun CreateAccountScreen(
                         modifier =
                             Modifier.size(AppDimensions.iconSizeSmall) // Replaced 32.dp
                                 .align(Alignment.BottomEnd)
-                                .testTag("upload_profile_picture_button")) {
+                                .testTag("upload_profile_picture")) {
                           Image(
                               painter = painterResource(id = R.drawable.camera),
                               contentDescription = "Upload profile picture",
