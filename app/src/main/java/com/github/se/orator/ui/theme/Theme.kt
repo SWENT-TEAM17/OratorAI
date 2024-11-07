@@ -12,6 +12,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 // Define reusable dimensions
 object AppDimensions {
@@ -62,6 +63,8 @@ object AppDimensions {
   val paddingMediumSmall = 20.dp
   val smallWidth = 12.dp
   val smallPadding = 4.dp
+  val mediumText = 16.sp
+  val full = 1f
 }
 
 object AppShapes {

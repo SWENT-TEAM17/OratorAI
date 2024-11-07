@@ -13,18 +13,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
+import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppColors.LightPurpleGrey
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.ProjectTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,62 +32,72 @@ fun LeaderboardScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  val userProfile by userProfileViewModel.userProfile.collectAsState()
-  val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
+    val userProfile by userProfileViewModel.userProfile.collectAsState()
+    val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
 
-  val leaderboardEntries =
-      remember(userProfile, friendsProfiles) {
-        (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
-          it.statistics.improvement
+    val leaderboardEntries =
+        remember(userProfile, friendsProfiles) {
+            (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
+                it.statistics.improvement
+            }
         }
-      }
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("Leaderboard", modifier = Modifier.testTag("leaderboardTitle")) },
-            navigationIcon = {
-              IconButton(
-                  onClick = {
-                    navigationActions.goBack() // Only navigate back, no drawer action
-                  },
-                  modifier = Modifier.testTag("leaderboardBackButton")) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.testTag("leaderboardBackIcon"))
-                  }
-            })
-      },
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.FRIENDS)
-      }) { innerPadding ->
+    ProjectTheme {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Leaderboard", modifier = Modifier.testTag("leaderboardTitle")) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navigationActions.goBack() // Only navigate back, no drawer action
+                        },
+                        modifier = Modifier.testTag("leaderboardBackButton")
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            modifier = Modifier.testTag("leaderboardBackIcon")
+                        )
+                    }
+                })
+        },
+        bottomBar = {
+            BottomNavigationMenu(
+                onTabSelect = { route -> navigationActions.navigateTo(route) },
+                tabList = LIST_TOP_LEVEL_DESTINATION,
+                selectedItem = Route.FRIENDS
+            )
+        }) { innerPadding ->
         Column(
             modifier =
-                Modifier.fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .testTag("leaderboardList"),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              // Dropdown selector
-              PracticeModeSelector()
+            Modifier.fillMaxSize()
+                .padding(innerPadding)
+                .padding(
+                    horizontal = AppDimensions.paddingMedium,
+                    vertical = AppDimensions.paddingSmall
+                )
+                .testTag("leaderboardList"),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Dropdown selector
+            PracticeModeSelector()
 
-              Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-              // Leaderboard list
-              LazyColumn(
-                  contentPadding = PaddingValues(vertical = 8.dp),
-                  verticalArrangement = Arrangement.spacedBy(8.dp),
-                  modifier = Modifier.testTag("leaderboardLazyColumn")) {
-                    itemsIndexed(leaderboardEntries) { index, profile ->
-                      LeaderboardItem(rank = index + 1, profile = profile)
-                    }
-                  }
+            // Leaderboard list
+            LazyColumn(
+                contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
+                modifier = Modifier.testTag("leaderboardLazyColumn")
+            ) {
+                itemsIndexed(leaderboardEntries) { index, profile ->
+                    LeaderboardItem(rank = index + 1, profile = profile)
+                }
             }
-      }
+        }
+    }
+}
 }
 
 @Composable
@@ -97,14 +107,14 @@ fun PracticeModeSelector() {
 
   Box(
       modifier =
-          Modifier.clip(RoundedCornerShape(12.dp))
+          Modifier.clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
               .clickable { expanded = true }
-              .padding(12.dp),
+              .padding(AppDimensions.paddingSmallMedium),
       contentAlignment = Alignment.Center) {
         Text(
             text = selectedMode,
-            fontSize = 16.sp,
+            fontSize = AppDimensions.mediumText,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold)
 
@@ -132,14 +142,14 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
   Surface(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(horizontal = 4.dp) // Side padding for each item
-              .clip(RoundedCornerShape(20.dp)),
+              .padding(horizontal = AppDimensions.paddingExtraSmall) // Side padding for each item
+              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius)),
       color = LightPurpleGrey,
-      shadowElevation = 4.dp // Subtle shadow with low elevation
+      shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("leaderboardItem#$rank")) {
+        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium).testTag("leaderboardItem#$rank")) {
           ProfilePicture(profilePictureUrl = profile.profilePic, onClick = {})
-          Spacer(modifier = Modifier.width(12.dp))
+          Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
 
           Column {
             Text(
@@ -149,11 +159,11 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
             Text(
                 text = "Improvement: ${profile.statistics.improvement}",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray,
+                color = AppColors.secondaryTextColor,
                 modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
           }
 
-          Spacer(modifier = Modifier.weight(1f))
+          Spacer(modifier = Modifier.weight(AppDimensions.full))
 
           // Display rank as badge on the left side
           Text(

@@ -1,7 +1,7 @@
 package com.github.se.orator.ui.friends
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,12 +9,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -25,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -33,16 +38,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
-import com.github.se.orator.ui.navigation.BottomNavigationMenu
-import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
 
@@ -56,6 +62,8 @@ fun AddFriendsScreen(
     var query by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     val allProfiles by userProfileViewModel.allProfiles.collectAsState()
+    val focusManager = LocalFocusManager.current
+    val focusRequester = FocusRequester()
 
     ProjectTheme {
         Scaffold(
@@ -71,13 +79,7 @@ fun AddFriendsScreen(
                         }
                     },
                 )
-            },
-            bottomBar = {
-                BottomNavigationMenu(
-                    onTabSelect = { route -> navigationActions.navigateTo(route) },
-                    tabList = LIST_TOP_LEVEL_DESTINATION,
-                    selectedItem = navigationActions.currentRoute(),
-                )
+                Divider()
             }) { paddingValues ->
             Column(
                 modifier =
@@ -91,7 +93,10 @@ fun AddFriendsScreen(
                         query = newValue
                         expanded = newValue.isNotEmpty()
                     },
-                    modifier = Modifier.fillMaxWidth().testTag("addFriendSearchField"),
+                    modifier =  Modifier.wrapContentWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .height(AppDimensions.mediumHeight)
+                        .focusRequester(focusRequester).testTag("addFriendSearchField"),
                     label = {
                         Text("Username", modifier = Modifier.testTag("searchFieldLabel"))
                     }, // Added testTag
@@ -150,33 +155,33 @@ fun AddFriendsScreen(
  */
 @Composable
 fun UserItem(user: UserProfile, userProfileViewModel: UserProfileViewModel) {
-    Row(
+    Surface(
         modifier =
         Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(AppDimensions.paddingMedium)
-            .testTag("addFriendUserItem#${user.uid}"),
-        verticalAlignment = Alignment.CenterVertically) {
-        // Displays the profile picture and allows the user to be added as a friend when clicked
-        ProfilePicture(
-            profilePictureUrl = user.profilePic,
-            onClick = { userProfileViewModel.addFriend(user) },
-        )
-        Spacer(modifier = Modifier.width(AppDimensions.spacerWidthMedium))
-        Column {
-            // Displays the user's name
-            Text(
-                text = user.name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.testTag("userName_${user.uid}") // Added testTag
-            )
-            // Displays the user's bio, or a default text if the bio is null
-            Text(
-                text = user.bio ?: "No bio available",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.testTag("userBio_${user.uid}") // Added testTag
-            )
+            .padding(horizontal = AppDimensions.smallPadding) // Side padding for each item
+            .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius)),
+        color = AppColors.LightPurpleGrey,
+        shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
+    ) {
+        Row(
+            modifier =
+            Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium).testTag("addFriendUserItem#${user.uid}")) {
+            ProfilePicture(
+                profilePictureUrl = user.profilePic,
+                onClick = { userProfileViewModel.addFriend(user) })
+            Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+            Column {
+                Text(
+                    text = user.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = AppDimensions.smallPadding))
+                Text(
+                    text = user.bio ?: "No bio available",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppColors.secondaryTextColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
+            }
         }
     }
 }
