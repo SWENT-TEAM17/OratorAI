@@ -114,7 +114,7 @@ fun ViewFriendsScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .padding(vertical = 16.dp) // Apply padding to the container
+                        .padding(vertical = 20.dp) // Apply padding to the container
                 ) {
                     OutlinedTextField(
                         value = searchQuery,
