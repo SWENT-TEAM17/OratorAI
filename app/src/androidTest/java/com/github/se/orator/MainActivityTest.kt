@@ -2,8 +2,6 @@ package com.github.se.orator
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import com.github.se.orator.ui.authentification.LoadingScreen
 import com.github.se.orator.ui.network.ChatGPTService
 import org.junit.Rule
 import org.junit.Test
