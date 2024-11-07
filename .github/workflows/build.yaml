@@ -23,6 +23,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      packages: write
+      actions: read
+
     env:
       KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
       KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
@@ -62,7 +67,13 @@ jobs:
 
           # Decode local.properties and add additional keys directly
           echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
-
+          
+      # Decode the keystore and save it as a file for Gradle to access
+      - name: Decode keystore file
+        env:
+          SIGNING_KEY_STORE_BASE64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+        run: |
+          echo "$SIGNING_KEY_STORE_BASE64" | base64 --decode > ./keystore.jks
 
       - name: Build APK
         run: |
