@@ -1,70 +1,56 @@
 package com.github.se.orator.network
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
- * NetworkConnectivityObserver is a class that observes network connectivity changes
- * and emits connectivity status updates to its subscribers.
+ * NetworkChangeReceiver is a BroadcastReceiver that listens for network connectivity changes
+ * and updates the isNetworkAvailable StateFlow to reflect the current network status.
  *
- * It uses the Android ConnectivityManager to monitor network status changes and
- * emits a ConnectivityObserver.Status indicating whether the network is available
- * or unavailable.
- *
- * @param context The application context, used to obtain the ConnectivityManager service.
+ * This receiver allows the app to observe changes in network connectivity in real-time and
+ * react accordingly, such as switching between online and offline modes.
  */
-class NetworkConnectivityObserver(context: Context) : ConnectivityObserver {
+class NetworkConnectivityObserver : BroadcastReceiver() {
 
-    // ConnectivityManager instance to monitor network changes.
-    private val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    // MutableStateFlow to hold the current network status (true for online, false for offline)
+    companion object {
+        private val _isNetworkAvailable = MutableStateFlow(true)
+        val isNetworkAvailable: StateFlow<Boolean> = _isNetworkAvailable // Public read-only StateFlow
+    }
 
     /**
-     * Starts observing network status changes and returns a Flow<ConnectivityObserver.Status>.
+     * This method is triggered whenever the network connectivity changes.
+     * It updates the isNetworkAvailable StateFlow based on the current network status.
      *
-     * The flow emits:
-     * - ConnectivityObserver.Status.Available when the network is available with internet.
-     * - ConnectivityObserver.Status.Unavailable when the network is lost or lacks internet capability.
+     * @param context The Context in which the receiver is running.
+     * @param intent The Intent being received, which holds the connectivity information.
      *
-     * @return Flow<ConnectivityObserver.Status> emitting distinct network status updates.
+     * When the system detects a change in network connectivity, it broadcasts an implicit
+     * intent that is sent to any BroadcastReceiver registered to listen for it.
      */
-    override fun observe(): Flow<ConnectivityObserver.Status> = callbackFlow {
-        // NetworkCallback to handle network changes and emit status updates.
-        val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                // Emit "Available" status when the network is connected.
-                trySend(ConnectivityObserver.Status.Available).isSuccess
-            }
-
-            override fun onLost(network: Network) {
-                // Emit "Unavailable" status when the network connection is lost.
-                trySend(ConnectivityObserver.Status.Unavailable).isSuccess
-            }
-
-            override fun onCapabilitiesChanged(
-                network: Network,
-                networkCapabilities: NetworkCapabilities
-            ) {
-                // Emit "Available" status if the network has internet capability;
-                // otherwise, emit "Unavailable".
-                if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-                    trySend(ConnectivityObserver.Status.Available).isSuccess
-                } else {
-                    trySend(ConnectivityObserver.Status.Unavailable).isSuccess
-                }
-            }
+    override fun onReceive(context: Context, intent: Intent) {
+        val isConnected = isConnected(context)
+        // Only update StateFlow if there's an actual change
+        if (_isNetworkAvailable.value != isConnected) {
+            _isNetworkAvailable.value = isConnected
         }
+    }
 
-        // Register the callback with the ConnectivityManager to start monitoring network changes.
-        connectivityManager.registerDefaultNetworkCallback(callback)
-
-        // Ensure the callback is unregistered and resources are released when Flow collection stops.
-        awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
-    }.distinctUntilChanged() // Emit only when the status changes to avoid redundant emissions.
+    /**
+     * Checks the network connectivity status.
+     *
+     * @param context The context used to access system services.
+     * @return Boolean indicating whether the device is connected to a network with internet access.
+     */
+    private fun isConnected(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
 }

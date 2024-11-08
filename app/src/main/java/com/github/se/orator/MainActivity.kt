@@ -6,16 +6,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,7 +23,6 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
-import com.github.se.orator.network.ConnectivityObserver
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
@@ -52,12 +47,21 @@ import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import androidx.activity.viewModels
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.lifecycleScope
+import com.github.se.orator.network.OfflineViewModel
+import com.github.se.orator.ui.network.OfflineScreen
+import kotlinx.coroutines.launch
+
 
 /** The MainActivity class is the main entry point for the OratorAI application. */
-
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
+  private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,28 +74,39 @@ class MainActivity : ComponentActivity() {
     val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
     val apiKey = appInfo.metaData.getString("GPT_API_KEY")
     val organizationId = appInfo.metaData.getString("GPT_ORGANIZATION_ID")
+
     requireNotNull(apiKey) { "GPT API Key is missing in the manifest" }
     requireNotNull(organizationId) { "GPT Organization ID is missing in the manifest" }
 
     val chatGPTService = createChatGPTService(apiKey, organizationId)
 
-    // Initialize Connectivity Observer
-    networkConnectivityObserver = NetworkConnectivityObserver(applicationContext)
+    // Initialize NetworkChangeReceiver and register it
+    networkConnectivityObserver = NetworkConnectivityObserver()
+    val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+    registerReceiver(networkConnectivityObserver, filter)
 
-    // Enable edge-to-edge display for modern UI layout
+    // Observe network status updates and update offline mode in ViewModel
+    lifecycleScope.launch {
+      NetworkConnectivityObserver.isNetworkAvailable.collect { isConnected ->
+        offlineViewModel.setOfflineMode(!isConnected) // Update offline mode status in ViewModel
+      }
+    }
+
     enableEdgeToEdge()
     setContent {
       ProjectTheme {
-        // Observe network connectivity status and update UI accordingly
-        val networkStatus by networkConnectivityObserver.observe().collectAsState(
-          initial = ConnectivityObserver.Status.Unavailable
-        )
         Scaffold(modifier = Modifier.fillMaxSize()) {
-          // Pass the connectivity status to OratorApp to handle network-based UI updates
-          OratorApp(chatGPTService, networkStatus)
+          // Pass chatGPTService and offline status from ViewModel
+          val isOffline by offlineViewModel.isOffline.observeAsState(false)
+          OratorApp(chatGPTService, isOffline)
         }
       }
     }
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    unregisterReceiver(networkConnectivityObserver) // Unregister receiver to prevent leaks
   }
 }
 
@@ -102,85 +117,113 @@ class MainActivity : ComponentActivity() {
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OratorApp(chatGPTService: ChatGPTService, networkStatus: ConnectivityObserver.Status) {
-  // Set up the navigation controller and actions
+fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
+
+  // Initialize the navigation controller
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
   // Main layout using a Scaffold
   Scaffold(modifier = Modifier.fillMaxSize()) {
-    // Check network status to adjust the UI accordingly
-    if (networkStatus == ConnectivityObserver.Status.Unavailable) {
-      // For now, display network status message if offline --> later it will be the full offline logic
-      Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-      ) {
-        Text(text = "Network status: $networkStatus")
-      }
-    } else {
-      // Initialize necessary view models when network is available
-      val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
-      val apiLinkViewModel = ApiLinkViewModel()
-      val speakingViewModel = SpeakingViewModel(SpeakingRepository(LocalContext.current), apiLinkViewModel)
-      val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
-      // Replace the content of the Scaffold with the desired screen
-      NavHost(navController = navController, startDestination = Route.AUTH) {
-        navigation(
+    if (isOffline) {
+      // Display OfflineScreen when there is no network connection
+      OfflineScreen(navigationActions)
+    } else {
+
+    // Initialize the view models
+    val userProfileViewModel: UserProfileViewModel =
+        viewModel(factory = UserProfileViewModel.Factory)
+    val apiLinkViewModel = ApiLinkViewModel()
+    val speakingViewModel =
+        SpeakingViewModel(SpeakingRepository(LocalContext.current), apiLinkViewModel)
+    val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    // Replace the content of the Scaffold with the desired screen
+    NavHost(navController = navController, startDestination = Route.AUTH) {
+      navigation(
           startDestination = Screen.AUTH,
           route = Route.AUTH,
-        ) {
-          // Authentication Flow
-          composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
+      ) {
 
-          // Profile Creation Flow
-          composable(Screen.CREATE_PROFILE) { CreateAccountScreen(navigationActions, userProfileViewModel) }
+        // Authentication Flow
+        composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
+
+        // Profile Creation Flow
+        composable(Screen.CREATE_PROFILE) {
+          CreateAccountScreen(navigationActions, userProfileViewModel)
         }
+      }
 
-        navigation(
+      navigation(
           startDestination = Screen.HOME,
           route = Route.HOME,
-        ) {
-          composable(Screen.HOME) { MainScreen(navigationActions) }
-          composable(Screen.SPEAKING_JOB_INTERVIEW) { SpeakingJobInterviewModule(navigationActions, apiLinkViewModel) }
-          composable(Screen.SPEAKING_PUBLIC_SPEAKING) { SpeakingPublicSpeaking(navigationActions, apiLinkViewModel) }
-          composable(Screen.SPEAKING_SALES_PITCH) { SpeakingSalesPitchModule(navigationActions, apiLinkViewModel) }
-          composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
-          composable(Screen.CHAT_SCREEN) { ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel) }
-          composable(Screen.FEEDBACK) {
-            FeedbackScreen(chatViewModel = chatViewModel, navController = navController, navigationActions = navigationActions)
-          }
-        }
+      ) {
+        composable(Screen.HOME) { MainScreen(navigationActions) }
 
-        navigation(
+        composable(Screen.SPEAKING_JOB_INTERVIEW) {
+          SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
+        }
+        composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
+          SpeakingPublicSpeaking(navigationActions, apiLinkViewModel)
+        }
+        composable(Screen.SPEAKING_SALES_PITCH) {
+          SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
+        }
+        composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
+        composable(Screen.CHAT_SCREEN) {
+          ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
+        }
+        composable(Screen.FEEDBACK) {
+          // Navigate to FeedbackScreen
+          FeedbackScreen(
+              chatViewModel = chatViewModel,
+              navController = navController,
+              navigationActions = navigationActions)
+        }
+      }
+
+      navigation(
           startDestination = Screen.FRIENDS,
           route = Route.FRIENDS,
-        ) {
-          composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
+      ) {
+        composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
+      }
+      //// temporarily adding those empty screens before we implement their functionalities
+      composable(Screen.FUN_SCREEN) {
+        ViewFunScreen(
+            navigationActions, userProfileViewModel) // Your composable function for Fun Screen
+      }
+      composable(Screen.CONNECT_SCREEN) {
+        ViewConnectScreen(
+            navigationActions, userProfileViewModel) // Your composable function for Connect Screen
+      }
+
+      navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
+        composable(Screen.CREATE_PROFILE) {
+          CreateAccountScreen(navigationActions, userProfileViewModel)
         }
+      }
 
-        composable(Screen.FUN_SCREEN) { ViewFunScreen(navigationActions, userProfileViewModel) }
-        composable(Screen.CONNECT_SCREEN) { ViewConnectScreen(navigationActions, userProfileViewModel) }
-
-        navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
-          composable(Screen.CREATE_PROFILE) { CreateAccountScreen(navigationActions, userProfileViewModel) }
+      navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
+        composable(Screen.EDIT_PROFILE) {
+          EditProfileScreen(navigationActions, userProfileViewModel)
         }
+      }
 
-        navigation(startDestination = Screen.EDIT_PROFILE, route = Route.EDIT_PROFILE) {
-          composable(Screen.EDIT_PROFILE) { EditProfileScreen(navigationActions, userProfileViewModel) }
-        }
-
-        navigation(
+      navigation(
           startDestination = Screen.PROFILE,
           route = Route.PROFILE,
-        ) {
-          composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
-          composable(Screen.LEADERBOARD) { LeaderboardScreen(navigationActions, userProfileViewModel) }
-          composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
-          composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+      ) {
+        composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
+
+        composable(Screen.LEADERBOARD) {
+          LeaderboardScreen(navigationActions, userProfileViewModel)
         }
+        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
       }
     }
   }
+}
 }
