@@ -17,7 +17,7 @@ import com.github.se.orator.ui.navigation.Screen
  * @param navigationActions The navigation actions that can be performed.
  */
 @Composable
-fun SpeakingPublicSpeaking(
+fun SpeakingPublicSpeakingModule(
     navigationActions: NavigationActions,
     apiLinkViewModel: ApiLinkViewModel
 ) {

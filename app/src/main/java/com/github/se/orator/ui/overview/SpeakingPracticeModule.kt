@@ -73,8 +73,7 @@ fun SpeakingPracticeModule(
                     Image(
                         painter = painterResource(id = R.drawable.back_arrow),
                         contentDescription = "Back",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeSmall).testTag("back_button"))
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall))
                   }
             })
       },

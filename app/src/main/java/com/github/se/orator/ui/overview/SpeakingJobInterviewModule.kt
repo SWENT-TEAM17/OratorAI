@@ -55,7 +55,7 @@ fun SpeakingJobInterviewModule(
               label = "What skills or qualifications do you want to highlight?",
               placeholder = "e.g Problem solving",
               height = 85,
-              testTag = "timeInput"),
+              testTag = "skillsInput"),
           InputFieldData(
               value = feedbackType,
               onValueChange = { newValue: String ->

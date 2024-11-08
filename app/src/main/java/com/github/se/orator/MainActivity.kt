@@ -19,7 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
-import com.github.se.orator.model.symblAi.SpeakingRepository
+import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
@@ -34,7 +34,7 @@ import com.github.se.orator.ui.network.createChatGPTService
 import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
 import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
-import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
+import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
@@ -112,7 +112,7 @@ fun OratorApp(chatGPTService: ChatGPTService) {
         viewModel(factory = UserProfileViewModel.Factory)
     val apiLinkViewModel = ApiLinkViewModel()
     val speakingViewModel =
-        SpeakingViewModel(SpeakingRepository(LocalContext.current), apiLinkViewModel)
+        SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
     val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
     // Replace the content of the Scaffold with the desired screen
@@ -141,7 +141,7 @@ fun OratorApp(chatGPTService: ChatGPTService) {
           SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
         }
         composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-          SpeakingPublicSpeaking(navigationActions, apiLinkViewModel)
+          SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
         }
         composable(Screen.SPEAKING_SALES_PITCH) {
           SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
