@@ -98,7 +98,8 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
                 Modifier.size(80.dp)
                     .scale(
                         if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) scale
-                        else 1f).testTag("mic_button"),
+                        else 1f)
+                    .testTag("mic_button"),
             contentPadding = PaddingValues(0.dp)) {
               Icon(
                   imageVector =

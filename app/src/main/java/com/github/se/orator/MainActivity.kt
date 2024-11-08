@@ -34,7 +34,7 @@ import com.github.se.orator.ui.network.createChatGPTService
 import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
 import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
-import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
+import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
@@ -141,7 +141,7 @@ fun OratorApp(chatGPTService: ChatGPTService) {
           SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
         }
         composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-          SpeakingPublicSpeaking(navigationActions, apiLinkViewModel)
+          SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
         }
         composable(Screen.SPEAKING_SALES_PITCH) {
           SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
