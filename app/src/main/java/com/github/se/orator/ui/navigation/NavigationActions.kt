@@ -55,7 +55,6 @@ object Screen {
   const val SPEAKING = "Speaking"
   const val PRACTICE_QUESTIONS_SCREEN = "PracticeQuestions Screen"
   const val OFFLINE_SCREEN = "Offline Screen"
-
 }
 
 data class TopLevelDestination(

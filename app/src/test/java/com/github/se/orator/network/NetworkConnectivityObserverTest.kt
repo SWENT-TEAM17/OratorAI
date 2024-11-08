@@ -22,78 +22,81 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class NetworkConnectivityObserverTest {
 
-    @Mock
-    private lateinit var mockContext: Context
+  @Mock private lateinit var mockContext: Context
 
-    @Mock
-    private lateinit var mockConnectivityManager: ConnectivityManager
+  @Mock private lateinit var mockConnectivityManager: ConnectivityManager
 
-    @Mock
-    private lateinit var mockNetworkCapabilities: NetworkCapabilities
+  @Mock private lateinit var mockNetworkCapabilities: NetworkCapabilities
 
-    @Mock
-    private lateinit var mockNetwork: Network
+  @Mock private lateinit var mockNetwork: Network
 
-    private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
-    private lateinit var autoCloseable: AutoCloseable
+  private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
+  private lateinit var autoCloseable: AutoCloseable
 
-    @Before
-    fun setUp() {
-        // Initialize the mocks and NetworkChangeReceiver
-        autoCloseable = MockitoAnnotations.openMocks(this)
-        networkConnectivityObserver = NetworkConnectivityObserver()
+  @Before
+  fun setUp() {
+    // Initialize the mocks and NetworkChangeReceiver
+    autoCloseable = MockitoAnnotations.openMocks(this)
+    networkConnectivityObserver = NetworkConnectivityObserver()
 
-        // Set up the context to return the mocked ConnectivityManager
-        `when`(mockContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(mockConnectivityManager)
-    }
+    // Set up the context to return the mocked ConnectivityManager
+    `when`(mockContext.getSystemService(Context.CONNECTIVITY_SERVICE))
+        .thenReturn(mockConnectivityManager)
+  }
 
-    @After
-    fun tearDown() {
-        // Close any open mocks to avoid memory leaks
-        autoCloseable.close()
-    }
+  @After
+  fun tearDown() {
+    // Close any open mocks to avoid memory leaks
+    autoCloseable.close()
+  }
 
-    @Test
-    fun `test network available`() = runBlockingTest {
-        // Set up mocks to simulate a connected network with internet capability
-        `when`(mockConnectivityManager.activeNetwork).thenReturn(mockNetwork)
-        `when`(mockConnectivityManager.getNetworkCapabilities(mockNetwork)).thenReturn(mockNetworkCapabilities)
-        `when`(mockNetworkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)).thenReturn(true)
+  @Test
+  fun `test network available`() = runBlockingTest {
+    // Set up mocks to simulate a connected network with internet capability
+    `when`(mockConnectivityManager.activeNetwork).thenReturn(mockNetwork)
+    `when`(mockConnectivityManager.getNetworkCapabilities(mockNetwork))
+        .thenReturn(mockNetworkCapabilities)
+    `when`(mockNetworkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET))
+        .thenReturn(true)
 
-        // Trigger the receiver with an Intent
-        networkConnectivityObserver.onReceive(mockContext, Intent())
+    // Trigger the receiver with an Intent
+    networkConnectivityObserver.onReceive(mockContext, Intent())
 
-        // Assert that isNetworkAvailable is true
-        val isConnected = NetworkConnectivityObserver.isNetworkAvailable.first() // Get the first emitted value
-        assertEquals(true, isConnected)
-    }
+    // Assert that isNetworkAvailable is true
+    val isConnected =
+        NetworkConnectivityObserver.isNetworkAvailable.first() // Get the first emitted value
+    assertEquals(true, isConnected)
+  }
 
-    @Test
-    fun `test network not available`() = runBlockingTest {
-        // Set up mocks to simulate no active network
-        `when`(mockConnectivityManager.activeNetwork).thenReturn(null)
+  @Test
+  fun `test network not available`() = runBlockingTest {
+    // Set up mocks to simulate no active network
+    `when`(mockConnectivityManager.activeNetwork).thenReturn(null)
 
-        // Trigger the receiver with an Intent
-        networkConnectivityObserver.onReceive(mockContext, Intent())
+    // Trigger the receiver with an Intent
+    networkConnectivityObserver.onReceive(mockContext, Intent())
 
-        // Assert that isNetworkAvailable is false
-        val isConnected = NetworkConnectivityObserver.isNetworkAvailable.first() // Get the first emitted value
-        assertEquals(false, isConnected)
-    }
+    // Assert that isNetworkAvailable is false
+    val isConnected =
+        NetworkConnectivityObserver.isNetworkAvailable.first() // Get the first emitted value
+    assertEquals(false, isConnected)
+  }
 
-    @Test
-    fun `test network available but no internet capability`() = runBlockingTest {
-        // Set up mocks to simulate a network without internet capability
-        `when`(mockConnectivityManager.activeNetwork).thenReturn(mockNetwork)
-        `when`(mockConnectivityManager.getNetworkCapabilities(mockNetwork)).thenReturn(mockNetworkCapabilities)
-        `when`(mockNetworkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)).thenReturn(false)
+  @Test
+  fun `test network available but no internet capability`() = runBlockingTest {
+    // Set up mocks to simulate a network without internet capability
+    `when`(mockConnectivityManager.activeNetwork).thenReturn(mockNetwork)
+    `when`(mockConnectivityManager.getNetworkCapabilities(mockNetwork))
+        .thenReturn(mockNetworkCapabilities)
+    `when`(mockNetworkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET))
+        .thenReturn(false)
 
-        // Trigger the receiver with an Intent
-        networkConnectivityObserver.onReceive(mockContext, Intent())
+    // Trigger the receiver with an Intent
+    networkConnectivityObserver.onReceive(mockContext, Intent())
 
-        // Assert that isNetworkAvailable is false
-        val isConnected = NetworkConnectivityObserver.isNetworkAvailable.first() // Get the first emitted value
-        assertEquals(false, isConnected)
-    }
+    // Assert that isNetworkAvailable is false
+    val isConnected =
+        NetworkConnectivityObserver.isNetworkAvailable.first() // Get the first emitted value
+    assertEquals(false, isConnected)
+  }
 }
-

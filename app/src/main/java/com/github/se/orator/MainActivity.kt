@@ -1,18 +1,23 @@
 package com.github.se.orator
 
 import android.annotation.SuppressLint
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -23,6 +28,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
+import com.github.se.orator.network.OfflineViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
@@ -31,6 +37,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.network.ChatGPTService
+import com.github.se.orator.ui.network.OfflineScreen
 import com.github.se.orator.ui.network.createChatGPTService
 import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
@@ -47,15 +54,7 @@ import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
-import android.content.IntentFilter
-import android.net.ConnectivityManager
-import androidx.activity.viewModels
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.lifecycleScope
-import com.github.se.orator.network.OfflineViewModel
-import com.github.se.orator.ui.network.OfflineScreen
 import kotlinx.coroutines.launch
-
 
 /** The MainActivity class is the main entry point for the OratorAI application. */
 class MainActivity : ComponentActivity() {
@@ -125,105 +124,107 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
 
   // Main layout using a Scaffold
   Scaffold(modifier = Modifier.fillMaxSize()) {
-
     if (isOffline) {
       // Display OfflineScreen when there is no network connection
       OfflineScreen(navigationActions)
     } else {
 
-    // Initialize the view models
-    val userProfileViewModel: UserProfileViewModel =
-        viewModel(factory = UserProfileViewModel.Factory)
-    val apiLinkViewModel = ApiLinkViewModel()
-    val speakingViewModel =
-        SpeakingViewModel(SpeakingRepository(LocalContext.current), apiLinkViewModel)
-    val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+      // Initialize the view models
+      val userProfileViewModel: UserProfileViewModel =
+          viewModel(factory = UserProfileViewModel.Factory)
+      val apiLinkViewModel = ApiLinkViewModel()
+      val speakingViewModel =
+          SpeakingViewModel(SpeakingRepository(LocalContext.current), apiLinkViewModel)
+      val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
-    // Replace the content of the Scaffold with the desired screen
-    NavHost(navController = navController, startDestination = Route.AUTH) {
-      navigation(
-          startDestination = Screen.AUTH,
-          route = Route.AUTH,
-      ) {
+      // Replace the content of the Scaffold with the desired screen
+      NavHost(navController = navController, startDestination = Route.AUTH) {
+        navigation(
+            startDestination = Screen.AUTH,
+            route = Route.AUTH,
+        ) {
 
-        // Authentication Flow
-        composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
+          // Authentication Flow
+          composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
 
-        // Profile Creation Flow
-        composable(Screen.CREATE_PROFILE) {
-          CreateAccountScreen(navigationActions, userProfileViewModel)
+          // Profile Creation Flow
+          composable(Screen.CREATE_PROFILE) {
+            CreateAccountScreen(navigationActions, userProfileViewModel)
+          }
         }
-      }
 
-      navigation(
-          startDestination = Screen.HOME,
-          route = Route.HOME,
-      ) {
-        composable(Screen.HOME) { MainScreen(navigationActions) }
+        navigation(
+            startDestination = Screen.HOME,
+            route = Route.HOME,
+        ) {
+          composable(Screen.HOME) { MainScreen(navigationActions) }
 
-        composable(Screen.SPEAKING_JOB_INTERVIEW) {
-          SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
+          composable(Screen.SPEAKING_JOB_INTERVIEW) {
+            SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
+          }
+          composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
+            SpeakingPublicSpeaking(navigationActions, apiLinkViewModel)
+          }
+          composable(Screen.SPEAKING_SALES_PITCH) {
+            SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
+          }
+          composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
+          composable(Screen.CHAT_SCREEN) {
+            ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
+          }
+          composable(Screen.FEEDBACK) {
+            // Navigate to FeedbackScreen
+            FeedbackScreen(
+                chatViewModel = chatViewModel,
+                navController = navController,
+                navigationActions = navigationActions)
+          }
         }
-        composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-          SpeakingPublicSpeaking(navigationActions, apiLinkViewModel)
-        }
-        composable(Screen.SPEAKING_SALES_PITCH) {
-          SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
-        }
-        composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
-        composable(Screen.CHAT_SCREEN) {
-          ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
-        }
-        composable(Screen.FEEDBACK) {
-          // Navigate to FeedbackScreen
-          FeedbackScreen(
-              chatViewModel = chatViewModel,
-              navController = navController,
-              navigationActions = navigationActions)
-        }
-      }
 
-      navigation(
-          startDestination = Screen.FRIENDS,
-          route = Route.FRIENDS,
-      ) {
-        composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
-      }
-      //// temporarily adding those empty screens before we implement their functionalities
-      composable(Screen.FUN_SCREEN) {
-        ViewFunScreen(
-            navigationActions, userProfileViewModel) // Your composable function for Fun Screen
-      }
-      composable(Screen.CONNECT_SCREEN) {
-        ViewConnectScreen(
-            navigationActions, userProfileViewModel) // Your composable function for Connect Screen
-      }
-
-      navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
-        composable(Screen.CREATE_PROFILE) {
-          CreateAccountScreen(navigationActions, userProfileViewModel)
+        navigation(
+            startDestination = Screen.FRIENDS,
+            route = Route.FRIENDS,
+        ) {
+          composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
         }
-      }
-
-      navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
-        composable(Screen.EDIT_PROFILE) {
-          EditProfileScreen(navigationActions, userProfileViewModel)
+        //// temporarily adding those empty screens before we implement their functionalities
+        composable(Screen.FUN_SCREEN) {
+          ViewFunScreen(
+              navigationActions, userProfileViewModel) // Your composable function for Fun Screen
         }
-      }
-
-      navigation(
-          startDestination = Screen.PROFILE,
-          route = Route.PROFILE,
-      ) {
-        composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
-
-        composable(Screen.LEADERBOARD) {
-          LeaderboardScreen(navigationActions, userProfileViewModel)
+        composable(Screen.CONNECT_SCREEN) {
+          ViewConnectScreen(
+              navigationActions,
+              userProfileViewModel) // Your composable function for Connect Screen
         }
-        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
-        composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+
+        navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
+          composable(Screen.CREATE_PROFILE) {
+            CreateAccountScreen(navigationActions, userProfileViewModel)
+          }
+        }
+
+        navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
+          composable(Screen.EDIT_PROFILE) {
+            EditProfileScreen(navigationActions, userProfileViewModel)
+          }
+        }
+
+        navigation(
+            startDestination = Screen.PROFILE,
+            route = Route.PROFILE,
+        ) {
+          composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
+
+          composable(Screen.LEADERBOARD) {
+            LeaderboardScreen(navigationActions, userProfileViewModel)
+          }
+          composable(Screen.ADD_FRIENDS) {
+            AddFriendsScreen(navigationActions, userProfileViewModel)
+          }
+          composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+        }
       }
     }
   }
-}
 }
