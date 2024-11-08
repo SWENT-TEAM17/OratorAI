@@ -42,16 +42,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.ui.navigation.BottomNavigationMenu
+import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
 
+/**
+ * Composable function that displays the "Add Friends" screen, allowing users to search and add
+ * friends. The screen contains a top app bar with a back button, a search field to look for
+ * friends, and a list of matching user profiles based on the search query.
+ *
+ * @param navigationActions Actions to handle navigation within the app.
+ * @param userProfileViewModel ViewModel for managing user profile data and friend addition logic.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -59,11 +69,10 @@ fun AddFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  var query by remember { mutableStateOf("") }
-  var expanded by remember { mutableStateOf(false) }
-  val allProfiles by userProfileViewModel.allProfiles.collectAsState()
-  val focusManager = LocalFocusManager.current
-  val focusRequester = FocusRequester()
+  var query by remember { mutableStateOf("") } // Holds the search query input
+  var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
+  val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
+  val focusRequester = FocusRequester() // Manages focus for the search field
 
   ProjectTheme {
     Scaffold(
@@ -80,6 +89,12 @@ fun AddFriendsScreen(
               },
           )
           Divider()
+        },
+        bottomBar = {
+          BottomNavigationMenu(
+              onTabSelect = { route -> navigationActions.navigateTo(route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION,
+              selectedItem = Route.FRIENDS)
         }) { paddingValues ->
           Column(
               modifier =
@@ -125,20 +140,19 @@ fun AddFriendsScreen(
                     },
                     singleLine = true,
                     keyboardActions = KeyboardActions.Default)
+                // Display search results if there is a query
                 if (query.isNotEmpty()) {
                   LazyColumn(
                       contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                       verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
                       modifier = Modifier.testTag("searchResultsList") // Added testTag
                       ) {
+                        // Filter and display profiles matching the query
                         items(
                             allProfiles.filter { profile ->
                               profile.name.contains(query, ignoreCase = true)
                             }) { user ->
-                              UserItem(
-                                  user = user,
-                                  userProfileViewModel = userProfileViewModel,
-                              )
+                              UserItem(user = user, userProfileViewModel = userProfileViewModel)
                             }
                       }
                 }
@@ -148,7 +162,7 @@ fun AddFriendsScreen(
 }
 
 /**
- * A composable function that represents a single user item in a list. Displays the user's profile
+ * Composable function that represents a single user item in a list. Displays the user's profile
  * picture, name, and bio, and allows adding the user as a friend.
  *
  * @param user The [UserProfile] object representing the user being displayed.
@@ -170,15 +184,18 @@ fun UserItem(user: UserProfile, userProfileViewModel: UserProfileViewModel) {
                 Modifier.fillMaxWidth()
                     .padding(AppDimensions.paddingMedium)
                     .testTag("addFriendUserItem#${user.uid}")) {
+              // Profile picture and click listener to add the user as a friend
               ProfilePicture(
                   profilePictureUrl = user.profilePic,
                   onClick = { userProfileViewModel.addFriend(user) })
               Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
               Column {
+                // Display user name
                 Text(
                     text = user.name,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = AppDimensions.smallPadding))
+                // Display user bio, with ellipsis if it exceeds one line
                 Text(
                     text = user.bio ?: "No bio available",
                     style = MaterialTheme.typography.bodySmall,

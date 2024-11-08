@@ -37,21 +37,31 @@ import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
 import kotlinx.coroutines.launch
 
+/**
+ * Composable function that displays the "View Friends" screen, showing a list of friends with a
+ * search bar and options to navigate to other screens like "Add Friends" and "Leaderboard."
+ *
+ * @param navigationActions Actions to handle navigation within the app.
+ * @param userProfileViewModel ViewModel for managing user profile data and fetching friends.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
+  // State variables for managing friends list and search functionality
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
   var searchQuery by remember { mutableStateOf("") }
   val filteredFriends =
       friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
 
+  // State variables for managing UI components
   val focusRequester = FocusRequester()
   val focusManager = LocalFocusManager.current
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val scope = rememberCoroutineScope()
+
   ProjectTheme {
     ModalNavigationDrawer(
         modifier = Modifier.testTag("viewFriendsDrawerMenu"),
@@ -92,19 +102,13 @@ fun ViewFriendsScreen(
               topBar = {
                 Column {
                   CenterAlignedTopAppBar(
-                      title = {
-                        Text(
-                            "My Friends",
-                            modifier = Modifier.testTag("myFriendsTitle") // Added testTag
-                            )
-                      },
+                      title = { Text("My Friends", modifier = Modifier.testTag("myFriendsTitle")) },
                       navigationIcon = {
                         IconButton(
                             onClick = { scope.launch { drawerState.open() } },
-                            modifier = Modifier.testTag("viewFriendsMenuButton"),
-                        ) {
-                          Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
+                            modifier = Modifier.testTag("viewFriendsMenuButton")) {
+                              Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            }
                       })
                   Divider() // Adds a separation line below the TopAppBar
                 }
@@ -126,13 +130,10 @@ fun ViewFriendsScreen(
                             .padding(innerPadding)
                             .padding(horizontal = AppDimensions.paddingMedium)
                             .clickable { focusManager.clearFocus() }) {
+                      // Search bar for filtering friends
                       Box(
                           modifier =
-                              Modifier.padding(
-                                  vertical =
-                                      AppDimensions
-                                          .paddingMediumSmall) // Apply padding to the container
-                          ) {
+                              Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
                             OutlinedTextField(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
@@ -150,6 +151,7 @@ fun ViewFriendsScreen(
                                         .testTag("viewFriendsSearch"))
                           }
 
+                      // Display message if no friends match the search query
                       if (filteredFriends.isEmpty()) {
                         Box(
                             modifier = Modifier.fillMaxSize().testTag("noUserFound"),
@@ -160,6 +162,7 @@ fun ViewFriendsScreen(
                                   modifier = Modifier.testTag("noUserFoundText"))
                             }
                       } else {
+                        // Display the list of friends if any match the search query
                         LazyColumn(
                             modifier = Modifier.testTag("viewFriendsList"),
                             contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
@@ -174,6 +177,12 @@ fun ViewFriendsScreen(
   }
 }
 
+/**
+ * Composable function that represents a single friend item in the list. Displays the friend's
+ * profile picture, name, and bio.
+ *
+ * @param friend The [UserProfile] object representing the friend being displayed.
+ */
 @Composable
 fun FriendItem(friend: UserProfile) {
   Surface(
@@ -207,6 +216,14 @@ fun FriendItem(friend: UserProfile) {
       }
 }
 
+/**
+ * Composable function to display a profile picture with a circular shape. Uses Coil to load the
+ * image asynchronously.
+ *
+ * @param profilePictureUrl The URL of the profile picture to display. Defaults to a placeholder if
+ *   null.
+ * @param onClick Action to be performed when the profile picture is clicked.
+ */
 @Composable
 fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
   val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)

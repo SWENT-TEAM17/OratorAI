@@ -26,15 +26,25 @@ import com.github.se.orator.ui.theme.AppColors.LightPurpleGrey
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
 
+/**
+ * Composable function that displays the "Leaderboard" screen, which shows a ranked list of friends
+ * based on their improvement statistics. Users can also select different practice modes.
+ *
+ * @param navigationActions Actions to handle navigation within the app.
+ * @param userProfileViewModel ViewModel for managing user profile data and fetching leaderboard
+ *   entries.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LeaderboardScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
+  // Fetch user profile and friends' profiles to create leaderboard entries
   val userProfile by userProfileViewModel.userProfile.collectAsState()
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
 
+  // Combine and sort profiles by improvement for leaderboard display
   val leaderboardEntries =
       remember(userProfile, friendsProfiles) {
         (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
@@ -50,7 +60,7 @@ fun LeaderboardScreen(
               navigationIcon = {
                 IconButton(
                     onClick = {
-                      navigationActions.goBack() // Only navigate back, no drawer action
+                      navigationActions.goBack() // Navigate back
                     },
                     modifier = Modifier.testTag("leaderboardBackButton")) {
                       Icon(
@@ -75,12 +85,12 @@ fun LeaderboardScreen(
                           vertical = AppDimensions.paddingSmall)
                       .testTag("leaderboardList"),
               horizontalAlignment = Alignment.CenterHorizontally) {
-                // Dropdown selector
+                // Dropdown selector for choosing practice mode
                 PracticeModeSelector()
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-                // Leaderboard list
+                // Leaderboard list displaying ranked profiles
                 LazyColumn(
                     contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                     verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
@@ -94,10 +104,14 @@ fun LeaderboardScreen(
   }
 }
 
+/**
+ * Composable function that displays a dropdown menu for selecting different practice modes. The
+ * selected mode is shown and can be changed by the user.
+ */
 @Composable
 fun PracticeModeSelector() {
-  var expanded by remember { mutableStateOf(false) }
-  var selectedMode by remember { mutableStateOf("Practice mode 1") }
+  var expanded by remember { mutableStateOf(false) } // Controls dropdown menu visibility
+  var selectedMode by remember { mutableStateOf("Practice mode 1") } // Holds the selected mode
 
   Box(
       modifier =
@@ -114,6 +128,7 @@ fun PracticeModeSelector() {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("selectedMode"))
 
+        // Dropdown menu options for selecting a practice mode
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
           DropdownMenuItem(
               text = { Text("Practice mode 1") },
@@ -129,51 +144,55 @@ fun PracticeModeSelector() {
                 expanded = false
               },
               modifier = Modifier.testTag("practiceModeOption2"))
-          // Add more items as needed
+          // Additional items can be added as needed
         }
       }
 }
 
+/**
+ * Composable function that represents a single leaderboard item, displaying the profile's rank,
+ * name, and improvement statistics.
+ *
+ * @param rank The rank position of the user in the leaderboard.
+ * @param profile The [UserProfile] object containing user information and improvement statistics.
+ */
 @Composable
 fun LeaderboardItem(rank: Int, profile: UserProfile) {
-
   Surface(
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = AppDimensions.paddingExtraSmall) // Side padding for each item
-              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius)),
+              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
+              .testTag("leaderboardItem#$rank"),
       color = LightPurpleGrey,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
-        Row(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .padding(AppDimensions.paddingMedium)
-                    .testTag("leaderboardItem#$rank")) {
-              ProfilePicture(profilePictureUrl = profile.profilePic, onClick = {})
-              Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
+        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
+          ProfilePicture(profilePictureUrl = profile.profilePic, onClick = {})
+          Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
 
-              Column {
-                Text(
-                    text = profile.name,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                )
-                Text(
-                    text = "Improvement: ${profile.statistics.improvement}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = AppColors.secondaryTextColor,
-                    modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
-              }
+          Column {
+            // Display user's name in bold
+            Text(
+                text = profile.name,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            )
+            // Display user's improvement statistics
+            Text(
+                text = "Improvement: ${profile.statistics.improvement}",
+                style = MaterialTheme.typography.bodySmall,
+                color = AppColors.secondaryTextColor,
+                modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
+          }
 
-              Spacer(modifier = Modifier.weight(AppDimensions.full))
+          Spacer(modifier = Modifier.weight(AppDimensions.full))
 
-              // Display rank as badge on the left side
-              Text(
-                  text = "#$rank",
-                  fontWeight = FontWeight.Bold,
-                  modifier =
-                      Modifier.align(Alignment.CenterVertically)
-                          .testTag("leaderboardItemName#$rank"))
-            }
+          // Display rank as a badge on the left side
+          Text(
+              text = "#$rank",
+              fontWeight = FontWeight.Bold,
+              modifier =
+                  Modifier.align(Alignment.CenterVertically).testTag("leaderboardItemName#$rank"))
+        }
       }
 }
