@@ -152,10 +152,7 @@ fun OratorApp(chatGPTService: ChatGPTService) {
         }
         composable(Screen.FEEDBACK) {
           // Navigate to FeedbackScreen
-          FeedbackScreen(
-              chatViewModel = chatViewModel,
-              navController = navController,
-              navigationActions = navigationActions)
+          FeedbackScreen(chatViewModel = chatViewModel, navigationActions = navigationActions)
         }
       }
 

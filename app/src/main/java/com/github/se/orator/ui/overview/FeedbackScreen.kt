@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.navigation.NavHostController
 import com.github.se.orator.R
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -38,15 +37,10 @@ import com.github.se.orator.ui.theme.AppTypography
  * The FeedbackScreen composable displays the feedback screen.
  *
  * @param chatViewModel The view model for the chat.
- * @param navController The navigation controller.
  * @param navigationActions The navigation actions that can be performed.
  */
 @Composable
-fun FeedbackScreen(
-    chatViewModel: ChatViewModel,
-    navController: NavHostController,
-    navigationActions: NavigationActions
-) {
+fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationActions) {
   // State variables
   var feedbackMessage by remember { mutableStateOf<String?>(null) }
   var isLoading by remember { mutableStateOf(true) }
@@ -75,13 +69,12 @@ fun FeedbackScreen(
             title = { Text("Feedback", modifier = Modifier.testTag("FeedbackText")) },
             navigationIcon = {
               IconButton(
-                  onClick = { navController.popBackStack() },
+                  onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("back_button")) {
                     Image(
                         painter = painterResource(id = R.drawable.back_arrow),
                         contentDescription = "Back",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeSmall).testTag("back_button"))
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall))
                   }
             })
       },
@@ -123,14 +116,14 @@ fun FeedbackScreen(
                     style = AppTypography.bodyLargeStyle,
                     modifier =
                         Modifier.padding(bottom = AppDimensions.paddingMedium)
-                            .testTag("feedbackContent"))
+                            .testTag("feedbackMessage"))
               } else {
                 Text(
                     text = "No feedback available.",
                     style = AppTypography.bodyLargeStyle,
                     modifier =
                         Modifier.padding(bottom = AppDimensions.paddingMedium)
-                            .testTag("feedbackContent"))
+                            .testTag("feedbackNoMessage"))
               }
 
               // Buttons for Retry and Review
