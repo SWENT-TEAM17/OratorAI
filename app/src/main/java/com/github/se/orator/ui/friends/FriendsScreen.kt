@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -162,11 +164,7 @@ fun ViewFriendsScreen(
                             .padding(innerPadding)
                             .padding(
                                 horizontal = AppDimensions.paddingMedium,
-                                vertical = AppDimensions.paddingSmall)
-                            .clickable {
-                              focusManager.clearFocus()
-                            } // Clear focus when clicking outside the search bar
-                    ) {
+                                vertical = AppDimensions.paddingSmall)) {
                       // Search bar to filter friends by name
                       OutlinedTextField(
                           value = searchQuery,
@@ -198,7 +196,9 @@ fun ViewFriendsScreen(
                             contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                             verticalArrangement =
                                 Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-                              items(filteredFriends) { friend -> FriendItem(friend = friend) }
+                              items(filteredFriends) { friend ->
+                                FriendItem(friend = friend, userProfileViewModel)
+                              }
                             }
                       }
                     }
@@ -208,7 +208,7 @@ fun ViewFriendsScreen(
 }
 
 @Composable
-fun FriendItem(friend: UserProfile) {
+fun FriendItem(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -235,6 +235,10 @@ fun FriendItem(friend: UserProfile) {
               modifier = Modifier.testTag("friendBio#${friend.uid}") // Added testTag
               )
         }
+
+        Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
+
+        DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
       }
 }
 
@@ -255,4 +259,22 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
       contentScale = ContentScale.Crop,
       modifier =
           Modifier.size(AppDimensions.iconSize).clip(CircleShape).clickable(onClick = onClick))
+}
+
+/**
+ * Button triggering the removing of a friend in the user's friend list.
+ *
+ * @param friend The friend to be removed.
+ * @param userProfileViewModel The view model for the user's profile.
+ */
+@Composable
+fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
+  IconButton(
+      onClick = { userProfileViewModel.deleteFriend(friend) },
+      modifier = Modifier.testTag("deleteFriendButton#${friend.uid}")) {
+        Icon(
+            imageVector = Icons.Default.Delete, // Built-in delete icon
+            contentDescription = "Delete",
+            tint = Color.Red)
+      }
 }
