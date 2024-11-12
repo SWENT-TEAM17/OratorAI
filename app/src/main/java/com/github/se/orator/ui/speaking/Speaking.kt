@@ -209,8 +209,9 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
         Row {
           Button(
               onClick = {
-                  viewModel.endAndSave() //end the recording
-                  navigationActions.goBack() },
+                viewModel.endAndSave() // end the recording
+                navigationActions.goBack()
+              },
               modifier = Modifier.testTag("back_button"),
               colors =
                   ButtonDefaults.buttonColors(
@@ -233,17 +234,21 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
  */
 @Composable
 fun AudioVisualizer(amplitudes: List<Float>) {
-  Canvas(modifier = Modifier.fillMaxWidth().height(AppDimensions.visualizerHeight)) {
-    val width = size.width
-    val height = size.height
-    val barWidth = width / amplitudes.size
-    amplitudes.forEachIndexed { index, amplitude ->
-      val barHeight = (amplitude / Short.MAX_VALUE) * height
-      drawLine(
-          color = AppColors.primaryColor,
-          start = Offset(x = index * barWidth, y = height / 2 - barHeight / 2),
-          end = Offset(x = index * barWidth, y = height / 2 + barHeight / 2),
-          strokeWidth = barWidth)
-    }
-  }
+  Canvas(
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(AppDimensions.visualizerHeight)
+              .testTag("audio_visualizer")) {
+        val width = size.width
+        val height = size.height
+        val barWidth = width / amplitudes.size
+        amplitudes.forEachIndexed { index, amplitude ->
+          val barHeight = (amplitude / Short.MAX_VALUE) * height
+          drawLine(
+              color = AppColors.primaryColor,
+              start = Offset(x = index * barWidth, y = height / 2 - barHeight / 2),
+              end = Offset(x = index * barWidth, y = height / 2 + barHeight / 2),
+              strokeWidth = barWidth)
+        }
+      }
 }
