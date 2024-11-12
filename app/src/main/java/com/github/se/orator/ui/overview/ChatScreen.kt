@@ -25,9 +25,9 @@ import com.github.se.orator.ui.theme.AppDimensions // Import AppDimensions
 /**
  * Composable function that represents the Chat Screen.
  *
- * This screen displays a list of chat messages between the user and the assistant.
- * It includes a top app bar with a back button, a scrollable list of messages,
- * and buttons at the bottom for recording a response or requesting feedback.
+ * This screen displays a list of chat messages between the user and the assistant. It includes a
+ * top app bar with a back button, a scrollable list of messages, and buttons at the bottom for
+ * recording a response or requesting feedback.
  *
  * @param navigationActions An instance of [NavigationActions] to handle navigation events.
  * @param chatViewModel The [ChatViewModel] that provides chat messages and loading state.
@@ -35,181 +35,167 @@ import com.github.se.orator.ui.theme.AppDimensions // Import AppDimensions
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewModel) {
-    // Collect the list of chat messages from the view model as a state.
-    val chatMessages by chatViewModel.chatMessages.collectAsState()
+  // Collect the list of chat messages from the view model as a state.
+  val chatMessages by chatViewModel.chatMessages.collectAsState()
 
-    // Collect the loading state from the view model as a state.
-    val isLoading by chatViewModel.isLoading.collectAsState()
+  // Collect the loading state from the view model as a state.
+  val isLoading by chatViewModel.isLoading.collectAsState()
 
-    // Remember the list state for the LazyColumn to manage scrolling position.
-    val listState = rememberLazyListState()
+  // Remember the list state for the LazyColumn to manage scrolling position.
+  val listState = rememberLazyListState()
 
-    // Side effect to auto-scroll to the last message when a new message is added.
-    LaunchedEffect(chatMessages.size) {
-        if (chatMessages.isNotEmpty()) {
-            listState.animateScrollToItem(chatMessages.size - 1)
-        }
+  // Side effect to auto-scroll to the last message when a new message is added.
+  LaunchedEffect(chatMessages.size) {
+    if (chatMessages.isNotEmpty()) {
+      listState.animateScrollToItem(chatMessages.size - 1)
     }
+  }
 
-    // Initialize and dispose of the conversation when the composable enters or leaves the composition.
-    DisposableEffect(Unit) {
-        chatViewModel.initializeConversation()
-        onDispose { chatViewModel.endConversation() }
-    }
+  // Initialize and dispose of the conversation when the composable enters or leaves the
+  // composition.
+  DisposableEffect(Unit) {
+    chatViewModel.initializeConversation()
+    onDispose { chatViewModel.endConversation() }
+  }
 
-    // Scaffold provides the basic visual layout structure.
-    Scaffold(
-        // Top app bar with a centered title and a back button.
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Chat Screen",
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.textColor // Use theme color for text
+  // Scaffold provides the basic visual layout structure.
+  Scaffold(
+      // Top app bar with a centered title and a back button.
+      topBar = {
+        CenterAlignedTopAppBar(
+            title = {
+              Text(
+                  text = "Chat Screen",
+                  fontWeight = FontWeight.Bold,
+                  color = AppColors.textColor // Use theme color for text
+                  )
+            },
+            navigationIcon = {
+              IconButton(onClick = { navigationActions.goBack() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.size(AppDimensions.iconSizeSmall).testTag("back_button"),
+                    tint = AppColors.textColor // Use theme color for icon
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navigationActions.goBack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .size(AppDimensions.iconSizeSmall)
-                                .testTag("back_button"),
-                            tint = AppColors.textColor // Use theme color for icon
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+              }
+            },
+            colors =
+                TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = AppColors.surfaceColor, // Use theme surface color
                     titleContentColor = AppColors.textColor // Use theme text color
-                )
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                // Divider to separate the TopAppBar from the content.
-                Divider()
-                // Main content column containing the messages and buttons.
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = AppDimensions.paddingMedium)
-                        .padding(top = AppDimensions.paddingSmall)
-                ) {
-                    // LazyColumn to display chat messages in a scrollable list.
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier
-                            .weight(1f) // Makes the LazyColumn fill available space.
-                            .fillMaxWidth()
-                    ) {
-                        // Dynamically add chat message items.
-                        items(chatMessages) { message ->
-                            ChatMessageItem(message)
-                        }
+                    ))
+      },
+      content = { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+          // Divider to separate the TopAppBar from the content.
+          Divider()
+          // Main content column containing the messages and buttons.
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(horizontal = AppDimensions.paddingMedium)
+                      .padding(top = AppDimensions.paddingSmall)) {
+                // LazyColumn to display chat messages in a scrollable list.
+                LazyColumn(
+                    state = listState,
+                    modifier =
+                        Modifier.weight(1f) // Makes the LazyColumn fill available space.
+                            .fillMaxWidth()) {
+                      // Dynamically add chat message items.
+                      items(chatMessages) { message -> ChatMessageItem(message) }
                     }
 
-                    // Display a loading indicator when a message is being processed.
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(AppDimensions.paddingSmall),
-                            color = AppColors.loadingIndicatorColor // Use theme color
-                        )
-                    }
+                // Display a loading indicator when a message is being processed.
+                if (isLoading) {
+                  CircularProgressIndicator(
+                      modifier =
+                          Modifier.align(Alignment.CenterHorizontally)
+                              .padding(AppDimensions.paddingSmall),
+                      color = AppColors.loadingIndicatorColor // Use theme color
+                      )
+                }
 
-                    // Button to navigate to the "Speaking" screen to record a response.
-                    Button(
-                        onClick = { navigationActions.navigateTo(Screen.SPEAKING) },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                // Button to navigate to the "Speaking" screen to record a response.
+                Button(
+                    onClick = { navigationActions.navigateTo(Screen.SPEAKING) },
+                    modifier =
+                        Modifier.fillMaxWidth()
                             .padding(top = AppDimensions.paddingSmall)
                             .border(
                                 width = AppDimensions.borderStrokeWidth,
                                 color = AppColors.buttonBorderColor,
-                                shape = MaterialTheme.shapes.medium
-                            ),
-                        enabled = !isLoading,
-                        colors = ButtonDefaults.buttonColors(
+                                shape = MaterialTheme.shapes.medium),
+                    enabled = !isLoading,
+                    colors =
+                        ButtonDefaults.buttonColors(
                             containerColor = AppColors.buttonBackgroundColor, // Use theme color
                             contentColor = AppColors.textColor // Use theme color
-                        )
-                    ) {
-                        Text(text = "Record Response")
+                            )) {
+                      Text(text = "Record Response")
                     }
 
-                    // Button to navigate to the "Feedback" screen to request feedback.
-                    Button(
-                        onClick = { navigationActions.navigateTo(Screen.FEEDBACK) },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                // Button to navigate to the "Feedback" screen to request feedback.
+                Button(
+                    onClick = { navigationActions.navigateTo(Screen.FEEDBACK) },
+                    modifier =
+                        Modifier.fillMaxWidth()
                             .padding(top = AppDimensions.paddingSmall)
                             .border(
-                                width = AppDimensions.borderStrokeWidth, // Use dimension for border width
+                                width =
+                                    AppDimensions
+                                        .borderStrokeWidth, // Use dimension for border width
                                 color = AppColors.buttonBorderColor, // Use theme color for border
                                 shape = MaterialTheme.shapes.medium // Or any other shape you prefer
-                            ),
-                        colors = ButtonDefaults.buttonColors(
+                                ),
+                    colors =
+                        ButtonDefaults.buttonColors(
                             containerColor = AppColors.buttonBackgroundColor, // Use theme color
                             contentColor = AppColors.textColor // Use theme color
-                        )
-                    ) {
-                        Text(text = "Request Feedback")
+                            )) {
+                      Text(text = "Request Feedback")
                     }
-                }
-            }
+              }
         }
-    )
+      })
 }
 
 /**
  * Composable function that represents a single chat message item.
  *
- * This function displays a message bubble with different background colors
- * and alignment based on whether the message is from the user or the assistant.
+ * This function displays a message bubble with different background colors and alignment based on
+ * whether the message is from the user or the assistant.
  *
  * @param message An instance of [Message] containing the message content and role.
  */
 @Composable
 fun ChatMessageItem(message: Message) {
-    // Determine the background color based on the message role.
-    val backgroundColor = if (message.role == "user") {
+  // Determine the background color based on the message role.
+  val backgroundColor =
+      if (message.role == "user") {
         AppColors.userMessageBackgroundColor // Use theme color for user messages
-    } else {
+      } else {
         AppColors.assistantMessageBackgroundColor // Use theme color for assistant messages
-    }
+      }
 
-    // Determine the alignment based on the message role.
-    val alignment = if (message.role == "user") Arrangement.End else Arrangement.Start
+  // Determine the alignment based on the message role.
+  val alignment = if (message.role == "user") Arrangement.End else Arrangement.Start
 
-    // Row to align the message bubble horizontally.
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = AppDimensions.paddingExtraSmall),
-        horizontalArrangement = alignment
-    ) {
+  // Row to align the message bubble horizontally.
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(vertical = AppDimensions.paddingExtraSmall),
+      horizontalArrangement = alignment) {
         // Message bubble.
         Box(
-            modifier = Modifier
-                .background(
-                    backgroundColor,
-                    shape = RoundedCornerShape(AppDimensions.cornerRadiusSmall)
-                )
-                .padding(AppDimensions.paddingSmall)
-        ) {
-            // Display the message content.
-            Text(
-                text = message.content,
-                color = AppColors.textColor // Use theme color for text
-            )
-        }
-    }
+            modifier =
+                Modifier.background(
+                        backgroundColor,
+                        shape = RoundedCornerShape(AppDimensions.cornerRadiusSmall))
+                    .padding(AppDimensions.paddingSmall)) {
+              // Display the message content.
+              Text(
+                  text = message.content, color = AppColors.textColor // Use theme color for text
+                  )
+            }
+      }
 }

@@ -13,8 +13,8 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,142 +66,124 @@ import kotlinx.coroutines.delay
 @Composable
 fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingViewModel) {
 
-    // State variables
-    val analysisState = viewModel.analysisState.collectAsState()
-    val analysisData by viewModel.analysisData.collectAsState()
+  // State variables
+  val analysisState = viewModel.analysisState.collectAsState()
+  val analysisData by viewModel.analysisData.collectAsState()
 
-    // Permission handling
-    var permissionGranted by remember { mutableStateOf(false) }
-    val permissionLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission(),
-            onResult = { isGranted -> permissionGranted = isGranted })
+  // Permission handling
+  var permissionGranted by remember { mutableStateOf(false) }
+  val permissionLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.RequestPermission(),
+          onResult = { isGranted -> permissionGranted = isGranted })
 
-    DisposableEffect(Unit) {
-        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+  DisposableEffect(Unit) {
+    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
 
-        onDispose { viewModel.endAndSave() }
-    }
+    onDispose { viewModel.endAndSave() }
+  }
 
-    // State for amplitudes
-    val amplitudes = remember { mutableStateListOf<Float>() }
+  // State for amplitudes
+  val amplitudes = remember { mutableStateListOf<Float>() }
 
-    // Audio recording and amplitude collection
-    LaunchedEffect(analysisState.value, permissionGranted) {
-        if (permissionGranted && analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-            val sampleRateInHz = 44100
-            val channelConfig = AudioFormat.CHANNEL_IN_MONO
-            val audioFormat = AudioFormat.ENCODING_PCM_16BIT
+  // Audio recording and amplitude collection
+  LaunchedEffect(analysisState.value, permissionGranted) {
+    if (permissionGranted && analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
+      val sampleRateInHz = 44100
+      val channelConfig = AudioFormat.CHANNEL_IN_MONO
+      val audioFormat = AudioFormat.ENCODING_PCM_16BIT
 
-            val bufferSize = AudioRecord.getMinBufferSize(
-                sampleRateInHz,
-                channelConfig,
-                audioFormat
-            )
-            val audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                sampleRateInHz,
-                channelConfig,
-                audioFormat,
-                bufferSize
-            )
-            audioRecord.startRecording()
-            val buffer = ShortArray(bufferSize)
-            try {
-                while (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-                    val readSize = audioRecord.read(buffer, 0, bufferSize)
-                    if (readSize > 0) {
-                        val max = buffer.take(readSize).maxOrNull()?.toFloat() ?: 0f
-                        amplitudes.add(max)
-                        if (amplitudes.size > 100) {
-                            amplitudes.removeFirst()
-                        }
-                    }
-                    delay(16L) // Approximately 60 fps
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                audioRecord.stop()
-                audioRecord.release()
+      val bufferSize = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat)
+      val audioRecord =
+          AudioRecord(
+              MediaRecorder.AudioSource.MIC, sampleRateInHz, channelConfig, audioFormat, bufferSize)
+      audioRecord.startRecording()
+      val buffer = ShortArray(bufferSize)
+      try {
+        while (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
+          val readSize = audioRecord.read(buffer, 0, bufferSize)
+          if (readSize > 0) {
+            val max = buffer.take(readSize).maxOrNull()?.toFloat() ?: 0f
+            amplitudes.add(max)
+            if (amplitudes.size > 100) {
+              amplitudes.removeFirst()
             }
-        } else {
-            amplitudes.clear()
+          }
+          delay(16L) // Approximately 60 fps
         }
+      } catch (e: Exception) {
+        e.printStackTrace()
+      } finally {
+        audioRecord.stop()
+        audioRecord.release()
+      }
+    } else {
+      amplitudes.clear()
     }
+  }
 
-    // UI Components
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(AppDimensions.paddingMedium)
-            .testTag("ui_column"),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+  // UI Components
+  Column(
+      modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium).testTag("ui_column"),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         // Animated recording indicator
         val infiniteTransition = rememberInfiniteTransition()
 
         // Animation for pulsing effect during recording
         val scale by
-        infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = 1.5f,
-            animationSpec =
-            infiniteRepeatable(
-                animation = tween(500, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = ""
-        )
+            infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.5f,
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(500, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse),
+                label = "")
 
         // Microphone button with animation
         Button(
             onClick = { viewModel.onMicButtonClicked(permissionGranted) },
             modifier =
-            Modifier.size(AppDimensions.buttonSize)
-                .scale(
-                    if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) scale
-                    else 1f
-                )
-                .testTag("mic_button"),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = MaterialTheme.colorScheme.primary
-            ),
+                Modifier.size(AppDimensions.buttonSize)
+                    .scale(
+                        if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) scale
+                        else 1f)
+                    .testTag("mic_button"),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.White, contentColor = MaterialTheme.colorScheme.primary),
             shape = AppShapes.circleShape,
-            border = BorderStroke(
-                width = AppDimensions.borderStrokeWidth,
-                color = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                imageVector =
-                if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING)
-                    Icons.Filled.Mic
-                else Icons.Filled.MicOff,
-                contentDescription =
-                if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING)
-                    "Stop recording"
-                else "Start recording",
-                modifier = Modifier.size(AppDimensions.iconSizeMic),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
+            border =
+                BorderStroke(
+                    width = AppDimensions.borderStrokeWidth,
+                    color = MaterialTheme.colorScheme.primary)) {
+              Icon(
+                  imageVector =
+                      if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING)
+                          Icons.Filled.Mic
+                      else Icons.Filled.MicOff,
+                  contentDescription =
+                      if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING)
+                          "Stop recording"
+                      else "Start recording",
+                  modifier = Modifier.size(AppDimensions.iconSizeMic),
+                  tint = MaterialTheme.colorScheme.primary)
+            }
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
         // Display feedback messages
         val feedbackMessage =
             when (analysisState.value) {
-                SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
-                SpeakingRepository.AnalysisState.PROCESSING -> "Processing..."
-                SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
-                else ->
-                    when (viewModel.analysisError.value) {
-                        SpeakingError.NO_ERROR -> "Analysis finished."
-                        else -> "Error : ${viewModel.analysisError.value}"
-                    }
+              SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
+              SpeakingRepository.AnalysisState.PROCESSING -> "Processing..."
+              SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
+              else ->
+                  when (viewModel.analysisError.value) {
+                    SpeakingError.NO_ERROR -> "Analysis finished."
+                    else -> "Error : ${viewModel.analysisError.value}"
+                  }
             }
         Text(feedbackMessage, modifier = Modifier.testTag("mic_text"))
 
@@ -209,37 +191,39 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
 
         // Add the AudioVisualizer when recording
         if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-            AudioVisualizer(amplitudes = amplitudes)
-            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+          AudioVisualizer(amplitudes = amplitudes)
+          Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
         }
 
         // Display transcribed text
         if (analysisData != null) {
-            Text("Transcribed Text: ${analysisData!!.transcription}")
-            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
+          Text("Transcribed Text: ${analysisData!!.transcription}")
+          Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
 
-            // Display sentiment analysis result
-            Text("Sentiment Analysis: ${analysisData!!.sentimentScore}")
-            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("sentiment_analysis"))
+          // Display sentiment analysis result
+          Text("Sentiment Analysis: ${analysisData!!.sentimentScore}")
+          Spacer(
+              modifier = Modifier.height(AppDimensions.paddingMedium).testTag("sentiment_analysis"))
         }
 
         Row {
-            Button(
-                onClick = { navigationActions.goBack() },
-                modifier = Modifier.testTag("back_button"),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
-                border = BorderStroke(
-                    width = AppDimensions.borderStrokeWidth,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            ) {
+          Button(
+              onClick = {
+                  viewModel.endAndSave() //end the recording
+                  navigationActions.goBack() },
+              modifier = Modifier.testTag("back_button"),
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = Color.White,
+                      contentColor = MaterialTheme.colorScheme.primary),
+              border =
+                  BorderStroke(
+                      width = AppDimensions.borderStrokeWidth,
+                      color = MaterialTheme.colorScheme.primary)) {
                 Text("Back")
-            }
+              }
         }
-    }
+      }
 }
 
 /**
@@ -249,22 +233,17 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
  */
 @Composable
 fun AudioVisualizer(amplitudes: List<Float>) {
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(AppDimensions.visualizerHeight)
-    ) {
-        val width = size.width
-        val height = size.height
-        val barWidth = width / amplitudes.size
-        amplitudes.forEachIndexed { index, amplitude ->
-            val barHeight = (amplitude / Short.MAX_VALUE) * height
-            drawLine(
-                color = AppColors.primaryColor,
-                start = Offset(x = index * barWidth, y = height / 2 - barHeight / 2),
-                end = Offset(x = index * barWidth, y = height / 2 + barHeight / 2),
-                strokeWidth = barWidth
-            )
-        }
+  Canvas(modifier = Modifier.fillMaxWidth().height(AppDimensions.visualizerHeight)) {
+    val width = size.width
+    val height = size.height
+    val barWidth = width / amplitudes.size
+    amplitudes.forEachIndexed { index, amplitude ->
+      val barHeight = (amplitude / Short.MAX_VALUE) * height
+      drawLine(
+          color = AppColors.primaryColor,
+          start = Offset(x = index * barWidth, y = height / 2 - barHeight / 2),
+          end = Offset(x = index * barWidth, y = height / 2 + barHeight / 2),
+          strokeWidth = barWidth)
     }
+  }
 }
