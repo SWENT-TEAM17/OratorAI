@@ -95,7 +95,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
       content = { padding ->
         if (isLoading) {
           // Show loading spinner while fetching user profile data
-          LoadingScreen(dimensions)
+          LoadingScreen()
         } else {
           // Show sign-in UI when not loading
           Column(
@@ -144,7 +144,8 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
 }
 
 @Composable
-fun LoadingScreen(dimensions: AppDimensionsObject) {
+fun LoadingScreen() {
+  val dimensions: AppDimensionsObject = createAppDimensions()
   // Show a loading indicator in the center of the screen
   Column(
       modifier = Modifier.fillMaxSize().testTag("loadingScreen"),
