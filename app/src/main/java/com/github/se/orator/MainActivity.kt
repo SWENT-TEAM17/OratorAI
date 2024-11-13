@@ -87,7 +87,11 @@ class MainActivity : ComponentActivity() {
 
     enableEdgeToEdge()
     setContent {
-      ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp(chatGPTService) } }
+      ProjectTheme {
+        Scaffold(modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold")) {
+          OratorApp(chatGPTService)
+        }
+      }
     }
   }
 }
@@ -102,7 +106,7 @@ class MainActivity : ComponentActivity() {
 fun OratorApp(chatGPTService: ChatGPTService) {
 
   // Main layout using a Scaffold
-  Scaffold(modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold")) {
+  Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
 
     // Initialize the navigation controller
     val navController = rememberNavController()
