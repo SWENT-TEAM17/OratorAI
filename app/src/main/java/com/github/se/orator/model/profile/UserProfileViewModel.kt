@@ -5,7 +5,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * ViewModel for managing user profiles and friends' profiles.
@@ -33,6 +35,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   // Loading state to indicate if the profile is being fetched
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
+
   // Init block to fetch user profile automatically after authentication
   init {
     val uid = repository.getCurrentUserUid()
@@ -169,6 +172,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       Log.e("UserProfileViewModel", "Failed to add friend: Current user profile is null.")
     }
   }
+
   /**
    * Updates the user profile.
    *

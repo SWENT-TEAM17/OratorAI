@@ -25,7 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
-import com.github.se.orator.model.symblAi.SpeakingRepository
+import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.network.OfflineViewModel
@@ -33,6 +33,7 @@ import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
+import com.github.se.orator.ui.mainScreen.MainScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
@@ -42,7 +43,7 @@ import com.github.se.orator.ui.network.createChatGPTService
 import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
 import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
-import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
+import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
@@ -52,7 +53,6 @@ import com.github.se.orator.ui.screens.ViewFunScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
-import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -176,7 +176,6 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             // Navigate to FeedbackScreen
             FeedbackScreen(
                 chatViewModel = chatViewModel,
-                navController = navController,
                 navigationActions = navigationActions)
           }
         }

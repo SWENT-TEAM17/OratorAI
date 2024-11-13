@@ -11,6 +11,15 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("build") {
+            storeFile =
+                file("${rootProject.projectDir}/keystore.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
     namespace = "com.github.se.orator"
     compileSdk = 34
 
@@ -47,6 +56,7 @@ android {
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("build")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"

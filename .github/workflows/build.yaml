@@ -23,6 +23,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      packages: write
+      actions: read
+
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
     steps:
       - uses: actions/checkout@v3
 
@@ -49,24 +59,21 @@ jobs:
         env:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
           LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
-          GPT_API_KEY: ${{ secrets.GPT_API_KEY }}
-          GPT_ORGANIZATION_ID: ${{ secrets.GPT_ORGANIZATION_ID }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SYMBL_APP_ID: ${{ secrets.SYMBL_APP_ID }}
-          SYMBL_APP_SECRET: ${{ secrets.SYMBL_APP_SECRET }}
+
         run: |
+          
           # Decode google-services.json into the appropriate location
           echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
 
           # Decode local.properties and add additional keys directly
           echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
-          echo "GPT_API_KEY=$GPT_API_KEY" >> ./local.properties
-          echo "GPT_ORGANIZATION_ID=$GPT_ORGANIZATION_ID" >> ./local.properties
-          echo "SONAR_TOKEN=$SONAR_TOKEN" >> ./local.properties
-          echo "SYMBL_APP_ID=$SYMBL_APP_ID" >> ./local.properties
-          echo "SYMBL_APP_SECRET=$SYMBL_APP_SECRET" >> ./local.properties
-      
-      
+          
+      # Decode the keystore and save it as a file for Gradle to access
+      - name: Decode keystore file
+        env:
+          SIGNING_KEY_STORE_BASE64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+        run: |
+          echo "$SIGNING_KEY_STORE_BASE64" | base64 --decode > ./keystore.jks
 
       - name: Build APK
         run: |
@@ -81,7 +88,7 @@ jobs:
           releaseDirectory: ${{ env.main_project_module }}/build/outputs/apk/release/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
         env:
           # override default build-tools version (33.0.0) -- optional

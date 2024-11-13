@@ -16,10 +16,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +27,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * The SpeakingPracticeModule composable is a composable screen that displays the speaking practice
@@ -54,42 +56,48 @@ fun SpeakingPracticeModule(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
         TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            elevation = 4.dp,
-            title = { Text(screenTitle) },
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("topAppBar"),
+            backgroundColor = AppColors.surfaceColor,
+            contentColor = AppColors.textColor,
+            elevation = AppDimensions.elevationSmall,
+            title = {
+              Text(
+                  screenTitle,
+                  style = AppTypography.appBarTitleStyle,
+                  modifier = Modifier.testTag("screenTitle"))
+            },
             navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Image(
-                    painter = painterResource(id = R.drawable.back_arrow),
-                    contentDescription = "Back",
-                    modifier = Modifier.size(32.dp).testTag("back_button"))
-              }
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.back_arrow),
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall))
+                  }
             })
       },
       content = { paddingValues ->
         Column(
             modifier =
                 Modifier.fillMaxSize()
-                    .padding(16.dp)
+                    .padding(AppDimensions.paddingMedium)
                     .padding(paddingValues)
-                    .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    .verticalScroll(rememberScrollState())
+                    .testTag("content"),
+            verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)) {
               Text(
                   text = headerText,
-                  style = MaterialTheme.typography.headlineMedium,
-                  modifier = Modifier.padding(16.dp).testTag("titleText"))
+                  style = AppTypography.mediumTitleStyle,
+                  modifier = Modifier.padding(AppDimensions.paddingMedium).testTag("titleText"))
 
-              Spacer(modifier = Modifier.height(45.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.spacerHeightLarge))
 
               // Dynamically generated input fields based on the provided data
               inputs.forEach { input ->
                 OutlinedTextField(
                     value = input.value,
-                    onValueChange =
-                        input.onValueChange, // Correctly uses the lambda with an explicitly typed
-                    // String parameter
+                    onValueChange = input.onValueChange,
                     label = { Text(input.label) },
                     placeholder = { Text(input.placeholder) },
                     modifier =
@@ -99,7 +107,7 @@ fun SpeakingPracticeModule(
               // Get Started Button
               Button(
                   modifier =
-                      Modifier.fillMaxWidth().padding(top = 50.dp).testTag("getStartedButton"),
+                      Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
                   onClick = {
                     // Custom action, can be customized for different modules
                     if (inputs.foldRight(true) { input, acc -> acc && input.value.isNotEmpty() }) {
@@ -109,7 +117,7 @@ fun SpeakingPracticeModule(
                           .show()
                     }
                   }) {
-                    Text("Get Started")
+                    Text("Get Started", modifier = Modifier.testTag("getStartedText"))
                   }
             }
       })
