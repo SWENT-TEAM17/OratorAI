@@ -59,12 +59,16 @@ object AppDimensions {
   val paddingTopSmall = 5.dp // Added for padding top=5.dp in Text
   val statusBarPadding = 10.dp
   val iconSizeLarge = 35.dp
+  val buttonSize = 80.dp
+  val visualizerHeight = 100.dp
+  val iconSizeMic = 48.dp
   val heightMedium = 24.dp
   val paddingMediumSmall = 20.dp
   val smallWidth = 12.dp
   val smallPadding = 4.dp
   val mediumText = 16.sp
   val full = 1f
+
 }
 
 object AppShapes {
