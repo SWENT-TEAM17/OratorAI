@@ -1,39 +1,26 @@
 package com.github.se.orator.ui.overview
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material3.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
 
 /**
- * The SpeakingPracticeModule composable is a composable screen that displays the speaking practice
- * module.
+ * The SpeakingPracticeModule composable displays the speaking practice module screen.
  *
  * @param navigationActions The navigation actions that can be performed.
  * @param screenTitle The title of the screen.
@@ -41,6 +28,7 @@ import com.github.se.orator.ui.theme.AppTypography
  * @param inputs The input fields.
  * @param onGetStarted The action to perform when the Get Started button is clicked.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpeakingPracticeModule(
     navigationActions: NavigationActions,
@@ -49,76 +37,105 @@ fun SpeakingPracticeModule(
     inputs: List<InputFieldData>,
     onGetStarted: () -> Unit
 ) {
-
   val context = LocalContext.current
 
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
+        // Use CenterAlignedTopAppBar for consistency
         TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("topAppBar"),
-            backgroundColor = AppColors.surfaceColor,
-            contentColor = AppColors.textColor,
-            elevation = AppDimensions.elevationSmall,
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
             title = {
               Text(
-                  screenTitle,
-                  style = AppTypography.appBarTitleStyle,
+                  text = screenTitle,
+                  style = AppTypography.appBarTitleStyle.copy(fontWeight = FontWeight.Bold),
+                  color = AppColors.textColor,
                   modifier = Modifier.testTag("screenTitle"))
             },
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("back_button")) {
-                    Image(
-                        painter = painterResource(id = R.drawable.back_arrow),
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        modifier = Modifier.size(AppDimensions.iconSizeSmall))
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                        tint = AppColors.textColor)
                   }
-            })
+            },
+            colors =
+                TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = AppColors.surfaceColor,
+                    titleContentColor = AppColors.textColor))
       },
       content = { paddingValues ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(AppDimensions.paddingMedium)
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .testTag("content"),
-            verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-              Text(
-                  text = headerText,
-                  style = AppTypography.mediumTitleStyle,
-                  modifier = Modifier.padding(AppDimensions.paddingMedium).testTag("titleText"))
-
-              Spacer(modifier = Modifier.height(AppDimensions.spacerHeightLarge))
-
-              // Dynamically generated input fields based on the provided data
-              inputs.forEach { input ->
-                OutlinedTextField(
-                    value = input.value,
-                    onValueChange = input.onValueChange,
-                    label = { Text(input.label) },
-                    placeholder = { Text(input.placeholder) },
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+          Divider()
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(horizontal = AppDimensions.paddingMedium)
+                      .padding(top = AppDimensions.paddingSmall)
+                      .verticalScroll(rememberScrollState())
+                      .testTag("content"),
+              verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)) {
+                // Header text with consistent styling
+                Text(
+                    text = headerText,
+                    style =
+                        AppTypography.mediumTitleStyle.copy(
+                            fontWeight = FontWeight.Bold, color = AppColors.textColor),
                     modifier =
-                        Modifier.fillMaxWidth().height(input.height.dp).testTag(input.testTag))
-              }
+                        Modifier.padding(vertical = AppDimensions.paddingMedium)
+                            .testTag("titleText"))
 
-              // Get Started Button
-              Button(
-                  modifier =
-                      Modifier.fillMaxWidth().padding(top = 100.dp).testTag("getStartedButton"),
-                  onClick = {
-                    // Custom action, can be customized for different modules
-                    if (inputs.foldRight(true) { input, acc -> acc && input.value.isNotEmpty() }) {
-                      onGetStarted()
-                    } else {
-                      Toast.makeText(context, "Please fill all the fields !", Toast.LENGTH_SHORT)
-                          .show()
+                // Dynamically generated input fields based on the provided data
+                inputs.forEach { input ->
+                  OutlinedTextField(
+                      value = input.value,
+                      onValueChange = input.onValueChange,
+                      label = { Text(input.label, color = AppColors.textColor) },
+                      placeholder = { Text(input.placeholder, color = AppColors.textColor) },
+                      modifier =
+                          Modifier.fillMaxWidth().height(input.height.dp).testTag(input.testTag),
+                      colors =
+                          TextFieldDefaults.outlinedTextFieldColors(
+                              focusedBorderColor = AppColors.primaryColor,
+                              unfocusedBorderColor = AppColors.textColor,
+                              cursorColor = AppColors.primaryColor,
+                              focusedLabelColor = AppColors.primaryColor,
+                              unfocusedLabelColor = AppColors.textColor))
+                }
+
+                // Spacer to add space before the button
+                Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
+
+                // Get Started Button with consistent styling
+                Button(
+                    onClick = {
+                      // Custom action, can be customized for different modules
+                      if (inputs.all { it.value.isNotEmpty() }) {
+                        onGetStarted()
+                      } else {
+                        Toast.makeText(context, "Please fill all the fields!", Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(top = AppDimensions.paddingMedium)
+                            .border(
+                                width = AppDimensions.borderStrokeWidth,
+                                color = AppColors.buttonBorderColor,
+                                shape = MaterialTheme.shapes.medium)
+                            .testTag("getStartedButton"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = AppColors.buttonBackgroundColor,
+                            contentColor = AppColors.textColor)) {
+                      Text("Get Started", modifier = Modifier.testTag("getStartedText"))
                     }
-                  }) {
-                    Text("Get Started", modifier = Modifier.testTag("getStartedText"))
-                  }
-            }
+              }
+        }
       })
 }

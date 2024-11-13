@@ -52,12 +52,14 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
   // Scaffold is the main layout component that provides a basic structure with top bar and content
   // area.
   Scaffold(
+      modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
       topBar = {
         // TopAppBar to display the screen title and back navigation.
         TopAppBar(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
             title = {
               Text(
-                  text = "Feedback", // Title text displayed in the top app bar.
+                  text = "Feedback", modifier = Modifier.testTag("FeedbackText"), // Title text displayed in the top app bar.
                   fontWeight = FontWeight.Bold, // Bold font for emphasis
                   color = AppColors.textColor // Using theme color for title text
                   )
@@ -88,7 +90,8 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
         Column(
             modifier =
                 Modifier.fillMaxSize() // Fill the screen space
-                    .padding(paddingValues) // Apply padding from the scaffold
+                    .padding(paddingValues)// Apply padding from the scaffold
+                    .testTag("feedbackContent"),
             ) {
               Divider() // Divider below the top bar for visual separation
               Column(
@@ -98,17 +101,22 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
                               horizontal =
                                   AppDimensions.paddingMedium) // Horizontal padding from theme
                           .padding(top = AppDimensions.paddingSmall) // Top padding from theme
-                          .testTag("feedbackContent"), // Test tag for UI testing
+                          .testTag("feedbackTitle"), // Test tag for UI testing
                   horizontalAlignment = Alignment.CenterHorizontally // Center alignment
                   ) {
                     // Subtitle at the top to introduce feedback.
-                    ChatMessageItem(
-                        message =
-                            Message(
-                                content =
-                                    "Here's what you did well and where you can improve:", // Subtitle text
-                                role = "assistant" // Sets the role to "assistant" for styling
-                                ))
+                  Box(
+                      modifier = Modifier
+                          .fillMaxWidth()
+                          .testTag("feedbackSubtitle") // Apply testTag here
+                  ) {
+                      ChatMessageItem(
+                          message = Message(
+                              content = "Here's what you did well and where you can improve:",
+                              role = "assistant"
+                          )
+                      )
+                  }
 
                     // Display appropriate content based on loading, error, or feedback state.
                     when {
@@ -139,7 +147,9 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
                                 Modifier.fillMaxWidth() // Fill available width
                                     .weight(1f) // Allow Box to grow and take available space
                                     .verticalScroll(
-                                        rememberScrollState()) // Enable scrolling for long content
+                                        rememberScrollState())
+                                    .testTag("feedbackMessage")
+                                    // Enable scrolling for long content
                             ) {
                               ChatMessageItem(
                                   message =
@@ -179,7 +189,7 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
                                     shape =
                                         MaterialTheme.shapes
                                             .medium // Button shape from MaterialTheme
-                                    ),
+                                    ).testTag("retryButton"),
                         enabled = !isLoading, // Disable button while loading
                         colors =
                             ButtonDefaults.buttonColors(

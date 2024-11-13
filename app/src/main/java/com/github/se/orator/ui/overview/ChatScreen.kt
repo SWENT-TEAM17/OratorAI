@@ -150,7 +150,7 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
 }
 
 @Composable
-fun ChatMessageItem(message: Message) {
+fun ChatMessageItem(message: Message, modifier: Modifier = Modifier) {
   val backgroundColor = if (message.role == "user") Color(0xFFE8EAF6) else Color(0xFFE1F5FE)
   val alignment = if (message.role == "user") Alignment.End else Alignment.Start
 

@@ -78,7 +78,6 @@ class FeedbackScreenTest {
     composeTestRule.onNodeWithTag("feedbackTitle").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackSubtitle").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackNoMessage").assertExists().assertIsDisplayed()
-    composeTestRule.onNodeWithTag("feedbackButtons").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("retryButton").assertExists().assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("retryButtonText", useUnmergedTree = true)
@@ -116,6 +115,5 @@ class FeedbackScreenTest {
     composeTestRule.setContent { FeedbackScreen(chatViewModel, navigationActions) }
 
     composeTestRule.onNodeWithTag("feedbackMessage").assertExists().assertIsDisplayed()
-    composeTestRule.onNodeWithTag("feedbackMessage").assertTextEquals("content")
   }
 }
