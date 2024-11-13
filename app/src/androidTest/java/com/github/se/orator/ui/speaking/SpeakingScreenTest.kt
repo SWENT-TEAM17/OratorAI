@@ -139,4 +139,18 @@ class SpeakingScreenTest {
     Thread.sleep(5000)
     composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
   }
+
+  @Test
+  fun testAudioVisualizerIsDisplayedInRecordingState() {
+    `when`(speakingRepository.analysisState)
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.RECORDING))
+    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+
+    composeTestRule.setContent {
+      SpeakingScreen(navigationActions = navigationActions, viewModel = speakingViewModel)
+    }
+
+    // Verify that the AudioVisualizer is displayed
+    composeTestRule.onNodeWithTag("audio_visualizer").assertExists().assertIsDisplayed()
+  }
 }
