@@ -44,7 +44,7 @@ fun SpeakingPracticeModule(
       topBar = {
         // Use CenterAlignedTopAppBar for consistency
         TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("topAppBar"),
             title = {
               Text(
                   text = screenTitle,

@@ -59,7 +59,9 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
             modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
             title = {
               Text(
-                  text = "Feedback", modifier = Modifier.testTag("FeedbackText"), // Title text displayed in the top app bar.
+                  text = "Feedback",
+                  modifier =
+                      Modifier.testTag("FeedbackText"), // Title text displayed in the top app bar.
                   fontWeight = FontWeight.Bold, // Bold font for emphasis
                   color = AppColors.textColor // Using theme color for title text
                   )
@@ -90,118 +92,110 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
         Column(
             modifier =
                 Modifier.fillMaxSize() // Fill the screen space
-                    .padding(paddingValues)// Apply padding from the scaffold
+                    .padding(paddingValues) // Apply padding from the scaffold
                     .testTag("feedbackContent"),
-            ) {
-              Divider() // Divider below the top bar for visual separation
-              Column(
-                  modifier =
-                      Modifier.fillMaxSize()
-                          .padding(
-                              horizontal =
-                                  AppDimensions.paddingMedium) // Horizontal padding from theme
-                          .padding(top = AppDimensions.paddingSmall) // Top padding from theme
-                          .testTag("feedbackTitle"), // Test tag for UI testing
-                  horizontalAlignment = Alignment.CenterHorizontally // Center alignment
-                  ) {
-                    // Subtitle at the top to introduce feedback.
-                  Box(
-                      modifier = Modifier
-                          .fillMaxWidth()
-                          .testTag("feedbackSubtitle") // Apply testTag here
-                  ) {
+        ) {
+          Divider() // Divider below the top bar for visual separation
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(
+                          horizontal = AppDimensions.paddingMedium) // Horizontal padding from theme
+                      .padding(top = AppDimensions.paddingSmall) // Top padding from theme
+                      .testTag("feedbackTitle"), // Test tag for UI testing
+              horizontalAlignment = Alignment.CenterHorizontally // Center alignment
+              ) {
+                // Subtitle at the top to introduce feedback.
+                Box(
+                    modifier =
+                        Modifier.fillMaxWidth().testTag("feedbackSubtitle") // Apply testTag here
+                    ) {
                       ChatMessageItem(
-                          message = Message(
-                              content = "Here's what you did well and where you can improve:",
-                              role = "assistant"
-                          )
-                      )
-                  }
-
-                    // Display appropriate content based on loading, error, or feedback state.
-                    when {
-                      isLoading -> {
-                        // Show loading spinner while feedback is being generated.
-                        CircularProgressIndicator(
-                            modifier =
-                                Modifier.align(Alignment.CenterHorizontally)
-                                    .padding(
-                                        AppDimensions.paddingMedium) // Padding around the spinner
-                                    .testTag("loadingIndicator"), // Test tag for UI testing
-                            color = AppColors.loadingIndicatorColor // Spinner color from theme
-                            )
-                      }
-                      errorMessage != null -> {
-                        // Show error message if there was an issue generating feedback.
-                        Text(
-                            text = "Error: $errorMessage", // Display the error message
-                            color = AppColors.errorColor, // Text color from theme
-                            modifier = Modifier.testTag("errorText") // Test tag for UI testing
-                            )
-                      }
-                      feedbackMessage != null -> {
-                        // Display the feedback message using `ChatMessageItem` for a consistent
-                        // look.
-                        Box(
-                            modifier =
-                                Modifier.fillMaxWidth() // Fill available width
-                                    .weight(1f) // Allow Box to grow and take available space
-                                    .verticalScroll(
-                                        rememberScrollState())
-                                    .testTag("feedbackMessage")
-                                    // Enable scrolling for long content
-                            ) {
-                              ChatMessageItem(
-                                  message =
-                                      Message(
-                                          content = feedbackMessage!!, // Display feedback content
-                                          role = "assistant" // Set role to "assistant" for styling
-                                          ))
-                            }
-                      }
-                      else -> {
-                        // Display if there is no feedback available (edge case).
-                        Text(
-                            text = "No feedback available.",
-                            style = AppTypography.bodyLargeStyle, // Style from theme typography
-                            color = AppColors.textColor, // Text color from theme
-                            modifier =
-                                Modifier.testTag("feedbackNoMessage") // Test tag for UI testing
-                            )
-                      }
+                          message =
+                              Message(
+                                  content = "Here's what you did well and where you can improve:",
+                                  role = "assistant"))
                     }
 
-                    // Button for retrying or navigating back, positioned below the feedback
-                    // content.
-                    Button(
-                        onClick = {
-                          navigationActions.navigateTo(
-                              TopLevelDestinations.HOME) // Action to retry or go home
-                        },
+                // Display appropriate content based on loading, error, or feedback state.
+                when {
+                  isLoading -> {
+                    // Show loading spinner while feedback is being generated.
+                    CircularProgressIndicator(
                         modifier =
-                            Modifier.fillMaxWidth() // Button fills available width
-                                .padding(
-                                    top = AppDimensions.paddingMedium) // Top padding from theme
-                                .border(
-                                    width =
-                                        AppDimensions.borderStrokeWidth, // Border width from theme
-                                    color = AppColors.buttonBorderColor, // Border color from theme
-                                    shape =
-                                        MaterialTheme.shapes
-                                            .medium // Button shape from MaterialTheme
-                                    ).testTag("retryButton"),
-                        enabled = !isLoading, // Disable button while loading
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor =
-                                    AppColors.buttonBackgroundColor, // Background color from theme
-                                contentColor = AppColors.textColor // Text color from theme
-                                )) {
-                          Text(
-                              text = "Try Again",
-                              modifier = Modifier.testTag("retryButtonText")) // Button label
-                    }
+                            Modifier.align(Alignment.CenterHorizontally)
+                                .padding(AppDimensions.paddingMedium) // Padding around the spinner
+                                .testTag("loadingIndicator"), // Test tag for UI testing
+                        color = AppColors.loadingIndicatorColor // Spinner color from theme
+                        )
                   }
-            }
+                  errorMessage != null -> {
+                    // Show error message if there was an issue generating feedback.
+                    Text(
+                        text = "Error: $errorMessage", // Display the error message
+                        color = AppColors.errorColor, // Text color from theme
+                        modifier = Modifier.testTag("errorText") // Test tag for UI testing
+                        )
+                  }
+                  feedbackMessage != null -> {
+                    // Display the feedback message using `ChatMessageItem` for a consistent
+                    // look.
+                    Box(
+                        modifier =
+                            Modifier.fillMaxWidth() // Fill available width
+                                .weight(1f) // Allow Box to grow and take available space
+                                .verticalScroll(rememberScrollState())
+                                .testTag("feedbackMessage")
+                        // Enable scrolling for long content
+                        ) {
+                          ChatMessageItem(
+                              message =
+                                  Message(
+                                      content = feedbackMessage!!, // Display feedback content
+                                      role = "assistant" // Set role to "assistant" for styling
+                                      ))
+                        }
+                  }
+                  else -> {
+                    // Display if there is no feedback available (edge case).
+                    Text(
+                        text = "No feedback available.",
+                        style = AppTypography.bodyLargeStyle, // Style from theme typography
+                        color = AppColors.textColor, // Text color from theme
+                        modifier = Modifier.testTag("feedbackNoMessage") // Test tag for UI testing
+                        )
+                  }
+                }
+
+                // Button for retrying or navigating back, positioned below the feedback
+                // content.
+                Button(
+                    onClick = {
+                      navigationActions.navigateTo(
+                          TopLevelDestinations.HOME) // Action to retry or go home
+                    },
+                    modifier =
+                        Modifier.fillMaxWidth() // Button fills available width
+                            .padding(top = AppDimensions.paddingMedium) // Top padding from theme
+                            .border(
+                                width = AppDimensions.borderStrokeWidth, // Border width from theme
+                                color = AppColors.buttonBorderColor, // Border color from theme
+                                shape =
+                                    MaterialTheme.shapes.medium // Button shape from MaterialTheme
+                                )
+                            .testTag("retryButton"),
+                    enabled = !isLoading, // Disable button while loading
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor =
+                                AppColors.buttonBackgroundColor, // Background color from theme
+                            contentColor = AppColors.textColor // Text color from theme
+                            )) {
+                      Text(
+                          text = "Try Again",
+                          modifier = Modifier.testTag("retryButtonText")) // Button label
+                }
+              }
+        }
       })
 }
