@@ -28,9 +28,15 @@ class SpeakingViewModel(
   /** True if the user is currently recording their speech, false otherwise. */
   val isRecording: StateFlow<Boolean> = _isRecording
 
-  /** To be called when the speaking screen is opened again. */
+  /** To be called when the speaking screen is closed or the "Done" button is pressed. */
   fun endAndSave() {
-    if (_analysisData.value != null) apiLinkViewModel.updateAnalysisData(_analysisData.value!!)
+    if (_isRecording.value) {
+      repository.stopRecording() // Ensure the recording stops
+      _isRecording.value = false
+    }
+    if (_analysisData.value != null) {
+      apiLinkViewModel.updateAnalysisData(_analysisData.value!!)
+    }
     repository.resetRecorder()
     _analysisData.value = null
   }
