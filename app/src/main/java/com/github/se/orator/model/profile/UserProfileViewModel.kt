@@ -283,6 +283,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
 
         // Updates the user profile with the new one
         updateUserProfile(updatedProfile)
+        userProfile_.value = updatedProfile
 
         // Updates the local state with the new friends list
         friendsProfiles_.value = updatedFriendsList
