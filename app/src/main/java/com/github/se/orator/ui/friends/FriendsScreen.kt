@@ -216,11 +216,10 @@ fun FriendItem(friend: UserProfile, userProfileViewModel: UserProfileViewModel) 
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.testTag("friendBio#${friend.uid}"))
           }
+          Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
+
+          DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
         }
-
-        Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
-
-        DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
       }
 }
 
