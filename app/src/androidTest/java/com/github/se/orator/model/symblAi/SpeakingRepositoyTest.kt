@@ -25,13 +25,13 @@ class SpeakingRepositoryTest {
     context = ApplicationProvider.getApplicationContext()
 
     // Initialize SpeakingRepository with the context
-    speakingRepository = SpeakingRepository(context)
+    speakingRepository = SpeakingRepositoryRecord(context)
   }
 
   @Test
   fun initial_state_should_be_IDLE() {
     // Assert that the initial state is IDLE
-    assertEquals(AnalysisState.IDLE, speakingRepository.analysisState.value)
+    assertEquals(SpeakingRepository.AnalysisState.IDLE, speakingRepository.analysisState.value)
   }
 
   @Test
@@ -40,19 +40,19 @@ class SpeakingRepositoryTest {
     speakingRepository.startRecording()
 
     // Assert
-    assertEquals(AnalysisState.RECORDING, speakingRepository.analysisState.value)
+    assertEquals(SpeakingRepository.AnalysisState.RECORDING, speakingRepository.analysisState.value)
   }
 
   @Test
   fun resetRecorder_should_set_state_back_to_IDLE() {
     // Arrange
     speakingRepository.startRecording()
-    assertEquals(AnalysisState.RECORDING, speakingRepository.analysisState.value)
+    assertEquals(SpeakingRepository.AnalysisState.RECORDING, speakingRepository.analysisState.value)
 
     // Act
     speakingRepository.resetRecorder()
 
     // Assert
-    assertEquals(AnalysisState.IDLE, speakingRepository.analysisState.value)
+    assertEquals(SpeakingRepository.AnalysisState.IDLE, speakingRepository.analysisState.value)
   }
 }
