@@ -39,8 +39,6 @@ import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
-import com.github.se.orator.ui.screens.ViewConnectScreen
-import com.github.se.orator.ui.screens.ViewFunScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
@@ -161,15 +159,6 @@ fun OratorApp(chatGPTService: ChatGPTService) {
           route = Route.FRIENDS,
       ) {
         composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
-      }
-      //// temporarily adding those empty screens before we implement their functionalities
-      composable(Screen.FUN_SCREEN) {
-        ViewFunScreen(
-            navigationActions, userProfileViewModel) // Your composable function for Fun Screen
-      }
-      composable(Screen.CONNECT_SCREEN) {
-        ViewConnectScreen(
-            navigationActions, userProfileViewModel) // Your composable function for Connect Screen
       }
 
       navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {

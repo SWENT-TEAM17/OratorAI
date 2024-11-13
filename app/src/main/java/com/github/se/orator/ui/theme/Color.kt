@@ -31,6 +31,10 @@ object AppColors {
   val silverColor = Color(0xFFC0C0C0)
   val bronzeColor = Color(0xFFCD7F32)
   val errorColor = Color.Red // For error messages
+  val buttonContentColor = Color.Black
+  val recordingButtonColor = Color.Red
+  val iconColor = Color.Black
+  val visualizerBarColor = Color.Cyan
 
   // Gradients
   val primaryGradient = Brush.linearGradient(colors = listOf(primaryColor, secondaryColor))
