@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -165,10 +166,38 @@ fun LoadingScreen() {
   // Show a loading indicator in the center of the screen
   Column(
       modifier =
-          Modifier.fillMaxSize()
+          Modifier.fillMaxSize().padding(top = AppDimensions.paddingXXLarge)
               .testTag("loadingScreen"), // Optional: Add a testTag for the entire loading screen
-      verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
+
+      Image(
+          painter = painterResource(id = R.drawable.loading_screen), // Replace with your actual image name
+          contentDescription = "Loading Screen Image",
+          modifier = Modifier
+              .fillMaxWidth()
+              .width(412.dp)
+              .height(487.dp)
+              .testTag("loadingImage")
+      )
+
+      Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
+      Text(
+          text = "Reach your goals",
+          style = AppTypography.mediumTitleStyle,
+          modifier = Modifier.testTag("loadingText") // Added testTag
+          )
+
+      Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+
+      Text(
+          text = "Become the best speaker",
+          style = AppTypography.smallTitleStyle,
+          modifier = Modifier.testTag("loadingText") // Added testTag
+          )
+
+        Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
+
         CircularProgressIndicator(
             color = AppColors.loadingIndicatorColor,
             strokeWidth = AppDimensions.strokeWidth,
