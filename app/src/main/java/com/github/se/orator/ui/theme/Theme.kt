@@ -140,7 +140,6 @@ object AppDimensions {
   val smallPadding = 4.dp
   val mediumText = 16.sp
   val full = 1f
-
 }
 
 object AppShapes {
