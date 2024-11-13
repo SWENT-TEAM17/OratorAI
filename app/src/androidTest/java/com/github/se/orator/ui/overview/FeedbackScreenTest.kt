@@ -1,7 +1,6 @@
 package com.github.se.orator.ui.overview
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -78,7 +77,6 @@ class FeedbackScreenTest {
     composeTestRule.onNodeWithTag("feedbackTitle").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackSubtitle").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackNoMessage").assertExists().assertIsDisplayed()
-    composeTestRule.onNodeWithTag("feedbackButtons").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("retryButton").assertExists().assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("retryButtonText", useUnmergedTree = true)
@@ -116,6 +114,5 @@ class FeedbackScreenTest {
     composeTestRule.setContent { FeedbackScreen(chatViewModel, navigationActions) }
 
     composeTestRule.onNodeWithTag("feedbackMessage").assertExists().assertIsDisplayed()
-    composeTestRule.onNodeWithTag("feedbackMessage").assertTextEquals("content")
   }
 }

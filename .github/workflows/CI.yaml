@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - fix/ui-for-feedbackScreen-and-speakingPracticeModule
 
   pull_request:
     types:

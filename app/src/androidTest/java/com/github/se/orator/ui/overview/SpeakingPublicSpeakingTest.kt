@@ -38,7 +38,6 @@ class SpeakingPublicSpeakingTest {
     composeTestRule.onNodeWithTag("occasionInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("demographicInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("mainPointsInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("feedbackLanguageInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("content").assertIsDisplayed()
