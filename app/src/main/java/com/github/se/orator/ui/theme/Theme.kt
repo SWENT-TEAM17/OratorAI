@@ -10,82 +10,80 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 data class AppDimensionsObject(
-  // Padding
-  val paddingExtraSmall: Dp,
-  val paddingSmall: Dp,
-  val paddingSmallMedium: Dp,
-  val paddingMedium: Dp,
-  val paddingLarge: Dp,
-  val paddingExtraLarge: Dp,
-  val paddingXXLarge: Dp,
-  val paddingXXXLarge: Dp,
-  val paddingTopSmall: Dp,
-  val statusBarPadding: Dp,
+    // Padding
+    val paddingExtraSmall: Dp,
+    val paddingSmall: Dp,
+    val paddingSmallMedium: Dp,
+    val paddingMedium: Dp,
+    val paddingLarge: Dp,
+    val paddingExtraLarge: Dp,
+    val paddingXXLarge: Dp,
+    val paddingXXXLarge: Dp,
+    val paddingTopSmall: Dp,
+    val statusBarPadding: Dp,
 
-  // Spacer Dimensions
-  val spacerWidthMedium: Dp,
-  val spacerHeightLarge: Dp,
-  val largeSpacerHeight: Dp,
+    // Spacer Dimensions
+    val spacerWidthMedium: Dp,
+    val spacerHeightLarge: Dp,
+    val largeSpacerHeight: Dp,
 
-  // Button Heights
-  val buttonHeight: Dp,
-  val buttonHeightLarge: Dp,
+    // Button Heights
+    val buttonHeight: Dp,
+    val buttonHeightLarge: Dp,
 
-  // Logo Dimensions
-  val logoSize: Dp,
-  val logoTextWidth: Dp,
-  val logoTextHeight: Dp,
-  val googleLogoSize: Dp,
+    // Logo Dimensions
+    val logoSize: Dp,
+    val logoTextWidth: Dp,
+    val logoTextHeight: Dp,
+    val googleLogoSize: Dp,
 
-  // Fixed Dimensions
-  val strokeWidth: Dp,
-  val borderStrokeWidth: Dp,
-  val dividerThickness: Dp,
-  val appBarElevation: Dp,
-  val elevationSmall: Dp,
+    // Fixed Dimensions
+    val strokeWidth: Dp,
+    val borderStrokeWidth: Dp,
+    val dividerThickness: Dp,
+    val appBarElevation: Dp,
+    val elevationSmall: Dp,
 
-  // Loading Indicator
-  val loadingIndicatorSize: Dp,
+    // Loading Indicator
+    val loadingIndicatorSize: Dp,
 
-  // Corner Radii
-  val roundedCornerRadius: Dp,
-  val cornerRadiusSmall: Dp,
+    // Corner Radii
+    val roundedCornerRadius: Dp,
+    val cornerRadiusSmall: Dp,
 
-  // Icon Sizes
-  val iconSize: Dp,
-  val iconSizeSmall: Dp,
-  val iconSizeMedium: Dp,
-  val iconSizeLarge: Dp,
+    // Icon Sizes
+    val iconSize: Dp,
+    val iconSizeSmall: Dp,
+    val iconSizeMedium: Dp,
+    val iconSizeLarge: Dp,
 
-  // Drawer Padding
-  val drawerPadding: Dp,
+    // Drawer Padding
+    val drawerPadding: Dp,
 
-  // Card Dimensions
-  val cardHorizontalPadding: Dp,
-  val cardCornerRadius: Dp,
-  val cardImageHeight: Dp,
-  val cardSectionHeight: Dp,
+    // Card Dimensions
+    val cardHorizontalPadding: Dp,
+    val cardCornerRadius: Dp,
+    val cardImageHeight: Dp,
+    val cardSectionHeight: Dp,
 
-  // Spacing
-  val spacingXLarge: Dp,
+    // Spacing
+    val spacingXLarge: Dp,
 
-  // Navigation
-  val bottomNavigationHeight: Dp,
+    // Navigation
+    val bottomNavigationHeight: Dp,
 
-  // Input Fields
-  val inputFieldHeight: Dp,
-  val bioFieldHeight: Dp,
+    // Input Fields
+    val inputFieldHeight: Dp,
+    val bioFieldHeight: Dp,
 
-  // Profile Picture
-  val profilePictureDialogSize: Dp,
-  val profilePictureSize: Dp
+    // Profile Picture
+    val profilePictureDialogSize: Dp,
+    val profilePictureSize: Dp
 )
 
 object AppDimensions {
@@ -165,6 +163,4 @@ fun ProjectTheme(
       }
 
   MaterialTheme(colorScheme = colorScheme, typography = CustomTypography, content = content)
-
-
 }
