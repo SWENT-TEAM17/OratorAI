@@ -12,6 +12,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 // Define reusable dimensions
 object AppDimensions {
@@ -20,6 +21,7 @@ object AppDimensions {
   val paddingLarge = 24.dp
   val paddingExtraLarge = 32.dp
   val largeSpacerHeight = 100.dp
+  val mediumHeight = 64.dp
   val buttonHeight = 48.dp
   val logoSize = 250.dp
   val logoTextWidth = 276.dp
@@ -52,7 +54,7 @@ object AppDimensions {
   val buttonHeightLarge = 50.dp // Added for Save changes button height
   val profilePictureDialogSize = 200.dp // Added for ProfilePictureDialog size
   val cardSectionHeight = 100.dp // Added for CardSection height
-  val profilePictureSize = 100.dp // Added for profile picture size
+  val profilePictureSize = 48.dp // Added for profile picture size
   val dividerThickness = 3.dp // Added for HorizontalDivider thickness
   val paddingTopSmall = 5.dp // Added for padding top=5.dp in Text
   val statusBarPadding = 10.dp
@@ -60,6 +62,13 @@ object AppDimensions {
   val buttonSize = 80.dp
   val visualizerHeight = 100.dp
   val iconSizeMic = 48.dp
+  val heightMedium = 24.dp
+  val paddingMediumSmall = 20.dp
+  val smallWidth = 12.dp
+  val smallPadding = 4.dp
+  val mediumText = 16.sp
+  val full = 1f
+
 }
 
 object AppShapes {
