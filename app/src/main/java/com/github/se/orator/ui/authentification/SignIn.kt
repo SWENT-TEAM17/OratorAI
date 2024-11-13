@@ -128,7 +128,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
 
             Text(
                 text = "OratorAI",
-                style = AppTypography.largeTitleStyle.copy(brush = AppColors.primaryGradient),
+                style = AppTypography.bigTitleStyle.copy(brush = AppColors.primaryGradient),
                 modifier =
                     Modifier.width(AppDimensions.logoTextWidth)
                         .height(AppDimensions.logoTextHeight)

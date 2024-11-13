@@ -40,6 +40,14 @@ object AppTypography {
     val poppinsBlackFontFamily = FontFamily(Font(R.font.poppins_black))
     val poppinsRegularFontFamily = FontFamily(Font(R.font.poppins_regular))
 
+    val bigTitleStyle =
+        TextStyle(
+            fontSize = AppFontSizes.largeTitleSize, // Large title size in sp
+            fontFamily = manropeFontFamily,
+            fontWeight = FontWeight.W600,
+            textAlign = TextAlign.Center
+        )
+
     val largeTitleStyle =
         TextStyle(
             fontSize = AppFontSizes.poppinsSizeLarge, // Large title size in sp
