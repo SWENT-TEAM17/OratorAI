@@ -134,7 +134,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           viewModel(factory = UserProfileViewModel.Factory)
       val apiLinkViewModel = ApiLinkViewModel()
       val speakingViewModel =
-          SpeakingViewModel(SpeakingRepository(LocalContext.current), apiLinkViewModel)
+          SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
       val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
       // Replace the content of the Scaffold with the desired screen
@@ -163,7 +163,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
           }
           composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-            SpeakingPublicSpeaking(navigationActions, apiLinkViewModel)
+            SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
           }
           composable(Screen.SPEAKING_SALES_PITCH) {
             SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
@@ -174,9 +174,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           }
           composable(Screen.FEEDBACK) {
             // Navigate to FeedbackScreen
-            FeedbackScreen(
-                chatViewModel = chatViewModel,
-                navigationActions = navigationActions)
+            FeedbackScreen(chatViewModel = chatViewModel, navigationActions = navigationActions)
           }
         }
 
