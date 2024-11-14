@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -30,6 +31,8 @@ object Route {
   const val SPEAKING = "Speaking"
   const val OFFLINE = "Offline"
   const val PRACTICE_QUESTIONS = "PracticeQuestions"
+  const val OFFLINE_RECORDING = "OfflineRecording"
+  const val OFFLINE_RECORDING_REVIEW = "OfflineRecordingReview"
 }
 
 object Screen {
@@ -51,7 +54,9 @@ object Screen {
   const val CHAT_SCREEN = "chat_screen"
   const val SPEAKING = "Speaking"
   const val PRACTICE_QUESTIONS_SCREEN = "PracticeQuestions Screen"
-  const val OFFLINE_SCREEN = "Offline Screen"
+  const val OFFLINE = "Offline Screen"
+  const val OFFLINE_RECORDING_SCREEN = "OfflineRecording Screen"
+  const val OFFLINE_RECORDING_REVIEW_SCREEN = "OfflineRecordingReview Screen"
 }
 
 data class TopLevelDestination(
@@ -138,5 +143,17 @@ open class NavigationActions(
   open fun currentRoute(): String {
     Log.d("inside nav actions", "currentRoute called, returned ${navController.currentDestination}")
     return navController.currentDestination?.route ?: ""
+  }
+  // Lambda function to navigate to OfflineRecordingScreen with a selected question.
+  // It constructs the navigation route by embedding the question text as a parameter
+  val navigateToOfflineRecording: (String) -> Unit = { question ->
+    navController.navigate("offline_recording/${question}")
+  }
+
+  // Wrapper function for navigating to OfflineRecordingScreen, allowing the lambda function to be
+  // called directly. This wrapper is open so it can be overridden, making it suitable for mocking
+  // and verifying in tests.
+  open fun goToOfflineRecording(question: String) {
+    navigateToOfflineRecording(question)
   }
 }

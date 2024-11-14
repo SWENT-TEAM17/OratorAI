@@ -89,6 +89,24 @@ object AppTypography {
           textAlign = TextAlign.Center,
       )
 
+  val mainScreenTitleStyle =
+      TextStyle(
+          fontSize = AppFontSizes.largeTitle, // Or use a more specific size if needed
+          fontFamily = poppinsBlackFontFamily, // Ensure this is Poppins as desired
+          fontWeight = FontWeight.W600,
+          lineHeight = AppFontSizes.poppinsHeightLarge, // Optional, adjust for readability
+          color = AppColors.textColor,
+          textAlign = TextAlign.Start)
+
+  val mainScreenSubtitleStyle =
+      TextStyle(
+          fontSize = AppFontSizes.mediumTitle, // Or use a smaller size if needed
+          fontFamily = poppinsRegularFontFamily,
+          fontWeight = FontWeight.W500,
+          lineHeight = AppFontSizes.poppinsHeightMedium, // Optional, adjust for readability
+          color = AppColors.textColor,
+          textAlign = TextAlign.Start)
+
   val buttonTextStyle =
       TextStyle(
           fontSize = AppFontSizes.buttonText,
