@@ -58,6 +58,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
@@ -149,14 +150,14 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                   .offset(y = (-20).dp),
                           // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
                           shape = AppShapes.circleShape,
-                          colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+                          colors =
+                              ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
                           contentPadding = PaddingValues(0.dp)) {
                             Icon(
                                 Icons.Outlined.Edit,
                                 contentDescription = "Edit button",
                                 modifier =
-                                    Modifier.size(AppDimensions.iconSizeMedium)
-                                        .testTag("edit_button"),
+                                    Modifier.size(AppDimensions.iconSizeMedium),
                                 tint = Color.Black)
                           }
 

@@ -87,9 +87,9 @@ fun EditProfileScreen(
       topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("edit_profile_app_bar"),
-            backgroundColor = AppColors.surfaceColor, // Replaced Color.White
-            contentColor = AppColors.textColor, // Replaced Color.Black
-            elevation = AppDimensions.elevationSmall, // Replaced 4.dp
+            backgroundColor = AppColors.surfaceColor,
+            contentColor = AppColors.surfaceColor,
+            elevation = AppDimensions.elevationSmall,
             title = {
               Text(
                   modifier = Modifier.testTag("edit_profile_title"),
@@ -131,8 +131,7 @@ fun EditProfileScreen(
 
               // Profile Picture with Camera Icon Overlay
               Box(
-                  contentAlignment = Alignment.Center,
-                  modifier = Modifier.testTag("profile_picture")) {
+                  contentAlignment = Alignment.Center) {
                     ProfilePicture(
                         profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
                         onClick = { isDialogOpen = true })

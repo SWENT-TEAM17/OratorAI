@@ -76,7 +76,6 @@ object AppTypography {
           fontWeight = FontWeight.W200,
           lineHeight = AppFontSizes.poppinsSizeMedium, // Optional line height
           color = androidx.compose.ui.graphics.Color.Black,
-
           textAlign = TextAlign.Center,
       )
 

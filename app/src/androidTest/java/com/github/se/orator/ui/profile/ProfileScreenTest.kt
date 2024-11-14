@@ -67,13 +67,13 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithContentDescription("Sign out").assertIsDisplayed()
 
     // Verify the Edit Profile button is displayed
-    composeTestRule.onNodeWithText("Edit Profile").assertExists()
+    composeTestRule.onNodeWithTag("edit_button").assertExists()
 
     // Verify the Achievements section is displayed
-    composeTestRule.onNodeWithText("Achievements").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("statistics_section").assertIsDisplayed()
 
     // Verify the Previous Sessions section is displayed
-    composeTestRule.onNodeWithText("Previous Sessions").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("previous_sessions_section").assertIsDisplayed()
   }
 
   @Test
