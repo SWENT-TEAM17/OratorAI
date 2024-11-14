@@ -124,9 +124,8 @@ fun CreateAccountScreen(
                   contentAlignment = Alignment.Center,
                   modifier =
                       Modifier.size(
-                              107
-                                  .dp) // Slightly larger to accommodate the IconButton outside the
-                                       // circle
+                              107.dp) // Slightly larger to accommodate the IconButton outside the
+                          // circle
                           .testTag("profile_picture_container")) {
                     // Circle with background image and profile picture
                     Box(
@@ -251,7 +250,7 @@ fun CreateAccountScreen(
                                 id =
                                     R.drawable
                                         .create_profile_speaker), // Replace with your drawable
-                                                                  // image name
+                        // image name
                         contentDescription = "Decorative bottom-left image",
                         modifier =
                             Modifier.height(AppDimensions.imageLargeXXL) // Adjust height as needed
