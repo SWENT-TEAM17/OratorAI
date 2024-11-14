@@ -148,7 +148,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
 @Composable
 fun LoadingScreen() {
   // Centering content and making it responsive to screen size
-    val dimensions: AppDimensionsObject = createAppDimensions()
+  val dimensions: AppDimensionsObject = createAppDimensions()
   Column(
       modifier =
           Modifier.fillMaxSize()
