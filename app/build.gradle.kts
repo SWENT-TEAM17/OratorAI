@@ -149,6 +149,7 @@ dependencies {
     implementation(libs.androidx.ui.test.android)
     implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.test.core.ktx)
+    testImplementation(libs.ui.test.junit4.android)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.material)
