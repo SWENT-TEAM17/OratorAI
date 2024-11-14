@@ -10,7 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.github.se.orator.model.profile.UserProfileRepositoryFirestore
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.friends.ViewFriendsScreen
-import com.github.se.orator.ui.theme.mainScreen.MainScreen
+import com.github.se.orator.ui.mainScreen.MainScreen
 import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.Rule
 import org.junit.Test

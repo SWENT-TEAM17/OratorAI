@@ -30,6 +30,7 @@ replay_pid*
 **/build
 local.properties
 keystore.properties
+keystore.jks
 .gradle
 /app/google-services.json
 /app/release

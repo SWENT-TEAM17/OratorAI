@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.Notifications
@@ -35,10 +35,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 
 // class for all that is needed about a section for settings
 data class SettingBar(
@@ -62,7 +63,7 @@ val listOfSettings =
             "Storage Settings",
             "storage_settings",
             { Log.d("hello", "storage settings") },
-            Icons.Outlined.List,
+            Icons.AutoMirrored.Outlined.List,
             "storage settings icon"),
         SettingBar(
             "Permissions",
@@ -100,18 +101,21 @@ fun TextButtonFun(settingBar: SettingBar) {
       contentPadding = PaddingValues(0.dp) // Remove default padding
       ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start) {
               Icon(
                   imageVector = settingBar.icon,
                   contentDescription = settingBar.iconDescription,
-                  modifier = Modifier.size(35.dp))
+                  modifier = Modifier.size(AppDimensions.iconSizeLarge).testTag("icon"))
 
               Text(
-                  modifier = Modifier.padding(start = 10.dp, top = 5.dp),
+                  modifier =
+                      Modifier.padding(
+                          start = AppDimensions.paddingSmallMedium,
+                          top = AppDimensions.paddingTopSmall),
                   text = settingBar.text,
-                  fontSize = 20.sp)
+                  fontSize = AppFontSizes.titleLarge)
             }
       }
 }
@@ -126,23 +130,23 @@ fun SettingsScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Settings") },
+            title = { Text("Settings", modifier = Modifier.testTag("SettingsText")) },
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
                 Image(
                     painter = painterResource(id = R.drawable.back_arrow),
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(AppDimensions.statusBarPadding).testTag("back_button"),
                     contentDescription = "Back")
               }
             })
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            modifier = Modifier.fillMaxSize().padding(padding).testTag("settingsScreen"),
+            verticalArrangement = Arrangement.spacedBy(AppDimensions.spacerWidthMedium)) {
               for (setting in listOfSettings) {
                 TextButtonFun(setting)
-                HorizontalDivider(thickness = 3.dp)
+                HorizontalDivider(thickness = AppDimensions.dividerThickness)
               }
             }
       })

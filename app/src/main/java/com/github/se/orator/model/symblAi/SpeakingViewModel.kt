@@ -18,13 +18,14 @@ class SpeakingViewModel(
   val analysisData: StateFlow<AnalysisData?> = _analysisData.asStateFlow()
 
   /** The result of the analysis of the user's speech. */
-  val analysisState: StateFlow<AnalysisState> = repository.analysisState
+  val analysisState: StateFlow<SpeakingRepository.AnalysisState> = repository.analysisState
 
   /** The error that occurred during processing of the user's speech. */
   private val _analysisError = MutableStateFlow(SpeakingError.NO_ERROR)
   val analysisError = _analysisError.asStateFlow()
 
   private val _isRecording = MutableStateFlow(false)
+
   /** True if the user is currently recording their speech, false otherwise. */
   val isRecording: StateFlow<Boolean> = _isRecording
 

@@ -27,7 +27,7 @@ import androidx.navigation.navArgument
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
-import com.github.se.orator.model.symblAi.SpeakingRepository
+import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.network.OfflineViewModel
@@ -35,6 +35,7 @@ import com.github.se.orator.ui.authentification.SignInScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
+import com.github.se.orator.ui.mainScreen.MainScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
@@ -47,17 +48,14 @@ import com.github.se.orator.ui.offline.RecordingReviewScreen
 import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
 import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
-import com.github.se.orator.ui.overview.SpeakingPublicSpeaking
+import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
-import com.github.se.orator.ui.screens.ViewConnectScreen
-import com.github.se.orator.ui.screens.ViewFunScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
-import com.github.se.orator.ui.theme.mainScreen.MainScreen
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -127,18 +125,27 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
-  // Initialize required ViewModelsA
-  val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
-  val apiLinkViewModel = ApiLinkViewModel()
-  val speakingViewModel =
-      SpeakingViewModel(SpeakingRepository(LocalContext.current), apiLinkViewModel)
-  val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
-
   // Main layout using a Scaffold
   Scaffold(modifier = Modifier.fillMaxSize()) {
-    NavHost(
-        navController = navController,
-        startDestination = if (isOffline) Screen.OFFLINE else Route.AUTH) {
+    if (isOffline) {
+      // Display OfflineScreen when there is no network connection
+      OfflineScreen(navigationActions)
+    } else {
+
+      // Initialize the view models
+      val userProfileViewModel: UserProfileViewModel =
+        viewModel(factory = UserProfileViewModel.Factory)
+      val apiLinkViewModel = ApiLinkViewModel()
+      val speakingViewModel =
+        SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
+      val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+      // Main layout using a Scaffold
+      Scaffold(modifier = Modifier.fillMaxSize()) {
+        NavHost(
+          navController = navController,
+          startDestination = if (isOffline) Screen.OFFLINE else Route.AUTH
+        ) {
           composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
           composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
             OfflinePracticeQuestionsScreen(navigationActions)
@@ -147,23 +154,26 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             RecordingReviewScreen(navigationActions, speakingViewModel)
           }
 
-      // Offline Recording Screen with a question parameter passed as an argument
-      composable(
-        route = "offline_recording/{question}", // Define route with question parameter in the path
-        arguments = listOf(navArgument("question") { type = NavType.StringType }) // Declare question parameter as a String type
-      ) { backStackEntry ->
-        // Retrieve the question parameter from the back stack entry arguments
-        val question = backStackEntry.arguments?.getString("question") ?: "" // Default to an empty string if null
+          // Offline Recording Screen with a question parameter passed as an argument
+          composable(
+            route = "offline_recording/{question}", // Define route with question parameter in the path
+            arguments = listOf(navArgument("question") {
+              type = NavType.StringType
+            }) // Declare question parameter as a String type
+          ) { backStackEntry ->
+            // Retrieve the question parameter from the back stack entry arguments
+            val question = backStackEntry.arguments?.getString("question")
+              ?: "" // Default to an empty string if null
 
-        // Display the OfflineRecordingScreen with the provided question and ViewModel
-        OfflineRecordingScreen(navigationActions, question, speakingViewModel)
-      }
+            // Display the OfflineRecordingScreen with the provided question and ViewModel
+            OfflineRecordingScreen(navigationActions, question, speakingViewModel)
+          }
 
 
 
-      navigation(
-              startDestination = Screen.AUTH,
-              route = Route.AUTH,
+          navigation(
+            startDestination = Screen.AUTH,
+            route = Route.AUTH,
           ) {
             composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
             composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
@@ -180,8 +190,8 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           }
 
           navigation(
-              startDestination = Screen.HOME,
-              route = Route.HOME,
+            startDestination = Screen.HOME,
+            route = Route.HOME,
           ) {
             composable(Screen.HOME) { MainScreen(navigationActions) }
 
@@ -189,7 +199,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
               SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
             }
             composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-              SpeakingPublicSpeaking(navigationActions, apiLinkViewModel)
+              SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
             }
             composable(Screen.SPEAKING_SALES_PITCH) {
               SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
@@ -200,30 +210,32 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             }
             composable(Screen.FEEDBACK) {
               // Navigate to FeedbackScreen
-              FeedbackScreen(
-                  chatViewModel = chatViewModel,
-                  navController = navController,
-                  navigationActions = navigationActions)
+              FeedbackScreen(chatViewModel = chatViewModel, navigationActions = navigationActions)
             }
           }
 
           navigation(
-              startDestination = Screen.FRIENDS,
-              route = Route.FRIENDS,
+            startDestination = Screen.FRIENDS,
+            route = Route.FRIENDS,
           ) {
             composable(Screen.FRIENDS) {
-              ViewFriendsScreen(navigationActions, userProfileViewModel)
+              ViewFriendsScreen(
+                navigationActions,
+                userProfileViewModel
+              )
             }
           }
-          //// temporarily adding those empty screens before we implement their functionalities
-          composable(Screen.FUN_SCREEN) {
-            ViewFunScreen(
-                navigationActions, userProfileViewModel) // Your composable function for Fun Screen
-          }
-          composable(Screen.CONNECT_SCREEN) {
-            ViewConnectScreen(
+
+          navigation(
+            startDestination = Screen.FRIENDS,
+            route = Route.FRIENDS,
+          ) {
+            composable(Screen.FRIENDS) {
+              ViewFriendsScreen(
                 navigationActions,
-                userProfileViewModel) // Your composable function for Connect Screen
+                userProfileViewModel
+              )
+            }
           }
 
           navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
@@ -239,8 +251,8 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           }
 
           navigation(
-              startDestination = Screen.PROFILE,
-              route = Route.PROFILE,
+            startDestination = Screen.PROFILE,
+            route = Route.PROFILE,
           ) {
             composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
 
@@ -263,5 +275,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             }
           }
         }
+      }
+    }
   }
 }

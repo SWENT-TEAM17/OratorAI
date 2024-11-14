@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class ApiLinkViewModel : ViewModel() {
   private val _analysisData = MutableStateFlow<AnalysisData?>(null)
+
   /** The analysis data to be shared with other view models that need it. */
   val analysisData = _analysisData.asStateFlow()
 
   private val _practiceContext = MutableStateFlow<PracticeContext?>(null)
+
   /** The practice context to be shared with other view models that need it. */
   val practiceContext = _practiceContext.asStateFlow()
 

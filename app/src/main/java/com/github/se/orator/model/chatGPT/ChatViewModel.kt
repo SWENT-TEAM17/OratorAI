@@ -30,7 +30,8 @@ class ChatViewModel(
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage = _errorMessage.asStateFlow()
 
-  private val collectedAnalysisData = mutableListOf<AnalysisData>()
+  private val _collectedAnalysisData = MutableStateFlow<MutableList<AnalysisData>>(mutableListOf())
+  val collectedAnalysisData = _collectedAnalysisData.asStateFlow()
 
   private val practiceContext = apiLinkViewModel.practiceContext
 
@@ -40,7 +41,7 @@ class ChatViewModel(
 
   fun initializeConversation() {
 
-    collectedAnalysisData.clear() // Resets the analysis data history
+    _collectedAnalysisData.value.clear() // Resets the analysis data history
     val practiceContextAsValue = practiceContext.value ?: return
     val systemMessageContent =
         when (practiceContextAsValue) {
@@ -56,7 +57,11 @@ class ChatViewModel(
               """
                 You are helping the user prepare a speech for a ${practiceContextAsValue.occasion}. 
                 The audience is ${practiceContextAsValue.audienceDemographic}. 
-                The main points of the speech are: ${practiceContextAsValue.mainPoints.joinToString(", ")}.
+                The main points of the speech are: ${
+                        practiceContextAsValue.mainPoints.joinToString(
+                            ", "
+                        )
+                    }.
                 Please guide the user through practicing their speech, asking for their input on each point.
             """
                   .trimIndent()
@@ -64,7 +69,11 @@ class ChatViewModel(
               """
                 You are helping the user prepare a sales pitch for the product ${practiceContextAsValue.product}. 
                 The target audience is ${practiceContextAsValue.targetAudience}. 
-                The key features of the product are: ${practiceContextAsValue.keyFeatures.joinToString(", ")}.
+                The key features of the product are: ${
+                        practiceContextAsValue.keyFeatures.joinToString(
+                            ", "
+                        )
+                    }.
                 Please guide the user through practicing their sales pitch, asking for their input on each feature.
             """
                   .trimIndent()
@@ -85,7 +94,7 @@ class ChatViewModel(
     val userMessage = Message(role = "user", content = transcript)
     _chatMessages.value += userMessage
 
-    collectedAnalysisData.add(analysisData)
+    _collectedAnalysisData.value.add(analysisData)
 
     getNextGPTResponse()
   }
@@ -147,7 +156,7 @@ class ChatViewModel(
   //    }
 
   private fun getAnalysisSummary(): String {
-    return generateAnalysisSummary(collectedAnalysisData)
+    return generateAnalysisSummary(_collectedAnalysisData.value)
   }
 
   private fun generateAnalysisSummary(analysisDataList: List<AnalysisData>): String {
