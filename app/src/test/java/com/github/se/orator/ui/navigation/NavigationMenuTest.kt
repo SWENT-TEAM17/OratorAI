@@ -1,6 +1,9 @@
 package com.github.se.orator.ui.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -18,9 +21,11 @@ class NavigationMenuTest {
   fun bottomNavigationMenu_displaysTabs() {
     val tabs =
         listOf(
-            TopLevelDestination(Route.HOME, Icons.Outlined.Menu, Screen.HOME),
-            TopLevelDestination(Route.FRIENDS, Icons.Outlined.Star, Screen.FRIENDS),
-            TopLevelDestination(Route.PROFILE, Icons.Outlined.Person, Screen.PROFILE))
+            TopLevelDestination(Route.HOME, Icons.Outlined.Home, Icons.Filled.Home, "Home"),
+            TopLevelDestination(Route.FRIENDS, Icons.Outlined.Star, Icons.Filled.Star, "Friends"),
+            TopLevelDestination(
+                Route.PROFILE, Icons.Outlined.Person, Icons.Filled.Person, "Profile"))
+
     composeTestRule.setContent {
       BottomNavigationMenu(onTabSelect = {}, tabList = tabs, selectedItem = Route.HOME)
     }
@@ -33,9 +38,10 @@ class NavigationMenuTest {
   fun bottomNavigationMenu_selectsTabOnClick() {
     val tabs =
         listOf(
-            TopLevelDestination(Route.HOME, Icons.Outlined.Menu, Screen.HOME),
-            TopLevelDestination(Route.FRIENDS, Icons.Outlined.Star, Screen.FRIENDS),
-            TopLevelDestination(Route.PROFILE, Icons.Outlined.Person, Screen.PROFILE))
+            TopLevelDestination(Route.HOME, Icons.Outlined.Home, Icons.Filled.Home, "Home"),
+            TopLevelDestination(Route.FRIENDS, Icons.Outlined.Star, Icons.Filled.Star, "Friends"),
+            TopLevelDestination(
+                Route.PROFILE, Icons.Outlined.Person, Icons.Filled.Person, "Profile"))
     var selectedTab: TopLevelDestination? = null
 
     composeTestRule.setContent {
@@ -45,7 +51,7 @@ class NavigationMenuTest {
 
     // Click on the "Friends" tab and verify if the onTabSelect callback was triggered with the
     // correct item
-    composeTestRule.onNodeWithTag(Screen.FRIENDS).performClick()
+    composeTestRule.onNodeWithTag("Friends").performClick()
     assert(selectedTab?.route == Route.FRIENDS)
   }
 
@@ -53,20 +59,17 @@ class NavigationMenuTest {
   fun bottomNavigationMenu_highlightsSelectedTab() {
     val tabs =
         listOf(
-            TopLevelDestination(Route.HOME, Icons.Outlined.Menu, Screen.HOME),
-            TopLevelDestination(Route.FRIENDS, Icons.Outlined.Star, Screen.FRIENDS),
-            TopLevelDestination(Route.PROFILE, Icons.Outlined.Person, Screen.PROFILE))
+            TopLevelDestination(Route.HOME, Icons.Outlined.Home, Icons.Filled.Home, "Home"),
+            TopLevelDestination(Route.FRIENDS, Icons.Outlined.Star, Icons.Filled.Star, "Friends"),
+            TopLevelDestination(
+                Route.PROFILE, Icons.Outlined.Person, Icons.Filled.Person, "Profile"))
 
     composeTestRule.setContent {
-      BottomNavigationMenu(
-          onTabSelect = {},
-          tabList = tabs,
-          selectedItem = Route.FRIENDS // "Friends" tab is selected
-          )
+      BottomNavigationMenu(onTabSelect = {}, tabList = tabs, selectedItem = Route.FRIENDS)
     }
 
     // Verify that the "Friends" tab is selected and highlighted
-    composeTestRule.onNodeWithTag(Screen.FRIENDS).assertIsSelected()
-    composeTestRule.onNodeWithTag(Screen.HOME).assertIsNotSelected()
+    composeTestRule.onNodeWithTag("Friends").assertIsSelected()
+    composeTestRule.onNodeWithTag("Home").assertIsNotSelected()
   }
 }
