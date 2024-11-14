@@ -144,17 +144,16 @@ open class NavigationActions(
     Log.d("inside nav actions", "currentRoute called, returned ${navController.currentDestination}")
     return navController.currentDestination?.route ?: ""
   }
-    // Lambda function to navigate to OfflineRecordingScreen with a selected question.
-// It constructs the navigation route by embedding the question text as a parameter
-    val navigateToOfflineRecording: (String) -> Unit = { question ->
-        navController.navigate("offline_recording/${question}")
-    }
+  // Lambda function to navigate to OfflineRecordingScreen with a selected question.
+  // It constructs the navigation route by embedding the question text as a parameter
+  val navigateToOfflineRecording: (String) -> Unit = { question ->
+    navController.navigate("offline_recording/${question}")
+  }
 
-    // Wrapper function for navigating to OfflineRecordingScreen, allowing the lambda function to be
-// called directly. This wrapper is open so it can be overridden, making it suitable for mocking
-// and verifying in tests.
-    open fun goToOfflineRecording(question: String) {
-        navigateToOfflineRecording(question)
-    }
-
+  // Wrapper function for navigating to OfflineRecordingScreen, allowing the lambda function to be
+  // called directly. This wrapper is open so it can be overridden, making it suitable for mocking
+  // and verifying in tests.
+  open fun goToOfflineRecording(question: String) {
+    navigateToOfflineRecording(question)
+  }
 }
