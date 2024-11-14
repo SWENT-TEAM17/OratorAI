@@ -58,12 +58,8 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
           onAuthComplete = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
             Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
-
-            // Start loading and fetch the user profile
             isLoading = true
             val uid = result.user?.uid
-
-            // Fetch the user profile and check if it's incomplete
             uid?.let { u ->
               viewModel.getUserProfile(u)
               redirectToProfile = true
@@ -74,10 +70,8 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
           })
 
-  // Token for Google Sign-In
   val token = stringResource(R.string.default_web_client_id)
 
-  // Start observing profile loading state and redirect based on profile completeness
   LaunchedEffect(viewModel.isLoading.collectAsState().value, redirectToProfile) {
     if (!viewModel.isLoading.value && redirectToProfile) {
       isLoading = false
@@ -89,44 +83,48 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
     }
   }
 
-  // UI for the sign-in screen
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       content = { padding ->
         if (isLoading) {
-          // Show loading spinner while fetching user profile data
           LoadingScreen()
         } else {
-          // Show sign-in UI when not loading
           Column(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(padding)
-                      .verticalScroll(rememberScrollState()) // Make content scrollable
+                      .verticalScroll(rememberScrollState())
                       .padding(horizontal = dimensions.paddingMedium),
               horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(dimensions.paddingMedium),
           ) {
-            // App Logo Image
-            Image(
-                painter = painterResource(id = R.drawable.app_logo),
-                contentDescription = "App Logo",
-                modifier = Modifier.size(dimensions.logoSize).testTag("appLogo"))
+            Spacer(modifier = Modifier.weight(1f)) // Spacer to push content to the center
 
-            Text(
-                text = "OratorAI",
-                style = AppTypography.largeTitleStyle.copy(brush = AppColors.primaryGradient),
-                modifier =
-                    Modifier.width(dimensions.logoTextWidth)
-                        .height(dimensions.logoTextHeight)
-                        .testTag("appTitle"))
+            // Centered Content (Logo and Texts)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(dimensions.paddingMedium)) {
+                  Image(
+                      painter = painterResource(id = R.drawable.app_logo),
+                      contentDescription = "App Logo",
+                      modifier = Modifier.size(dimensions.logoSize).testTag("appLogo"))
 
-            Text(
-                text = "Welcome !",
-                style = AppTypography.mediumTitleStyle,
-                modifier = Modifier.testTag("welcomeText"))
+                  Text(
+                      text = "OratorAI",
+                      style = AppTypography.largeTitleStyle.copy(brush = AppColors.primaryGradient),
+                      modifier =
+                          Modifier.width(dimensions.logoTextWidth)
+                              .height(dimensions.logoTextHeight)
+                              .testTag("appTitle"))
 
-            // Authenticate With Google Button
+                  Text(
+                      text = "Welcome !",
+                      style = AppTypography.mediumTitleStyle,
+                      modifier = Modifier.testTag("welcomeText"))
+                }
+
+            Spacer(modifier = Modifier.weight(1f)) // Spacer to push content to the center
+
+            // Bottom Content (Google Sign-In Button)
             GoogleSignInButton(
                 onSignInClick = {
                   val gso =
