@@ -188,7 +188,7 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor =
-                                AppColors.buttonBackgroundColor, // Background color from theme
+                                AppColors.buttonOverviewColor, // Background color from theme
                             contentColor = AppColors.textColor // Text color from theme
                             )) {
                       Text(
