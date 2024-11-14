@@ -28,6 +28,8 @@ object Route {
   const val FEEDBACK = "Feedback"
   const val CHAT_SCREEN = "chat_screen"
   const val SPEAKING = "Speaking"
+  const val OFFLINE = "Offline"
+  const val PRACTICE_QUESTIONS = "PracticeQuestions"
 }
 
 object Screen {
@@ -48,6 +50,8 @@ object Screen {
   const val FEEDBACK = "Feedback Screen"
   const val CHAT_SCREEN = "chat_screen"
   const val SPEAKING = "Speaking"
+  const val PRACTICE_QUESTIONS_SCREEN = "PracticeQuestions Screen"
+  const val OFFLINE_SCREEN = "Offline Screen"
 }
 
 data class TopLevelDestination(
