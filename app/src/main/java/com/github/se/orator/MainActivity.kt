@@ -157,7 +157,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
               composable(
                   route =
                       "offline_recording/{question}", // Define route with question parameter in the
-                                                      // path
+                  // path
                   arguments =
                       listOf(
                           navArgument("question") {
