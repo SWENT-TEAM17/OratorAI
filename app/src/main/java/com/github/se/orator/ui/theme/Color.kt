@@ -31,7 +31,7 @@ object AppColors {
   val errorColor = Color.Red // For error messages
   val placeholderColor = Color.White // For placeholder text
   val buttonTextColor = Color.White
-  val buttonContentColor = Color.Black
+  val buttonContentColor = Color.White
   val recordingButtonColor = Color.Red
   val iconColor = Color.Black
   val visualizerBarColor = Color.Cyan

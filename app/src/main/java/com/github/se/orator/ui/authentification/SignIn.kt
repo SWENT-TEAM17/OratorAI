@@ -22,14 +22,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.theme.AppColors
-import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppDimensionsObject
 import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.createAppDimensions
@@ -97,7 +95,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
       content = { padding ->
         if (isLoading) {
           // Show loading spinner while fetching user profile data
-          LoadingScreen()
+          LoadingScreen(dimensions = dimensions)
         } else {
           // Show sign-in UI when not loading
           Column(
@@ -148,52 +146,51 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
 }
 
 @Composable
-fun LoadingScreen() {
-  // Show a loading indicator in the center of the screen
+fun LoadingScreen(dimensions: AppDimensionsObject) {
+  // Centering content and making it responsive to screen size
   Column(
       modifier =
           Modifier.fillMaxSize()
-              .padding(top = AppDimensions.paddingXXLarge)
-              .testTag("loadingScreen"), // Optional: Add a testTag for the entire loading screen
+              .padding(top = dimensions.paddingXXLarge)
+              .wrapContentSize(Alignment.Center) // Centers the content on screen
+              .testTag("loadingScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Image(
-            painter =
-                painterResource(
-                    id = R.drawable.loading_screen), // Replace with your actual image name
+            painter = painterResource(id = R.drawable.loading_screen), // Your image resource
             contentDescription = "Loading Screen Image",
-            modifier = Modifier.fillMaxWidth().width(412.dp).height(487.dp).testTag("loadingImage"))
+            modifier =
+                Modifier.fillMaxWidth(0.8f) // Limits the image width to 80% of the screen width
+                    .aspectRatio(1f) // Maintains aspect ratio for better fit
+                    .wrapContentHeight() // Wraps height to content size
+                    .testTag("loadingImage"))
 
-        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+        Spacer(modifier = Modifier.height(dimensions.paddingMedium))
 
         Text(
             text = "Reach your goals",
             style = AppTypography.mediumTitleStyle,
-            modifier = Modifier.testTag("loadingText") // Added testTag
-            )
+            modifier = Modifier.testTag("loadingText"))
 
-        Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+        Spacer(modifier = Modifier.height(dimensions.paddingSmall))
 
         Text(
             text = "Become the best speaker",
             style = AppTypography.smallTitleStyle,
-            modifier = Modifier.testTag("loadingText") // Added testTag
-            )
+            modifier = Modifier.testTag("loadingText"))
 
-        Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
+        Spacer(modifier = Modifier.height(dimensions.paddingLarge))
 
         CircularProgressIndicator(
             color = AppColors.loadingIndicatorColor,
-            strokeWidth = AppDimensions.strokeWidth,
-            modifier =
-                Modifier.size(AppDimensions.loadingIndicatorSize)
-                    .testTag("loadingIndicator") // Added testTag
-            )
-        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+            strokeWidth = dimensions.strokeWidth,
+            modifier = Modifier.size(dimensions.loadingIndicatorSize).testTag("loadingIndicator"))
+
+        Spacer(modifier = Modifier.height(dimensions.paddingMedium))
+
         Text(
             text = "Loading...",
             style = AppTypography.loadingTextStyle,
-            modifier = Modifier.testTag("loadingText") // Added testTag
-            )
+            modifier = Modifier.testTag("loadingText"))
       }
 }
 

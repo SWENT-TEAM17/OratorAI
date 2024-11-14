@@ -84,7 +84,12 @@ data class AppDimensionsObject(
 
     // Profile Picture
     val profilePictureDialogSize: Dp,
-    val profilePictureSize: Dp
+    val profilePictureSize: Dp,
+
+    // Font Size
+    val largeTitleFontSize: Dp,
+    val mediumTitleFontSize: Dp,
+    val buttonTextSize: Dp,
 )
 
 object AppDimensions {
@@ -141,6 +146,8 @@ object AppDimensions {
   val mediumText = 16.sp
   val full = 1f
   val imageLargeXXL = 350.dp
+  val smallTitleFontSize = 20.dp
+  val mediumTitleFontSize = 30.dp
 }
 
 object AppShapes {
