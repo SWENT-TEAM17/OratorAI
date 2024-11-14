@@ -98,12 +98,6 @@ fun ButtonRow(navigationActions: NavigationActions) {
     SectionButton("Popular") {
       // Do nothing, stays on the same screen
     }
-
-    // Fun Button
-    SectionButton("Fun") { navigationActions.navigateTo(Screen.FUN_SCREEN) }
-
-    // Connect Button
-    SectionButton("Connect") { navigationActions.navigateTo(Screen.CONNECT_SCREEN) }
   }
 }
 

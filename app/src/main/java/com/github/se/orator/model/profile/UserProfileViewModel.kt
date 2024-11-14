@@ -263,4 +263,35 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
 
     return profile == null || profile.name.isBlank()
   }
+
+  /**
+   * Deletes a friend from the current user's list of friends.
+   *
+   * @param friend The `UserProfile` of the friend to be deleted.
+   */
+  fun deleteFriend(friend: UserProfile) {
+    val currentUserProfile = userProfile_.value
+    if (currentUserProfile != null) {
+      // Asserts that the friend is in the friends list
+      if (currentUserProfile.friends.contains(friend.uid)) {
+        Log.d("UserProfileViewModel", "Removing friend: ${friend.name}")
+
+        // Removes the friend from the friends list
+        val updatedFriendsList = friendsProfiles_.value.toMutableList().apply { remove(friend) }
+
+        val updatedProfile = currentUserProfile.copy(friends = updatedFriendsList.map { it.uid })
+
+        // Updates the user profile with the new one
+        updateUserProfile(updatedProfile)
+        userProfile_.value = updatedProfile
+
+        // Updates the local state with the new friends list
+        friendsProfiles_.value = updatedFriendsList
+      } else {
+        Log.d("UserProfileViewModel", "${friend.name} cannot be deleted: not in the friends list !")
+      }
+    } else {
+      Log.e("UserProfileViewModel", "Failed to remove a friend: current user profile is null.")
+    }
+  }
 }
