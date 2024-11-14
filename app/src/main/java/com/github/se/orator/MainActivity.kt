@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
 
     enableEdgeToEdge()
     setContent {
-      ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp(chatGPTService) } }
+      ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { MainScreenPreview() } }
     }
   }
 }
@@ -200,4 +200,15 @@ fun OratorApp(chatGPTService: ChatGPTService) {
       }
     }
   }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
+  // Setup a dummy navigation controller
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
+
+  // Use a dummy MainScreen for preview
+  MainScreen(navigationActions = navigationActions)
 }
