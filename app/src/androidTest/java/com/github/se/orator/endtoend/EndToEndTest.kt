@@ -84,7 +84,6 @@ class EndToEndAppTest {
 
     // Step 1: Navigate from Home to Profile
     composeTestRule.onNodeWithTag("Profile").performClick() // Simulate click on Profile button
-    verify(navigationActions).currentRoute()
 
     // Step 2: Navigate from Profile to Settings
     composeTestRule

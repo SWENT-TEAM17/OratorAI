@@ -2,7 +2,6 @@ package com.github.se.orator.ui.settings
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
@@ -31,11 +31,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
@@ -133,10 +132,11 @@ fun SettingsScreen(
             title = { Text("Settings", modifier = Modifier.testTag("SettingsText")) },
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
-                Image(
-                    painter = painterResource(id = R.drawable.back_arrow),
-                    modifier = Modifier.size(AppDimensions.statusBarPadding).testTag("back_button"),
-                    contentDescription = "Back")
+                androidx.compose.material.Icon(
+                    Icons.Outlined.ArrowBackIosNew,
+                    contentDescription = "Back button",
+                    modifier = Modifier.size(AppDimensions.iconSizeMedium).testTag("back_button"),
+                    tint = Color.Black)
               }
             })
       },
