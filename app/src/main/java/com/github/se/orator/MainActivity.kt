@@ -183,12 +183,12 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
         }
 
-      navigation(
-          startDestination = Screen.FRIENDS,
-          route = Route.FRIENDS,
-      ) {
-        composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
-      }
+        navigation(
+            startDestination = Screen.FRIENDS,
+            route = Route.FRIENDS,
+        ) {
+          composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
+        }
 
         navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
           composable(Screen.CREATE_PROFILE) {
