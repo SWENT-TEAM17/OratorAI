@@ -198,18 +198,28 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
  * @param onClick Callback to handle click events.
  */
 @Composable
-fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
-  val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
+fun ProfilePicture(
+    profilePictureUrl: String?,
+    onClick: () -> Unit,
+) {
+  // Only attempt to load the image if the URL is not null
+  if (profilePictureUrl != null) {
+    val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
 
-  Image(
-      painter = painter,
-      contentDescription = "Profile Picture",
-      contentScale = ContentScale.Crop,
-      modifier =
-          Modifier.size(AppDimensions.profilePictureSize) // Replaced 100.dp with profilePictureSize
-              .clip(CircleShape)
-              .clickable(onClick = onClick)
-              .testTag("profile_picture"))
+    Image(
+        painter = painter,
+        contentDescription = "Profile Picture",
+        contentScale = ContentScale.Crop,
+        modifier =
+            Modifier.size(
+                    AppDimensions.profilePictureSize) // Replaced 100.dp with profilePictureSize
+                .clip(CircleShape)
+                .clickable(onClick = onClick)
+                .testTag("profile_picture"))
+  } else {
+    // If no URL is provided, do not display anything
+    // This allows the background image to be visible
+  }
 }
 
 /**
