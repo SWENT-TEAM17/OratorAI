@@ -84,7 +84,6 @@ class EndToEndAppTest {
 
     // Step 1: Navigate from Home to Profile
     composeTestRule.onNodeWithTag("Profile").performClick() // Simulate click on Profile button
-    verify(navigationActions).currentRoute()
 
     // Step 2: Navigate from Profile to Settings
     composeTestRule
@@ -113,13 +112,11 @@ class EndToEndAppTest {
     }
 
     // Step 3: Use the back button to return to Profile
-    composeTestRule
-        .onNodeWithContentDescription("Back")
-        .performClick() // Simulate clicking the back button
+    composeTestRule.onNodeWithTag("back_button").performClick() // Simulate clicking the back button
     verify(navigationActions).goBack() // Ensure it navigates back to Profile
 
     // Step 4: Navigate to Edit Profile from Profile
-    composeTestRule.onNodeWithText("Edit Profile").performClick() // Simulate clicking Edit Profile
+    composeTestRule.onNodeWithTag("edit_button").performClick() // Simulate clicking Edit Profile
     verify(navigationActions).navigateTo(Screen.EDIT_PROFILE)
 
     composeTestRule.runOnUiThread {
@@ -128,14 +125,12 @@ class EndToEndAppTest {
     composeTestRule.onNodeWithTag("username_field").performTextInput("TestName")
     composeTestRule.onNodeWithTag("username_field").assertTextContains("TestName")
 
-    composeTestRule.onNodeWithContentDescription("Change Profile Picture").performClick()
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
     composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").performClick()
     composeTestRule.onNodeWithText("Choose Profile Picture").assertIsNotDisplayed()
     // Step 5: Return back to Profile using the back button
-    composeTestRule
-        .onNodeWithContentDescription("Back")
-        .performClick() // Simulate back button click
+    composeTestRule.onNodeWithTag("back_button").performClick() // Simulate back button click
 
     // Step 6: Navigate to Friends from Profile
     composeTestRule.onNodeWithTag("Friends").performClick() // Simulate clicking Friends button

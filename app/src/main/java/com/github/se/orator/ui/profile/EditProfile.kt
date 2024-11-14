@@ -4,9 +4,9 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,13 +14,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,11 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import com.github.se.orator.R
+import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
@@ -80,9 +87,9 @@ fun EditProfileScreen(
       topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("edit_profile_app_bar"),
-            backgroundColor = AppColors.surfaceColor, // Replaced Color.White
-            contentColor = AppColors.textColor, // Replaced Color.Black
-            elevation = AppDimensions.elevationSmall, // Replaced 4.dp
+            backgroundColor = AppColors.surfaceColor,
+            contentColor = AppColors.surfaceColor,
+            elevation = AppDimensions.elevationSmall,
             title = {
               Text(
                   modifier = Modifier.testTag("edit_profile_title"),
@@ -94,26 +101,18 @@ fun EditProfileScreen(
               IconButton(
                   onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("back_button")) {
-                    Image(
-                        painter = painterResource(id = R.drawable.back_arrow),
-                        contentDescription = "Back",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeSmall)
-                                .testTag("BackArrowImage") // Replaced 32.dp
-                        )
+                    Icon(
+                        Icons.Outlined.ArrowBackIosNew,
+                        contentDescription = "Back arrow",
+                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                        tint = Color.Black)
                   }
             },
             actions = {
               IconButton(
                   onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
                   modifier = Modifier.testTag("settings_button")) {
-                    Image(
-                        painter = painterResource(id = R.drawable.settings),
-                        contentDescription = "Settings",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeSmall)
-                                .testTag("SettingsImage") // Replaced 32.dp
-                        )
+                    Icon(Icons.Filled.Settings, contentDescription = "Logout icon")
                   }
             })
       },
@@ -131,26 +130,30 @@ fun EditProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
 
               // Profile Picture with Camera Icon Overlay
-              Box(
-                  contentAlignment = Alignment.Center,
-                  modifier = Modifier.testTag("profile_picture")) {
-                    ProfilePicture(
-                        profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
-                        onClick = { isDialogOpen = true })
-                    IconButton(
-                        onClick = { isDialogOpen = true },
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeSmall) // Replaced 32.dp
-                                .align(Alignment.BottomEnd)
-                                .testTag("upload_profile_picture_button")) {
-                          Image(
-                              painter = painterResource(id = R.drawable.camera),
-                              contentDescription = "Change Profile Picture",
-                              modifier =
-                                  Modifier.size(AppDimensions.iconSizeSmall) // Replaced 32.dp
-                                      .testTag("upload_profile_picture"))
-                        }
-                  }
+              Box(contentAlignment = Alignment.Center) {
+                ProfilePicture(
+                    profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
+                    onClick = { isDialogOpen = true })
+
+                // edit profile picture button
+                Button(
+                    onClick = { isDialogOpen = true },
+                    modifier =
+                        Modifier.testTag("upload_profile_picture_button")
+                            .width(40.dp)
+                            .height(40.dp)
+                            .align(Alignment.BottomEnd),
+                    shape = AppShapes.circleShape,
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
+                    contentPadding = PaddingValues(0.dp)) {
+                      Icon(
+                          Icons.Outlined.PhotoCamera,
+                          contentDescription = "Edit button",
+                          modifier =
+                              Modifier.size(AppDimensions.iconSizeMedium).testTag("edit_button"),
+                          tint = AppColors.primaryColor)
+                    }
+              }
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
 
@@ -164,15 +167,10 @@ fun EditProfileScreen(
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
 
-              // Bio Input Field
-              Text(
-                  text = "BIO",
-                  fontWeight = FontWeight.Bold,
-                  style = AppTypography.mediumTitleStyle, // Replaced manual styling
-                  modifier = Modifier.align(Alignment.Start).testTag("bio_label"))
               OutlinedTextField(
                   value = updatedBio,
                   onValueChange = { newBio -> updatedBio = newBio },
+                  label = { Text("Bio", modifier = Modifier.testTag("bio_text")) },
                   placeholder = { Text("Tell us about yourself") },
                   modifier =
                       Modifier.fillMaxWidth()
@@ -203,15 +201,15 @@ fun EditProfileScreen(
                       Modifier.fillMaxWidth()
                           .height(AppDimensions.buttonHeightLarge) // Replaced 50.dp
                           .testTag("save_profile_button"),
-                  shape = AppShapes.circleShape, // Replaced CircleShape
-              ) {
-                Text(
-                    modifier = Modifier.testTag("save_profile_button_text"),
-                    text = "Save changes",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = AppFontSizes.bodyLarge // Replaced 16.sp
-                    )
-              }
+                  shape = AppShapes.circleShape, // Replaced CircleShape,
+                  colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)) {
+                    Text(
+                        modifier = Modifier.testTag("save_profile_button_text"),
+                        text = "Save changes",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = AppFontSizes.bodyLarge // Replaced 16.sp
+                        )
+                  }
             }
       }
 
