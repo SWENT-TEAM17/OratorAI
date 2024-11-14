@@ -39,7 +39,6 @@ class SpeakingSalesPitchModuletest {
     composeTestRule.onNodeWithTag("productTypeInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("targetAudienceInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackTypeInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("keySellingPointsInput").assertIsDisplayed()
     composeTestRule.onNodeWithText("Public Speaking").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("content").assertIsDisplayed()

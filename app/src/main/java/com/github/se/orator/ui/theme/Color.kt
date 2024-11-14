@@ -24,12 +24,18 @@ object AppColors {
   val loadingIndicatorColor = Color(0xFF442DAA)
   val secondaryTextColor = Color.Gray
   val surfaceColor = Color.White
+
+  val LightPurpleGrey = Color(0xFFE2E1EC)
   val goldColor = Color(0xFFFFD700)
   val silverColor = Color(0xFFC0C0C0)
   val bronzeColor = Color(0xFFCD7F32)
   val errorColor = Color.Red // For error messages
   val placeholderColor = Color.White // For placeholder text
   val buttonTextColor = Color.White
+  val buttonContentColor = Color.Black
+  val recordingButtonColor = Color.Red
+  val iconColor = Color.Black
+  val visualizerBarColor = Color.Cyan
 
   // Gradients
   val primaryGradient = Brush.linearGradient(colors = listOf(primaryColor, secondaryColor))

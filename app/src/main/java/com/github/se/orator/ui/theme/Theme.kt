@@ -11,15 +11,89 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-// Define reusable dimensions
+data class AppDimensionsObject(
+    // Padding
+    val paddingExtraSmall: Dp,
+    val paddingSmall: Dp,
+    val paddingSmallMedium: Dp,
+    val paddingMedium: Dp,
+    val paddingLarge: Dp,
+    val paddingExtraLarge: Dp,
+    val paddingXXLarge: Dp,
+    val paddingXXXLarge: Dp,
+    val paddingTopSmall: Dp,
+    val statusBarPadding: Dp,
+
+    // Spacer Dimensions
+    val spacerWidthMedium: Dp,
+    val spacerHeightLarge: Dp,
+    val largeSpacerHeight: Dp,
+
+    // Button Heights
+    val buttonHeight: Dp,
+    val buttonHeightLarge: Dp,
+
+    // Logo Dimensions
+    val logoSize: Dp,
+    val logoTextWidth: Dp,
+    val logoTextHeight: Dp,
+    val googleLogoSize: Dp,
+
+    // Fixed Dimensions
+    val strokeWidth: Dp,
+    val borderStrokeWidth: Dp,
+    val dividerThickness: Dp,
+    val appBarElevation: Dp,
+    val elevationSmall: Dp,
+
+    // Loading Indicator
+    val loadingIndicatorSize: Dp,
+
+    // Corner Radii
+    val roundedCornerRadius: Dp,
+    val cornerRadiusSmall: Dp,
+
+    // Icon Sizes
+    val iconSize: Dp,
+    val iconSizeSmall: Dp,
+    val iconSizeMedium: Dp,
+    val iconSizeLarge: Dp,
+
+    // Drawer Padding
+    val drawerPadding: Dp,
+
+    // Card Dimensions
+    val cardHorizontalPadding: Dp,
+    val cardCornerRadius: Dp,
+    val cardImageHeight: Dp,
+    val cardSectionHeight: Dp,
+
+    // Spacing
+    val spacingXLarge: Dp,
+
+    // Navigation
+    val bottomNavigationHeight: Dp,
+
+    // Input Fields
+    val inputFieldHeight: Dp,
+    val bioFieldHeight: Dp,
+
+    // Profile Picture
+    val profilePictureDialogSize: Dp,
+    val profilePictureSize: Dp
+)
+
 object AppDimensions {
   val paddingSmall = 8.dp
   val paddingMedium = 16.dp
   val paddingLarge = 24.dp
   val paddingExtraLarge = 32.dp
   val largeSpacerHeight = 100.dp
+  val mediumHeight = 64.dp
   val buttonHeight = 48.dp
   val logoSize = 250.dp
   val logoTextWidth = 276.dp
@@ -57,6 +131,15 @@ object AppDimensions {
   val paddingTopSmall = 5.dp // Added for padding top=5.dp in Text
   val statusBarPadding = 10.dp
   val iconSizeLarge = 35.dp
+  val buttonSize = 80.dp
+  val visualizerHeight = 100.dp
+  val iconSizeMic = 48.dp
+  val heightMedium = 24.dp
+  val paddingMediumSmall = 20.dp
+  val smallWidth = 12.dp
+  val smallPadding = 4.dp
+  val mediumText = 16.sp
+  val full = 1f
   val imageLargeXXL = 350.dp
 }
 
