@@ -67,97 +67,113 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
               Text(
                   text = "Chat Screen",
                   fontWeight = FontWeight.Bold,
-                  color = AppColors.textColor // Use theme color for text
-                  )
+                  color = AppColors.textColor, // Use theme color for text
+                  modifier = Modifier.testTag("chat_screen_title"))
             },
             navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.size(AppDimensions.iconSizeSmall).testTag("back_button"),
-                    tint = AppColors.textColor // Use theme color for icon
-                    )
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                        tint = AppColors.textColor) // Use theme color for icon
               }
             },
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = AppColors.surfaceColor, // Use theme surface color
-                    titleContentColor = AppColors.textColor // Use theme text color
-                    ))
+                    titleContentColor = AppColors.textColor), // Use theme text color
+            modifier = Modifier.testTag("top_app_bar"))
       },
       content = { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-          // Divider to separate the TopAppBar from the content.
-          Divider()
-          // Main content column containing the messages and buttons.
-          Column(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .padding(horizontal = AppDimensions.paddingMedium)
-                      .padding(top = AppDimensions.paddingSmall)) {
-                // LazyColumn to display chat messages in a scrollable list.
-                LazyColumn(
-                    state = listState,
-                    modifier =
-                        Modifier.weight(1f) // Makes the LazyColumn fill available space.
-                            .fillMaxWidth()) {
-                      // Dynamically add chat message items.
-                      items(chatMessages) { message -> ChatMessageItem(message) }
+        Column(
+            // Divider to separate the TopAppBar from the content.
+            modifier =
+                Modifier.fillMaxSize().padding(paddingValues).testTag("chat_screen_column")) {
+              Divider(modifier = Modifier.testTag("divider"))
+              // Main content column containing the messages and buttons.
+              Column(
+                  modifier =
+                      Modifier.fillMaxSize()
+                          .padding(horizontal = AppDimensions.paddingMedium)
+                          .padding(top = AppDimensions.paddingSmall)
+                          .testTag("content_column")) {
+                    // LazyColumn to display chat messages in a scrollable list.
+                    LazyColumn(
+                        state = listState,
+                        modifier =
+                            Modifier.weight(1f)
+                                . // Makes the LazyColumn fill available space.
+                                fillMaxWidth()
+                                .testTag(
+                                    "chat_messages_list")) // Dynamically add chat message items.
+                    {
+                          items(chatMessages) { message -> ChatMessageItem(message) }
+                        }
+
+                    // Display a loading indicator when a message is being processed.
+                    if (isLoading) {
+                      CircularProgressIndicator(
+                          modifier =
+                              Modifier.align(Alignment.CenterHorizontally)
+                                  .padding(AppDimensions.paddingSmall)
+                                  .testTag("loading_indicator"),
+                          color = AppColors.loadingIndicatorColor) // Use theme color
                     }
 
-                // Display a loading indicator when a message is being processed.
-                if (isLoading) {
-                  CircularProgressIndicator(
-                      modifier =
-                          Modifier.align(Alignment.CenterHorizontally)
-                              .padding(AppDimensions.paddingSmall),
-                      color = AppColors.loadingIndicatorColor // Use theme color
-                      )
-                }
+                    // Button to navigate to the "Speaking" screen to record a response.
+                    Button(
+                        onClick = { navigationActions.navigateTo(Screen.SPEAKING) },
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(top = AppDimensions.paddingSmall)
+                                .border(
+                                    width = AppDimensions.borderStrokeWidth,
+                                    color = AppColors.buttonBorderColor,
+                                    shape = MaterialTheme.shapes.medium)
+                                .testTag("record_response_button"),
+                        enabled = !isLoading,
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = AppColors.buttonBackgroundColor, // Use theme color
+                                contentColor = AppColors.textColor // Use theme color
+                                )) {
+                          Text(
+                              text = "Record Response",
+                              modifier = Modifier.testTag("record_response_button_text"))
+                        }
 
-                // Button to navigate to the "Speaking" screen to record a response.
-                Button(
-                    onClick = { navigationActions.navigateTo(Screen.SPEAKING) },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(top = AppDimensions.paddingSmall)
-                            .border(
-                                width = AppDimensions.borderStrokeWidth,
-                                color = AppColors.buttonBorderColor,
-                                shape = MaterialTheme.shapes.medium),
-                    enabled = !isLoading,
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = AppColors.buttonBackgroundColor, // Use theme color
-                            contentColor = AppColors.textColor // Use theme color
-                            )) {
-                      Text(text = "Record Response")
-                    }
-
-                // Button to navigate to the "Feedback" screen to request feedback.
-                Button(
-                    onClick = { navigationActions.navigateTo(Screen.FEEDBACK) },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(top = AppDimensions.paddingSmall)
-                            .border(
-                                width =
-                                    AppDimensions
-                                        .borderStrokeWidth, // Use dimension for border width
-                                color = AppColors.buttonBorderColor, // Use theme color for border
-                                shape = MaterialTheme.shapes.medium // Or any other shape you prefer
-                                ),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = AppColors.buttonBackgroundColor, // Use theme color
-                            contentColor = AppColors.textColor // Use theme color
-                            )) {
-                      Text(text = "Request Feedback")
-                    }
-              }
-        }
-      })
+                    // Button to navigate to the "Feedback" screen to request feedback.
+                    Button(
+                        onClick = { navigationActions.navigateTo(Screen.FEEDBACK) },
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(top = AppDimensions.paddingSmall)
+                                .border(
+                                    width =
+                                        AppDimensions
+                                            .borderStrokeWidth, // Use dimension for border width
+                                    color =
+                                        AppColors.buttonBorderColor, // Use theme color for border
+                                    shape =
+                                        MaterialTheme.shapes
+                                            .medium) // Or any other shape you prefer
+                                .testTag("request_feedback_button"),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = AppColors.buttonBackgroundColor, // Use theme color
+                                contentColor = AppColors.textColor // Use theme color
+                                )) {
+                          Text(
+                              text = "Request Feedback",
+                              modifier = Modifier.testTag("request_feedback_button_text"))
+                        }
+                  }
+            }
+      },
+      modifier = Modifier.testTag("scaffold"))
 }
 
 /**
@@ -183,7 +199,10 @@ fun ChatMessageItem(message: Message) {
 
   // Row to align the message bubble horizontally.
   Row(
-      modifier = Modifier.fillMaxWidth().padding(vertical = AppDimensions.paddingExtraSmall),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(vertical = AppDimensions.paddingExtraSmall)
+              .testTag("chat_message_row"),
       horizontalArrangement = alignment) {
         // Message bubble.
         Box(
@@ -191,11 +210,13 @@ fun ChatMessageItem(message: Message) {
                 Modifier.background(
                         backgroundColor,
                         shape = RoundedCornerShape(AppDimensions.cornerRadiusSmall))
-                    .padding(AppDimensions.paddingSmall)) {
+                    .padding(AppDimensions.paddingSmall)
+                    .testTag("message_bubble")) {
               // Display the message content.
               Text(
-                  text = message.content, color = AppColors.textColor // Use theme color for text
-                  )
+                  text = message.content,
+                  color = AppColors.textColor, // Use theme color for text
+                  modifier = Modifier.testTag("message_text"))
             }
       }
 }
