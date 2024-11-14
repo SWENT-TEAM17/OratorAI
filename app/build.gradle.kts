@@ -11,6 +11,15 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("build") {
+            storeFile =
+                file("${rootProject.projectDir}/keystore.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
     namespace = "com.github.se.orator"
     compileSdk = 34
 
@@ -47,6 +56,7 @@ android {
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("build")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
@@ -137,6 +147,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui.test.android)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.test.core.ktx)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
@@ -206,6 +217,9 @@ dependencies {
 
     // Coroutines Testing
     testImplementation(libs.kotlinx.coroutines.test)
+
+    // for exectutor testing (NetworkChangeReceiverTest)
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
 }
 
 tasks.withType<Test> {

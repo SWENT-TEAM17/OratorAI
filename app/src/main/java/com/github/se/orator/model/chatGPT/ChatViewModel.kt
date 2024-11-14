@@ -1,10 +1,11 @@
 package com.github.se.orator.model.chatGPT
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
-import com.github.se.orator.model.speaking.PracticeContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.network.ChatGPTService
@@ -12,12 +13,12 @@ import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val chatGPTService: ChatGPTService,
-    val practiceContext: PracticeContext,
-    val feedbackType: String
+    private val apiLinkViewModel: ApiLinkViewModel
 ) : ViewModel() {
 
   private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
@@ -29,36 +30,50 @@ class ChatViewModel(
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage = _errorMessage.asStateFlow()
 
-  private val collectedAnalysisData = mutableListOf<AnalysisData>()
+  private val _collectedAnalysisData = MutableStateFlow<MutableList<AnalysisData>>(mutableListOf())
+  val collectedAnalysisData = _collectedAnalysisData.asStateFlow()
+
+  private val practiceContext = apiLinkViewModel.practiceContext
 
   init {
-    initializeConversation()
+    observeAnalysisData()
   }
 
   fun initializeConversation() {
+
+    _collectedAnalysisData.value.clear() // Resets the analysis data history
+    val practiceContextAsValue = practiceContext.value ?: return
     val systemMessageContent =
-        when (practiceContext) {
+        when (practiceContextAsValue) {
           is InterviewContext ->
               """
-                You are simulating a ${practiceContext.interviewType} for the position of ${practiceContext.role} at ${practiceContext.company}. 
-                Focus on the following areas: ${practiceContext.focusAreas.joinToString(", ")}. 
+                You are simulating a ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.role} at ${practiceContextAsValue.company}. 
+                Focus on the following areas: ${practiceContextAsValue.focusAreas.joinToString(", ")}. 
                 Ask questions one at a time and wait for the user's response before proceeding. 
                 Do not provide feedback until the end.
             """
                   .trimIndent()
           is PublicSpeakingContext ->
               """
-                You are helping the user prepare a speech for a ${practiceContext.occasion}. 
-                The audience is ${practiceContext.audienceDemographic}. 
-                The main points of the speech are: ${practiceContext.mainPoints.joinToString(", ")}.
+                You are helping the user prepare a speech for a ${practiceContextAsValue.occasion}. 
+                The audience is ${practiceContextAsValue.audienceDemographic}. 
+                The main points of the speech are: ${
+                        practiceContextAsValue.mainPoints.joinToString(
+                            ", "
+                        )
+                    }.
                 Please guide the user through practicing their speech, asking for their input on each point.
             """
                   .trimIndent()
           is SalesPitchContext ->
               """
-                You are helping the user prepare a sales pitch for the product ${practiceContext.product}. 
-                The target audience is ${practiceContext.targetAudience}. 
-                The key features of the product are: ${practiceContext.keyFeatures.joinToString(", ")}.
+                You are helping the user prepare a sales pitch for the product ${practiceContextAsValue.product}. 
+                The target audience is ${practiceContextAsValue.targetAudience}. 
+                The key features of the product are: ${
+                        practiceContextAsValue.keyFeatures.joinToString(
+                            ", "
+                        )
+                    }.
                 Please guide the user through practicing their sales pitch, asking for their input on each feature.
             """
                   .trimIndent()
@@ -77,14 +92,15 @@ class ChatViewModel(
 
   fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
     val userMessage = Message(role = "user", content = transcript)
-    _chatMessages.value = _chatMessages.value + userMessage
+    _chatMessages.value += userMessage
 
-    collectedAnalysisData.add(analysisData)
+    _collectedAnalysisData.value.add(analysisData)
 
     getNextGPTResponse()
   }
 
   private fun getNextGPTResponse() {
+    Log.d("ChatViewModel", "Getting next GPT response")
     viewModelScope.launch {
       try {
         _isLoading.value = true
@@ -94,7 +110,7 @@ class ChatViewModel(
         val response = chatGPTService.getChatCompletion(request)
 
         response.choices.firstOrNull()?.message?.let { responseMessage ->
-          _chatMessages.value = _chatMessages.value + responseMessage
+          _chatMessages.value += responseMessage
         }
       } catch (e: Exception) {
         handleError(e)
@@ -104,7 +120,11 @@ class ChatViewModel(
     }
   }
 
-  fun requestFeedback() {
+  fun endConversation() {
+    apiLinkViewModel.resetAllPracticeData()
+  }
+
+  /*fun requestFeedback() {
     val analysisSummary = generateAnalysisSummary(collectedAnalysisData)
 
     val feedbackRequestMessage =
@@ -118,10 +138,10 @@ class ChatViewModel(
             """
                     .trimIndent())
 
-    _chatMessages.value = _chatMessages.value + feedbackRequestMessage
+    _chatMessages.value += feedbackRequestMessage
 
     getNextGPTResponse()
-  }
+  }*/
 
   //    fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
   //        val userMessage = Message(
@@ -136,7 +156,7 @@ class ChatViewModel(
   //    }
 
   private fun getAnalysisSummary(): String {
-    return generateAnalysisSummary(collectedAnalysisData)
+    return generateAnalysisSummary(_collectedAnalysisData.value)
   }
 
   private fun generateAnalysisSummary(analysisDataList: List<AnalysisData>): String {
@@ -169,6 +189,21 @@ class ChatViewModel(
   private fun handleError(e: Exception) {
     // Handle exceptions and update _errorMessage
     _errorMessage.value = e.localizedMessage
+  }
+
+  /**
+   * Observe the analysis data from the ApiLinkViewModel and send the user response to the chat when
+   * a new one is received.
+   */
+  private fun observeAnalysisData() {
+    viewModelScope.launch {
+      apiLinkViewModel.analysisData.collectLatest { data ->
+        data?.let {
+          Log.d("ChatViewModel", "Analysis data received: $it")
+          sendUserResponse(it.transcription, it)
+        }
+      }
+    }
   }
 
   //    fun sendMessage(userMessage: String) {

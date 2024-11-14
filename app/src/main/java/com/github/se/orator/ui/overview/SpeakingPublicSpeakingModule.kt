@@ -1,15 +1,14 @@
 package com.github.se.orator.ui.overview
 
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 /**
  * The SpeakingPublicSpeaking composable is a composable screen that displays the public speaking
@@ -18,7 +17,10 @@ import com.github.se.orator.ui.navigation.NavigationActions
  * @param navigationActions The navigation actions that can be performed.
  */
 @Composable
-fun SpeakingPublicSpeaking(navigationActions: NavigationActions) {
+fun SpeakingPublicSpeakingModule(
+    navigationActions: NavigationActions,
+    apiLinkViewModel: ApiLinkViewModel
+) {
   var occasion by remember { mutableStateOf("") }
   var demographic by remember { mutableStateOf("") }
   var mainPoints by remember { mutableStateOf("") }
@@ -75,7 +77,9 @@ fun SpeakingPublicSpeaking(navigationActions: NavigationActions) {
                 audienceDemographic = demographic,
                 mainPoints = mainPoints.split(",").map { it.trim() })
 
+        apiLinkViewModel.updatePracticeContext(publicSpeakingContext)
+
         // Navigate to ChatScreen, passing the context and feedbackLanguage
-        navigationActions.navigateToChatScreen(publicSpeakingContext, feedbackLanguage)
+        navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }

@@ -1,6 +1,5 @@
 package com.github.se.orator.ui.navigation
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -8,13 +7,10 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.github.se.orator.model.speaking.PracticeContext
-import com.google.gson.Gson
 
 object Route {
   const val HOME = "Home"
@@ -32,6 +28,8 @@ object Route {
   const val FEEDBACK = "Feedback"
   const val CHAT_SCREEN = "chat_screen"
   const val SPEAKING = "Speaking"
+  const val OFFLINE = "Offline"
+  const val PRACTICE_QUESTIONS = "PracticeQuestions"
 }
 
 object Screen {
@@ -47,13 +45,13 @@ object Screen {
   const val SPEAKING_PUBLIC_SPEAKING = "SpeakingPublicSpeaking Screen"
   const val SPEAKING_SALES_PITCH = "SpeakingSalesPitch Screen"
   const val SPEAKING_SCREEN = "SpeakingScreen"
-  const val FUN_SCREEN = "ViewFunScreen"
   const val PRACTICE_SCREEN = "ViewPracticeScreen"
-  const val CONNECT_SCREEN = "ViewConnectScreen"
   const val LEADERBOARD = "LeaderBoard Screen"
   const val FEEDBACK = "Feedback Screen"
   const val CHAT_SCREEN = "chat_screen"
   const val SPEAKING = "Speaking"
+  const val PRACTICE_QUESTIONS_SCREEN = "PracticeQuestions Screen"
+  const val OFFLINE_SCREEN = "Offline Screen"
 }
 
 data class TopLevelDestination(
@@ -140,33 +138,5 @@ open class NavigationActions(
   open fun currentRoute(): String {
     Log.d("inside nav actions", "currentRoute called, returned ${navController.currentDestination}")
     return navController.currentDestination?.route ?: ""
-  }
-
-  /**
-   * Navigate to the specified screen with the given practice context and feedback type.
-   *
-   * @param practiceContext The practice context to pass to the screen
-   * @param feedbackType The feedback type to pass to the screen
-   */
-  fun navigateToChatScreen(practiceContext: PracticeContext, feedbackType: String) {
-    val gson = Gson()
-    val contextJson = Uri.encode(gson.toJson(practiceContext))
-    val feedbackTypeEncoded = Uri.encode(feedbackType)
-    navController.navigate("${Screen.CHAT_SCREEN}/$contextJson/$feedbackTypeEncoded")
-  }
-
-  /** Navigate to the speaking screen. */
-  fun navigateToSpeakingScreen() {
-    navController.navigate(Screen.SPEAKING)
-  }
-
-  /** Navigate to the feedback screen. */
-  fun navigateToFeedbackScreen() {
-    navController.navigate(Screen.FEEDBACK)
-  }
-
-  /** Navigate to the home screen. */
-  fun navigateToHome() {
-    navController.navigate(Route.HOME)
   }
 }

@@ -1,15 +1,15 @@
 package com.github.se.orator.ui.overview
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 
 /**
  * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch
@@ -19,7 +19,10 @@ import com.github.se.orator.ui.navigation.NavigationActions
  */
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun SpeakingSalesPitchModule(navigationActions: NavigationActions) {
+fun SpeakingSalesPitchModule(
+    navigationActions: NavigationActions,
+    apiLinkViewModel: ApiLinkViewModel
+) {
   var productType by remember { mutableStateOf("") }
   var targetAudience by remember { mutableStateOf("") }
   var feedbackType by remember { mutableStateOf("") }
@@ -77,7 +80,9 @@ fun SpeakingSalesPitchModule(navigationActions: NavigationActions) {
                 targetAudience = targetAudience,
                 keyFeatures = keySellingPoints.split(", "))
 
+        apiLinkViewModel.updatePracticeContext(salesPitchContext)
+
         // Navigate to ChatScreen, passing the context and feedbackLanguage
-        navigationActions.navigateToChatScreen(salesPitchContext, feedbackLanguage)
+        navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }
