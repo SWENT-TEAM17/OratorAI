@@ -22,12 +22,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppDimensionsObject
 import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.createAppDimensions
@@ -41,13 +43,6 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-/**
- * Composable function that displays the Sign-In screen. It includes Google Sign-In functionality,
- * which triggers navigation based on profile completeness.
- *
- * @param navigationActions The actions to handle navigation events.
- * @param viewModel The UserProfileViewModel used for managing user profile data.
- */
 @Composable
 fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileViewModel) {
   val context = LocalContext.current
@@ -56,19 +51,23 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
     mutableStateOf(false)
   } // To handle redirection after profile fetch
 
-  // Obtain responsive dimensions for layout styling
+  // Obtain responsive dimensions using your factory
   val dimensions: AppDimensionsObject = createAppDimensions()
 
-  // Google Sign-In launcher that manages the sign-in process and handles authentication results
+  // Launcher for Google Sign-In
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
             Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
-            isLoading = true // Show loading screen
+
+            // Start loading and fetch the user profile
+            isLoading = true
             val uid = result.user?.uid
+
+            // Fetch the user profile and check if it's incomplete
             uid?.let { u ->
-              viewModel.getUserProfile(u) // Fetch user profile
+              viewModel.getUserProfile(u)
               redirectToProfile = true
             }
           },
@@ -77,10 +76,10 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
           })
 
-  // Token required for Google Sign-In
+  // Token for Google Sign-In
   val token = stringResource(R.string.default_web_client_id)
 
-  // Observe profile loading state and navigate based on profile completeness
+  // Start observing profile loading state and redirect based on profile completeness
   LaunchedEffect(viewModel.isLoading.collectAsState().value, redirectToProfile) {
     if (!viewModel.isLoading.value && redirectToProfile) {
       isLoading = false
@@ -92,49 +91,46 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
     }
   }
 
-  // Main UI for Sign-In Screen
+  // UI for the sign-in screen
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       content = { padding ->
         if (isLoading) {
-          LoadingScreen() // Display loading screen when fetching profile
+          // Show loading spinner while fetching user profile data
+          LoadingScreen()
         } else {
+          // Show sign-in UI when not loading
           Column(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(padding)
-                      .verticalScroll(rememberScrollState()) // Enable vertical scrolling
+                      .verticalScroll(rememberScrollState()) // Make content scrollable
                       .padding(horizontal = dimensions.paddingMedium),
               horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center,
           ) {
-            Spacer(modifier = Modifier.weight(1f)) // Spacer to center content
+            // App Logo Image
+            Image(
+                painter = painterResource(id = R.drawable.app_logo),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(dimensions.logoSize).testTag("appLogo"))
 
-            // Centered Content: Logo, Title, and Welcome Text
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(dimensions.paddingMedium)) {
-                  Image(
-                      painter = painterResource(id = R.drawable.app_logo),
-                      contentDescription = "App Logo",
-                      modifier = Modifier.size(dimensions.logoSize).testTag("appLogo"))
+            Text(
+                text = "OratorAI",
+                style = AppTypography.bigTitleStyle.copy(brush = AppColors.primaryGradient),
+                modifier =
+                    Modifier.width(dimensions.logoTextWidth)
+                        .height(dimensions.logoTextHeight)
+                        .testTag("appTitle"))
 
-                  Text(
-                      text = "OratorAI",
-                      style = AppTypography.largeTitleStyle.copy(brush = AppColors.primaryGradient),
-                      modifier =
-                          Modifier.width(dimensions.logoTextWidth)
-                              .height(dimensions.logoTextHeight)
-                              .testTag("appTitle"))
+            Text(
+                text = "Welcome !",
+                style = AppTypography.smallTitleStyle,
+                modifier = Modifier.testTag("welcomeText"))
 
-                  Text(
-                      text = "Welcome !",
-                      style = AppTypography.mediumTitleStyle,
-                      modifier = Modifier.testTag("welcomeText"))
-                }
+            Spacer(modifier = Modifier.height(dimensions.paddingExtraLarge))
 
-            Spacer(modifier = Modifier.weight(1f)) // Spacer to center content
-
-            // Google Sign-In Button at the Bottom
+            // Authenticate With Google Button
             GoogleSignInButton(
                 onSignInClick = {
                   val gso =
@@ -151,36 +147,56 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
       })
 }
 
-/**
- * Composable function that displays a loading screen with a circular progress indicator and a
- * "Loading..." text, used during user profile loading.
- */
 @Composable
 fun LoadingScreen() {
-  val dimensions: AppDimensionsObject = createAppDimensions()
+  // Show a loading indicator in the center of the screen
   Column(
-      modifier = Modifier.fillMaxSize().testTag("loadingScreen"),
-      verticalArrangement = Arrangement.Center,
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(top = AppDimensions.paddingXXLarge)
+              .testTag("loadingScreen"), // Optional: Add a testTag for the entire loading screen
       horizontalAlignment = Alignment.CenterHorizontally) {
+        Image(
+            painter =
+                painterResource(
+                    id = R.drawable.loading_screen), // Replace with your actual image name
+            contentDescription = "Loading Screen Image",
+            modifier = Modifier.fillMaxWidth().width(412.dp).height(487.dp).testTag("loadingImage"))
+
+        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
+        Text(
+            text = "Reach your goals",
+            style = AppTypography.mediumTitleStyle,
+            modifier = Modifier.testTag("loadingText") // Added testTag
+            )
+
+        Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+
+        Text(
+            text = "Become the best speaker",
+            style = AppTypography.smallTitleStyle,
+            modifier = Modifier.testTag("loadingText") // Added testTag
+            )
+
+        Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
+
         CircularProgressIndicator(
             color = AppColors.loadingIndicatorColor,
-            strokeWidth = dimensions.strokeWidth,
-            modifier = Modifier.size(dimensions.loadingIndicatorSize).testTag("loadingIndicator"))
-        Spacer(modifier = Modifier.height(dimensions.paddingMedium))
+            strokeWidth = AppDimensions.strokeWidth,
+            modifier =
+                Modifier.size(AppDimensions.loadingIndicatorSize)
+                    .testTag("loadingIndicator") // Added testTag
+            )
+        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
         Text(
             text = "Loading...",
             style = AppTypography.loadingTextStyle,
-            modifier = Modifier.testTag("loadingText"))
+            modifier = Modifier.testTag("loadingText") // Added testTag
+            )
       }
 }
 
-/**
- * Composable function for the Google Sign-In button. Provides a customizable button with Google
- * logo and sign-in text.
- *
- * @param onSignInClick Lambda to execute when the button is clicked.
- * @param dimensions The dimensions for styling the button.
- */
 @Composable
 fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObject) {
   Button(
@@ -197,6 +213,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObjec
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()) {
+              // Load the Google logo from resources
               Image(
                   painter = painterResource(id = R.drawable.google_logo),
                   contentDescription = "Google Logo",
@@ -204,6 +221,8 @@ fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObjec
                       Modifier.size(dimensions.googleLogoSize)
                           .padding(end = dimensions.paddingSmall)
                           .testTag("googleLogo"))
+
+              // Text for the button
               Text(
                   text = "Sign in with Google",
                   style = AppTypography.buttonTextStyle,
@@ -212,14 +231,6 @@ fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObjec
       }
 }
 
-/**
- * Utility function that sets up and returns a ManagedActivityResultLauncher for Google Sign-In.
- * This launcher handles the sign-in intent and processes the result.
- *
- * @param onAuthComplete Callback for successful authentication.
- * @param onAuthError Callback for authentication errors.
- * @return ManagedActivityResultLauncher that launches the Google Sign-In intent.
- */
 @Composable
 fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
