@@ -32,6 +32,7 @@ object AppFontSizes {
   val poppinsSizeMedium = 24.sp
   val poppinsHeightMedium = 32.sp
   val poppinsSizeSmall = 18.sp
+  val poppinsSizeXSmall = 10.sp
   val poppinsHeightSmall = 24.sp
 }
 
@@ -71,6 +72,17 @@ object AppTypography {
   val smallTitleStyle =
       TextStyle(
           fontSize = AppFontSizes.poppinsSizeSmall, // Example small title size, adjust as needed
+          fontFamily = poppinsRegularFontFamily,
+          fontWeight = FontWeight.W200,
+          lineHeight = AppFontSizes.poppinsSizeMedium, // Optional line height
+          color = androidx.compose.ui.graphics.Color.Black,
+
+          textAlign = TextAlign.Center,
+      )
+
+  val xSmallTitleStyle =
+      TextStyle(
+          fontSize = AppFontSizes.poppinsSizeXSmall, // Example small title size, adjust as needed
           fontFamily = poppinsRegularFontFamily,
           fontWeight = FontWeight.W200,
           lineHeight = AppFontSizes.poppinsSizeMedium, // Optional line height

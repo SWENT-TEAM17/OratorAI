@@ -21,11 +21,10 @@ object AppColors {
   val textColor = Color.Black
   val buttonBackgroundColor = Color.Black
   val buttonBorderColor = Color.LightGray
+  val LightPurpleGrey = Color(0xFFE8EAF6)
   val loadingIndicatorColor = Color(0xFF442DAA)
   val secondaryTextColor = Color.Gray
   val surfaceColor = Color.White
-
-  val LightPurpleGrey = Color(0xFFE2E1EC)
   val goldColor = Color(0xFFFFD700)
   val silverColor = Color(0xFFC0C0C0)
   val bronzeColor = Color(0xFFCD7F32)

@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -92,7 +93,7 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       ProjectTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) {
+        Scaffold(modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold")) {
           // Pass chatGPTService and offline status from ViewModel
           val isOffline by offlineViewModel.isOffline.observeAsState(false)
           OratorApp(chatGPTService, isOffline)
@@ -121,12 +122,11 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val navigationActions = NavigationActions(navController)
 
   // Main layout using a Scaffold
-  Scaffold(modifier = Modifier.fillMaxSize()) {
+  Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
     if (isOffline) {
       // Display OfflineScreen when there is no network connection
       OfflineScreen(navigationActions)
     } else {
-
       // Initialize the view models
       val userProfileViewModel: UserProfileViewModel =
           viewModel(factory = UserProfileViewModel.Factory)
