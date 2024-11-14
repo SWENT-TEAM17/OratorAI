@@ -1,55 +1,30 @@
 package com.github.se.orator.ui.friends
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
@@ -57,64 +32,66 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
 import kotlinx.coroutines.launch
 
+/**
+ * Composable function that displays the "View Friends" screen, showing a list of friends with a
+ * search bar and options to navigate to other screens like "Add Friends" and "Leaderboard."
+ *
+ * @param navigationActions Actions to handle navigation within the app.
+ * @param userProfileViewModel ViewModel for managing user profile data and fetching friends.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
+  // State variables for managing friends list and search functionality
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
   var searchQuery by remember { mutableStateOf("") }
   val filteredFriends =
       friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
 
-  // Manage focus for the search bar
+  // State variables for managing UI components
   val focusRequester = FocusRequester()
   val focusManager = LocalFocusManager.current
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
   ProjectTheme {
-    // ModalDrawer Scaffold
     ModalNavigationDrawer(
         modifier = Modifier.testTag("viewFriendsDrawerMenu"),
         drawerState = drawerState,
         drawerContent = {
           ModalDrawerSheet {
-            Column(modifier = Modifier.fillMaxHeight().padding(AppDimensions.drawerPadding)) {
+            Column(modifier = Modifier.fillMaxHeight().padding(AppDimensions.paddingMedium)) {
               Text(
                   "Actions",
                   modifier = Modifier.testTag("viewFriendsDrawerTitle"),
                   style = MaterialTheme.typography.titleMedium)
-              Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
-
-              // Option to Add Friend
+              Spacer(modifier = Modifier.height(AppDimensions.heightMedium))
               TextButton(
                   modifier = Modifier.testTag("viewFriendsAddFriendButton"),
                   onClick = {
-                    // Navigate to Add Friend screen
                     scope.launch {
-                      drawerState.close() // Close the drawer
+                      drawerState.close()
                       navigationActions.navigateTo(Screen.ADD_FRIENDS)
                     }
                   }) {
                     Text("➕ Add a friend")
                   }
-
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-
-              // Option to Leaderboard
               TextButton(
                   modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
                   onClick = {
-                    // Close drawer and navigate to Leaderboard screen
                     scope.launch {
-                      drawerState.close() // Close the drawer
+                      drawerState.close()
                       navigationActions.navigateTo(Screen.LEADERBOARD)
                     }
                   }) {
@@ -125,80 +102,77 @@ fun ViewFriendsScreen(
         }) {
           Scaffold(
               topBar = {
-                TopAppBar(
-                    title = {
-                      Text(
-                          "My Friends",
-                          modifier = Modifier.testTag("myFriendsTitle") // Added testTag
-                          )
-                    },
-                    navigationIcon = {
-                      IconButton(
-                          modifier = Modifier.testTag("viewFriendsMenuButton"),
-                          onClick = {
-                            scope.launch {
-                              drawerState.open() // Open the drawer
+                Column {
+                  CenterAlignedTopAppBar(
+                      title = { Text("My Friends", modifier = Modifier.testTag("myFriendsTitle")) },
+                      navigationIcon = {
+                        IconButton(
+                            onClick = { scope.launch { drawerState.open() } },
+                            modifier = Modifier.testTag("viewFriendsMenuButton")) {
+                              Icon(Icons.Default.Menu, contentDescription = "Menu")
                             }
-                          }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                          }
-                    })
+                      })
+                  Divider() // Adds a separation line below the TopAppBar
+                }
               },
               bottomBar = {
                 BottomNavigationMenu(
                     onTabSelect = { route ->
                       scope.launch {
-                        drawerState.close() // Close the drawer before navigating
+                        drawerState.close()
                         navigationActions.navigateTo(route)
                       }
                     },
                     tabList = LIST_TOP_LEVEL_DESTINATION,
-                    selectedItem = navigationActions.currentRoute())
+                    selectedItem = Route.FRIENDS)
               }) { innerPadding ->
-                // Main container that will remove focus from the search bar when clicked
                 Column(
                     modifier =
                         Modifier.fillMaxSize()
                             .padding(innerPadding)
-                            .padding(
-                                horizontal = AppDimensions.paddingMedium,
-                                vertical = AppDimensions.paddingSmall)
-                            .clickable {
-                              focusManager.clearFocus()
-                            } // Clear focus when clicking outside the search bar
-                    ) {
-                      // Search bar to filter friends by name
-                      OutlinedTextField(
-                          value = searchQuery,
-                          onValueChange = { searchQuery = it },
-                          label = { Text("Search for a friend") },
+                            .padding(horizontal = AppDimensions.paddingMedium)
+                            .clickable { focusManager.clearFocus() }) {
+                      // Search bar for filtering friends
+                      Box(
                           modifier =
-                              Modifier.fillMaxWidth()
-                                  .padding(bottom = AppDimensions.paddingSmall)
-                                  .focusRequester(
-                                      focusRequester) // Attach focusRequester to search bar
-                                  .testTag("viewFriendsSearch"))
+                              Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                label = { Text("Search for a friend.") },
+                                leadingIcon = {
+                                  Icon(
+                                      imageVector = Icons.Default.Search,
+                                      contentDescription = "Search Icon")
+                                },
+                                modifier =
+                                    Modifier.wrapContentWidth()
+                                        .horizontalScroll(rememberScrollState())
+                                        .height(AppDimensions.mediumHeight)
+                                        .focusRequester(focusRequester)
+                                        .testTag("viewFriendsSearch"))
+                          }
 
+                      // Display message if no friends match the search query
                       if (filteredFriends.isEmpty()) {
-                        // Show "No user found" when there are no matches
                         Box(
-                            modifier =
-                                Modifier.fillMaxSize().testTag("noUserFound"), // Added testTag
+                            modifier = Modifier.fillMaxSize().testTag("noUserFound"),
                             contentAlignment = Alignment.Center) {
                               Text(
-                                  text = "No user found",
+                                  "No user found",
                                   style = MaterialTheme.typography.bodyLarge,
-                                  modifier = Modifier.testTag("noUserFoundText") // Added testTag
-                                  )
+                                  modifier = Modifier.testTag("noUserFoundText"))
                             }
                       } else {
-                        // LazyColumn for displaying friends
+                        // Display the list of friends if any match the search query
                         LazyColumn(
                             modifier = Modifier.testTag("viewFriendsList"),
                             contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                             verticalArrangement =
                                 Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-                              items(filteredFriends) { friend -> FriendItem(friend = friend) }
+                              items(filteredFriends) { friend ->
+                                FriendItem(friend = friend, userProfileViewModel)
+                              }
                             }
                       }
                     }
@@ -207,44 +181,55 @@ fun ViewFriendsScreen(
   }
 }
 
+/**
+ * Composable function that represents a single friend item in the list. Displays the friend's
+ * profile picture, name, and bio.
+ *
+ * @param friend The [UserProfile] object representing the friend being displayed.
+ */
 @Composable
-fun FriendItem(friend: UserProfile) {
-  Row(
+fun FriendItem(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
+  Surface(
       modifier =
           Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
-              .background(MaterialTheme.colorScheme.surface)
-              .padding(AppDimensions.paddingMedium)
+              .padding(horizontal = AppDimensions.smallPadding) // Side padding for each item
+              .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
               .testTag("viewFriendsItem#${friend.uid}"),
-      verticalAlignment = Alignment.CenterVertically) {
-        ProfilePicture(
-            profilePictureUrl = friend.profilePic,
-            onClick = {},
-        )
-        Spacer(modifier = Modifier.width(AppDimensions.spacerWidthMedium))
+      color = AppColors.LightPurpleGrey,
+      shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
+      ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
+          ProfilePicture(profilePictureUrl = friend.profilePic, onClick = {})
+          Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+          Column {
+            Text(
+                text = friend.name,
+                style = MaterialTheme.typography.titleMedium,
+                modifier =
+                    Modifier.padding(bottom = AppDimensions.smallPadding)
+                        .testTag("friendName#${friend.uid}"))
+            Text(
+                text = friend.bio ?: "No bio available",
+                style = MaterialTheme.typography.bodySmall,
+                color = AppColors.secondaryTextColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.testTag("friendBio#${friend.uid}"))
+          }
+          Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
 
-        Column {
-          Text(
-              text = friend.name,
-              style = MaterialTheme.typography.titleMedium,
-              modifier = Modifier.testTag("friendName#${friend.uid}") // Added testTag
-              )
-          Text(
-              text = friend.bio ?: "No bio available",
-              style = MaterialTheme.typography.bodySmall,
-              modifier = Modifier.testTag("friendBio#${friend.uid}") // Added testTag
-              )
+          DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
         }
       }
 }
 
 /**
- * A composable function that displays a profile picture. If no profile picture URL is provided, a
- * default image is shown. The image is clickable, triggering the provided [onClick] function.
+ * Composable function to display a profile picture with a circular shape. Uses Coil to load the
+ * image asynchronously.
  *
- * @param profilePictureUrl The URL of the profile picture to be displayed. If null, a default image
- *   is shown.
- * @param onClick A lambda function that is triggered when the profile picture is clicked.
+ * @param profilePictureUrl The URL of the profile picture to display. Defaults to a placeholder if
+ *   null.
+ * @param onClick Action to be performed when the profile picture is clicked.
  */
 @Composable
 fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
@@ -254,5 +239,23 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
       contentDescription = "Profile Picture",
       contentScale = ContentScale.Crop,
       modifier =
-          Modifier.size(AppDimensions.iconSize).clip(CircleShape).clickable(onClick = onClick))
+          Modifier.size(AppDimensions.buttonHeight).clip(CircleShape).clickable(onClick = onClick))
+}
+
+/**
+ * Button triggering the removing of a friend in the user's friend list.
+ *
+ * @param friend The friend to be removed.
+ * @param userProfileViewModel The view model for the user's profile.
+ */
+@Composable
+fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
+  IconButton(
+      onClick = { userProfileViewModel.deleteFriend(friend) },
+      modifier = Modifier.testTag("deleteFriendButton#${friend.uid}")) {
+        Icon(
+            imageVector = Icons.Default.Delete, // Built-in delete icon
+            contentDescription = "Delete",
+            tint = Color.Red)
+      }
 }
