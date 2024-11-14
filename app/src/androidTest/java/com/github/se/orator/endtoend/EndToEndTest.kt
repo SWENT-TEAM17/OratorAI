@@ -112,9 +112,7 @@ class EndToEndAppTest {
     }
 
     // Step 3: Use the back button to return to Profile
-    composeTestRule
-        .onNodeWithTag("back_button")
-        .performClick() // Simulate clicking the back button
+    composeTestRule.onNodeWithTag("back_button").performClick() // Simulate clicking the back button
     verify(navigationActions).goBack() // Ensure it navigates back to Profile
 
     // Step 4: Navigate to Edit Profile from Profile
@@ -132,9 +130,7 @@ class EndToEndAppTest {
     composeTestRule.onNodeWithText("Cancel").performClick()
     composeTestRule.onNodeWithText("Choose Profile Picture").assertIsNotDisplayed()
     // Step 5: Return back to Profile using the back button
-    composeTestRule
-        .onNodeWithTag("back_button")
-        .performClick() // Simulate back button click
+    composeTestRule.onNodeWithTag("back_button").performClick() // Simulate back button click
 
     // Step 6: Navigate to Friends from Profile
     composeTestRule.onNodeWithTag("Friends").performClick() // Simulate clicking Friends button

@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -156,9 +155,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                             Icon(
                                 Icons.Outlined.Edit,
                                 contentDescription = "Edit button",
-                                modifier =
-                                    Modifier.size(AppDimensions.iconSizeMedium),
-                                tint = Color.Black)
+                                modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                                tint = AppColors.surfaceColor)
                           }
 
                       Column(

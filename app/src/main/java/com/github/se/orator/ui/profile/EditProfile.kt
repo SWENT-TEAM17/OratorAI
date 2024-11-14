@@ -130,32 +130,30 @@ fun EditProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
 
               // Profile Picture with Camera Icon Overlay
-              Box(
-                  contentAlignment = Alignment.Center) {
-                    ProfilePicture(
-                        profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
-                        onClick = { isDialogOpen = true })
+              Box(contentAlignment = Alignment.Center) {
+                ProfilePicture(
+                    profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
+                    onClick = { isDialogOpen = true })
 
-                    // edit profile picture button
-                    Button(
-                        onClick = { isDialogOpen = true },
-                        modifier =
-                            Modifier.testTag("upload_profile_picture_button")
-                                .width(40.dp)
-                                .height(40.dp)
-                                .align(Alignment.BottomEnd),
-                        shape = AppShapes.circleShape,
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
-                        contentPadding = PaddingValues(0.dp)) {
-                          Icon(
-                              Icons.Outlined.PhotoCamera,
-                              contentDescription = "Edit button",
-                              modifier =
-                                  Modifier.size(AppDimensions.iconSizeMedium)
-                                      .testTag("edit_button"),
-                              tint = Color.Black)
-                        }
-                  }
+                // edit profile picture button
+                Button(
+                    onClick = { isDialogOpen = true },
+                    modifier =
+                        Modifier.testTag("upload_profile_picture_button")
+                            .width(40.dp)
+                            .height(40.dp)
+                            .align(Alignment.BottomEnd),
+                    shape = AppShapes.circleShape,
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
+                    contentPadding = PaddingValues(0.dp)) {
+                      Icon(
+                          Icons.Outlined.PhotoCamera,
+                          contentDescription = "Edit button",
+                          modifier =
+                              Modifier.size(AppDimensions.iconSizeMedium).testTag("edit_button"),
+                          tint = AppColors.primaryColor)
+                    }
+              }
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
 

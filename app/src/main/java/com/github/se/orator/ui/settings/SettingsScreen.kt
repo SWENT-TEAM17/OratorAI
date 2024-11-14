@@ -131,14 +131,15 @@ fun SettingsScreen(
         TopAppBar(
             title = { Text("Settings", modifier = Modifier.testTag("SettingsText")) },
             navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() },
+              IconButton(
+                  onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("back_button")) {
-                androidx.compose.material.Icon(
-                    Icons.Outlined.ArrowBackIosNew,
-                    contentDescription = "Back button",
-                    modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                    tint = Color.Black)
-              }
+                    androidx.compose.material.Icon(
+                        Icons.Outlined.ArrowBackIosNew,
+                        contentDescription = "Back button",
+                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                        tint = Color.Black)
+                  }
             })
       },
       content = { padding ->
