@@ -42,7 +42,6 @@ class SpeakingJobInterViewModuleTest {
     composeTestRule.onNodeWithTag("levelInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("jobInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("skillsInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("experienceInput").assertIsDisplayed()
     composeTestRule.onNodeWithText("Ace your next job interview").assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()

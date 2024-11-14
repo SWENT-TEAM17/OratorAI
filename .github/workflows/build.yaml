@@ -58,16 +58,21 @@ jobs:
       - name: Decode and configure secrets
         env:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
-          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+          GPT_API_KEY: ${{ secrets.GPT_API_KEY }}
+          GPT_ORGANIZATION_ID: ${{ secrets.GPT_ORGANIZATION_ID }}
+          SYMBL_APP_ID: ${{ secrets.SYMBL_APP_ID }}
+          SYMBL_APP_SECRET: ${{ secrets.SYMBL_APP_SECRET }}
 
         run: |
-          
-          # Decode google-services.json into the appropriate location
+          # Decode google-services.json
           echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
 
-          # Decode local.properties and add additional keys directly
-          echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
-          
+          # Decode and write each key to local.properties
+          echo "GPT_API_KEY=$(echo $GPT_API_KEY | base64 --decode)" >> ./local.properties
+          echo "GPT_ORGANIZATION_ID=$(echo $GPT_ORGANIZATION_ID | base64 --decode)" >> ./local.properties
+          echo "SYMBL_APP_ID=$(echo $SYMBL_APP_ID | base64 --decode)" >> ./local.properties
+          echo "SYMBL_APP_SECRET=$(echo $SYMBL_APP_SECRET | base64 --decode)" >> ./local.properties
+
       # Decode the keystore and save it as a file for Gradle to access
       - name: Decode keystore file
         env:
