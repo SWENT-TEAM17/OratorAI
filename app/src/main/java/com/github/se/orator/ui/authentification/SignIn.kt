@@ -128,7 +128,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
                 style = AppTypography.smallTitleStyle,
                 modifier = Modifier.testTag("welcomeText"))
 
-              Spacer(modifier = Modifier.height(dimensions.paddingExtraLarge))
+            Spacer(modifier = Modifier.height(dimensions.paddingExtraLarge))
 
             // Authenticate With Google Button
             GoogleSignInButton(
@@ -149,22 +149,19 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
 
 @Composable
 fun LoadingScreen() {
-    // Show a loading indicator in the center of the screen
-    Column(
-        modifier =
-        Modifier.fillMaxSize().padding(top = AppDimensions.paddingXXLarge)
-            .testTag("loadingScreen"), // Optional: Add a testTag for the entire loading screen
-        horizontalAlignment = Alignment.CenterHorizontally) {
-
+  // Show a loading indicator in the center of the screen
+  Column(
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(top = AppDimensions.paddingXXLarge)
+              .testTag("loadingScreen"), // Optional: Add a testTag for the entire loading screen
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Image(
-            painter = painterResource(id = R.drawable.loading_screen), // Replace with your actual image name
+            painter =
+                painterResource(
+                    id = R.drawable.loading_screen), // Replace with your actual image name
             contentDescription = "Loading Screen Image",
-            modifier = Modifier
-                .fillMaxWidth()
-                .width(412.dp)
-                .height(487.dp)
-                .testTag("loadingImage")
-        )
+            modifier = Modifier.fillMaxWidth().width(412.dp).height(487.dp).testTag("loadingImage"))
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
@@ -172,7 +169,7 @@ fun LoadingScreen() {
             text = "Reach your goals",
             style = AppTypography.mediumTitleStyle,
             modifier = Modifier.testTag("loadingText") // Added testTag
-        )
+            )
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
@@ -180,7 +177,7 @@ fun LoadingScreen() {
             text = "Become the best speaker",
             style = AppTypography.smallTitleStyle,
             modifier = Modifier.testTag("loadingText") // Added testTag
-        )
+            )
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
@@ -188,16 +185,16 @@ fun LoadingScreen() {
             color = AppColors.loadingIndicatorColor,
             strokeWidth = AppDimensions.strokeWidth,
             modifier =
-            Modifier.size(AppDimensions.loadingIndicatorSize)
-                .testTag("loadingIndicator") // Added testTag
-        )
+                Modifier.size(AppDimensions.loadingIndicatorSize)
+                    .testTag("loadingIndicator") // Added testTag
+            )
         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
         Text(
             text = "Loading...",
             style = AppTypography.loadingTextStyle,
             modifier = Modifier.testTag("loadingText") // Added testTag
-        )
-    }
+            )
+      }
 }
 
 @Composable
