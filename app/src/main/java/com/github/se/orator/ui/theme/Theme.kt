@@ -84,7 +84,12 @@ data class AppDimensionsObject(
 
     // Profile Picture
     val profilePictureDialogSize: Dp,
-    val profilePictureSize: Dp
+    val profilePictureSize: Dp,
+
+    // Font Size
+    val largeTitleFontSize: Dp,
+    val mediumTitleFontSize: Dp,
+    val buttonTextSize: Dp,
 )
 
 object AppDimensions {
@@ -119,14 +124,14 @@ object AppDimensions {
   val iconSizeSmall = 32.dp // Added for icon size 32.dp
   val iconSizeMedium = 24.dp // Added for medium-sized icons
   val cornerRadiusSmall = 8.dp // Added for corner radius of 8.dp
-  val appBarElevation = 4.dp // Added for elevation of AppBar
+  val appBarElevation = 0.dp // Added for elevation of AppBar
   val elevationSmall = 4.dp // For AppBar elevation
   val inputFieldHeight = 56.dp // Existing or newly added for input fields
   val bioFieldHeight = 150.dp // Added for bio input field height
   val buttonHeightLarge = 50.dp // Added for Save changes button height
   val profilePictureDialogSize = 200.dp // Added for ProfilePictureDialog size
   val cardSectionHeight = 100.dp // Added for CardSection height
-  val profilePictureSize = 48.dp // Added for profile picture size
+  val profilePictureSize = 100.dp // Added for profile picture size
   val dividerThickness = 3.dp // Added for HorizontalDivider thickness
   val paddingTopSmall = 5.dp // Added for padding top=5.dp in Text
   val statusBarPadding = 10.dp
@@ -140,6 +145,9 @@ object AppDimensions {
   val smallPadding = 4.dp
   val mediumText = 16.sp
   val full = 1f
+  val imageLargeXXL = 350.dp
+  val smallTitleFontSize = 20.dp
+  val mediumTitleFontSize = 30.dp
 }
 
 object AppShapes {
