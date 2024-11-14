@@ -22,7 +22,6 @@ class MainActivityTest {
   //    composeTestRule2.onNodeWithTag("oratorScaffold").assertExists()
   //  }
 
-
   @Test
   fun testMainActivityOnCreate() {
 
@@ -31,9 +30,8 @@ class MainActivityTest {
     // Move the activity to the RESUMED state explicitly
     scenario.moveToState(Lifecycle.State.RESUMED)
 
-    scenario.onActivity { activity ->
+    scenario.onActivity { activity -> }
 
-    }
     // Check that the main activity Scaffold exists
     composeTestRule.onNodeWithTag("mainActivityScaffold").assertExists()
 

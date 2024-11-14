@@ -187,4 +187,48 @@ class FriendsUITests {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.FRIENDS)
     composeTestRule.setContent { ViewFriendsScreen(mockNavigationActions, userProfileViewModel) }
   }
+
+  @Test
+  fun testPracticeModeSelector() {
+    // Set up the content with the PracticeModeSelector composable
+    composeTestRule.setContent { PracticeModeSelector() }
+
+    // Open the dropdown menu
+    composeTestRule.onNodeWithTag("practiceModeSelector").performClick()
+
+    // Verify the dropdown menu options are displayed
+    composeTestRule.onNodeWithTag("practiceModeOption1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("practiceModeOption2").assertIsDisplayed()
+
+    // Select "Practice mode 2"
+    composeTestRule.onNodeWithTag("practiceModeOption2").performClick()
+  }
+
+  @Test
+  fun deleteFriendButtonCallsRepositoryUpdateProfileMethod() {
+    `when`(mockUserProfileRepository.getUserProfile(any(), any(), any())).then {
+      it.getArgument<(UserProfile) -> Unit>(1)(
+          testProfile.copy(friends = listOf(profile1.uid, profile2.uid)))
+    }
+    userProfileViewModel.getUserProfile(testProfile.uid)
+    // Set up the content with the ViewFriendsScreen composable
+    composeTestRule.setContent { ViewFriendsScreen(mockNavigationActions, userProfileViewModel) }
+
+    composeTestRule
+        .onNodeWithTag("viewFriendsItem#${profile2.uid}", useUnmergedTree = true)
+        .assertExists()
+        .assertIsDisplayed()
+    // Click the delete friend button
+    composeTestRule
+        .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
+        .assertExists()
+        .performClick()
+
+    composeTestRule
+        .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
+        .assertIsNotDisplayed()
+    composeTestRule
+        .onNodeWithTag("viewFriendsItem#${profile2.uid}", useUnmergedTree = true)
+        .assertIsDisplayed()
+  }
 }
