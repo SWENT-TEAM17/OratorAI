@@ -202,24 +202,25 @@ fun ProfilePicture(
     profilePictureUrl: String?,
     onClick: () -> Unit,
 ) {
-    // Only attempt to load the image if the URL is not null
-    if (profilePictureUrl != null) {
-        val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
+  // Only attempt to load the image if the URL is not null
+  if (profilePictureUrl != null) {
+    val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
 
-        Image(
-            painter = painter,
-            contentDescription = "Profile Picture",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.size(AppDimensions.profilePictureSize) // Replaced 100.dp with profilePictureSize
+    Image(
+        painter = painter,
+        contentDescription = "Profile Picture",
+        contentScale = ContentScale.Crop,
+        modifier =
+            Modifier.size(
+                    AppDimensions.profilePictureSize) // Replaced 100.dp with profilePictureSize
                 .clip(CircleShape)
                 .clickable(onClick = onClick)
                 .testTag("profile_picture"))
-    } else {
-        // If no URL is provided, do not display anything
-        // This allows the background image to be visible
-    }
+  } else {
+    // If no URL is provided, do not display anything
+    // This allows the background image to be visible
+  }
 }
-
 
 /**
  * Composable function to display a dialog with a larger profile picture.

@@ -45,126 +45,123 @@ import kotlinx.coroutines.tasks.await
 
 @Composable
 fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileViewModel) {
-    val context = LocalContext.current
-    var isLoading by remember { mutableStateOf(false) } // To handle loading state
-    var redirectToProfile by remember {
-        mutableStateOf(false)
-    } // To handle redirection after profile fetch
+  val context = LocalContext.current
+  var isLoading by remember { mutableStateOf(false) } // To handle loading state
+  var redirectToProfile by remember {
+    mutableStateOf(false)
+  } // To handle redirection after profile fetch
 
-    // Obtain responsive dimensions using your factory
-    val dimensions: AppDimensionsObject = createAppDimensions()
+  // Obtain responsive dimensions using your factory
+  val dimensions: AppDimensionsObject = createAppDimensions()
 
-    // Launcher for Google Sign-In
-    val launcher =
-        rememberFirebaseAuthLauncher(
-            onAuthComplete = { result ->
-                Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-                Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
+  // Launcher for Google Sign-In
+  val launcher =
+      rememberFirebaseAuthLauncher(
+          onAuthComplete = { result ->
+            Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
+            Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
 
-                // Start loading and fetch the user profile
-                isLoading = true
-                val uid = result.user?.uid
+            // Start loading and fetch the user profile
+            isLoading = true
+            val uid = result.user?.uid
 
-                // Fetch the user profile and check if it's incomplete
-                uid?.let { u ->
-                    viewModel.getUserProfile(u)
-                    redirectToProfile = true
-                }
-            },
-            onAuthError = {
-                Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}")
-                Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
-            })
-
-    // Token for Google Sign-In
-    val token = stringResource(R.string.default_web_client_id)
-
-    // Start observing profile loading state and redirect based on profile completeness
-    LaunchedEffect(viewModel.isLoading.collectAsState().value, redirectToProfile) {
-        if (!viewModel.isLoading.value && redirectToProfile) {
-            isLoading = false
-            if (!viewModel.isProfileIncomplete()) {
-                navigationActions.navigateTo(TopLevelDestinations.HOME)
-            } else {
-                navigationActions.navigateTo(Screen.CREATE_PROFILE)
+            // Fetch the user profile and check if it's incomplete
+            uid?.let { u ->
+              viewModel.getUserProfile(u)
+              redirectToProfile = true
             }
-        }
+          },
+          onAuthError = {
+            Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}")
+            Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
+          })
+
+  // Token for Google Sign-In
+  val token = stringResource(R.string.default_web_client_id)
+
+  // Start observing profile loading state and redirect based on profile completeness
+  LaunchedEffect(viewModel.isLoading.collectAsState().value, redirectToProfile) {
+    if (!viewModel.isLoading.value && redirectToProfile) {
+      isLoading = false
+      if (!viewModel.isProfileIncomplete()) {
+        navigationActions.navigateTo(TopLevelDestinations.HOME)
+      } else {
+        navigationActions.navigateTo(Screen.CREATE_PROFILE)
+      }
     }
+  }
 
-    // UI for the sign-in screen
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        content = { padding ->
-            if (isLoading) {
-                // Show loading spinner while fetching user profile data
-                LoadingScreen()
-            } else {
-                // Show sign-in UI when not loading
-                Column(
-                    modifier =
-                    Modifier.fillMaxSize()
-                        .padding(padding)
-                        .verticalScroll(rememberScrollState()) // Make content scrollable
-                        .padding(horizontal = dimensions.paddingMedium),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(dimensions.paddingMedium),
-                ) {
-                    // App Logo Image
-                    Image(
-                        painter = painterResource(id = R.drawable.app_logo),
-                        contentDescription = "App Logo",
-                        modifier = Modifier.size(dimensions.logoSize).testTag("appLogo"))
+  // UI for the sign-in screen
+  Scaffold(
+      modifier = Modifier.fillMaxSize(),
+      content = { padding ->
+        if (isLoading) {
+          // Show loading spinner while fetching user profile data
+          LoadingScreen()
+        } else {
+          // Show sign-in UI when not loading
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(padding)
+                      .verticalScroll(rememberScrollState()) // Make content scrollable
+                      .padding(horizontal = dimensions.paddingMedium),
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center,
+          ) {
+            // App Logo Image
+            Image(
+                painter = painterResource(id = R.drawable.app_logo),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(dimensions.logoSize).testTag("appLogo"))
 
-                    Text(
-                        text = "OratorAI",
-                        style = AppTypography.bigTitleStyle.copy(brush = AppColors.primaryGradient),
-                        modifier =
-                        Modifier.width(dimensions.logoTextWidth)
-                            .height(dimensions.logoTextHeight)
-                            .testTag("appTitle"))
+            Text(
+                text = "OratorAI",
+                style = AppTypography.bigTitleStyle.copy(brush = AppColors.primaryGradient),
+                modifier =
+                    Modifier.width(dimensions.logoTextWidth)
+                        .height(dimensions.logoTextHeight)
+                        .testTag("appTitle"))
 
-                    Text(
-                        text = "Welcome !",
-                        style = AppTypography.smallTitleStyle,
-                        modifier = Modifier.testTag("welcomeText"))
+            Text(
+                text = "Welcome !",
+                style = AppTypography.smallTitleStyle,
+                modifier = Modifier.testTag("welcomeText"))
 
-                    Spacer(modifier = Modifier.height(dimensions.paddingExtraLarge))
+            Spacer(modifier = Modifier.height(dimensions.paddingExtraLarge))
 
-                    // Authenticate With Google Button
-                    GoogleSignInButton(
-                        onSignInClick = {
-                            val gso =
-                                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                    .requestIdToken(token)
-                                    .requestEmail()
-                                    .build()
-                            val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                            launcher.launch(googleSignInClient.signInIntent)
-                        },
-                        dimensions = dimensions)
-                }
-            }
-        })
+            // Authenticate With Google Button
+            GoogleSignInButton(
+                onSignInClick = {
+                  val gso =
+                      GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                          .requestIdToken(token)
+                          .requestEmail()
+                          .build()
+                  val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                  launcher.launch(googleSignInClient.signInIntent)
+                },
+                dimensions = dimensions)
+          }
+        }
+      })
 }
 
 @Composable
 fun LoadingScreen() {
-    // Show a loading indicator in the center of the screen
-    Column(
-        modifier =
-        Modifier.fillMaxSize().padding(top = AppDimensions.paddingXXLarge)
-            .testTag("loadingScreen"), // Optional: Add a testTag for the entire loading screen
-        horizontalAlignment = Alignment.CenterHorizontally) {
-
+  // Show a loading indicator in the center of the screen
+  Column(
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(top = AppDimensions.paddingXXLarge)
+              .testTag("loadingScreen"), // Optional: Add a testTag for the entire loading screen
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Image(
-            painter = painterResource(id = R.drawable.loading_screen), // Replace with your actual image name
+            painter =
+                painterResource(
+                    id = R.drawable.loading_screen), // Replace with your actual image name
             contentDescription = "Loading Screen Image",
-            modifier = Modifier
-                .fillMaxWidth()
-                .width(412.dp)
-                .height(487.dp)
-                .testTag("loadingImage")
-        )
+            modifier = Modifier.fillMaxWidth().width(412.dp).height(487.dp).testTag("loadingImage"))
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
@@ -172,7 +169,7 @@ fun LoadingScreen() {
             text = "Reach your goals",
             style = AppTypography.mediumTitleStyle,
             modifier = Modifier.testTag("loadingText") // Added testTag
-        )
+            )
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
@@ -180,7 +177,7 @@ fun LoadingScreen() {
             text = "Become the best speaker",
             style = AppTypography.smallTitleStyle,
             modifier = Modifier.testTag("loadingText") // Added testTag
-        )
+            )
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
@@ -188,50 +185,50 @@ fun LoadingScreen() {
             color = AppColors.loadingIndicatorColor,
             strokeWidth = AppDimensions.strokeWidth,
             modifier =
-            Modifier.size(AppDimensions.loadingIndicatorSize)
-                .testTag("loadingIndicator") // Added testTag
-        )
+                Modifier.size(AppDimensions.loadingIndicatorSize)
+                    .testTag("loadingIndicator") // Added testTag
+            )
         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
         Text(
             text = "Loading...",
             style = AppTypography.loadingTextStyle,
             modifier = Modifier.testTag("loadingText") // Added testTag
-        )
-    }
+            )
+      }
 }
 
 @Composable
 fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObject) {
-    Button(
-        onClick = onSignInClick,
-        colors = ButtonDefaults.buttonColors(containerColor = AppColors.buttonBackgroundColor),
-        shape = RoundedCornerShape(50),
-        border = BorderStroke(dimensions.borderStrokeWidth, AppColors.buttonBorderColor),
-        modifier =
-        Modifier.fillMaxWidth()
-            .padding(dimensions.paddingSmall)
-            .height(dimensions.buttonHeight)
-            .testTag("loginButton")) {
+  Button(
+      onClick = onSignInClick,
+      colors = ButtonDefaults.buttonColors(containerColor = AppColors.buttonBackgroundColor),
+      shape = RoundedCornerShape(50),
+      border = BorderStroke(dimensions.borderStrokeWidth, AppColors.buttonBorderColor),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(dimensions.paddingSmall)
+              .height(dimensions.buttonHeight)
+              .testTag("loginButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()) {
-            // Load the Google logo from resources
-            Image(
-                painter = painterResource(id = R.drawable.google_logo),
-                contentDescription = "Google Logo",
-                modifier =
-                Modifier.size(dimensions.googleLogoSize)
-                    .padding(end = dimensions.paddingSmall)
-                    .testTag("googleLogo"))
+              // Load the Google logo from resources
+              Image(
+                  painter = painterResource(id = R.drawable.google_logo),
+                  contentDescription = "Google Logo",
+                  modifier =
+                      Modifier.size(dimensions.googleLogoSize)
+                          .padding(end = dimensions.paddingSmall)
+                          .testTag("googleLogo"))
 
-            // Text for the button
-            Text(
-                text = "Sign in with Google",
-                style = AppTypography.buttonTextStyle,
-                modifier = Modifier.testTag("signInWithGoogleText"))
-        }
-    }
+              // Text for the button
+              Text(
+                  text = "Sign in with Google",
+                  style = AppTypography.buttonTextStyle,
+                  modifier = Modifier.testTag("signInWithGoogleText"))
+            }
+      }
 }
 
 @Composable
@@ -239,19 +236,19 @@ fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    val scope = rememberCoroutineScope()
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            scope.launch {
-                val authResult = Firebase.auth.signInWithCredential(credential).await()
-                onAuthComplete(authResult)
-            }
-        } catch (e: ApiException) {
-            onAuthError(e)
-        }
+  val scope = rememberCoroutineScope()
+  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+      result ->
+    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+    try {
+      val account = task.getResult(ApiException::class.java)!!
+      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+      scope.launch {
+        val authResult = Firebase.auth.signInWithCredential(credential).await()
+        onAuthComplete(authResult)
+      }
+    } catch (e: ApiException) {
+      onAuthError(e)
     }
+  }
 }
