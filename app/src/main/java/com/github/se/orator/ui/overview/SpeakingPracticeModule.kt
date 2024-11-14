@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -141,8 +142,8 @@ fun SpeakingPracticeModule(
                             .testTag("getStartedButton"),
                     colors =
                         ButtonDefaults.buttonColors(
-                            containerColor = AppColors.buttonBackgroundColor,
-                            contentColor = AppColors.textColor)) {
+                            containerColor = Color.White,
+                            contentColor = AppColors.buttonContentColor)) {
                       Text("Get Started", modifier = Modifier.testTag("getStartedText"))
                     }
               }

@@ -59,15 +59,14 @@ fun MainScreen(navigationActions: NavigationActions) {
                       .padding(top = AppDimensions.paddingXXXLarge)
                       .testTag("mainScreenText1"),
               text = "Find your",
-              style = AppTypography.bigTitleStyle,
-              fontSize = AppFontSizes.largeTitle)
+              style = AppTypography.largeTitleStyle, // Apply custom style for title
+          )
 
           Text(
               modifier =
                   Modifier.padding(start = AppDimensions.paddingXXLarge).testTag("mainScreenText2"),
               text = "practice mode",
-              style = AppTypography.xSmallTitleStyle,
-              fontSize = AppFontSizes.mediumTitleSize,
+              style = AppTypography.largeTitleStyle, // Apply custom style for subtitle
               fontWeight = FontWeight.Bold)
 
           ButtonRow(navigationActions)
