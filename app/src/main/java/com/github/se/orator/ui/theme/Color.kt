@@ -20,6 +20,7 @@ object AppColors {
   val secondaryColor = Color(0xFF00A6A6)
   val textColor = Color.Black
   val buttonBackgroundColor = Color.Black
+  val buttonOverviewColor = Color.White
   val buttonBorderColor = Color.LightGray
   val LightPurpleGrey = Color(0xFFE8EAF6)
   val loadingIndicatorColor = Color(0xFF442DAA)
