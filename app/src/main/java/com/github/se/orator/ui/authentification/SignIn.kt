@@ -41,6 +41,13 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/**
+ * Composable function that displays the Sign-In screen. It includes Google Sign-In functionality,
+ * which triggers navigation based on profile completeness.
+ *
+ * @param navigationActions The actions to handle navigation events.
+ * @param viewModel The UserProfileViewModel used for managing user profile data.
+ */
 @Composable
 fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileViewModel) {
   val context = LocalContext.current
@@ -49,19 +56,19 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
     mutableStateOf(false)
   } // To handle redirection after profile fetch
 
-  // Obtain responsive dimensions using your factory
+  // Obtain responsive dimensions for layout styling
   val dimensions: AppDimensionsObject = createAppDimensions()
 
-  // Launcher for Google Sign-In
+  // Google Sign-In launcher that manages the sign-in process and handles authentication results
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
             Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
-            isLoading = true
+            isLoading = true // Show loading screen
             val uid = result.user?.uid
             uid?.let { u ->
-              viewModel.getUserProfile(u)
+              viewModel.getUserProfile(u) // Fetch user profile
               redirectToProfile = true
             }
           },
@@ -70,8 +77,10 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
           })
 
+  // Token required for Google Sign-In
   val token = stringResource(R.string.default_web_client_id)
 
+  // Observe profile loading state and navigate based on profile completeness
   LaunchedEffect(viewModel.isLoading.collectAsState().value, redirectToProfile) {
     if (!viewModel.isLoading.value && redirectToProfile) {
       isLoading = false
@@ -83,23 +92,24 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
     }
   }
 
+  // Main UI for Sign-In Screen
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       content = { padding ->
         if (isLoading) {
-          LoadingScreen()
+          LoadingScreen() // Display loading screen when fetching profile
         } else {
           Column(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(padding)
-                      .verticalScroll(rememberScrollState())
+                      .verticalScroll(rememberScrollState()) // Enable vertical scrolling
                       .padding(horizontal = dimensions.paddingMedium),
               horizontalAlignment = Alignment.CenterHorizontally,
           ) {
-            Spacer(modifier = Modifier.weight(1f)) // Spacer to push content to the center
+            Spacer(modifier = Modifier.weight(1f)) // Spacer to center content
 
-            // Centered Content (Logo and Texts)
+            // Centered Content: Logo, Title, and Welcome Text
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(dimensions.paddingMedium)) {
@@ -122,9 +132,9 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
                       modifier = Modifier.testTag("welcomeText"))
                 }
 
-            Spacer(modifier = Modifier.weight(1f)) // Spacer to push content to the center
+            Spacer(modifier = Modifier.weight(1f)) // Spacer to center content
 
-            // Bottom Content (Google Sign-In Button)
+            // Google Sign-In Button at the Bottom
             GoogleSignInButton(
                 onSignInClick = {
                   val gso =
@@ -141,10 +151,13 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
       })
 }
 
+/**
+ * Composable function that displays a loading screen with a circular progress indicator and a
+ * "Loading..." text, used during user profile loading.
+ */
 @Composable
 fun LoadingScreen() {
   val dimensions: AppDimensionsObject = createAppDimensions()
-  // Show a loading indicator in the center of the screen
   Column(
       modifier = Modifier.fillMaxSize().testTag("loadingScreen"),
       verticalArrangement = Arrangement.Center,
@@ -161,6 +174,13 @@ fun LoadingScreen() {
       }
 }
 
+/**
+ * Composable function for the Google Sign-In button. Provides a customizable button with Google
+ * logo and sign-in text.
+ *
+ * @param onSignInClick Lambda to execute when the button is clicked.
+ * @param dimensions The dimensions for styling the button.
+ */
 @Composable
 fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObject) {
   Button(
@@ -177,7 +197,6 @@ fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObjec
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()) {
-              // Load the Google logo from resources
               Image(
                   painter = painterResource(id = R.drawable.google_logo),
                   contentDescription = "Google Logo",
@@ -185,8 +204,6 @@ fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObjec
                       Modifier.size(dimensions.googleLogoSize)
                           .padding(end = dimensions.paddingSmall)
                           .testTag("googleLogo"))
-
-              // Text for the button
               Text(
                   text = "Sign in with Google",
                   style = AppTypography.buttonTextStyle,
@@ -195,6 +212,14 @@ fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObjec
       }
 }
 
+/**
+ * Utility function that sets up and returns a ManagedActivityResultLauncher for Google Sign-In.
+ * This launcher handles the sign-in intent and processes the result.
+ *
+ * @param onAuthComplete Callback for successful authentication.
+ * @param onAuthError Callback for authentication errors.
+ * @return ManagedActivityResultLauncher that launches the Google Sign-In intent.
+ */
 @Composable
 fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
