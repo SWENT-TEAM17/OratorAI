@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
 
     enableEdgeToEdge()
     setContent {
-      ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { MainScreenPreview() } }
+      ProjectTheme { Scaffold(modifier = Modifier.fillMaxSize()) { OratorApp(chatGPTService) } }
     }
   }
 }
