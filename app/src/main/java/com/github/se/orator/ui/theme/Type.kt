@@ -73,7 +73,7 @@ object AppTypography {
         TextStyle(
             fontSize = AppFontSizes.poppinsSizeSmall, // Example small title size, adjust as needed
             fontFamily = poppinsRegularFontFamily,
-            fontWeight = FontWeight.W100,
+            fontWeight = FontWeight.W200,
             lineHeight = AppFontSizes.poppinsSizeMedium, // Optional line height
             color = androidx.compose.ui.graphics.Color.Black,
             textAlign = TextAlign.Center,
