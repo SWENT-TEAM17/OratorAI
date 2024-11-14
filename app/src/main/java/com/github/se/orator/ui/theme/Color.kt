@@ -1,4 +1,3 @@
-// File: Color.kt
 package com.github.se.orator.ui.theme
 
 import androidx.compose.ui.graphics.Brush

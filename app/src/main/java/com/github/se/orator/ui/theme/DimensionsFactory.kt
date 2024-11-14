@@ -1,4 +1,3 @@
-// File: DimensionsFactory.kt
 package com.github.se.orator.ui.theme
 
 import androidx.compose.runtime.Composable
