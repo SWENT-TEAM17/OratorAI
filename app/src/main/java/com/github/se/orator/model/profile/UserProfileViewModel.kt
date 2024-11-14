@@ -5,7 +5,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * ViewModel for managing user profiles and friends' profiles.
@@ -33,6 +35,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   // Loading state to indicate if the profile is being fetched
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
+
   // Init block to fetch user profile automatically after authentication
   init {
     val uid = repository.getCurrentUserUid()
@@ -169,6 +172,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       Log.e("UserProfileViewModel", "Failed to add friend: Current user profile is null.")
     }
   }
+
   /**
    * Updates the user profile.
    *
@@ -258,5 +262,36 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     Log.d("UserProfileViewModel", "Checking profile completeness. Profile: $profile")
 
     return profile == null || profile.name.isBlank()
+  }
+
+  /**
+   * Deletes a friend from the current user's list of friends.
+   *
+   * @param friend The `UserProfile` of the friend to be deleted.
+   */
+  fun deleteFriend(friend: UserProfile) {
+    val currentUserProfile = userProfile_.value
+    if (currentUserProfile != null) {
+      // Asserts that the friend is in the friends list
+      if (currentUserProfile.friends.contains(friend.uid)) {
+        Log.d("UserProfileViewModel", "Removing friend: ${friend.name}")
+
+        // Removes the friend from the friends list
+        val updatedFriendsList = friendsProfiles_.value.toMutableList().apply { remove(friend) }
+
+        val updatedProfile = currentUserProfile.copy(friends = updatedFriendsList.map { it.uid })
+
+        // Updates the user profile with the new one
+        updateUserProfile(updatedProfile)
+        userProfile_.value = updatedProfile
+
+        // Updates the local state with the new friends list
+        friendsProfiles_.value = updatedFriendsList
+      } else {
+        Log.d("UserProfileViewModel", "${friend.name} cannot be deleted: not in the friends list !")
+      }
+    } else {
+      Log.e("UserProfileViewModel", "Failed to remove a friend: current user profile is null.")
+    }
   }
 }

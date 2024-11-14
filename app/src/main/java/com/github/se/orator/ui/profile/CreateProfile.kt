@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
@@ -33,7 +32,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
@@ -41,6 +39,10 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.profile.UserStatistics
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
+import com.github.se.orator.ui.theme.AppShapes
 
 /**
  * The CreateAccountScreen composable is a composable screen that displays the create account
@@ -85,37 +87,56 @@ fun CreateAccountScreen(
                     Image(
                         painter = painterResource(id = R.drawable.back_arrow),
                         contentDescription = "Back",
-                        modifier = Modifier.size(32.dp))
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeSmall)
+                                .testTag("BackImage") // Replaced 32.dp
+                        )
                   }
             },
-            backgroundColor = Color.White,
-            contentColor = Color.Black)
+            backgroundColor = AppColors.surfaceColor, // Replaced Color.White
+            contentColor = AppColors.textColor // Replaced Color.Black
+            )
       },
       content = {
         Column(
-            modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(it)
+                    .padding(AppDimensions.paddingMedium), // Replaced 16.dp
             horizontalAlignment = Alignment.CenterHorizontally) {
 
               // Profile Picture
-              Box(contentAlignment = Alignment.Center) {
-                ProfilePicture(
-                    profilePictureUrl = profilePicUri?.toString(),
-                    onClick = { isDialogOpen = true })
-                IconButton(
-                    onClick = { isDialogOpen = true },
-                    modifier = Modifier.size(32.dp).align(Alignment.BottomEnd)) {
-                      Image(
-                          painter = painterResource(id = R.drawable.camera),
-                          contentDescription = "Upload profile picture",
-                          modifier = Modifier.size(32.dp).testTag("upload_profile_picture"))
-                    }
-              }
+              Box(
+                  contentAlignment = Alignment.Center,
+                  modifier = Modifier.testTag("profile_picture")) {
+                    ProfilePicture(
+                        profilePictureUrl = profilePicUri?.toString(),
+                        onClick = { isDialogOpen = true })
+                    IconButton(
+                        onClick = { isDialogOpen = true },
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeSmall) // Replaced 32.dp
+                                .align(Alignment.BottomEnd)
+                                .testTag("upload_profile_picture")) {
+                          Image(
+                              painter = painterResource(id = R.drawable.camera),
+                              contentDescription = "Upload profile picture",
+                              modifier =
+                                  Modifier.size(AppDimensions.iconSizeSmall) // Replaced 32.dp
+                                      .testTag("upload_profile_picture"))
+                        }
+                  }
 
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
 
-              Text(text = "Profile picture (optional)", fontSize = 14.sp, color = Color.Gray)
+              Text(
+                  modifier = Modifier.testTag("profile_picture_label"),
+                  text = "Profile picture (optional)",
+                  fontSize = 14.sp, // Can be replaced with a theme variable if defined
+                  color = Color.Gray // Can be replaced with AppColors.secondaryTextColor
+                  )
 
-              Spacer(modifier = Modifier.height(24.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.paddingLarge)) // Replaced 24.dp
 
               // Username Input Field
               TextField(
@@ -123,10 +144,13 @@ fun CreateAccountScreen(
                   onValueChange = { username = it },
                   label = { Text("Username") },
                   placeholder = { Text("Enter your username") },
-                  modifier = Modifier.fillMaxWidth().testTag("username_input"),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(AppDimensions.inputFieldHeight) // Replaced with a new variable
+                          .testTag("username_input"),
                   singleLine = true)
 
-              Spacer(modifier = Modifier.height(48.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.paddingExtraLarge)) // Replaced 48.dp
 
               // Save Button
               Button(
@@ -159,9 +183,16 @@ fun CreateAccountScreen(
                     }
                   },
                   modifier = Modifier.fillMaxWidth().testTag("save_profile_button"),
-                  shape = CircleShape,
+                  shape = AppShapes.circleShape, // Replaced CircleShape
                   enabled = username.isNotBlank() && !isUploading) {
-                    Text(text = "Save profile", fontWeight = FontWeight.Bold)
+                    Text(
+                        modifier = Modifier.testTag("save_profile_button_text"),
+                        text = "Save profile",
+                        fontWeight = FontWeight.Bold,
+                        fontSize =
+                            AppFontSizes
+                                .bodyLarge // Can be replaced with a theme variable if defined
+                        )
                   }
             }
       })

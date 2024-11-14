@@ -1,4 +1,4 @@
-package com.github.se.orator.ui.theme.mainScreen
+package com.github.se.orator.ui.mainScreen
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
@@ -25,23 +25,22 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 
 /**
  * The main screen's composable responsible to display the welcome text, the practice mode cards and
@@ -55,14 +54,17 @@ fun MainScreen(navigationActions: NavigationActions) {
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
           Text(
               modifier =
-                  Modifier.padding(start = 42.dp).padding(top = 64.dp).testTag("mainScreenText1"),
+                  Modifier.padding(start = AppDimensions.paddingXXLarge)
+                      .padding(top = AppDimensions.paddingXXXLarge)
+                      .testTag("mainScreenText1"),
               text = "Find your",
-              fontSize = 50.sp)
+              fontSize = AppFontSizes.largeTitle)
 
           Text(
-              modifier = Modifier.padding(start = 42.dp).testTag("mainScreenText2"),
+              modifier =
+                  Modifier.padding(start = AppDimensions.paddingXXLarge).testTag("mainScreenText2"),
               text = "practice mode",
-              fontSize = 47.sp,
+              fontSize = AppFontSizes.mediumTitle,
               fontWeight = FontWeight.Bold)
 
           ButtonRow(navigationActions)
@@ -75,7 +77,7 @@ fun MainScreen(navigationActions: NavigationActions) {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.HOME)
       })
 }
 
@@ -85,18 +87,14 @@ fun MainScreen(navigationActions: NavigationActions) {
 @Composable
 fun ButtonRow(navigationActions: NavigationActions) {
   Row(
-      modifier = Modifier.testTag("toolbar").fillMaxWidth().padding(top = 16.dp),
-      horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
+      modifier =
+          Modifier.testTag("toolbar").fillMaxWidth().padding(top = AppDimensions.paddingMedium),
+      horizontalArrangement =
+          Arrangement.spacedBy(AppDimensions.spacingXLarge, Alignment.CenterHorizontally),
   ) {
     SectionButton("Popular") {
       // Do nothing, stays on the same screen
     }
-
-    // Fun Button
-    SectionButton("Fun") { navigationActions.navigateTo(Screen.FUN_SCREEN) }
-
-    // Connect Button
-    SectionButton("Connect") { navigationActions.navigateTo(Screen.CONNECT_SCREEN) }
   }
 }
 
@@ -108,11 +106,12 @@ fun ButtonRow(navigationActions: NavigationActions) {
 @Composable
 fun SectionButton(text: String, onClick: () -> Unit) {
   TextButton(onClick = onClick, modifier = Modifier.testTag("button")) {
-    Text(text = text, color = Color.Black, fontSize = 20.sp)
+    Text(text = text, color = AppColors.textColor, fontSize = AppFontSizes.buttonText)
   }
 }
 
 data class Mode(val text: String, val imageRes: Int, val destinationScreen: String)
+
 /** Function to create the sliding animation to browse between modes */
 @Composable
 fun AnimatedCards(navigationActions: NavigationActions) {
@@ -134,8 +133,8 @@ fun AnimatedCards(navigationActions: NavigationActions) {
   LazyColumn(
       modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(16.dp),
-      contentPadding = PaddingValues(16.dp)) {
+      verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingMedium),
+      contentPadding = PaddingValues(AppDimensions.paddingMedium)) {
         items(modes) { mode ->
           ModeCard(
               text = mode.text,
@@ -164,26 +163,29 @@ fun ModeCard(text: String, painter: Painter, visible: Boolean, onCardClick: () -
       enter = slideInVertically() + fadeIn(),
       exit = slideOutVertically() + fadeOut()) {
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(AppDimensions.cardCornerRadius),
             modifier =
-                Modifier.fillMaxWidth().padding(horizontal = 30.dp).padding(top = 16.dp).clickable {
-                  onCardClick()
-                },
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))) {
+                Modifier.fillMaxWidth()
+                    .padding(horizontal = AppDimensions.cardHorizontalPadding)
+                    .padding(top = AppDimensions.paddingMedium)
+                    .clickable { onCardClick() },
+            colors = CardDefaults.cardColors(containerColor = AppColors.cardBackgroundColor)) {
               Column(modifier = Modifier.fillMaxWidth()) {
                 // Top image
                 Image(
                     painter = painter,
                     contentDescription = "Interview Preparation",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.height(160.dp).fillMaxWidth())
+                    modifier = Modifier.height(AppDimensions.cardImageHeight).fillMaxWidth())
 
                 // Text below the image
                 Text(
                     text = text,
-                    fontSize = 20.sp,
+                    fontSize = AppFontSizes.cardTitle,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally))
+                    modifier =
+                        Modifier.padding(AppDimensions.paddingMedium)
+                            .align(Alignment.CenterHorizontally))
               }
             }
       }

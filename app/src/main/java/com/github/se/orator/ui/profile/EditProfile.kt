@@ -29,18 +29,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
+import com.github.se.orator.ui.theme.AppShapes
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * Composable function for editing the user profile.
@@ -75,76 +79,108 @@ fun EditProfileScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = Color.White,
-            contentColor = Color.Black,
-            elevation = 4.dp,
-            title = { Text(text = "Edit Profile", fontWeight = FontWeight.Bold) },
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("edit_profile_app_bar"),
+            backgroundColor = AppColors.surfaceColor, // Replaced Color.White
+            contentColor = AppColors.textColor, // Replaced Color.Black
+            elevation = AppDimensions.elevationSmall, // Replaced 4.dp
+            title = {
+              Text(
+                  modifier = Modifier.testTag("edit_profile_title"),
+                  text = "Edit Profile",
+                  fontWeight = FontWeight.Bold,
+                  style = AppTypography.appBarTitleStyle)
+            },
             navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Image(
-                    painter = painterResource(id = R.drawable.back_arrow),
-                    contentDescription = "Back",
-                    modifier = Modifier.size(32.dp).testTag("back_button"))
-              }
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.back_arrow),
+                        contentDescription = "Back",
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeSmall)
+                                .testTag("BackArrowImage") // Replaced 32.dp
+                        )
+                  }
             },
             actions = {
-              IconButton(onClick = { navigationActions.navigateTo(Screen.SETTINGS) }) {
-                Image(
-                    painter = painterResource(id = R.drawable.settings),
-                    contentDescription = "Settings",
-                    modifier = Modifier.size(32.dp).testTag("settings_button"))
-              }
+              IconButton(
+                  onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
+                  modifier = Modifier.testTag("settings_button")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.settings),
+                        contentDescription = "Settings",
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeSmall)
+                                .testTag("SettingsImage") // Replaced 32.dp
+                        )
+                  }
             })
       },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.PROFILE)
       }) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(it)
+                    .padding(AppDimensions.paddingMedium), // Replaced 16.dp
             horizontalAlignment = Alignment.CenterHorizontally) {
-              // Profile Picture with Camera Icon Overlay
-              Box(contentAlignment = Alignment.Center) {
-                ProfilePicture(
-                    profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
-                    onClick = { isDialogOpen = true })
-                IconButton(
-                    onClick = { isDialogOpen = true },
-                    modifier = Modifier.size(32.dp).align(Alignment.BottomEnd)) {
-                      Image(
-                          painter = painterResource(id = R.drawable.camera),
-                          contentDescription = "Change Profile Picture",
-                          modifier = Modifier.size(32.dp))
-                    }
-              }
 
-              Spacer(modifier = Modifier.height(16.dp))
+              // Profile Picture with Camera Icon Overlay
+              Box(
+                  contentAlignment = Alignment.Center,
+                  modifier = Modifier.testTag("profile_picture")) {
+                    ProfilePicture(
+                        profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
+                        onClick = { isDialogOpen = true })
+                    IconButton(
+                        onClick = { isDialogOpen = true },
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeSmall) // Replaced 32.dp
+                                .align(Alignment.BottomEnd)
+                                .testTag("upload_profile_picture_button")) {
+                          Image(
+                              painter = painterResource(id = R.drawable.camera),
+                              contentDescription = "Change Profile Picture",
+                              modifier =
+                                  Modifier.size(AppDimensions.iconSizeSmall) // Replaced 32.dp
+                                      .testTag("upload_profile_picture"))
+                        }
+                  }
+
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
 
               // Username Input Field
               OutlinedTextField(
                   value = updatedUsername,
                   onValueChange = { newUsername -> updatedUsername = newUsername },
-                  label = { Text("Username") },
-                  modifier = Modifier.fillMaxWidth().testTag("username_field"))
+                  label = { Text("Username", modifier = Modifier.testTag("UsernameText")) },
+                  modifier = Modifier.fillMaxWidth().testTag("username_field"),
+                  singleLine = true)
 
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
 
               // Bio Input Field
               Text(
                   text = "BIO",
                   fontWeight = FontWeight.Bold,
-                  modifier = Modifier.align(Alignment.Start))
+                  style = AppTypography.mediumTitleStyle, // Replaced manual styling
+                  modifier = Modifier.align(Alignment.Start).testTag("bio_label"))
               OutlinedTextField(
                   value = updatedBio,
                   onValueChange = { newBio -> updatedBio = newBio },
                   placeholder = { Text("Tell us about yourself") },
-                  modifier = Modifier.fillMaxWidth().height(150.dp).testTag("bio_field"),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(AppDimensions.bioFieldHeight) // Replaced 150.dp
+                          .testTag("bio_field"),
                   maxLines = 5)
 
-              Spacer(modifier = Modifier.height(24.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.paddingLarge)) // Replaced 24.dp
 
               // Save Changes Button
               Button(
@@ -163,13 +199,23 @@ fun EditProfileScreen(
                     }
                     navigationActions.goBack()
                   },
-                  modifier = Modifier.fillMaxWidth().height(50.dp)) {
-                    Text(text = "Save changes")
-                  }
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(AppDimensions.buttonHeightLarge) // Replaced 50.dp
+                          .testTag("save_profile_button"),
+                  shape = AppShapes.circleShape, // Replaced CircleShape
+              ) {
+                Text(
+                    modifier = Modifier.testTag("save_profile_button_text"),
+                    text = "Save changes",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = AppFontSizes.bodyLarge // Replaced 16.sp
+                    )
+              }
             }
       }
 
-  // Display the dialog to choose an image from the gallery
+  // Dialog for choosing between camera and gallery
   if (isDialogOpen) {
     ChoosePictureDialog(
         onDismiss = { isDialogOpen = false },
@@ -199,17 +245,33 @@ fun ChoosePictureDialog(
 ) {
   AlertDialog(
       onDismissRequest = { onDismiss() },
-      title = { Text("Choose Profile Picture") },
-      text = { Text("Select an option to update your profile picture.") },
+      title = {
+        Text("Choose Profile Picture", modifier = Modifier.testTag("ProfilePictureTitle"))
+      },
+      text = {
+        Text(
+            "Select an option to update your profile picture.",
+            modifier = Modifier.testTag("ProfilePictureButton"))
+      },
       buttons = {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("upload_dialog"),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(AppDimensions.paddingSmallMedium) // Replaced 16.dp
+                    .testTag("upload_dialog"),
             horizontalAlignment = Alignment.CenterHorizontally) {
-              Button(onClick = { onTakePhoto() }) { Text("Take Photo") }
-              Spacer(modifier = Modifier.height(8.dp))
-              Button(onClick = { onPickFromGallery() }) { Text("Upload from Gallery") }
-              Spacer(modifier = Modifier.height(8.dp))
-              Button(onClick = { onDismiss() }) { Text("Cancel") }
+              Button(onClick = { onTakePhoto() }, modifier = Modifier.testTag("PhotoOnTake")) {
+                Text("Take Photo", modifier = Modifier.testTag("TakePhotoText"))
+              }
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 8.dp
+              Button(
+                  onClick = { onPickFromGallery() }, modifier = Modifier.testTag("PhotoOnPick")) {
+                    Text("Upload from Gallery", modifier = Modifier.testTag("UploadGalleryText"))
+                  }
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 8.dp
+              Button(onClick = { onDismiss() }, modifier = Modifier.testTag("PhotoOnDismiss")) {
+                Text("Cancel", modifier = Modifier.testTag("CancelText"))
+              }
             }
       })
 }
