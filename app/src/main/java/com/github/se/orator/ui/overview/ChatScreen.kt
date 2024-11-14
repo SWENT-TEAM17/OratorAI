@@ -60,25 +60,30 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
 
   // Scaffold provides the basic visual layout structure.
   Scaffold(
+      modifier = Modifier.testTag("ChatScreen"),
       // Top app bar with a centered title and a back button.
       topBar = {
         CenterAlignedTopAppBar(
             title = {
               Text(
                   text = "Chat Screen",
+                  modifier = Modifier.testTag("ChatScreenTitle"),
                   fontWeight = FontWeight.Bold,
                   color = AppColors.textColor // Use theme color for text
                   )
             },
             navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.size(AppDimensions.iconSizeSmall).testTag("back_button"),
-                    tint = AppColors.textColor // Use theme color for icon
-                    )
-              }
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("ChatScreenBackButton")) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeSmall).testTag("back_button"),
+                        tint = AppColors.textColor // Use theme color for icon
+                        )
+                  }
             },
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -101,7 +106,8 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                     state = listState,
                     modifier =
                         Modifier.weight(1f) // Makes the LazyColumn fill available space.
-                            .fillMaxWidth()) {
+                            .fillMaxWidth()
+                            .testTag("ChatScreenMessagesColumn")) {
                       // Dynamically add chat message items.
                       items(chatMessages) { message -> ChatMessageItem(message) }
                     }
@@ -125,7 +131,8 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                             .border(
                                 width = AppDimensions.borderStrokeWidth,
                                 color = AppColors.buttonBorderColor,
-                                shape = MaterialTheme.shapes.medium),
+                                shape = MaterialTheme.shapes.medium)
+                            .testTag("ChatScreenRecordResponseButton"),
                     enabled = !isLoading,
                     colors =
                         ButtonDefaults.buttonColors(
@@ -147,7 +154,8 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                                         .borderStrokeWidth, // Use dimension for border width
                                 color = AppColors.buttonBorderColor, // Use theme color for border
                                 shape = MaterialTheme.shapes.medium // Or any other shape you prefer
-                                ),
+                                )
+                            .testTag("ChatScreenRequestFeedbackButton"),
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = AppColors.buttonBackgroundColor, // Use theme color
@@ -191,7 +199,8 @@ fun ChatMessageItem(message: Message) {
                 Modifier.background(
                         backgroundColor,
                         shape = RoundedCornerShape(AppDimensions.cornerRadiusSmall))
-                    .padding(AppDimensions.paddingSmall)) {
+                    .padding(AppDimensions.paddingSmall)
+                    .testTag("ChatScreenMessage")) {
               // Display the message content.
               Text(
                   text = message.content, color = AppColors.textColor // Use theme color for text
