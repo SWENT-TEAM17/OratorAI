@@ -107,7 +107,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
                       .verticalScroll(rememberScrollState()) // Make content scrollable
                       .padding(horizontal = dimensions.paddingMedium),
               horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(dimensions.paddingMedium),
+              verticalArrangement = Arrangement.Center,
           ) {
             // App Logo Image
             Image(
@@ -128,7 +128,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
                 style = AppTypography.smallTitleStyle,
                 modifier = Modifier.testTag("welcomeText"))
 
-              Spacer(modifier = Modifier.height(dimensions.paddingMedium))
+              Spacer(modifier = Modifier.height(dimensions.paddingExtraLarge))
 
             // Authenticate With Google Button
             GoogleSignInButton(
