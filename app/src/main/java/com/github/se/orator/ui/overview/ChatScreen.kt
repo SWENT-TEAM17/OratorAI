@@ -137,7 +137,7 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                         enabled = !isLoading,
                         colors =
                             ButtonDefaults.buttonColors(
-                                containerColor = AppColors.buttonBackgroundColor, // Use theme color
+                                containerColor = AppColors.buttonOverviewColor, // Use theme color
                                 contentColor = AppColors.textColor // Use theme color
                                 )) {
                           Text(
@@ -163,7 +163,7 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                                 .testTag("request_feedback_button"),
                         colors =
                             ButtonDefaults.buttonColors(
-                                containerColor = AppColors.buttonBackgroundColor, // Use theme color
+                                containerColor = AppColors.buttonOverviewColor, // Use theme color
                                 contentColor = AppColors.textColor // Use theme color
                                 )) {
                           Text(
