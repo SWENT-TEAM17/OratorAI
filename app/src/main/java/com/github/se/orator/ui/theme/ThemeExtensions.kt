@@ -1,4 +1,3 @@
-// File: ThemeExtensions.kt
 package com.github.se.orator.ui.theme
 
 import androidx.compose.material3.MaterialTheme

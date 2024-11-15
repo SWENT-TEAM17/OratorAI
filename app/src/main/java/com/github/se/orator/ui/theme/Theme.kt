@@ -99,6 +99,8 @@ object AppDimensions {
   val paddingExtraLarge = 32.dp
   val largeSpacerHeight = 100.dp
   val mediumHeight = 64.dp
+  val MediumSpacerHeight = 50.dp
+  val SmallSpacerHeight = 15.dp
   val buttonHeight = 48.dp
   val logoSize = 250.dp
   val logoTextWidth = 276.dp

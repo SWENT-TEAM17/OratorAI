@@ -5,7 +5,6 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileRepository
@@ -67,13 +66,13 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithContentDescription("Sign out").assertIsDisplayed()
 
     // Verify the Edit Profile button is displayed
-    composeTestRule.onNodeWithText("Edit Profile").assertExists()
+    composeTestRule.onNodeWithTag("edit_button").assertExists()
 
     // Verify the Achievements section is displayed
-    composeTestRule.onNodeWithText("Achievements").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("statistics_section").assertIsDisplayed()
 
     // Verify the Previous Sessions section is displayed
-    composeTestRule.onNodeWithText("Previous Sessions").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("previous_sessions_section").assertIsDisplayed()
   }
 
   @Test
