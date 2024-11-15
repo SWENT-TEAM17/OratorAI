@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -96,10 +97,12 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       ProjectTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) {
-          val isOffline by offlineViewModel.isOffline.observeAsState(false)
-          OratorApp(chatGPTService, isOffline)
-        }
+        Scaffold(
+            modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold") // Tag for testing
+            ) {
+              val isOffline by offlineViewModel.isOffline.observeAsState(false)
+              OratorApp(chatGPTService, isOffline)
+            }
       }
     }
   }
@@ -123,78 +126,85 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
       SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
-  // Monitor `isOffline` for state changes and navigate accordingly
-  LaunchedEffect(isOffline) {
-    if (isOffline) {
-      // Navigate to the offline screen if the app goes offline
-      navController.navigate(Screen.OFFLINE) { popUpTo(Screen.OFFLINE) { inclusive = true } }
-    } else {
-      // Navigate to the main flow if the app comes back online
-      navController.navigate(Route.AUTH) { popUpTo(Route.AUTH) { inclusive = true } }
-    }
-  }
+  Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
+    NavHost(
+        navController = navController,
+        startDestination = Route.AUTH,
+        modifier = Modifier.testTag("navHost")) {
+          // Offline flow
+          composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
+          composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
+            OfflinePracticeQuestionsScreen(navigationActions)
+          }
+          composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
+            RecordingReviewScreen(navigationActions, speakingViewModel)
+          }
+          composable(
+              route = "offline_recording/{question}",
+              arguments = listOf(navArgument("question") { type = NavType.StringType })) {
+                  backStackEntry ->
+                val question = backStackEntry.arguments?.getString("question") ?: ""
+                OfflineRecordingScreen(navigationActions, question, speakingViewModel)
+              }
 
-  Scaffold(modifier = Modifier.fillMaxSize()) {
-    NavHost(navController = navController, startDestination = Route.AUTH) {
-
-      // Offline flow
-      composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
-      composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
-        OfflinePracticeQuestionsScreen(navigationActions)
-      }
-      composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
-        RecordingReviewScreen(navigationActions, speakingViewModel)
-      }
-      composable(
-          route = "offline_recording/{question}",
-          arguments = listOf(navArgument("question") { type = NavType.StringType })) {
-              backStackEntry ->
-            val question = backStackEntry.arguments?.getString("question") ?: ""
-            OfflineRecordingScreen(navigationActions, question, speakingViewModel)
+          // Online/auth flow
+          navigation(startDestination = Screen.AUTH, route = Route.AUTH) {
+            composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
+            composable(Screen.CREATE_PROFILE) {
+              CreateAccountScreen(navigationActions, userProfileViewModel)
+            }
           }
 
-      // Online/auth flow
-      navigation(startDestination = Screen.AUTH, route = Route.AUTH) {
-        composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
-        composable(Screen.CREATE_PROFILE) {
-          CreateAccountScreen(navigationActions, userProfileViewModel)
-        }
-      }
+          // Main/home flow
+          navigation(startDestination = Screen.HOME, route = Route.HOME) {
+            composable(Screen.HOME) { MainScreen(navigationActions) }
+            composable(Screen.SPEAKING_JOB_INTERVIEW) {
+              SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
+            }
+            composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
+              SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
+            }
+            composable(Screen.SPEAKING_SALES_PITCH) {
+              SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
+            }
+            composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
+            composable(Screen.CHAT_SCREEN) {
+              ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
+            }
+            composable(Screen.FEEDBACK) {
+              FeedbackScreen(chatViewModel = chatViewModel, navigationActions = navigationActions)
+            }
+          }
 
-      // Main/home flow
-      navigation(startDestination = Screen.HOME, route = Route.HOME) {
-        composable(Screen.HOME) { MainScreen(navigationActions) }
-        composable(Screen.SPEAKING_JOB_INTERVIEW) {
-          SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
-        }
-        composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-          SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
-        }
-        composable(Screen.SPEAKING_SALES_PITCH) {
-          SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
-        }
-        composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
-        composable(Screen.CHAT_SCREEN) {
-          ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
-        }
-        composable(Screen.FEEDBACK) {
-          FeedbackScreen(chatViewModel = chatViewModel, navigationActions = navigationActions)
-        }
-      }
+          // Friends flow
+          navigation(startDestination = Screen.FRIENDS, route = Route.FRIENDS) {
+            composable(Screen.FRIENDS) {
+              ViewFriendsScreen(navigationActions, userProfileViewModel)
+            }
+          }
 
-      // Friends flow
-      navigation(startDestination = Screen.FRIENDS, route = Route.FRIENDS) {
-        composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
-      }
-
-      // Profile flow
-      navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
-        composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
-        composable(Screen.LEADERBOARD) {
-          LeaderboardScreen(navigationActions, userProfileViewModel)
+          // Profile flow
+          navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
+            composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
+            composable(Screen.LEADERBOARD) {
+              LeaderboardScreen(navigationActions, userProfileViewModel)
+            }
+            composable(Screen.ADD_FRIENDS) {
+              AddFriendsScreen(navigationActions, userProfileViewModel)
+            }
+            composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+          }
         }
-        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
-        composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+
+    // Handle transitions based on network status and ensure smooth navigation.
+    LaunchedEffect(isOffline) {
+      if (isOffline) {
+        // Navigate to the offline screen and clear the back stack to prevent returning to online
+        // views
+        navController.navigate(Screen.OFFLINE) { popUpTo(Screen.OFFLINE) { inclusive = true } }
+      } else {
+        // Return to the main authentication flow if returning online
+        navController.navigate(Route.AUTH) { popUpTo(Screen.OFFLINE) { inclusive = true } }
       }
     }
   }

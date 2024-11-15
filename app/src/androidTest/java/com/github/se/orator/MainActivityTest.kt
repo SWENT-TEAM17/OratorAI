@@ -2,7 +2,6 @@ package com.github.se.orator
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import org.junit.Rule
 import org.junit.Test
@@ -27,8 +26,6 @@ class MainActivityTest {
 
     // Launch MainActivity
     val scenario = ActivityScenario.launch(MainActivity::class.java)
-    // Move the activity to the RESUMED state explicitly
-    scenario.moveToState(Lifecycle.State.RESUMED)
 
     scenario.onActivity { activity -> }
 
