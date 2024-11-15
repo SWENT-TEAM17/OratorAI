@@ -80,5 +80,9 @@ fun createAppDimensions(): AppDimensionsObject {
 
       // Profile Picture
       profilePictureDialogSize = (screenWidth * 0.5f).coerceIn(150.dp, 200.dp),
-      profilePictureSize = (screenWidth * 0.2f).coerceIn(80.dp, 100.dp))
+      profilePictureSize = (screenWidth * 0.2f).coerceIn(80.dp, 100.dp),
+      largeTitleFontSize = (screenWidth * 0.1f).coerceIn(24.dp, 64.dp),
+      mediumTitleFontSize = (screenWidth * 0.08f).coerceIn(20.dp, 55.dp),
+      buttonTextSize = (screenWidth * 0.05f).coerceIn(14.dp, 20.dp),
+  )
 }

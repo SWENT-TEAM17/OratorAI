@@ -41,6 +41,7 @@ import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * The main screen's composable responsible to display the welcome text, the practice mode cards and
@@ -58,13 +59,14 @@ fun MainScreen(navigationActions: NavigationActions) {
                       .padding(top = AppDimensions.paddingXXXLarge)
                       .testTag("mainScreenText1"),
               text = "Find your",
-              fontSize = AppFontSizes.largeTitle)
+              style = AppTypography.largeTitleStyle, // Apply custom style for title
+          )
 
           Text(
               modifier =
                   Modifier.padding(start = AppDimensions.paddingXXLarge).testTag("mainScreenText2"),
               text = "practice mode",
-              fontSize = AppFontSizes.mediumTitle,
+              style = AppTypography.largeTitleStyle, // Apply custom style for subtitle
               fontWeight = FontWeight.Bold)
 
           ButtonRow(navigationActions)
@@ -119,15 +121,15 @@ fun AnimatedCards(navigationActions: NavigationActions) {
       listOf(
           Mode(
               text = "Prepare for an interview",
-              imageRes = R.drawable.job_interview,
+              imageRes = R.drawable.speaking_interview,
               destinationScreen = Screen.SPEAKING_JOB_INTERVIEW),
           Mode(
               text = "Improve public speaking",
-              imageRes = R.drawable.job_interview,
+              imageRes = R.drawable.speaking_speaking,
               destinationScreen = Screen.SPEAKING_PUBLIC_SPEAKING),
           Mode(
               text = "Master sales pitches",
-              imageRes = R.drawable.job_interview,
+              imageRes = R.drawable.speaking_sales,
               destinationScreen = Screen.SPEAKING_SALES_PITCH))
 
   LazyColumn(

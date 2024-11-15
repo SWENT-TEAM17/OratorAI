@@ -2,6 +2,7 @@
 package com.github.se.orator.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.BlendMode.Companion.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -26,25 +27,85 @@ object AppFontSizes {
   val titleLarge = 24.sp // For large titles in composables
   val subtitle = 16.sp
   val titleSmall = 18.sp
+  val poppinsSizeLarge = 32.sp
+  val poppinsHeightLarge = 40.sp
+  val poppinsSizeMedium = 24.sp
+  val poppinsHeightMedium = 32.sp
+  val poppinsSizeSmall = 18.sp
+  val poppinsSizeXSmall = 10.sp
+  val poppinsHeightSmall = 24.sp
 }
 
 object AppTypography {
   val manropeFontFamily = FontFamily(Font(R.font.manrope_variablefont_wght))
+  val poppinsBlackFontFamily = FontFamily(Font(R.font.poppins_black))
+  val poppinsRegularFontFamily = FontFamily(Font(R.font.poppins_regular))
 
-  val largeTitleStyle =
+  val bigTitleStyle =
       TextStyle(
-          fontSize = AppFontSizes.largeTitle,
+          fontSize = AppFontSizes.largeTitleSize, // Large title size in sp
           fontFamily = manropeFontFamily,
           fontWeight = FontWeight.W600,
           textAlign = TextAlign.Center)
 
+  val largeTitleStyle =
+      TextStyle(
+          fontSize = AppFontSizes.poppinsSizeLarge, // Large title size in sp
+          fontFamily = poppinsBlackFontFamily,
+          fontWeight = FontWeight.W600,
+          lineHeight = AppFontSizes.poppinsHeightLarge, // Optional: Add line height if needed
+          color =
+              androidx.compose.ui.graphics.Color.Black, // Replace #000 with Color.Black in Compose
+          textAlign = TextAlign.Center)
+
   val mediumTitleStyle =
       TextStyle(
-          fontSize = AppFontSizes.mediumTitle,
-          fontWeight = FontWeight.W500,
-          color = AppColors.textColor,
+          fontSize = AppFontSizes.poppinsSizeMedium, // 24px in sp for medium title
+          fontFamily = poppinsBlackFontFamily,
+          fontWeight = FontWeight.W600,
+          lineHeight = AppFontSizes.poppinsHeightMedium, // Optional line height, adjust if needed
+          color = androidx.compose.ui.graphics.Color.Black,
           textAlign = TextAlign.Center,
       )
+
+  // Small title style with specified specs
+  val smallTitleStyle =
+      TextStyle(
+          fontSize = AppFontSizes.poppinsSizeSmall, // Example small title size, adjust as needed
+          fontFamily = poppinsRegularFontFamily,
+          fontWeight = FontWeight.W200,
+          lineHeight = AppFontSizes.poppinsSizeMedium, // Optional line height
+          color = androidx.compose.ui.graphics.Color.Black,
+          textAlign = TextAlign.Center,
+      )
+
+  val xSmallTitleStyle =
+      TextStyle(
+          fontSize = AppFontSizes.poppinsSizeXSmall, // Example small title size, adjust as needed
+          fontFamily = poppinsRegularFontFamily,
+          fontWeight = FontWeight.W200,
+          lineHeight = AppFontSizes.poppinsSizeMedium, // Optional line height
+          color = androidx.compose.ui.graphics.Color.Black,
+          textAlign = TextAlign.Center,
+      )
+
+  val mainScreenTitleStyle =
+      TextStyle(
+          fontSize = AppFontSizes.largeTitle, // Or use a more specific size if needed
+          fontFamily = poppinsBlackFontFamily, // Ensure this is Poppins as desired
+          fontWeight = FontWeight.W600,
+          lineHeight = AppFontSizes.poppinsHeightLarge, // Optional, adjust for readability
+          color = AppColors.textColor,
+          textAlign = TextAlign.Start)
+
+  val mainScreenSubtitleStyle =
+      TextStyle(
+          fontSize = AppFontSizes.mediumTitle, // Or use a smaller size if needed
+          fontFamily = poppinsRegularFontFamily,
+          fontWeight = FontWeight.W500,
+          lineHeight = AppFontSizes.poppinsHeightMedium, // Optional, adjust for readability
+          color = AppColors.textColor,
+          textAlign = TextAlign.Start)
 
   val buttonTextStyle =
       TextStyle(

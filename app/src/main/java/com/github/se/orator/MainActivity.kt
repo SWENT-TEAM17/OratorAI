@@ -12,6 +12,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -112,7 +113,6 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
-
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
@@ -120,14 +120,23 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
   val apiLinkViewModel = ApiLinkViewModel()
   val speakingViewModel =
-    SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
+      SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
-  Scaffold(modifier = Modifier.fillMaxSize()) {
-    // Set the appropriate start destination based on the network status
-    val startDestination = if (isOffline) Screen.OFFLINE else Route.AUTH
+  // Monitor `isOffline` for state changes and navigate accordingly
+  LaunchedEffect(isOffline) {
+    if (isOffline) {
+      // Navigate to the offline screen if the app goes offline
+      navController.navigate(Screen.OFFLINE) { popUpTo(Screen.OFFLINE) { inclusive = true } }
+    } else {
+      // Navigate to the main flow if the app comes back online
+      navController.navigate(Route.AUTH) { popUpTo(Route.AUTH) { inclusive = true } }
+    }
+  }
 
-    NavHost(navController = navController, startDestination = startDestination) {
+  Scaffold(modifier = Modifier.fillMaxSize()) {
+    NavHost(navController = navController, startDestination = Route.AUTH) {
+
       // Offline flow
       composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
       composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
@@ -137,12 +146,12 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
         RecordingReviewScreen(navigationActions, speakingViewModel)
       }
       composable(
-        route = "offline_recording/{question}",
-        arguments = listOf(navArgument("question") { type = NavType.StringType })
-      ) { backStackEntry ->
-        val question = backStackEntry.arguments?.getString("question") ?: ""
-        OfflineRecordingScreen(navigationActions, question, speakingViewModel)
-      }
+          route = "offline_recording/{question}",
+          arguments = listOf(navArgument("question") { type = NavType.StringType })) {
+              backStackEntry ->
+            val question = backStackEntry.arguments?.getString("question") ?: ""
+            OfflineRecordingScreen(navigationActions, question, speakingViewModel)
+          }
 
       // Online/auth flow
       navigation(startDestination = Screen.AUTH, route = Route.AUTH) {
@@ -175,9 +184,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
 
       // Friends flow
       navigation(startDestination = Screen.FRIENDS, route = Route.FRIENDS) {
-        composable(Screen.FRIENDS) {
-          ViewFriendsScreen(navigationActions, userProfileViewModel)
-        }
+        composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
       }
 
       // Profile flow
@@ -186,9 +193,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
         composable(Screen.LEADERBOARD) {
           LeaderboardScreen(navigationActions, userProfileViewModel)
         }
-        composable(Screen.ADD_FRIENDS) {
-          AddFriendsScreen(navigationActions, userProfileViewModel)
-        }
+        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
         composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
       }
     }
