@@ -229,7 +229,6 @@ class EndToEndAppTest {
     verify(navigationActions).goBack()
     clearInvocations(navigationActions)
 
-      
     // Step 7: Navigate back to Home from Friends
     composeTestRule.onNodeWithTag("Home").performClick() // Simulate clicking Home button
   }
