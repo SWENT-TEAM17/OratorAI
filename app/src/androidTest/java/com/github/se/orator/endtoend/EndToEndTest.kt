@@ -133,7 +133,6 @@ class EndToEndAppTest {
     composeTestRule
         .onNodeWithTag("save_profile_button")
         .assertIsEnabled() // now the save profile button should be enabled
-
     composeTestRule.runOnUiThread {
       navController?.navigate(
           Screen.HOME) // forcing back to home where the user would be once he finishes creating his
@@ -169,7 +168,6 @@ class EndToEndAppTest {
       composeTestRule.onNodeWithTag(tag).assertExists()
       composeTestRule.onNodeWithTag(tag).performClick()
     }
-
     // go back to profile and test the features there
     composeTestRule.onNodeWithTag("back_button").performClick()
     verify(navigationActions).goBack() // ensure back button brings user back to profile

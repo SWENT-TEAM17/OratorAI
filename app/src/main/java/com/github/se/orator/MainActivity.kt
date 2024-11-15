@@ -12,6 +12,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -52,7 +53,6 @@ import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
 import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
-import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
@@ -60,7 +60,6 @@ import com.github.se.orator.ui.theme.ProjectTheme
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
-/** The MainActivity class is the main entry point for the OratorAI application. */
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
@@ -98,11 +97,12 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       ProjectTheme {
-        Scaffold(modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold")) {
-          // Pass chatGPTService and offline status from ViewModel
-          val isOffline by offlineViewModel.isOffline.observeAsState(false)
-          OratorApp(chatGPTService, isOffline)
-        }
+        Scaffold(
+            modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold") // Tag for testing
+            ) {
+              val isOffline by offlineViewModel.isOffline.observeAsState(false)
+              OratorApp(chatGPTService, isOffline)
+            }
       }
     }
   }
@@ -113,169 +113,98 @@ class MainActivity : ComponentActivity() {
   }
 }
 
-/**
- * The OratorApp composable is the main entry point for the OratorAI application.
- *
- * @param chatGPTService The ChatGPTService instance used for chat conversations.
- */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
-
-  // Initialize the navigation controller
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
-  // Main layout using a Scaffold
+  // Initialize required ViewModels
+  val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
+  val apiLinkViewModel = ApiLinkViewModel()
+  val speakingViewModel =
+      SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
+  val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
   Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
-    if (isOffline) {
-      // Display OfflineScreen when there is no network connection
-      OfflineScreen(navigationActions)
-    } else {
-      // Initialize the view models
-      val userProfileViewModel: UserProfileViewModel =
-          viewModel(factory = UserProfileViewModel.Factory)
-      val apiLinkViewModel = ApiLinkViewModel()
-      val speakingViewModel =
-          SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
-      val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
-
-      // Main layout using a Scaffold
-      Scaffold(modifier = Modifier.fillMaxSize()) {
-        NavHost(
-            navController = navController,
-            startDestination = if (isOffline) Screen.OFFLINE else Route.AUTH) {
-              composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
-              composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
-                OfflinePracticeQuestionsScreen(navigationActions)
-              }
-              composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
-                RecordingReviewScreen(navigationActions, speakingViewModel)
+    NavHost(
+        navController = navController,
+        startDestination = Route.AUTH,
+        modifier = Modifier.testTag("navHost")) {
+          // Offline flow
+          composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
+          composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
+            OfflinePracticeQuestionsScreen(navigationActions)
+          }
+          composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
+            RecordingReviewScreen(navigationActions, speakingViewModel)
+          }
+          composable(
+              route = "offline_recording/{question}",
+              arguments = listOf(navArgument("question") { type = NavType.StringType })) {
+                  backStackEntry ->
+                val question = backStackEntry.arguments?.getString("question") ?: ""
+                OfflineRecordingScreen(navigationActions, question, speakingViewModel)
               }
 
-              // Offline Recording Screen with a question parameter passed as an argument
-              composable(
-                  route =
-                      "offline_recording/{question}", // Define route with question parameter in the
-                  // path
-                  arguments =
-                      listOf(
-                          navArgument("question") {
-                            type = NavType.StringType
-                          }) // Declare question parameter as a String type
-                  ) { backStackEntry ->
-                    // Retrieve the question parameter from the back stack entry arguments
-                    val question =
-                        backStackEntry.arguments?.getString("question")
-                            ?: "" // Default to an empty string if null
-
-                    // Display the OfflineRecordingScreen with the provided question and ViewModel
-                    OfflineRecordingScreen(navigationActions, question, speakingViewModel)
-                  }
-
-              navigation(
-                  startDestination = Screen.AUTH,
-                  route = Route.AUTH,
-              ) {
-                composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
-                composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
-                  OfflinePracticeQuestionsScreen(navigationActions)
-                }
-
-                // Authentication Flow
-                composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
-
-                // Profile Creation Flow
-                composable(Screen.CREATE_PROFILE) {
-                  CreateAccountScreen(navigationActions, userProfileViewModel)
-                }
-              }
-
-              navigation(
-                  startDestination = Screen.HOME,
-                  route = Route.HOME,
-              ) {
-                composable(Screen.HOME) { MainScreen(navigationActions) }
-
-                composable(Screen.SPEAKING_JOB_INTERVIEW) {
-                  SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
-                }
-                composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-                  SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
-                }
-                composable(Screen.SPEAKING_SALES_PITCH) {
-                  SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
-                }
-                composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
-                composable(Screen.CHAT_SCREEN) {
-                  ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
-                }
-                composable(Screen.FEEDBACK) {
-                  // Navigate to FeedbackScreen
-                  FeedbackScreen(
-                      chatViewModel = chatViewModel, navigationActions = navigationActions)
-                }
-              }
-
-              navigation(
-                  startDestination = Screen.FRIENDS,
-                  route = Route.FRIENDS,
-              ) {
-                composable(Screen.FRIENDS) {
-                  ViewFriendsScreen(navigationActions, userProfileViewModel)
-                }
-              }
-
-              navigation(
-                  startDestination = Screen.FRIENDS,
-                  route = Route.FRIENDS,
-              ) {
-                composable(Screen.FRIENDS) {
-                  ViewFriendsScreen(navigationActions, userProfileViewModel)
-                }
-              }
-
-              navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
-                composable(Screen.CREATE_PROFILE) {
-                  CreateAccountScreen(navigationActions, userProfileViewModel)
-                }
-              }
-
-              navigation(startDestination = Screen.CREATE_PROFILE, route = Route.CREATE_PROFILE) {
-                composable(Screen.EDIT_PROFILE) {
-                  EditProfileScreen(navigationActions, userProfileViewModel)
-                }
-              }
-
-              navigation(
-                  startDestination = Screen.PROFILE,
-                  route = Route.PROFILE,
-              ) {
-                composable(Screen.PROFILE) {
-                  ProfileScreen(navigationActions, userProfileViewModel)
-                }
-
-                composable(Screen.LEADERBOARD) {
-                  LeaderboardScreen(navigationActions, userProfileViewModel)
-                }
-                composable(Screen.ADD_FRIENDS) {
-                  AddFriendsScreen(navigationActions, userProfileViewModel)
-                }
-                composable(Screen.SETTINGS) {
-                  SettingsScreen(navigationActions, userProfileViewModel)
-                }
-              }
-
-              navigation(startDestination = Screen.OFFLINE, route = Route.OFFLINE) {
-                composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
-                composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
-                  OfflinePracticeQuestionsScreen(navigationActions)
-                }
-                composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
-                  RecordingReviewScreen(navigationActions, speakingViewModel)
-                }
-              }
+          // Online/auth flow
+          navigation(startDestination = Screen.AUTH, route = Route.AUTH) {
+            composable(Screen.AUTH) { SignInScreen(navigationActions, userProfileViewModel) }
+            composable(Screen.CREATE_PROFILE) {
+              CreateAccountScreen(navigationActions, userProfileViewModel)
             }
+          }
+
+          // Main/home flow
+          navigation(startDestination = Screen.HOME, route = Route.HOME) {
+            composable(Screen.HOME) { MainScreen(navigationActions) }
+            composable(Screen.SPEAKING_JOB_INTERVIEW) {
+              SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
+            }
+            composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
+              SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
+            }
+            composable(Screen.SPEAKING_SALES_PITCH) {
+              SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
+            }
+            composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
+            composable(Screen.CHAT_SCREEN) {
+              ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
+            }
+            composable(Screen.FEEDBACK) {
+              FeedbackScreen(chatViewModel = chatViewModel, navigationActions = navigationActions)
+            }
+          }
+
+          // Friends flow
+          navigation(startDestination = Screen.FRIENDS, route = Route.FRIENDS) {
+            composable(Screen.FRIENDS) {
+              ViewFriendsScreen(navigationActions, userProfileViewModel)
+            }
+          }
+
+          // Profile flow
+          navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
+            composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
+            composable(Screen.LEADERBOARD) {
+              LeaderboardScreen(navigationActions, userProfileViewModel)
+            }
+            composable(Screen.ADD_FRIENDS) {
+              AddFriendsScreen(navigationActions, userProfileViewModel)
+            }
+            composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+          }
+        }
+
+    // Handle transitions based on network status and ensure smooth navigation.
+    LaunchedEffect(isOffline) {
+      if (isOffline) {
+        // Navigate to the offline screen and clear the back stack to prevent returning to online
+        // views
+        navController.navigate(Screen.OFFLINE) { popUpTo(Screen.OFFLINE) { inclusive = true } }
+      } else {
+        // Return to the main authentication flow if returning online
+        navController.navigate(Route.AUTH) { popUpTo(Screen.OFFLINE) { inclusive = true } }
       }
     }
   }
