@@ -36,8 +36,8 @@ class SettingsScreenTest {
           navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
     }
 
-    composeTestRule.onNodeWithContentDescription("Back").assertExists()
-    composeTestRule.onNodeWithContentDescription("Back").performClick()
+    composeTestRule.onNodeWithTag("back_button").assertExists()
+    composeTestRule.onNodeWithTag("back_button").performClick()
     verify(navigationActions).goBack() // Verify navigation back action
   }
 
