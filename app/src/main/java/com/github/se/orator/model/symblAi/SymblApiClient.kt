@@ -143,8 +143,6 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
         onSuccess(
             AnalysisData(
                 transcription = textBuilder.toString(),
-                fillerWordsCount = -1,
-                averagePauseDuration = -1.0,
                 sentimentScore =
                     sentimentJson
                         .getJSONArray("messages")
@@ -158,6 +156,50 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       }
     } catch (e: Exception) {
       Log.e(CLASS_LOG_ID, "Failed to parse the response: ${e.message}", e)
+      onFailure(SpeakingError.JSON_PARSING_ERROR)
+    }
+  }
+
+  /**
+   * Function to parse the analytics response from the Symbl API.
+   *
+   * @param analyticsJSONObject The JSON object containing the analytics data.
+   * @param onSuccess The function to be called on success. The `AnalysisData` object passed is set
+   *   with non-default values for fields `talkTimePercentage`, `talkTimeSeconds`, and `pace`.
+   */
+  private fun parseAnalyticsResponse(
+      analyticsJSONObject: JSONObject,
+      onSuccess: (AnalysisData) -> Unit,
+      onFailure: (SpeakingError) -> Unit
+  ) {
+    try {
+      val userAnalyticsArray = analyticsJSONObject.getJSONArray("members")
+
+      if (userAnalyticsArray.length() != 1) {
+        onFailure(SpeakingError.NO_ANALYTICS_FOUND_ERROR)
+        Log.e(CLASS_LOG_ID, "No analytics found in the response.")
+        return
+      }
+
+      val userAnalytics = userAnalyticsArray.getJSONObject(0)
+
+      // Pace
+      val pace = userAnalytics.getJSONObject("pace").getInt("wpm")
+      // Talk time
+      val talkTimePercentage = userAnalytics.getJSONObject("talkTime").getDouble("percentage")
+      val talkTimeSeconds = userAnalytics.getJSONObject("talkTime").getDouble("seconds")
+
+      // Pass the result on success
+      onSuccess(
+          AnalysisData(
+              talkTimePercentage = talkTimePercentage,
+              talkTimeSeconds = talkTimeSeconds,
+              pace = pace))
+    } catch (e: Exception) {
+      Log.e(
+          CLASS_LOG_ID,
+          "Failed to parse the response while trying to retrieve analytics: ${e.message}",
+          e)
       onFailure(SpeakingError.JSON_PARSING_ERROR)
     }
   }
@@ -258,18 +300,60 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onSuccess: (AnalysisData) -> Unit,
       onFailure: (SpeakingError) -> Unit
   ) {
-    urlCallRequest(
-        request =
-            buildUrlGetRequestWithHeader(
-                "https://api.symbl.ai/v1/conversations/$conversationId/messages?sentiment=true&enableAllInsights=true",
-                accessToken),
-        onSuccess = { response ->
-          parseSentimentResponse(JSONObject(response), onSuccess, onFailure)
-        },
-        onFailure = {
-          Log.e(CLASS_LOG_ID, "Failed to fetch analysis data online")
-          onFailure(SpeakingError.HTTP_REQUEST_ERROR)
-        })
+
+    try {
+
+      var tempAnalysisData: AnalysisData? = null
+      urlCallRequestBlocking(
+          request =
+              buildUrlGetRequestWithHeader(
+                  "https://api.symbl.ai/v1/conversations/$conversationId/messages?sentiment=true&enableAllInsights=true",
+                  accessToken),
+          onSuccess = { response ->
+            parseSentimentResponse(JSONObject(response), { tempAnalysisData = it }, onFailure)
+          },
+          onFailure = {
+            Log.e(CLASS_LOG_ID, "Failed to fetch message data online")
+            onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+          })
+
+      if (tempAnalysisData == null) {
+        Log.e(
+            CLASS_LOG_ID, "Failed to fetch message data online (analysisData is unexpectedly null)")
+        onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+        return
+      }
+
+      Log.d(CLASS_LOG_ID, "Successfully parsed speech's transcription and sentiment data")
+
+      urlCallRequestBlocking(
+          request =
+              buildUrlGetRequestWithHeader(
+                  "https://api.symbl.ai/v1/conversations/$conversationId/analytics", accessToken),
+          onSuccess = { response ->
+            parseAnalyticsResponse(
+                JSONObject(response),
+                {
+                  tempAnalysisData =
+                      tempAnalysisData!!.copy(
+                          talkTimePercentage = it.talkTimePercentage,
+                          talkTimeSeconds = it.talkTimeSeconds,
+                          pace = it.pace)
+                },
+                onFailure)
+          },
+          onFailure = {
+            Log.e(CLASS_LOG_ID, "Failed to fetch analysis data online")
+            onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+          })
+
+      Log.d(CLASS_LOG_ID, "Successfully parsed speech's analytics data: $tempAnalysisData")
+
+      onSuccess(tempAnalysisData!!)
+    } catch (e: Exception) {
+      Log.e("Failed to parse response", e.message, e)
+      onFailure(SpeakingError.JSON_PARSING_ERROR)
+    }
   }
 
   /**
