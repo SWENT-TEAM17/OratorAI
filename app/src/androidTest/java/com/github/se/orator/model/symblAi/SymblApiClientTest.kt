@@ -96,4 +96,45 @@ class SymblApiClientTest {
           data.transcription.trim())
     }
   }
+
+  @Test
+  fun metricsReceived() {
+    // Arrange
+    val assetManager = context.assets
+
+    // Name of the audio file in the assets directory
+    val audioFileName = "test_audio.wav"
+
+    // Copy the audio file from assets to a temporary file
+    val inputStream = assetManager.open(audioFileName)
+    val audioFile = File(context.cacheDir, audioFileName)
+    inputStream.use { input -> audioFile.outputStream().use { output -> input.copyTo(output) } }
+
+    // Prepare a CountDownLatch to wait for asynchronous callback
+    val latch = CountDownLatch(1)
+
+    // Variables to capture the results
+    var analysisData: AnalysisData? = null
+
+    // Act
+    symblApiClient.getTranscription(
+        audioFile = audioFile,
+        onSuccess = { data ->
+          analysisData = data
+          latch.countDown() // Signal that the operation is complete
+        },
+        onFailure = {
+          latch.countDown() // Signal that the operation is complete
+        })
+
+    // Wait for up to 20 seconds for the operation to complete
+    latch.await(20, TimeUnit.SECONDS)
+    // Assert
+    analysisData?.let {
+      Assert.assertTrue(
+          "Talk time (percentage) should have been received", it.talkTimePercentage != -1.0)
+      Assert.assertTrue("Talk time (seconds) should have been received", it.talkTimeSeconds != -1.0)
+      Assert.assertTrue("Pace should have been received", it.pace != -1)
+    }
+  }
 }
