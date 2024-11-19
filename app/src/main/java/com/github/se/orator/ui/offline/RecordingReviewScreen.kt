@@ -30,7 +30,7 @@ fun RecordingReviewScreen(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
-            modifier = Modifier.fillMaxWidth().testTag("BackButtonRow"),
+            modifier = Modifier.fillMaxWidth().testTag("Back"),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
                   imageVector = Icons.Filled.ArrowBack,
@@ -43,7 +43,7 @@ fun RecordingReviewScreen(
             }
 
         Text(
-            text = "Soon you will be able to: Play Recording, Comment on it, and Save it locally",
+            text = "Soon you will be able to : Play Recording, Comment on it and Save it locally",
             fontSize = AppFontSizes.bodyLarge,
             modifier = Modifier.padding(AppDimensions.paddingMedium).testTag("InstructionText"))
       }
