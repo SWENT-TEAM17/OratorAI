@@ -42,8 +42,6 @@ class RecordingReviewScreenTest {
         .assertIsDisplayed()
   }
 
-
-
   @Test
   fun testBackButtonNavigation() {
     // Set up content for RecordingReviewScreen
