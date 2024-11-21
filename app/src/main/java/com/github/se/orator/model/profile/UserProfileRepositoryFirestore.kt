@@ -302,4 +302,24 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           onFailure(exception)
         }
   }
+
+    /**
+     * Calculates the mean (average) of the elements in a given queue.
+     *
+     * This function takes a queue of numerical values (represented as an `ArrayDeque<Double>`)
+     * and returns the mean of its elements. If the queue is empty, the function returns 0.
+     *
+     * @param values An `ArrayDeque<Double>` containing the metrics values.
+     * @return The mean of the values or 0 if it is empty
+     */
+    override fun getMetricMean(values: ArrayDeque<Double>): Double {
+      // Check if the queue is empty to avoid division by zero
+      if (values.isEmpty()) return 0.0
+
+      // Sum the elements and divide by the size of the queue
+      val sum = values.sum()
+      return sum / values.size
+    }
+
+
 }
