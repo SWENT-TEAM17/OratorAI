@@ -22,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,44 +30,37 @@ import com.github.se.orator.R
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.speaking.MicrophoneButton
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 
+// TODO: remove this suppress and fix the permissions
 @SuppressLint("MissingPermission")
 @Composable
 fun OfflineRecordingScreen(
     navigationActions: NavigationActions,
     question: String,
-    speakingViewModel: SpeakingViewModel = viewModel()
+    viewModel: SpeakingViewModel = viewModel()
 ) {
-  var permissionGranted by remember { mutableStateOf(false) }
+    val analysisState = viewModel.analysisState.collectAsState()
+    val analysisData by viewModel.analysisData.collectAsState()
+
+  val permissionGranted = remember { mutableStateOf(false) }
   val permissionLauncher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
-          isGranted ->
-        permissionGranted = isGranted
-        if (isGranted) {
-          speakingViewModel.onMicButtonClicked(true)
-        }
+          isGranted -> permissionGranted.value = isGranted
       }
 
-  val isRecording by speakingViewModel.isRecording.collectAsState()
-  val infiniteTransition = rememberInfiniteTransition()
-  val scale by
-      infiniteTransition.animateFloat(
-          initialValue = 1f,
-          targetValue = 1.3f,
-          animationSpec =
-              infiniteRepeatable(
-                  animation = tween(600, easing = LinearEasing), repeatMode = RepeatMode.Reverse))
+  val isRecording by viewModel.isRecording.collectAsState()
 
-  DisposableEffect(Unit) {
-    onDispose {
-      if (isRecording) {
-        speakingViewModel.endAndSave()
-      }
+    DisposableEffect(Unit) {
+        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+
+        onDispose { viewModel.endAndSave() }
     }
-  }
+
   val colors = MaterialTheme.colorScheme
+    val amplitudes = remember { mutableStateListOf<Float>() }
 
   Column(
       modifier =
@@ -112,25 +106,7 @@ fun OfflineRecordingScreen(
                   modifier =
                       Modifier.size(AppDimensions.logoSize)
                           .testTag("MicIconContainer")) { // // should be 203.dp
-                    Image(
-                        painter = painterResource(id = R.drawable.bckgrnd_blobs),
-                        contentDescription = "Background",
-                        modifier = Modifier.size(AppDimensions.logoSize).testTag("BackgroundBlob"))
-                    Icon(
-                        imageVector = Icons.Filled.Mic,
-                        contentDescription = "Microphone",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeMic)
-                                .scale(if (isRecording) scale else 1f)
-                                .clickable {
-                                  if (permissionGranted) {
-                                    speakingViewModel.onMicButtonClicked(true)
-                                  } else {
-                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                  }
-                                }
-                                .testTag("MicIcon"),
-                        tint = colors.secondary)
+                  MicrophoneButton(viewModel, analysisState, permissionGranted, LocalContext.current)
                   }
 
               Text(
@@ -144,7 +120,7 @@ fun OfflineRecordingScreen(
 
               Button(
                   onClick = {
-                    speakingViewModel.endAndSave()
+                    viewModel.endAndSave()
                     navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
                   },
                   modifier =

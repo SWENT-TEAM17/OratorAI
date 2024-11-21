@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -52,14 +54,15 @@ fun OfflineScreen(navigationActions: NavigationActions) {
                           .background(colors.primary.copy(alpha = 0.1f), CircleShape)
                           .padding(AppDimensions.paddingLarge)
                           .testTag("OfflineScreenIconContainer")) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_no_wifi2),
-                        contentDescription = "No connection",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSize)
-                                .align(Alignment.Center)
-                                .testTag("NoConnectionIcon"),
-                        tint = colors.primary)
+                  Icon(
+                      Icons.Filled.WifiOff,
+                      contentDescription = "No connection",
+                      modifier =
+                      Modifier.size(AppDimensions.iconSize)
+                          .align(Alignment.Center)
+                          .testTag("NoConnectionIcon"),
+                      tint = colors.primary
+                  )
                   }
 
               Spacer(modifier = Modifier.height(AppDimensions.spacerHeightDefault))
