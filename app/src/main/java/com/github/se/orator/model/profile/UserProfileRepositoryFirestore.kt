@@ -320,6 +320,4 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       val sum = values.sum()
       return sum / values.size
     }
-
-
 }

@@ -371,4 +371,32 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
             Log.e("UserProfileViewModel", "Failed to add new metric value: Current user profile is null.")
         }
     }
+
+    /**
+     * Calculates the means of the values of talk time seconds and percentage queues and update the
+     * profile with the new means
+     */
+    fun updateMetricMean() {
+        val currentUserProfile = userProfile_.value
+
+        if (currentUserProfile != null) {
+            val currentStats = currentUserProfile.statistics
+           // Calculate the mean of the values of the metric queues
+           val updatedTalkTimeSecMean = repository.getMetricMean(recentTalkTimeSec_.value)
+           val updatedTalkTimePercMean = repository.getMetricMean(recentTalkTimePerc_.value)
+
+            // Create a new statistics object with the updated means
+            val updatedStats = currentStats.copy(
+                talkTimeSecMean = updatedTalkTimeSecMean,
+                talkTimePercMean = updatedTalkTimePercMean
+            )
+
+            // Create a new profile object with the updated stats
+            val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
+
+            userProfile_.value = updatedProfile
+        } else {
+            Log.e("UserProfileViewModel", "Failed to update metric means: Current user profile is null.")
+        }
+    }
 }

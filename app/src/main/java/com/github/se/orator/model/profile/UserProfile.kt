@@ -18,8 +18,13 @@ data class UserStatistics(
     val speechesGiven: Int = 0,
     val improvement: Float = 0.0f,
     val previousRuns: List<SpeechStats> = emptyList(),
+
     val recentTalkTimeSec: ArrayDeque<Double> = ArrayDeque(),
-    val recentTalkTimePerc: ArrayDeque<Double> = ArrayDeque()
+    val recentTalkTimePerc: ArrayDeque<Double> = ArrayDeque(),
+    val talkTimeSecMean: Double = 0.0,
+    val talkTimePercMean: Double = 0.0
+
+
 )
 
 data class SpeechStats(
