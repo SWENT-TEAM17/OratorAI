@@ -335,10 +335,14 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     fun addTalkTimeSec(value: Double){
         val currentUserProfile = userProfile_.value
         if (currentUserProfile != null) {
+            val currentStats = currentUserProfile.statistics
             val updatedQueue = addLatestMetric(recentTalkTimeSec_, value)
 
+            // Create a new statistics object with the updated queue
+            val updatedStats = currentStats.copy(recentTalkTimeSec = updatedQueue)
+
             // Create a new profile object with the updated queue
-            val updatedProfile = currentUserProfile.copy(statistics = UserStatistics(recentTalkTimeSec = updatedQueue))
+            val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
 
             // Updates the user profile with the new one
             updateUserProfile(updatedProfile)
@@ -358,10 +362,14 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     fun addTalkTimePerc(value: Double){
         val currentUserProfile = userProfile_.value
         if (currentUserProfile != null) {
+            val currentStats = currentUserProfile.statistics
             val updatedQueue = addLatestMetric(recentTalkTimePerc_, value)
 
+            // Create a new statistics object with the updated queue
+            val updatedStats = currentStats.copy(recentTalkTimePerc = updatedQueue)
+
             // Create a new profile object with the updated queue
-            val updatedProfile = currentUserProfile.copy(statistics = UserStatistics(recentTalkTimePerc = updatedQueue))
+            val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
 
             // Updates the user profile with the new one
             updateUserProfile(updatedProfile)
@@ -393,6 +401,9 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
 
             // Create a new profile object with the updated stats
             val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
+
+            // Updates the user profile with the new one
+            updateUserProfile(updatedProfile)
 
             userProfile_.value = updatedProfile
         } else {
