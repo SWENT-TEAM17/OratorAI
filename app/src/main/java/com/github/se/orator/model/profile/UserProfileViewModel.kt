@@ -305,9 +305,9 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   }
 
     /**
-     * Adds a metric to the queue while ensuring the queue maintains a maximum size of 10 elements.
+     * Adds a metric value to the queue while ensuring the queue maintains a maximum size of 10 elements.
      *
-     * This function adds the given metric to the end of the queue. If the queue already contains
+     * This function adds the given metric value to the end of the queue. If the queue already contains
      * 10 elements, the oldest element (at the front of the queue) is removed before adding the new metric.
      *
      * @param queue The queue to which the metric will be added.
@@ -326,6 +326,12 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
         return updatedQueue
     }
 
+    /**
+     * Adds the latest "talk time seconds" value to its respective queue and update the profile to save
+     * the updated queue
+     *
+     * @param value The new value to be added to the queue.
+     */
     fun addTalkTimeSec(value: Double){
         val currentUserProfile = userProfile_.value
         if (currentUserProfile != null) {
@@ -343,6 +349,12 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
         }
     }
 
+    /**
+     * Adds the latest "talk time percentage" value to its respective queue and update the profile to save
+     * the updated queue
+     *
+     * @param value The new value to be added to the queue.
+     */
     fun addTalkTimePerc(value: Double){
         val currentUserProfile = userProfile_.value
         if (currentUserProfile != null) {
