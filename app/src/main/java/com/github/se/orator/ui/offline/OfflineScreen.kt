@@ -15,11 +15,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 
 @Composable
 fun OfflineScreen(navigationActions: NavigationActions) {
@@ -37,54 +37,56 @@ fun OfflineScreen(navigationActions: NavigationActions) {
                               colors.primary.copy(alpha = 0.1f),
                               colors.secondary.copy(alpha = 0.1f))))
               .padding(WindowInsets.systemBars.asPaddingValues())
-              .testTag("OfflineScreen") // Tag for the entire screen
-      ) {
+              .testTag("OfflineScreen")) {
         Column(
             modifier =
-                Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag("OfflineScreenColumn"),
+                Modifier.fillMaxSize()
+                    .padding(horizontal = AppDimensions.paddingMedium)
+                    .testTag("OfflineScreenColumn"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
               // Icon with a circular background
               Box(
                   modifier =
-                      Modifier.size(140.dp)
+                      Modifier.size(AppDimensions.profilePictureDialogSize)
                           .background(colors.primary.copy(alpha = 0.1f), CircleShape)
-                          .padding(20.dp)
+                          .padding(AppDimensions.paddingLarge)
                           .testTag("OfflineScreenIconContainer")) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_no_wifi2),
                         contentDescription = "No connection",
                         modifier =
-                            Modifier.size(100.dp)
+                            Modifier.size(AppDimensions.iconSize)
                                 .align(Alignment.Center)
                                 .testTag("NoConnectionIcon"),
                         tint = colors.primary)
                   }
 
-              Spacer(modifier = Modifier.height(24.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.spacerHeightDefault))
 
               // Main text
               Text(
                   text = "No Internet Connection",
-                  fontSize = 20.sp,
+                  fontSize = AppFontSizes.titleLarge,
                   fontWeight = FontWeight.Bold,
                   color = colors.onBackground,
                   textAlign = TextAlign.Center,
                   modifier = Modifier.testTag("NoConnectionText"))
 
-              Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
               // Subtext
               Text(
                   text =
                       "It seems like you don't have any WiFi connection... You can still practice offline!",
-                  fontSize = 16.sp,
+                  fontSize = AppFontSizes.bodyLarge,
                   fontWeight = FontWeight.Medium,
                   color = colors.onBackground.copy(alpha = 0.7f),
                   textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(horizontal = 16.dp).testTag("SubText"))
+                  modifier =
+                      Modifier.padding(horizontal = AppDimensions.paddingMedium).testTag("SubText"))
 
-              Spacer(modifier = Modifier.height(32.dp))
+              Spacer(modifier = Modifier.height(AppDimensions.spacerHeightDefault))
 
               // Button
               Button(
@@ -93,16 +95,20 @@ fun OfflineScreen(navigationActions: NavigationActions) {
                     navigationActions.navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
                   },
                   colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                  shape = RoundedCornerShape(50),
+                  shape = RoundedCornerShape(AppDimensions.buttonHeightRounded),
                   modifier =
-                      Modifier.height(50.dp)
-                          .widthIn(min = 200.dp, max = 300.dp)
-                          .shadow(5.dp, RoundedCornerShape(50))
+                      Modifier.height(AppDimensions.buttonHeightRounded)
+                          .widthIn(
+                              min = AppDimensions.buttonWidthMin,
+                              max = AppDimensions.buttonWidthMax)
+                          .shadow(
+                              AppDimensions.shadowElevation,
+                              RoundedCornerShape(AppDimensions.buttonHeightRounded))
                           .testTag("PracticeOfflineButton")) {
                     Text(
                         text = "Practice Offline",
                         color = colors.onPrimary,
-                        fontSize = 16.sp,
+                        fontSize = AppFontSizes.subtitle,
                         fontWeight = FontWeight.Bold)
                   }
             }
