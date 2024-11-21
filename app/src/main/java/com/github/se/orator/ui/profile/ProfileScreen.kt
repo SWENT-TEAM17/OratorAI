@@ -48,7 +48,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,184 +67,151 @@ import com.github.se.orator.ui.theme.AppTypography
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
-    // State to control whether the profile picture dialog is open
-    var isDialogOpen by remember { mutableStateOf(false) }
+  // State to control whether the profile picture dialog is open
+  var isDialogOpen by remember { mutableStateOf(false) }
 
-    // Collect the profile data from the ViewModel
-    val userProfile by profileViewModel.userProfile.collectAsState()
+  // Collect the profile data from the ViewModel
+  val userProfile by profileViewModel.userProfile.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding(),
-                backgroundColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.inverseSurface,
-                elevation = AppDimensions.appBarElevation,
-                title = {
-                    Text(
-                        modifier = Modifier.testTag("profile_title"),
-                        text = "Profile",
-                        fontWeight = FontWeight.Bold,
-                        style = AppTypography.appBarTitleStyle
-                    )
-                },
-                actions = {
-                    IconButton(
-                        onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
-                        modifier = Modifier.testTag("settings_button")
-                    ) {
-                        Icon(
-                            Icons.Outlined.Settings,
-                            contentDescription = "Settings",
-                            modifier = Modifier
-                                .size(AppDimensions.iconSizeMedium)
-                                .testTag("settings_icon")
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            // TODO: Implement sign-out functionality
-                        },
-                        modifier = Modifier.testTag("sign_out_button")
-                    ) {
-                        Icon(
-                            Icons.Filled.Logout,
-                            contentDescription = "Sign out",
-                            modifier = Modifier
-                                .size(AppDimensions.iconSizeMedium)
-                                .testTag("sign_out_icon")
-                        )
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { route -> navigationActions.navigateTo(route) },
-                tabList = LIST_TOP_LEVEL_DESTINATION,
-                selectedItem = Route.PROFILE
-            )
-        }
-    ) { innerPadding ->
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.inverseSurface,
+            elevation = AppDimensions.appBarElevation,
+            title = {
+              Text(
+                  modifier = Modifier.testTag("profile_title"),
+                  text = "Profile",
+                  fontWeight = FontWeight.Bold,
+                  style = AppTypography.appBarTitleStyle)
+            },
+            actions = {
+              IconButton(
+                  onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
+                  modifier = Modifier.testTag("settings_button")) {
+                    Icon(
+                        Icons.Outlined.Settings,
+                        contentDescription = "Settings",
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"))
+                  }
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = {
+                    // TODO: Implement sign-out functionality
+                  },
+                  modifier = Modifier.testTag("sign_out_button")) {
+                    Icon(
+                        Icons.Filled.Logout,
+                        contentDescription = "Sign out",
+                        modifier =
+                            Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"))
+                  }
+            })
+      },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = Route.PROFILE)
+      }) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(AppDimensions.paddingMedium),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            userProfile?.let { profile ->
+            modifier =
+                Modifier.fillMaxSize().padding(innerPadding).padding(AppDimensions.paddingMedium),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              userProfile?.let { profile ->
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .padding(top = AppDimensions.paddingXXXLarge),
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    // Background "card" behind the profile picture
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .height(140.dp),
-                        elevation = AppDimensions.elevationSmall
-                    ) {}
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .height(AppDimensions.profileBoxHeight)
+                            .padding(top = AppDimensions.paddingXXXLarge),
+                    contentAlignment = Alignment.TopCenter) {
+                      // Background "card" behind the profile picture
+                      Card(
+                          modifier = Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
+                          elevation = AppDimensions.elevationSmall) {}
 
-                    // Profile Picture with overlapping positioning
-                    ProfilePicture(
-                        profilePictureUrl = profile.profilePic,
-                        onClick = { isDialogOpen = true },
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .offset(y = (-AppDimensions.profilePictureSize / 2))
-                    )
+                      // Profile Picture with overlapping positioning
+                      ProfilePicture(
+                          profilePictureUrl = profile.profilePic,
+                          onClick = { isDialogOpen = true },
+                          modifier =
+                              Modifier.align(Alignment.TopCenter)
+                                  .offset(y = (-AppDimensions.profilePictureSize / 2)))
 
-                    // Edit button
-                    Button(
-                        onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
-                        modifier = Modifier
-                            .testTag("edit_button")
-                            .size(40.dp)
-                            .align(Alignment.TopEnd)
-                            .offset(y = (-20).dp),
-                        shape = AppShapes.circleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = AppColors.surfaceColor
-                        ),
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Icon(
-                            Icons.Outlined.Edit,
-                            contentDescription = "Edit button",
-                            modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                            tint = AppColors.surfaceColor
-                        )
-                    }
+                      // Edit button
+                      Button(
+                          onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
+                          modifier =
+                              Modifier.testTag("edit_button")
+                                  .size(AppDimensions.spacingXLarge)
+                                  .align(Alignment.TopEnd)
+                                  .offset(y = (-20).dp),
+                          shape = AppShapes.circleShape,
+                          colors =
+                              ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
+                          contentPadding = PaddingValues(0.dp)) {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                contentDescription = "Edit button",
+                                modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                                tint = AppColors.surfaceColor)
+                          }
 
-                    // Updated Username and Streak Section
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    ) {
-                        Spacer(modifier = Modifier.height(AppDimensions.MediumSpacerHeight))
+                      // Updated Username and Streak Section
+                      Column(
+                          horizontalAlignment = Alignment.CenterHorizontally,
+                          modifier = Modifier.align(Alignment.TopCenter)) {
+                            Spacer(modifier = Modifier.height(AppDimensions.MediumSpacerHeight))
 
-                        // Box to hold username and streak
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("profile_name_box"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            // Username remains centered
+                            // Box to hold username and streak
+                            Box(
+                                modifier = Modifier.fillMaxWidth().testTag("profile_name_box"),
+                                contentAlignment = Alignment.Center) {
+                                  // Username remains centered
+                                  Text(
+                                      text = profile.name,
+                                      fontSize = 20.sp,
+                                      fontWeight = FontWeight.Bold,
+                                      modifier = Modifier.testTag("profile_name"))
+
+                                  // Current Streak aligned to the end with fire icon
+                                  Row(
+                                      verticalAlignment = Alignment.CenterVertically,
+                                      modifier =
+                                          Modifier.align(Alignment.CenterEnd)
+                                              .offset(x = -AppDimensions.paddingLarge) // Push a little to the left
+                                              .testTag("current_streak")) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Whatshot, // Fire icon
+                                            contentDescription = "Active Streak",
+                                            tint = AppColors.amber,
+                                            modifier = Modifier.size(AppDimensions.iconSizeSmall))
+                                        Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+                                        Text(
+                                            text = "${profile.currentStreak}",
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = AppColors.amber,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.testTag("current_streak_text"))
+                                      }
+                                }
+
+                            Spacer(modifier = Modifier.height(AppDimensions.SmallSpacerHeight))
+
                             Text(
-                                text = profile.name,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier
-                                    .testTag("profile_name")
-                            )
-
-                            // Current Streak aligned to the end with fire icon
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .offset(x = -20.dp) // Push a little to the right
-                                    .testTag("current_streak_row")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Whatshot, // Fire icon
-                                    contentDescription = "Active Streak",
-                                    tint = Color(0xFFFFA726), // Amber color
-                                    modifier = Modifier.size(AppDimensions.iconSizeSmall)
-                                )
-                                Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-                                Text(
-                                    text = "${profile.currentStreak}",
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFFFA726), // Amber color
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier
-                                        .testTag("current_streak_text")
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(AppDimensions.SmallSpacerHeight))
-
-                        Text(
-                            text =
-                            if (profile.bio.isNullOrBlank()) "Write your bio here"
-                            else profile.bio,
-                            modifier = Modifier.padding(horizontal = AppDimensions.paddingMedium)
-                        )
+                                text =
+                                    if (profile.bio.isNullOrBlank()) "Write your bio here"
+                                    else profile.bio,
+                                modifier =
+                                    Modifier.padding(horizontal = AppDimensions.paddingMedium))
+                          }
                     }
-                }
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Log.d("scn", "bio is: ${profile.bio}")
@@ -254,9 +220,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 CardSection(
                     title = "My stats",
                     imageVector = Icons.Outlined.QueryStats,
-                    onClick = { /*TODO: Handle achievements click */ },
-                    modifier = Modifier.testTag("statistics_section")
-                )
+                    onClick = { /*TODO: Handle achievements click */},
+                    modifier = Modifier.testTag("statistics_section"))
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
@@ -264,26 +229,23 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 CardSection(
                     title = "Previous Recordings",
                     imageVector = Icons.Outlined.History,
-                    onClick = { /*TODO: Handle previous sessions click */ },
-                    modifier = Modifier.testTag("previous_sessions_section")
-                )
-            } ?: run {
-                Text(
-                    text = "Loading profile...",
-                    style = AppTypography.bodyLargeStyle,
-                    modifier = Modifier.testTag("loading_profile_text")
-                )
+                    onClick = { /*TODO: Handle previous sessions click */},
+                    modifier = Modifier.testTag("previous_sessions_section"))
+              }
+                  ?: run {
+                    Text(
+                        text = "Loading profile...",
+                        style = AppTypography.bodyLargeStyle,
+                        modifier = Modifier.testTag("loading_profile_text"))
+                  }
             }
-        }
 
         // Dialog to show the profile picture in larger format
         if (isDialogOpen && userProfile?.profilePic != null) {
-            ProfilePictureDialog(
-                profilePictureUrl = userProfile!!.profilePic!!,
-                onDismiss = { isDialogOpen = false }
-            )
+          ProfilePictureDialog(
+              profilePictureUrl = userProfile!!.profilePic!!, onDismiss = { isDialogOpen = false })
         }
-    }
+      }
 }
 
 @Composable

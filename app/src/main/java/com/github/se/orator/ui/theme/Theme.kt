@@ -150,6 +150,8 @@ object AppDimensions {
   val imageLargeXXL = 350.dp
   val smallTitleFontSize = 20.dp
   val mediumTitleFontSize = 30.dp
+    val profileBoxHeight = 200.dp
+    val profileCardHeight = 140.dp
 }
 
 object AppShapes {

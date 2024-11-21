@@ -259,18 +259,18 @@ fun FriendItem(friend: UserProfile, userProfileViewModel: UserProfileViewModel) 
                                 imageVector =
                                     Icons.Filled.Whatshot, // Using Whatshot as the fire icon
                                 contentDescription = "Active Streak",
-                                tint = Color(0xFFFFA726), // Amber color
+                                tint = AppColors.amber,
                                 modifier = Modifier.size(AppDimensions.iconSizeSmall))
                             Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                             Text(
                                 text =
                                     "$displayedStreak day${if (displayedStreak > 1) "s" else ""} streak",
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFFFA726), // Amber color
+                                color = AppColors.amber,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier =
-                                    Modifier.testTag("friendStreak#${friend.uid}")
+                                    Modifier.testTag("friendStreak")
                                         .weight(1f) // Allow the text to take available space
                                 )
                           }
