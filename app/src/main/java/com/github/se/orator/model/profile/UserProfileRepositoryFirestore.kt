@@ -8,6 +8,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 /**
  * Repository class for managing user profiles in Firestore.
@@ -215,6 +220,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       val uid = document.id
       val name = document.getString("name") ?: return null
       val age = document.getLong("age")?.toInt() ?: return null
+      val lastLoginDate = document.getString("lastLoginDate")
+      val currentStreak = document.getLong("currentStreak") ?: 0L
       val statisticsMap = document.get("statistics") as? Map<*, *>
       val statistics =
           statisticsMap?.let {
@@ -242,6 +249,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           statistics = statistics,
           friends = friends,
           profilePic = profilePic,
+          currentStreak = currentStreak,
+          lastLoginDate = lastLoginDate,
           bio = bio)
     } catch (e: Exception) {
       Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
@@ -301,5 +310,65 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
           onFailure(exception)
         }
+  }
+
+  override fun updateLoginStreak(uid: String, onSuccess: () -> Int, onFailure: () -> Int) {
+    val userRef = db.collection(collectionPath).document(uid)
+    db.runTransaction { transaction ->
+          val snapshot = transaction.get(userRef)
+          val currentDate = getCurrentDate()
+          val lastLoginDateString = snapshot.getString("lastLoginDate")
+          val currentStreak = snapshot.getLong("currentStreak") ?: 0L
+          val updatedStreak: Long
+          val lastLoginDate: Date?
+          if (lastLoginDateString != null) {
+            lastLoginDate = parseDate(lastLoginDateString)
+            val daysDifference = getDaysDifference(lastLoginDate, currentDate)
+            updatedStreak =
+                when (daysDifference) {
+                  0L -> currentStreak // Same day login
+                  1L -> currentStreak + 1 // Consecutive day
+                  else -> 1L // Streak broken
+                }
+          } else {
+            // First-time login
+            updatedStreak = 1L
+          }
+          // Update the fields
+          transaction.update(
+              userRef,
+              mapOf("lastLoginDate" to formatDate(currentDate), "currentStreak" to updatedStreak))
+        }
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error updating login streak", exception)
+          onFailure()
+        }
+  }
+  // Helper functions for date handling
+  private fun getCurrentDate(): Date {
+    val calendar = Calendar.getInstance(TimeZone.getDefault())
+    calendar.set(Calendar.HOUR_OF_DAY, 0)
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    return calendar.time
+  }
+
+  private fun parseDate(dateString: String): Date {
+    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    sdf.timeZone = TimeZone.getDefault()
+    return sdf.parse(dateString) ?: Date()
+  }
+
+  private fun formatDate(date: Date): String {
+    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    sdf.timeZone = TimeZone.getDefault()
+    return sdf.format(date)
+  }
+
+  private fun getDaysDifference(startDate: Date, endDate: Date): Long {
+    val diffInMillis = endDate.time - startDate.time
+    return diffInMillis / (1000 * 60 * 60 * 24)
   }
 }

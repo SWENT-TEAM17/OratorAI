@@ -100,4 +100,6 @@ interface UserProfileRepository {
    * @param onFailure Callback to be invoked on failure with the exception.
    */
   fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+
+  fun updateLoginStreak(uid: String, onSuccess: () -> Int, onFailure: () -> Int)
 }

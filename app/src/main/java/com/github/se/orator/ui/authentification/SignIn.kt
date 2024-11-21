@@ -69,6 +69,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             val uid = result.user?.uid
             uid?.let { u ->
               viewModel.getUserProfile(u) // Fetch user profile
+              viewModel.updateLoginStreak()
               redirectToProfile = true
             }
           },

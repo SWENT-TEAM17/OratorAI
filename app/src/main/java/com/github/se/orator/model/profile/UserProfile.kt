@@ -11,7 +11,9 @@ data class UserProfile(
     // Temp list of all users for hardcoding
     val allUsers: List<String> = emptyList(),
     val friends: List<String> = emptyList(),
-    val bio: String? = null
+    val bio: String? = null,
+    val currentStreak: Long = 0L,
+    val lastLoginDate: String? = "1970-10-10"
 )
 
 data class UserStatistics(

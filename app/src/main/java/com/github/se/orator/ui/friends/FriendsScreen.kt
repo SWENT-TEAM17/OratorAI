@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.friends
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +39,11 @@ import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import kotlinx.coroutines.launch
 
 /**
@@ -189,6 +196,25 @@ fun ViewFriendsScreen(
  */
 @Composable
 fun FriendItem(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
+  // Compute the displayedStreak
+  val displayedStreak = currentFriendStreak(friend.lastLoginDate, friend.currentStreak)
+  Log.d("FriendItem", "Days Since Last Login: ${friend.lastLoginDate}")
+
+  // Compute days since last login for broken streak
+  val daysSinceLastLogin =
+      remember(friend.lastLoginDate) {
+        if (!friend.lastLoginDate.isNullOrEmpty()) {
+          val lastLoginDate = parseDate(friend.lastLoginDate)
+          if (lastLoginDate != null) {
+            getDaysDifference(lastLoginDate, getCurrentDate())
+          } else {
+            0L
+          }
+        } else {
+          0L
+        }
+      }
+
   Surface(
       modifier =
           Modifier.fillMaxWidth()
@@ -198,28 +224,74 @@ fun FriendItem(friend: UserProfile, userProfileViewModel: UserProfileViewModel) 
       color = AppColors.LightPurpleGrey,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
-          ProfilePicture(profilePictureUrl = friend.profilePic, onClick = {})
-          Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-          Column {
-            Text(
-                text = friend.name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier =
-                    Modifier.padding(bottom = AppDimensions.smallPadding)
-                        .testTag("friendName#${friend.uid}"))
-            Text(
-                text = friend.bio ?: "No bio available",
-                style = MaterialTheme.typography.bodySmall,
-                color = AppColors.secondaryTextColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.testTag("friendBio#${friend.uid}"))
-          }
-          Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
-
-          DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
-        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
+            verticalAlignment = Alignment.CenterVertically // Retain original vertical alignment
+            ) {
+              ProfilePicture(profilePictureUrl = friend.profilePic, onClick = {})
+              Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+              Column(
+                  modifier =
+                      Modifier.weight(
+                          1f), // Retain original weight to push DeleteFriendButton to the end
+                  verticalArrangement = Arrangement.Center) { // Friend details
+                    Text(
+                        text = friend.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier =
+                            Modifier.padding(bottom = AppDimensions.smallPadding)
+                                .testTag("friendName#${friend.uid}"))
+                    Text(
+                        text = friend.bio ?: "No bio available",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AppColors.secondaryTextColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("friendBio#${friend.uid}"))
+                    Spacer(modifier = Modifier.height(AppDimensions.smallPadding))
+                    // Display streak or last login message
+                    if (displayedStreak > 0) {
+                      // Display Whatshot icon with streak count
+                      Row(
+                          verticalAlignment = Alignment.CenterVertically,
+                          modifier = Modifier.fillMaxWidth()) {
+                            Icon(
+                                imageVector =
+                                    Icons.Filled.Whatshot, // Using Whatshot as the fire icon
+                                contentDescription = "Active Streak",
+                                tint = Color(0xFFFFA726), // Amber color
+                                modifier = Modifier.size(AppDimensions.iconSizeSmall))
+                            Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+                            Text(
+                                text =
+                                    "$displayedStreak day${if (displayedStreak > 1) "s" else ""} streak",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color(0xFFFFA726), // Amber color
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier =
+                                    Modifier.testTag("friendStreak#${friend.uid}")
+                                        .weight(1f) // Allow the text to take available space
+                                )
+                          }
+                    } else {
+                      // Display last login message
+                      Text(
+                          text =
+                              "Last login ${daysSinceLastLogin} day${if (daysSinceLastLogin > 1) "s" else ""} ago",
+                          style = MaterialTheme.typography.bodyLarge,
+                          color = Color.Gray,
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis,
+                          modifier = Modifier.testTag("friendLastLogin#${friend.uid}"))
+                    }
+                  }
+              // Retain the Spacer with weight to keep DeleteFriendButton aligned to the end
+              // If this Spacer is causing layout issues, consider adjusting its weight or replacing
+              // it with fixed width
+              // Spacer(modifier = Modifier.weight(1f))
+              DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
+            }
       }
 }
 
@@ -258,4 +330,46 @@ fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileVie
             contentDescription = "Delete",
             tint = Color.Red)
       }
+}
+
+/**
+ * Computes the current streak of a friend based on their last login date and current streak.
+ *
+ * @param lastLoginDateString The last login date as a string in "yyyy-MM-dd" format. Can be null.
+ * @param currentStreak The current streak value.
+ * @return The streak to be displayed: either currentStreak or 0.
+ */
+fun currentFriendStreak(lastLoginDateString: String?, currentStreak: Long): Long {
+  if (!lastLoginDateString.isNullOrEmpty()) {
+    val lastLoginDate = parseDate(lastLoginDateString) ?: return 0L
+    val currentDate = getCurrentDate()
+    val daysDifference = getDaysDifference(lastLoginDate, currentDate)
+    return when (daysDifference) {
+      0L,
+      1L -> currentStreak // Same day or consecutive day login
+      else -> 0L // Streak broken
+    }
+  }
+  return -1L // No last login date recorded
+}
+
+// Helper functions for date handling
+private fun getCurrentDate(): Date {
+  val calendar = Calendar.getInstance(TimeZone.getDefault())
+  calendar.set(Calendar.HOUR_OF_DAY, 0)
+  calendar.set(Calendar.MINUTE, 0)
+  calendar.set(Calendar.SECOND, 0)
+  calendar.set(Calendar.MILLISECOND, 0)
+  return calendar.time
+}
+
+private fun parseDate(dateString: String): Date {
+  val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+  sdf.timeZone = TimeZone.getDefault()
+  return sdf.parse(dateString) ?: Date()
+}
+
+private fun getDaysDifference(startDate: Date, endDate: Date): Long {
+  val diffInMillis = endDate.time - startDate.time
+  return diffInMillis / (1000 * 60 * 60 * 24)
 }
