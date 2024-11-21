@@ -2,6 +2,7 @@ package com.github.se.orator.ui.offline
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
@@ -27,31 +28,44 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.orator.R
+import com.github.se.orator.model.symblAi.AndroidAudioPlayer
+import com.github.se.orator.model.symblAi.AudioRecorder
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.speaking.MicrophoneButton
+import com.github.se.orator.ui.speaking.handleAudioRecording
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import java.io.File
 
 // TODO: remove this suppress and fix the permissions
 @SuppressLint("MissingPermission")
 @Composable
 fun OfflineRecordingScreen(
+    context: Context,
     navigationActions: NavigationActions,
     question: String,
     viewModel: SpeakingViewModel = viewModel()
 ) {
     val analysisState = viewModel.analysisState.collectAsState()
     val analysisData by viewModel.analysisData.collectAsState()
+    val recorder by lazy {
+        AudioRecorder(context = context)
+    }
 
-  val permissionGranted = remember { mutableStateOf(false) }
+    val player by lazy {
+        AndroidAudioPlayer(context)
+    }
+
+    var audioFile: File? = null
+
+
+    val permissionGranted = remember { mutableStateOf(false) }
   val permissionLauncher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
           isGranted -> permissionGranted.value = isGranted
       }
-
-  val isRecording by viewModel.isRecording.collectAsState()
 
     DisposableEffect(Unit) {
         permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -61,6 +75,7 @@ fun OfflineRecordingScreen(
 
   val colors = MaterialTheme.colorScheme
     val amplitudes = remember { mutableStateListOf<Float>() }
+    handleAudioRecording(analysisState, permissionGranted, amplitudes)
 
   Column(
       modifier =
@@ -93,6 +108,25 @@ fun OfflineRecordingScreen(
                 Modifier.height(
                     AppDimensions.largeSpacerHeight)) // /// or   val buttonHeight = 48.dp
 
+      Button( onClick = {
+          File(context.cacheDir, "audio.mp3").also{
+              recorder.startRecording(it)
+              audioFile = it
+          }
+      }) {
+          Text(text = "Start Recording")
+      }
+
+      Button( onClick = {
+          File(context.cacheDir, "audio.mp3").also{
+              recorder.stopRecording()
+          }
+      }) {
+          Text(text = "Stop Recording")
+      }
+
+
+
         Column(
             modifier =
                 Modifier.fillMaxSize()
@@ -107,6 +141,7 @@ fun OfflineRecordingScreen(
                       Modifier.size(AppDimensions.logoSize)
                           .testTag("MicIconContainer")) { // // should be 203.dp
                   MicrophoneButton(viewModel, analysisState, permissionGranted, LocalContext.current)
+
                   }
 
               Text(

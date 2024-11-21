@@ -21,6 +21,10 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
     audioRecorder.startRecording()
   }
 
+    override fun startRecordingToFile(audioFile: File) {
+        audioRecorder.startRecording(audioFile)
+    }
+
   override fun stopRecording() {
     audioRecorder.stopRecording()
   }

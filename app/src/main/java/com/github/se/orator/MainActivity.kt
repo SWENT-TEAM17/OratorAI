@@ -29,6 +29,8 @@ import androidx.navigation.navArgument
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.symblAi.AndroidAudioPlayer
+import com.github.se.orator.model.symblAi.AudioRecorder
 import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
@@ -60,12 +62,12 @@ import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import java.io.File
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
   private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
-
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -146,14 +148,14 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             OfflinePracticeQuestionsScreen(navigationActions)
           }
           composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
-            RecordingReviewScreen(navigationActions, speakingViewModel)
+            RecordingReviewScreen(LocalContext.current, navigationActions, speakingViewModel)
           }
           composable(
               route = "offline_recording/{question}",
               arguments = listOf(navArgument("question") { type = NavType.StringType })) {
                   backStackEntry ->
                 val question = backStackEntry.arguments?.getString("question") ?: ""
-                OfflineRecordingScreen(navigationActions, question, speakingViewModel)
+                OfflineRecordingScreen(LocalContext.current, navigationActions, question, speakingViewModel)
               }
 
           // Online/auth flow

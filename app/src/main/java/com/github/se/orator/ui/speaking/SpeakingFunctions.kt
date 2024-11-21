@@ -147,11 +147,6 @@ fun handleAudioRecording(analysisState: State<SpeakingRepository.AnalysisState>,
 ) {
     // Audio recording and amplitude collection
     LaunchedEffect(analysisState.value, permissionGranted) {
-        if (!permissionGranted.value) {
-
-
-        }
-
         if (permissionGranted.value && analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
             val sampleRateInHz = 44100
             val channelConfig = AudioFormat.CHANNEL_IN_MONO
