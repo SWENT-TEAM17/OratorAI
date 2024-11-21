@@ -47,8 +47,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.window.Dialog
-import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
@@ -75,116 +73,104 @@ fun AddFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-    var query by remember { mutableStateOf("") } // Holds the search query input
-    var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
-    val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
-    val focusRequester = FocusRequester() // Manages focus for the search field
+  var query by remember { mutableStateOf("") } // Holds the search query input
+  var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
+  val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
+  val focusRequester = FocusRequester() // Manages focus for the search field
 
-    // State variable to keep track of the selected user's profile picture
-    var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
+  // State variable to keep track of the selected user's profile picture
+  var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
 
-    ProjectTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { navigationActions.goBack() },
-                            modifier = Modifier.testTag("addFriendBackButton")
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
-                    },
-                )
-                Divider()
-            },
-            bottomBar = {
-                BottomNavigationMenu(
-                    onTabSelect = { route -> navigationActions.navigateTo(route) },
-                    tabList = LIST_TOP_LEVEL_DESTINATION,
-                    selectedItem = Route.FRIENDS
-                )
-            }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(AppDimensions.paddingMedium)
-            ) {
+  ProjectTheme {
+    Scaffold(
+        topBar = {
+          TopAppBar(
+              title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
+              navigationIcon = {
+                IconButton(
+                    onClick = { navigationActions.goBack() },
+                    modifier = Modifier.testTag("addFriendBackButton")) {
+                      Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+              },
+          )
+          Divider()
+        },
+        bottomBar = {
+          BottomNavigationMenu(
+              onTabSelect = { route -> navigationActions.navigateTo(route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION,
+              selectedItem = Route.FRIENDS)
+        }) { paddingValues ->
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(paddingValues)
+                      .padding(AppDimensions.paddingMedium)) {
                 // Text field with search icon and clear button
                 OutlinedTextField(
                     value = query,
                     onValueChange = { newValue ->
-                        query = newValue
-                        expanded = newValue.isNotEmpty()
+                      query = newValue
+                      expanded = newValue.isNotEmpty()
                     },
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .height(AppDimensions.mediumHeight)
-                        .focusRequester(focusRequester)
-                        .testTag("addFriendSearchField"),
+                    modifier =
+                        Modifier.wrapContentWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .height(AppDimensions.mediumHeight)
+                            .focusRequester(focusRequester)
+                            .testTag("addFriendSearchField"),
                     label = { Text("Username", modifier = Modifier.testTag("searchFieldLabel")) },
                     leadingIcon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Search Icon",
-                            modifier = Modifier.testTag("searchIcon")
-                        )
+                      Icon(
+                          Icons.Default.Search,
+                          contentDescription = "Search Icon",
+                          modifier = Modifier.testTag("searchIcon"))
                     },
                     trailingIcon = {
-                        if (query.isNotEmpty()) {
-                            IconButton(
-                                onClick = { query = "" },
-                                modifier = Modifier.testTag("clearSearchButton")
-                            ) {
-                                Icon(
-                                    Icons.Default.Clear,
-                                    contentDescription = "Clear Icon",
-                                    modifier = Modifier.testTag("clearIcon")
-                                )
+                      if (query.isNotEmpty()) {
+                        IconButton(
+                            onClick = { query = "" },
+                            modifier = Modifier.testTag("clearSearchButton")) {
+                              Icon(
+                                  Icons.Default.Clear,
+                                  contentDescription = "Clear Icon",
+                                  modifier = Modifier.testTag("clearIcon"))
                             }
-                        }
+                      }
                     },
                     singleLine = true,
-                    keyboardActions = KeyboardActions.Default
-                )
+                    keyboardActions = KeyboardActions.Default)
                 // Display search results if there is a query
                 if (query.isNotEmpty()) {
-                    LazyColumn(
-                        contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                        verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
-                        modifier = Modifier.testTag("searchResultsList")
-                    ) {
+                  LazyColumn(
+                      contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                      verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
+                      modifier = Modifier.testTag("searchResultsList")) {
                         // Filter and display profiles matching the query
                         items(
                             allProfiles.filter { profile ->
-                                profile.name.contains(query, ignoreCase = true)
-                            }
-                        ) { user ->
-                            UserItem(
-                                user = user,
-                                userProfileViewModel = userProfileViewModel,
-                                onProfilePictureClick = { selectedUser ->
+                              profile.name.contains(query, ignoreCase = true)
+                            }) { user ->
+                              UserItem(
+                                  user = user,
+                                  userProfileViewModel = userProfileViewModel,
+                                  onProfilePictureClick = { selectedUser ->
                                     selectedProfilePicUser = selectedUser
-                                }
-                            )
-                        }
-                    }
+                                  })
+                            }
+                      }
                 }
-            }
+              }
 
-            // Dialog to show the enlarged profile picture
-            if (selectedProfilePicUser?.profilePic != null) {
-                ProfilePictureDialog(
-                    profilePictureUrl = selectedProfilePicUser?.profilePic ?: "",
-                    onDismiss = { selectedProfilePicUser = null }
-                )
-            }
+          // Dialog to show the enlarged profile picture
+          if (selectedProfilePicUser?.profilePic != null) {
+            ProfilePictureDialog(
+                profilePictureUrl = selectedProfilePicUser?.profilePic ?: "",
+                onDismiss = { selectedProfilePicUser = null })
+          }
         }
-    }
+  }
 }
 
 /**
@@ -202,51 +188,46 @@ fun UserItem(
     userProfileViewModel: UserProfileViewModel,
     onProfilePictureClick: (UserProfile) -> Unit
 ) {
-    val context = LocalContext.current // Get the context for showing Toast
+  val context = LocalContext.current // Get the context for showing Toast
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = AppDimensions.smallPadding)
-            .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
-            .clickable {
+  Surface(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = AppDimensions.smallPadding)
+              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
+              .clickable {
                 // Add friend when the item is clicked
                 userProfileViewModel.addFriend(user)
                 // Show Toast message
-                Toast.makeText(context, "${user.name} has been added as a friend", Toast.LENGTH_SHORT).show()
-            },
-        color = AppColors.LightPurpleGrey,
-        shadowElevation = AppDimensions.elevationSmall
-    ) {
+                Toast.makeText(
+                        context, "${user.name} has been added as a friend", Toast.LENGTH_SHORT)
+                    .show()
+              },
+      color = AppColors.LightPurpleGrey,
+      shadowElevation = AppDimensions.elevationSmall) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(AppDimensions.paddingMedium)
-                .testTag("addFriendUserItem#${user.uid}")
-        ) {
-            // Profile picture click listener to show enlarged picture
-            ProfilePicture(
-                profilePictureUrl = user.profilePic,
-                onClick = { onProfilePictureClick(user) }
-            )
-            Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-            Column {
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(AppDimensions.paddingMedium)
+                    .testTag("addFriendUserItem#${user.uid}")) {
+              // Profile picture click listener to show enlarged picture
+              ProfilePicture(
+                  profilePictureUrl = user.profilePic, onClick = { onProfilePictureClick(user) })
+              Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+              Column {
                 // Display user name
                 Text(
                     text = user.name,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = AppDimensions.smallPadding)
-                )
+                    modifier = Modifier.padding(bottom = AppDimensions.smallPadding))
                 // Display user bio, with ellipsis if it exceeds one line
                 Text(
                     text = user.bio ?: "No bio available",
                     style = MaterialTheme.typography.bodySmall,
                     color = AppColors.secondaryTextColor,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                    overflow = TextOverflow.Ellipsis)
+              }
             }
-        }
-    }
+      }
 }
-

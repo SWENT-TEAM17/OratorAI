@@ -55,166 +55,146 @@ fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-    // State variables for managing friends list and search functionality
-    val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
-    val filteredFriends =
-        friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
+  // State variables for managing friends list and search functionality
+  val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
+  var searchQuery by remember { mutableStateOf("") }
+  val filteredFriends =
+      friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
 
-    // State variables for managing UI components
-    val focusRequester = FocusRequester()
-    val focusManager = LocalFocusManager.current
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+  // State variables for managing UI components
+  val focusRequester = FocusRequester()
+  val focusManager = LocalFocusManager.current
+  val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+  val scope = rememberCoroutineScope()
 
-    // State variable to manage the currently selected friend for enlarged profile picture
-    var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
+  // State variable to manage the currently selected friend for enlarged profile picture
+  var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
 
-    ProjectTheme {
-        ModalNavigationDrawer(
-            modifier = Modifier.testTag("viewFriendsDrawerMenu"),
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(AppDimensions.paddingMedium)
-                    ) {
-                        Text(
-                            "Actions",
-                            modifier = Modifier.testTag("viewFriendsDrawerTitle"),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(AppDimensions.heightMedium))
-                        TextButton(
-                            modifier = Modifier.testTag("viewFriendsAddFriendButton"),
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    navigationActions.navigateTo(Screen.ADD_FRIENDS)
-                                }
-                            }) {
-                            Text("➕ Add a friend")
-                        }
-                        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-                        TextButton(
-                            modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    navigationActions.navigateTo(Screen.LEADERBOARD)
-                                }
-                            }) {
-                            Text("⭐ Leaderboard")
-                        }
+  ProjectTheme {
+    ModalNavigationDrawer(
+        modifier = Modifier.testTag("viewFriendsDrawerMenu"),
+        drawerState = drawerState,
+        drawerContent = {
+          ModalDrawerSheet {
+            Column(modifier = Modifier.fillMaxHeight().padding(AppDimensions.paddingMedium)) {
+              Text(
+                  "Actions",
+                  modifier = Modifier.testTag("viewFriendsDrawerTitle"),
+                  style = MaterialTheme.typography.titleMedium)
+              Spacer(modifier = Modifier.height(AppDimensions.heightMedium))
+              TextButton(
+                  modifier = Modifier.testTag("viewFriendsAddFriendButton"),
+                  onClick = {
+                    scope.launch {
+                      drawerState.close()
+                      navigationActions.navigateTo(Screen.ADD_FRIENDS)
                     }
-                }
-            }) {
-            Scaffold(
-                topBar = {
-                    Column {
-                        CenterAlignedTopAppBar(
-                            title = {
-                                Text(
-                                    "My Friends",
-                                    modifier = Modifier.testTag("myFriendsTitle")
-                                )
-                            },
-                            navigationIcon = {
-                                IconButton(
-                                    onClick = { scope.launch { drawerState.open() } },
-                                    modifier = Modifier.testTag("viewFriendsMenuButton")
-                                ) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                }
-                            })
-                        Divider() // Adds a separation line below the TopAppBar
+                  }) {
+                    Text("➕ Add a friend")
+                  }
+              Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+              TextButton(
+                  modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
+                  onClick = {
+                    scope.launch {
+                      drawerState.close()
+                      navigationActions.navigateTo(Screen.LEADERBOARD)
                     }
-                },
-                bottomBar = {
-                    BottomNavigationMenu(
-                        onTabSelect = { route ->
-                            scope.launch {
-                                drawerState.close()
-                                navigationActions.navigateTo(route)
+                  }) {
+                    Text("⭐ Leaderboard")
+                  }
+            }
+          }
+        }) {
+          Scaffold(
+              topBar = {
+                Column {
+                  CenterAlignedTopAppBar(
+                      title = { Text("My Friends", modifier = Modifier.testTag("myFriendsTitle")) },
+                      navigationIcon = {
+                        IconButton(
+                            onClick = { scope.launch { drawerState.open() } },
+                            modifier = Modifier.testTag("viewFriendsMenuButton")) {
+                              Icon(Icons.Default.Menu, contentDescription = "Menu")
                             }
-                        },
-                        tabList = LIST_TOP_LEVEL_DESTINATION,
-                        selectedItem = Route.FRIENDS
-                    )
-                }) { innerPadding ->
+                      })
+                  Divider() // Adds a separation line below the TopAppBar
+                }
+              },
+              bottomBar = {
+                BottomNavigationMenu(
+                    onTabSelect = { route ->
+                      scope.launch {
+                        drawerState.close()
+                        navigationActions.navigateTo(route)
+                      }
+                    },
+                    tabList = LIST_TOP_LEVEL_DESTINATION,
+                    selectedItem = Route.FRIENDS)
+              }) { innerPadding ->
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = AppDimensions.paddingMedium)
-                        .clickable { focusManager.clearFocus() }
-                ) {
-                    // Search bar for filtering friends
-                    Box(modifier = Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            label = { Text("Search for a friend.") },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search Icon"
-                                )
-                            },
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .horizontalScroll(rememberScrollState())
-                                .height(AppDimensions.mediumHeight)
-                                .focusRequester(focusRequester)
-                                .testTag("viewFriendsSearch")
-                        )
-                    }
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .padding(innerPadding)
+                            .padding(horizontal = AppDimensions.paddingMedium)
+                            .clickable { focusManager.clearFocus() }) {
+                      // Search bar for filtering friends
+                      Box(
+                          modifier =
+                              Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                label = { Text("Search for a friend.") },
+                                leadingIcon = {
+                                  Icon(
+                                      imageVector = Icons.Default.Search,
+                                      contentDescription = "Search Icon")
+                                },
+                                modifier =
+                                    Modifier.wrapContentWidth()
+                                        .horizontalScroll(rememberScrollState())
+                                        .height(AppDimensions.mediumHeight)
+                                        .focusRequester(focusRequester)
+                                        .testTag("viewFriendsSearch"))
+                          }
 
-                    // Display message if no friends match the search query
-                    if (filteredFriends.isEmpty()) {
+                      // Display message if no friends match the search query
+                      if (filteredFriends.isEmpty()) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .testTag("noUserFound"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "No user found",
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.testTag("noUserFoundText")
-                            )
-                        }
-                    } else {
+                            modifier = Modifier.fillMaxSize().testTag("noUserFound"),
+                            contentAlignment = Alignment.Center) {
+                              Text(
+                                  "No user found",
+                                  style = MaterialTheme.typography.bodyLarge,
+                                  modifier = Modifier.testTag("noUserFoundText"))
+                            }
+                      } else {
                         // Display the list of friends if any match the search query
                         LazyColumn(
                             modifier = Modifier.testTag("viewFriendsList"),
                             contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                             verticalArrangement =
-                            Arrangement.spacedBy(AppDimensions.paddingSmall)
-                        ) {
-                            items(filteredFriends) { friend ->
+                                Arrangement.spacedBy(AppDimensions.paddingSmall)) {
+                              items(filteredFriends) { friend ->
                                 FriendItem(
                                     friend = friend,
                                     userProfileViewModel = userProfileViewModel,
-                                    onProfilePictureClick = { selectedFriend = it }
-                                )
+                                    onProfilePictureClick = { selectedFriend = it })
+                              }
                             }
-                        }
-                    }
+                      }
 
-                    // Dialog to display the enlarged profile picture
-                    if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
+                      // Dialog to display the enlarged profile picture
+                      if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
                         ProfilePictureDialog(
                             profilePictureUrl = selectedFriend!!.profilePic!!,
-                            onDismiss = { selectedFriend = null }
-                        )
+                            onDismiss = { selectedFriend = null })
+                      }
                     }
-                }
-            }
+              }
         }
-    }
+  }
 }
 
 /**
@@ -230,46 +210,39 @@ fun FriendItem(
     userProfileViewModel: UserProfileViewModel,
     onProfilePictureClick: (UserProfile) -> Unit
 ) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = AppDimensions.smallPadding)
-            .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
-            .testTag("viewFriendsItem#${friend.uid}"),
-        color = AppColors.LightPurpleGrey,
-        shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
-    ) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(AppDimensions.paddingMedium)) {
-            ProfilePicture(
-                profilePictureUrl = friend.profilePic,
-                onClick = { onProfilePictureClick(friend) }
-            )
-            Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-            Column {
-                Text(
-                    text = friend.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier =
-                    Modifier
-                        .padding(bottom = AppDimensions.smallPadding)
-                        .testTag("friendName#${friend.uid}")
-                )
-                Text(
-                    text = friend.bio ?: "No bio available",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = AppColors.secondaryTextColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.testTag("friendBio#${friend.uid}")
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
+  Surface(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = AppDimensions.smallPadding)
+              .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
+              .testTag("viewFriendsItem#${friend.uid}"),
+      color = AppColors.LightPurpleGrey,
+      shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
+      ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
+          ProfilePicture(
+              profilePictureUrl = friend.profilePic, onClick = { onProfilePictureClick(friend) })
+          Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+          Column {
+            Text(
+                text = friend.name,
+                style = MaterialTheme.typography.titleMedium,
+                modifier =
+                    Modifier.padding(bottom = AppDimensions.smallPadding)
+                        .testTag("friendName#${friend.uid}"))
+            Text(
+                text = friend.bio ?: "No bio available",
+                style = MaterialTheme.typography.bodySmall,
+                color = AppColors.secondaryTextColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.testTag("friendBio#${friend.uid}"))
+          }
+          Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
 
-            DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
+          DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
         }
-    }
+      }
 }
 
 /**
@@ -282,17 +255,13 @@ fun FriendItem(
  */
 @Composable
 fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
-    val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
-    Image(
-        painter = painter,
-        contentDescription = "Profile Picture",
-        contentScale = ContentScale.Crop,
-        modifier =
-        Modifier
-            .size(AppDimensions.buttonHeight)
-            .clip(CircleShape)
-            .clickable(onClick = onClick)
-    )
+  val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
+  Image(
+      painter = painter,
+      contentDescription = "Profile Picture",
+      contentScale = ContentScale.Crop,
+      modifier =
+          Modifier.size(AppDimensions.buttonHeight).clip(CircleShape).clickable(onClick = onClick))
 }
 
 /**
@@ -303,23 +272,19 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
  */
 @Composable
 fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    IconButton(
-        onClick = {
-            userProfileViewModel.deleteFriend(friend)
-            Toast.makeText(
-                context,
-                "${friend.name} has been removed from your friends.",
-                Toast.LENGTH_SHORT
-            ).show()
-        },
-        modifier = Modifier.testTag("deleteFriendButton#${friend.uid}")
-    ) {
+  IconButton(
+      onClick = {
+        userProfileViewModel.deleteFriend(friend)
+        Toast.makeText(
+                context, "${friend.name} has been removed from your friends.", Toast.LENGTH_SHORT)
+            .show()
+      },
+      modifier = Modifier.testTag("deleteFriendButton#${friend.uid}")) {
         Icon(
             imageVector = Icons.Default.Delete, // Built-in delete icon
             contentDescription = "Delete",
-            tint = Color.Red
-        )
-    }
+            tint = Color.Red)
+      }
 }
