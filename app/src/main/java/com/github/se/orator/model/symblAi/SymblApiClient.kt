@@ -272,11 +272,13 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
 
             Log.d(CLASS_LOG_ID, "Job started. Waiting for completion...")
 
-            while (getJobStatus(jobId, onFailure) == "in_progress") {
+            var status: String?
+            do {
+              status = getJobStatus(jobId, onFailure)
               Thread.sleep(2000)
-            }
+            } while (status == "in_progress")
 
-            if (getJobStatus(jobId, onFailure) == "completed") {
+            if (status == "completed") {
               fetchAnalysis(conversationId, onSuccess, onFailure)
               // pollForFillers(conversationId, accessToken!!)
             } else {
@@ -342,9 +344,14 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
                 onFailure)
           },
           onFailure = {
-            Log.e(CLASS_LOG_ID, "Failed to fetch analysis data online")
+            Log.e(CLASS_LOG_ID, "Failed to fetch analysis data online)")
             onFailure(SpeakingError.HTTP_REQUEST_ERROR)
           })
+
+      if (tempAnalysisData!!.pace ==
+          -1) { // Meaning the processing of analytics data was unsuccessful
+        return
+      }
 
       Log.d(CLASS_LOG_ID, "Successfully parsed speech's analytics data: $tempAnalysisData")
 
@@ -359,6 +366,7 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
    * Function to get the current state of the job.
    *
    * @param jobId The ID of the job to check.
+   * @param onFailure The function to be called on failure.
    * @return The status (String?) of the job : either "completed", "failed", "in_progress" or null
    *   if the call to the api was unsuccessful.
    */
@@ -368,8 +376,12 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
     urlCallRequestBlocking(
         request = buildUrlGetRequest("https://api.symbl.ai/v1/job/$jobId"),
         onSuccess = { response ->
-          val jsonObject = JSONObject(response)
-          status = jsonObject.getString("status")
+          try {
+            val jsonObject = JSONObject(response)
+            status = jsonObject.getString("status")
+          } catch (e: Exception) {
+            status = null
+          }
         },
         onFailure = onFailure)
 
@@ -471,7 +483,7 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
     client.newCall(request).execute().use { response ->
       val responseData = response.body?.string() ?: "No Response"
       Log.d(CLASS_LOG_ID, responseData)
-      if (response.isSuccessful) {
+      if (response.isSuccessful && responseData.isNotEmpty()) {
         onSuccess(responseData)
       } else {
         onFailure(SpeakingError.HTTP_REQUEST_ERROR)
