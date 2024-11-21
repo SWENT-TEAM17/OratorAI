@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.friends
 
+import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -147,16 +148,18 @@ class FriendsUITests {
 
   /**
    * Tests that the search functionality works correctly on the Add Friends screen. After inputting
-   * text, it checks that the first friend item is displayed and the second is not.
+   * text, it checks that the first friend item is not displayed because the user searching should
+   * not be displayed and the second is not because it's not the right name.
    */
   @Test
   fun testAddFriendSearch() {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.ADD_FRIENDS)
     composeTestRule.setContent { AddFriendsScreen(mockNavigationActions, userProfileViewModel) }
 
+    Log.d("AddFriendSearch", userProfileViewModel.allProfiles.value.toString())
     composeTestRule.onNodeWithTag("addFriendSearchField").performTextInput("John")
 
-    composeTestRule.onNodeWithTag("addFriendUserItem#1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addFriendUserItem#1").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("addFriendUserItem#2").assertIsNotDisplayed()
   }
 
