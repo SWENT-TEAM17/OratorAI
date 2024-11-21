@@ -73,10 +73,20 @@ fun AddFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
+  val userProfile by userProfileViewModel.userProfile.collectAsState()
+  val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
   var query by remember { mutableStateOf("") } // Holds the search query input
   var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
   val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
   val focusRequester = FocusRequester() // Manages focus for the search field
+
+  // Exclude the current user's profile and their friends' profiles from the list
+  val filteredProfiles =
+      allProfiles.filter { profile ->
+        profile.uid != userProfile?.uid && // Exclude own profile
+            friendsProfiles.none { friend -> friend.uid == profile.uid } && // Exclude friends
+            profile.name.contains(query, ignoreCase = true) // Match search query
+      }
 
   // State variable to keep track of the selected user's profile picture
   var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
@@ -149,7 +159,7 @@ fun AddFriendsScreen(
                       modifier = Modifier.testTag("searchResultsList")) {
                         // Filter and display profiles matching the query
                         items(
-                            allProfiles.filter { profile ->
+                            filteredProfiles.filter { profile ->
                               profile.name.contains(query, ignoreCase = true)
                             }) { user ->
                               UserItem(
