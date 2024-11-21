@@ -36,7 +36,16 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
 
-  // Init block to fetch user profile automatically after authentication
+  // Queue of the last ten "words per minute" metric
+  private val recentTalkTimeSec_ = MutableStateFlow<ArrayDeque<Double>>(ArrayDeque())
+  val recentWPM: StateFlow<ArrayDeque<Double>> = recentTalkTimeSec_.asStateFlow()
+
+  // Queue of the last ten "talk time" metric
+  private val recentTalkTimePerc_ = MutableStateFlow<ArrayDeque<Double>>(ArrayDeque())
+  val recentTalkTime: StateFlow<ArrayDeque<Double>> = recentTalkTimePerc_.asStateFlow()
+
+
+    // Init block to fetch user profile automatically after authentication
   init {
     val uid = repository.getCurrentUserUid()
     if (uid != null) {
@@ -294,4 +303,60 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       Log.e("UserProfileViewModel", "Failed to remove a friend: current user profile is null.")
     }
   }
+
+    /**
+     * Adds a metric to the queue while ensuring the queue maintains a maximum size of 10 elements.
+     *
+     * This function adds the given metric to the end of the queue. If the queue already contains
+     * 10 elements, the oldest element (at the front of the queue) is removed before adding the new metric.
+     *
+     * @param queue The queue to which the metric will be added.
+     *              The queue is updated in-place to reflect the changes.
+     * @param value The new value to be added to the queue.
+     *
+     * @return The queue with the new value
+     */
+    private fun addLatestMetric(queue: MutableStateFlow<ArrayDeque<Double>>, value: Double): ArrayDeque<Double> {
+        val updatedQueue = queue.value.apply {
+            if (size >= 10) {
+                removeFirst()
+            } // Remove the oldest element if the queue is full
+            addLast(value) // Add the new metric to the end of the queue
+        }
+        return updatedQueue
+    }
+
+    fun addTalkTimeSec(value: Double){
+        val currentUserProfile = userProfile_.value
+        if (currentUserProfile != null) {
+            val updatedQueue = addLatestMetric(recentTalkTimeSec_, value)
+
+            // Create a new profile object with the updated queue
+            val updatedProfile = currentUserProfile.copy(statistics = UserStatistics(recentTalkTimeSec = updatedQueue))
+
+            // Updates the user profile with the new one
+            updateUserProfile(updatedProfile)
+
+            userProfile_.value = updatedProfile
+        } else {
+            Log.e("UserProfileViewModel", "Failed to add new metric value: Current user profile is null.")
+        }
+    }
+
+    fun addTalkTimePerc(value: Double){
+        val currentUserProfile = userProfile_.value
+        if (currentUserProfile != null) {
+            val updatedQueue = addLatestMetric(recentTalkTimePerc_, value)
+
+            // Create a new profile object with the updated queue
+            val updatedProfile = currentUserProfile.copy(statistics = UserStatistics(recentTalkTimePerc = updatedQueue))
+
+            // Updates the user profile with the new one
+            updateUserProfile(updatedProfile)
+
+            userProfile_.value = updatedProfile
+        } else {
+            Log.e("UserProfileViewModel", "Failed to add new metric value: Current user profile is null.")
+        }
+    }
 }
