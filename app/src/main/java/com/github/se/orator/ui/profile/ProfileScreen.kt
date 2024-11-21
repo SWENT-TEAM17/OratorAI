@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -131,7 +130,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                     contentAlignment = Alignment.TopCenter) {
                       // Background "card" behind the profile picture
                       Card(
-                          modifier = Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
+                          modifier =
+                              Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
                           elevation = AppDimensions.elevationSmall) {}
 
                       // Profile Picture with overlapping positioning
@@ -183,7 +183,11 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                       verticalAlignment = Alignment.CenterVertically,
                                       modifier =
                                           Modifier.align(Alignment.CenterEnd)
-                                              .offset(x = -AppDimensions.paddingLarge) // Push a little to the left
+                                              .offset(
+                                                  x =
+                                                      -AppDimensions
+                                                          .paddingLarge) // Push a little to the
+                                                                         // left
                                               .testTag("current_streak")) {
                                         Icon(
                                             imageVector = Icons.Filled.Whatshot, // Fire icon
