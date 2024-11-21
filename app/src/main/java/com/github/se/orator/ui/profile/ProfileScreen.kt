@@ -1,6 +1,7 @@
 package com.github.se.orator.ui.profile
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,9 +65,13 @@ import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
+  // Get the context
+  val context = LocalContext.current
+
   // State to control whether the profile picture dialog is open
   var isDialogOpen by remember { mutableStateOf(false) }
 
@@ -100,7 +106,12 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             navigationIcon = {
               IconButton(
                   onClick = {
-                    // TODO: Implement sign-out functionality
+                    // Sign out the user
+                    FirebaseAuth.getInstance().signOut()
+                    // Display a toast message
+                    Toast.makeText(context, "Logout successful!", Toast.LENGTH_SHORT).show()
+                    // Navigate to the sign in screen
+                    navigationActions.navigateTo(Screen.AUTH)
                   },
                   modifier = Modifier.testTag("sign_out_button")) {
                     Icon(
@@ -150,6 +161,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                   .size(AppDimensions.spacingXLarge)
                                   .align(Alignment.TopEnd)
                                   .offset(y = (-20).dp),
+                          // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
                           shape = AppShapes.circleShape,
                           colors =
                               ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
@@ -161,7 +173,6 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                 tint = AppColors.surfaceColor)
                           }
 
-                      // Updated Username and Streak Section
                       Column(
                           horizontalAlignment = Alignment.CenterHorizontally,
                           modifier = Modifier.align(Alignment.TopCenter)) {
@@ -220,7 +231,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Log.d("scn", "bio is: ${profile.bio}")
 
-                // Stats section
+                // stats section
                 CardSection(
                     title = "My stats",
                     imageVector = Icons.Outlined.QueryStats,

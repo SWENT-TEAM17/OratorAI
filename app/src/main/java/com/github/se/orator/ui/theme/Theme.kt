@@ -112,6 +112,7 @@ object AppDimensions {
   val roundedCornerRadius = 12.dp
   val spacerWidthMedium = 16.dp
   val spacerHeightLarge = 24.dp
+  val spacerHeightMedium = 8.dp
   val iconSize = 100.dp
   val drawerPadding = 16.dp
   val cardHorizontalPadding = 30.dp
@@ -152,6 +153,14 @@ object AppDimensions {
   val mediumTitleFontSize = 30.dp
   val profileBoxHeight = 200.dp
   val profileCardHeight = 140.dp
+
+  /// Offline Mode layout definition
+  val buttonWidthMin = 200.dp // Minimum width for buttons
+  val buttonWidthMax = 300.dp // Maximum width for buttons
+  val buttonHeightRounded = 50.dp // Height for rounded buttons
+  val shadowElevation = 5.dp // Elevation/shadow for buttons
+  // Specific Spacing Needs
+  val spacerHeightDefault = 32.dp // Spacer height for default spacing in between elements
 }
 
 object AppShapes {

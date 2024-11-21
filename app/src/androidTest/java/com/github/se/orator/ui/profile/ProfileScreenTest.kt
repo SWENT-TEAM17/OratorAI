@@ -96,6 +96,9 @@ class ProfileScreenTest {
 
     // Perform click on sign-out button
     composeTestRule.onNodeWithContentDescription("Sign out").performClick()
+
+    // Verify navigation to sign in screen
+    Mockito.verify(navigationActions).navigateTo(Screen.AUTH)
   }
 
   @Test

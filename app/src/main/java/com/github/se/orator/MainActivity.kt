@@ -53,6 +53,7 @@ import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
 import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
+import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
@@ -73,6 +74,7 @@ class MainActivity : ComponentActivity() {
     auth = FirebaseAuth.getInstance()
     auth.currentUser?.let { auth.signOut() }
 
+    // Retrieve API key and Organization ID from manifest metadata
     val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
     val apiKey = appInfo.metaData.getString("GPT_API_KEY")
     val organizationId = appInfo.metaData.getString("GPT_ORGANIZATION_ID")
@@ -80,6 +82,7 @@ class MainActivity : ComponentActivity() {
     requireNotNull(apiKey) { "GPT API Key is missing in the manifest" }
     requireNotNull(organizationId) { "GPT Organization ID is missing in the manifest" }
 
+    // Create ChatGPT service instance
     val chatGPTService = createChatGPTService(apiKey, organizationId)
 
     // Initialize NetworkChangeReceiver and register it
@@ -100,6 +103,7 @@ class MainActivity : ComponentActivity() {
         Scaffold(
             modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold") // Tag for testing
             ) {
+              // Observe offline mode state
               val isOffline by offlineViewModel.isOffline.observeAsState(false)
               OratorApp(chatGPTService, isOffline)
             }
@@ -109,6 +113,7 @@ class MainActivity : ComponentActivity() {
 
   override fun onDestroy() {
     super.onDestroy()
+    // Unregister NetworkChangeReceiver to prevent leaks
     unregisterReceiver(networkConnectivityObserver) // Unregister receiver to prevent leaks
   }
 }
@@ -116,22 +121,26 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
+  // Create NavController for navigation within the app
   val navController = rememberNavController()
+  // Initialize NavigationActions to handle navigation events
   val navigationActions = NavigationActions(navController)
 
-  // Initialize required ViewModels
+  // Initialize required ViewModels using ViewModel.compose APIs
   val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
   val apiLinkViewModel = ApiLinkViewModel()
   val speakingViewModel =
       SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
+  // Scaffold composable to provide basic layout structure for the app
   Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
+    // NavHost composable manages navigation between screens
     NavHost(
         navController = navController,
         startDestination = Route.AUTH,
         modifier = Modifier.testTag("navHost")) {
-          // Offline flow
+          // Offline flow screens
           composable(Screen.OFFLINE) { OfflineScreen(navigationActions) }
           composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
             OfflinePracticeQuestionsScreen(navigationActions)
@@ -186,6 +195,9 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           // Profile flow
           navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
             composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
+            composable(Screen.EDIT_PROFILE) {
+              EditProfileScreen(navigationActions, userProfileViewModel)
+            }
             composable(Screen.LEADERBOARD) {
               LeaderboardScreen(navigationActions, userProfileViewModel)
             }
