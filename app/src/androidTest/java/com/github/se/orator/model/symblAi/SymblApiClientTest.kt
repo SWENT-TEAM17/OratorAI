@@ -8,21 +8,33 @@ import com.github.se.orator.model.speaking.AnalysisData
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import okhttp3.Call
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
 
 @RunWith(AndroidJUnit4::class)
 class SymblApiClientTest {
 
   private lateinit var context: Context
   private lateinit var symblApiClient: SymblApiClient
+  private lateinit var okHttpClient: OkHttpClient
 
   @Before
   fun setUp() {
     // Obtain the application context
     context = ApplicationProvider.getApplicationContext()
+    okHttpClient = mock(OkHttpClient::class.java)
 
     // Initialize SymblApiClient with the context
     symblApiClient = SymblApiClient(context)
@@ -136,5 +148,75 @@ class SymblApiClientTest {
       Assert.assertTrue("Talk time (seconds) should have been received", it.talkTimeSeconds != -1.0)
       Assert.assertTrue("Pace should have been received", it.pace != -1)
     }
+  }
+
+  @Test
+  fun messageParsingFailureCallsOnError() {
+    symblApiClient = SymblApiClient(context, okHttpClient)
+
+    val call = mock(Call::class.java)
+    val file = mock(File::class.java)
+
+    `when`(call.execute())
+        .thenReturn(
+            Response.Builder()
+                .request(Request.Builder().url("http://localhost").build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("OK")
+                .body(ResponseBody.create("application/json".toMediaType(), "Invalid JSON"))
+                .build())
+
+    `when`(okHttpClient.newCall(any())).thenReturn(call)
+
+    symblApiClient.getTranscription(
+        file,
+        { Assert.fail("Should not have succeeded") },
+        { Assert.assertTrue(it == SpeakingError.JSON_PARSING_ERROR) })
+  }
+
+  @Test
+  fun requestFailsCausesOnFailureCall() {
+    symblApiClient = SymblApiClient(context, okHttpClient)
+
+    val file = mock(File::class.java)
+    val callAccessToken = mock(Call::class.java)
+    val callTranscription = mock(Call::class.java)
+
+    `when`(callAccessToken.execute())
+        .thenReturn(
+            Response.Builder()
+                .request(Request.Builder().url("http://localhost").build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("OK")
+                .body(
+                    ResponseBody.create(
+                        "application/json".toMediaType(), "{\"accessToken\":\"test\"}"))
+                .build())
+
+    `when`(callTranscription.execute())
+        .thenReturn(
+            Response.Builder()
+                .request(Request.Builder().url("http://localhost").build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(500)
+                .message("Internal Server Error")
+                .body(ResponseBody.create("application/json".toMediaType(), ""))
+                .build())
+
+    `when`(okHttpClient.newCall(any())).then {
+      val request = it.arguments[0] as Request
+      if (request.url.toString().contains("oauth2/token")) {
+        callAccessToken
+      } else {
+        callTranscription
+      }
+    }
+
+    symblApiClient.getTranscription(
+        file,
+        { Assert.fail("Should not have succeeded") },
+        { Assert.assertTrue(it == SpeakingError.HTTP_REQUEST_ERROR) })
   }
 }

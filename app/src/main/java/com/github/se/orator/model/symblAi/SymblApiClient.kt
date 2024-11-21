@@ -21,7 +21,8 @@ import org.json.JSONObject
 
 private const val CLASS_LOG_ID = "SymblApiClient"
 
-class SymblApiClient(context: Context) : VoiceAnalysisApi {
+class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttpClient()) :
+    VoiceAnalysisApi {
 
   // Variables to hold Symbl.ai credentials
   private var symblAppId: String
@@ -53,8 +54,6 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onFailure(SpeakingError.CREDENTIALS_ERROR)
       return
     }
-
-    val client = OkHttpClient()
 
     val url = "https://api.symbl.ai/oauth2/token:generate"
 
@@ -435,8 +434,6 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onSuccess: (String) -> Unit,
       onFailure: (SpeakingError) -> Unit
   ) {
-    val client = OkHttpClient()
-
     client
         .newCall(request)
         .enqueue(
@@ -471,8 +468,6 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onSuccess: (String) -> Unit,
       onFailure: (SpeakingError) -> Unit
   ) {
-    val client = OkHttpClient()
-
     client.newCall(request).execute().use { response ->
       val responseData = response.body?.string() ?: "No Response"
       Log.d(CLASS_LOG_ID, responseData)
