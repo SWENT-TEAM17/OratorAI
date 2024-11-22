@@ -62,8 +62,6 @@ fun RecordingReviewScreen(
             Text(text = "Stop recording")
         }
 
-
-
         Row(
             modifier = Modifier.fillMaxWidth().testTag("Back"),
             verticalAlignment = Alignment.CenterVertically) {
@@ -76,10 +74,5 @@ fun RecordingReviewScreen(
                           .testTag("BackButton"),
                   tint = MaterialTheme.colorScheme.primary)
             }
-
-        Text(
-            text = "Soon you will be able to : Play Recording, Comment on it and Save it locally",
-            fontSize = AppFontSizes.bodyLarge,
-            modifier = Modifier.padding(AppDimensions.paddingMedium).testTag("InstructionText"))
       }
 }

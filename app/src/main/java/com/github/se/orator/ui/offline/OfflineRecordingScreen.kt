@@ -30,6 +30,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.orator.R
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
 import com.github.se.orator.model.symblAi.AudioRecorder
+import com.github.se.orator.model.symblAi.SpeakingError
+import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
@@ -37,10 +39,11 @@ import com.github.se.orator.ui.speaking.MicrophoneButton
 import com.github.se.orator.ui.speaking.handleAudioRecording
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 
 // TODO: remove this suppress and fix the permissions
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
 @Composable
 fun OfflineRecordingScreen(
     context: Context,
@@ -48,7 +51,8 @@ fun OfflineRecordingScreen(
     question: String,
     viewModel: SpeakingViewModel = viewModel()
 ) {
-    val analysisState = viewModel.analysisState.collectAsState()
+    val analysisState = remember { MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)} //viewModel.analysisState.collectAsState()
+    val collState = analysisState.collectAsState()
     val analysisData by viewModel.analysisData.collectAsState()
     val recorder by lazy {
         AudioRecorder(context = context)
@@ -75,7 +79,7 @@ fun OfflineRecordingScreen(
 
   val colors = MaterialTheme.colorScheme
     val amplitudes = remember { mutableStateListOf<Float>() }
-    handleAudioRecording(analysisState, permissionGranted, amplitudes)
+    handleAudioRecording(collState, permissionGranted, amplitudes)
 
   Column(
       modifier =
@@ -140,11 +144,45 @@ fun OfflineRecordingScreen(
                   modifier =
                       Modifier.size(AppDimensions.logoSize)
                           .testTag("MicIconContainer")) { // // should be 203.dp
-                  MicrophoneButton(viewModel, analysisState, permissionGranted, LocalContext.current)
-
+                  MicrophoneButton(
+                      viewModel,
+                      collState,
+                      permissionGranted,
+                      LocalContext.current,
+                      funRec = {
+                          if (analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
+                              File(context.cacheDir, "audio.mp3").also {
+                                  recorder.startRecording(it)
+                                  audioFile = it
+                              }
+                              analysisState.value = SpeakingRepository.AnalysisState.RECORDING
+                          }
+                          else if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
+                              File(context.cacheDir, "audio.mp3").also{
+                                  recorder.stopRecording()
+                              }
+                              analysisState.value = SpeakingRepository.AnalysisState.FINISHED
+                          }
+                      }
+                  )
                   }
 
-              Text(
+            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+            // Display feedback messages
+            val feedbackMessage =
+                when (analysisState.value) {
+                    SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
+                    SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
+                    else ->
+                        when (viewModel.analysisError.value) {
+                            SpeakingError.NO_ERROR -> "Analysis finished."
+                            else -> "mhmm"
+                        }
+                }
+            Text(feedbackMessage, modifier = Modifier.testTag("mic_text"),
+                fontSize = AppFontSizes.bodyLarge,
+                color = colors.onSurface)
+            Text(
                   text = question,
                   fontSize = AppFontSizes.bodyLarge,
                   color = colors.onSurface,

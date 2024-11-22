@@ -88,7 +88,8 @@ fun MicrophoneButton(
     viewModel: SpeakingViewModel,
     analysisState: State<SpeakingRepository.AnalysisState>,
     permissionGranted: MutableState<Boolean>,
-    context: Context) {
+    context: Context,
+    funRec: () -> Unit = {}) {
     val infiniteTransition = rememberInfiniteTransition(label = "")
     val requestPerms = remember { mutableStateOf(false) }
     val scale by
@@ -108,6 +109,7 @@ fun MicrophoneButton(
                 Toast.makeText(context, "You need to allow permissions!", Toast.LENGTH_SHORT).show()
 
             }
+            funRec()
             viewModel.onMicButtonClicked(permissionGranted.value)
                   },
         modifier =

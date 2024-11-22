@@ -86,7 +86,11 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
       horizontalAlignment = Alignment.CenterHorizontally) {
 
         // Microphone button with animation
-      MicrophoneButton(viewModel, analysisState, permissionGranted, LocalContext.current)
+      MicrophoneButton(
+          viewModel,
+          analysisState,
+          permissionGranted,
+          LocalContext.current)
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 

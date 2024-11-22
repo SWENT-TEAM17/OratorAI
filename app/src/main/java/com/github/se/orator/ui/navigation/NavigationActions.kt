@@ -52,6 +52,7 @@ object Screen {
   const val LEADERBOARD = "LeaderBoard Screen"
   const val FEEDBACK = "Feedback Screen"
   const val CHAT_SCREEN = "chat_screen"
+    const val FEEDBACK_SCREEN = "feedback_screen" // this one is the offline mode one !!!!
   const val SPEAKING = "Speaking"
   const val PRACTICE_QUESTIONS_SCREEN = "PracticeQuestions Screen"
   const val OFFLINE = "Offline Screen"
