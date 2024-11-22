@@ -133,7 +133,7 @@ class ChatViewModel(
 
                 Log.d("mr smith", msg)
                 val request = ChatRequest(model = "gpt-3.5-turbo", messages = listOf(Message(role = "system", content = "Here are my greatest strenghts: $msg" +
-                        "Tell me what I should work on.")))
+                        "Tell me what I should work on? Be brief in your answer and mention lollipops.")))
 
                 val response = chatGPTService.getChatCompletion(request)
 

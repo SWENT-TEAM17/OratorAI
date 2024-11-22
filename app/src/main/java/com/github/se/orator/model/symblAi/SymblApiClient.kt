@@ -96,6 +96,7 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onFailure: (SpeakingError) -> Unit
   ) {
     try {
+        Log.d("final", "final")
       val messagesArray = sentimentJson.getJSONArray("messages")
       if (messagesArray.length() > 0) {
         val textBuilder = StringBuilder()
@@ -237,6 +238,7 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
             }
 
             if (getJobStatus(jobId, onFailure) == "completed") {
+                Log.d("this is it buddy", "What have you been waiting for")
               fetchAnalysis(conversationId, onSuccess, onFailure)
               // pollForFillers(conversationId, accessToken!!)
             } else {

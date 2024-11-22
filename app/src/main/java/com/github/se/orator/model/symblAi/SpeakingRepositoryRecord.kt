@@ -1,6 +1,7 @@
 package com.github.se.orator.model.symblAi
 
 import android.content.Context
+import android.util.Log
 import com.github.se.orator.model.speaking.AnalysisData
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,4 +61,11 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
   override fun resetRecorder() {
     _analysisState.value = SpeakingRepository.AnalysisState.IDLE
   }
+
+    override fun getTranscript(audioFile: File, onSuccess: (AnalysisData) -> Unit, onFailure: (SpeakingError) -> Unit) {
+        Log.d("smiling", "again")
+
+        symblApiClient.getTranscription(audioFile, onSuccess, onFailure)
+    }
+
 }

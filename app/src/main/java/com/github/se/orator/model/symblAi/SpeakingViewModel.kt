@@ -7,11 +7,16 @@ import com.github.se.orator.model.speaking.AnalysisData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.io.File
 
 class SpeakingViewModel(
     private val repository: SpeakingRepository,
     private val apiLinkViewModel: ApiLinkViewModel
 ) : ViewModel() {
+  /** The analysis data collected. It is not final as the user can still re-record another audio. */
+  private val _offlineAnalysisData = MutableStateFlow<AnalysisData?>(null)
+  val offlineAnalysisData: StateFlow<AnalysisData?> = _offlineAnalysisData.asStateFlow()
+
 
   /** The analysis data collected. It is not final as the user can still re-record another audio. */
   private val _analysisData = MutableStateFlow<AnalysisData?>(null)
@@ -42,6 +47,15 @@ class SpeakingViewModel(
     _analysisData.value = null
   }
 
+  fun getTranscript(audioFile: File) {
+    repository.getTranscript(
+      audioFile,
+      onSuccess = {ad -> _offlineAnalysisData.value = ad},
+      onFailure = { error -> _analysisError.value = error }
+    )
+    Log.d("cute", "smile")
+  }
+
   // Function to handle microphone button click
   fun onMicButtonClicked(permissionGranted: Boolean) {
     if (permissionGranted) {
@@ -51,7 +65,8 @@ class SpeakingViewModel(
       } else {
         repository.setupAnalysisResultsUsage(
             onSuccess = { ad -> _analysisData.value = ad },
-            onFailure = { error -> _analysisError.value = error })
+            onFailure = { error -> _analysisError.value = error }
+        )
         repository.startRecording()
         _isRecording.value = true
       }
