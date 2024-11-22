@@ -131,8 +131,9 @@ class ChatViewModel(
             try {
                 _isLoading.value = true
 
-                val request = ChatRequest(model = "gpt-3.5-turbo", messages = listOf(Message(role = "system", content = "You are an interviewer talking to a potential hire who is currently talking about what his strengths are. He has said the following things: $msg" +
-                        "Give him constructive criticism based on what he has said")))
+                Log.d("mr smith", msg)
+                val request = ChatRequest(model = "gpt-3.5-turbo", messages = listOf(Message(role = "system", content = "Here are my greatest strenghts: $msg" +
+                        "Tell me what I should work on.")))
 
                 val response = chatGPTService.getChatCompletion(request)
 

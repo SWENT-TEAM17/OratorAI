@@ -55,6 +55,7 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
 import com.github.se.orator.model.symblAi.AudioRecorder
+import com.github.se.orator.model.symblAi.SymblApiClient
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
@@ -75,9 +76,7 @@ fun PreviousRecordingsFeedbackScreen(
     //chatViewModel: ChatGPTService,
     viewModel: ChatViewModel
 ) {
-    val response by viewModel.response.collectAsState("")
-    viewModel.offlineRequest("i hate working so much")
-
+    val symblApiClient = SymblApiClient(context)
     val recorder by lazy {
         AudioRecorder(context = context)
     }
@@ -88,6 +87,19 @@ fun PreviousRecordingsFeedbackScreen(
 
     val audioFile: File = File(context.cacheDir, "audio.mp3")
 
+    val whatUserSaid = MutableStateFlow("")
+    val what_has_been_said = whatUserSaid.collectAsState()
+    symblApiClient.getTranscription(audioFile, {analysisData -> whatUserSaid.value = analysisData.transcription
+                                               Log.d("this is inside getTranscription in feedback", whatUserSaid.value)}, {})
+
+    val response by viewModel.response.collectAsState("")
+    LaunchedEffect(whatUserSaid) {
+        if (whatUserSaid.value.isNotBlank()) {
+            viewModel.offlineRequest(whatUserSaid.value)
+            Log.d("d", "Hello! This is has been said: ${whatUserSaid.value}")
+        }
+
+    }
 
     //val chatMessages by chatViewModel.chatMessages.collectAsState()
 
@@ -127,7 +139,8 @@ fun PreviousRecordingsFeedbackScreen(
                     .testTag("BackButton"),
                 tint = MaterialTheme.colorScheme.primary)
 
-            Text(text = response, color = Color.White)
+            //Text(text = "What you said: ${what_has_been_said.value}")
+            Text(text = "Interviewer's response: $response", color = Color.White)
 
         }
     }
