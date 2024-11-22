@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.overview
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,7 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.profile.SessionType
+import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.speaking.PublicSpeakingContext
+import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.network.Message
@@ -22,18 +29,51 @@ import com.github.se.orator.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationActions) {
+fun FeedbackScreen(
+    chatViewModel: ChatViewModel,
+    userProfileViewModel: UserProfileViewModel,
+    apiLinkViewModel: ApiLinkViewModel,
+    navigationActions: NavigationActions
+) {
     // State variables for feedback message, decision, loading status, and error message.
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
-    var decision by remember { mutableStateOf<String?>(null) }
+    var decisionResult by remember { mutableStateOf<ChatViewModel.DecisionResult?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
+    val userProfile by userProfileViewModel.userProfile.collectAsState()
+
+    val sessionType = when (practiceContext) {
+        is InterviewContext -> SessionType.INTERVIEW
+        is PublicSpeakingContext -> SessionType.SPEECH
+        is SalesPitchContext -> SessionType.NEGOTIATION
+        else -> null
+    }
+
+    // Retrieve the number of successful sessions
+    val successfulSessionsCount = when (sessionType) {
+        SessionType.SPEECH -> userProfile?.statistics?.successfulSpeeches ?: 0
+        SessionType.INTERVIEW -> userProfile?.statistics?.successfulInterviews ?: 0
+        SessionType.NEGOTIATION -> userProfile?.statistics?.successfulNegotiations ?: 0
+        else -> 0
+    }
 
     LaunchedEffect(Unit) {
         try {
             feedbackMessage = chatViewModel.generateFeedback()
             feedbackMessage?.let {
-                decision = parseDecisionFromFeedback(it)
+                decisionResult = parseDecisionFromFeedback(it)
+
+                // Update user statistics based on the decision and session type
+                if (decisionResult != null && sessionType != null) {
+                    userProfileViewModel.updateSessionResult(
+                        isSuccess = decisionResult!!.isSuccess,
+                        sessionType = sessionType
+                    )
+                } else {
+                    Log.e("FeedbackScreen", "Session type or decision result is null.")
+                }
             }
         } catch (e: Exception) {
             errorMessage = e.localizedMessage
@@ -41,6 +81,7 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
             isLoading = false
         }
     }
+
 
     DisposableEffect(Unit) {
         onDispose {
@@ -129,7 +170,7 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
                                     .testTag("feedbackMessage")
                             ) {
                                 // Display the decision prominently.
-                                decision?.let { decisionText ->
+                                decisionResult?.message?.let { decisionText ->
                                     Text(
                                         text = decisionText,
                                         style = AppTypography.largeTitleStyle,
@@ -139,6 +180,22 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
                                             .testTag("decisionText")
                                     )
                                 }
+
+                                Text(
+                                    text = "You have successfully completed $successfulSessionsCount ${
+                                        when (sessionType) {
+                                            SessionType.SPEECH -> "speeches"
+                                            SessionType.INTERVIEW -> "interviews"
+                                            SessionType.NEGOTIATION -> "negotiations"
+                                            else -> "sessions"
+                                        }
+                                    } so far!",
+                                    style = AppTypography.bodyLargeStyle,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterHorizontally)
+                                        .padding(AppDimensions.paddingMedium)
+                                        .testTag("successfulSessionsText")
+                                )
                                 // Display the detailed feedback message.
                                 ChatMessageItem(
                                     message = Message(
@@ -189,15 +246,22 @@ fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationAc
 }
 
 // Function to parse the decision from the feedback message
-private fun parseDecisionFromFeedback(feedback: String): String? {
+private fun parseDecisionFromFeedback(feedback: String): ChatViewModel.DecisionResult? {
     val feedbackLower = feedback.lowercase()
     return when {
-        "would recommend hiring" in feedbackLower || "would hire" in feedbackLower -> "Congratulations! You would be hired."
-        "would not recommend hiring" in feedbackLower || "would not hire" in feedbackLower -> "Unfortunately, you would not be hired."
-        "would win the competition" in feedbackLower -> "Great job! You would win the competition."
-        "would not win the competition" in feedbackLower -> "You might need to improve to win the competition."
-        "successfully convinced" in feedbackLower -> "Success! You have convinced the client."
-        "did not convince" in feedbackLower -> "You did not convince the client this time."
+        "would recommend hiring" in feedbackLower || "would hire" in feedbackLower ->
+            ChatViewModel.DecisionResult("Congratulations! You would be hired.", true)
+        "would not recommend hiring" in feedbackLower || "would not hire" in feedbackLower ->
+            ChatViewModel.DecisionResult("Unfortunately, you would not be hired.", false)
+        "would win the competition" in feedbackLower ->
+            ChatViewModel.DecisionResult("Great job! You would win the competition.", true)
+        "would not win the competition" in feedbackLower ->
+            ChatViewModel.DecisionResult("You might need to improve to win the competition.", false)
+        "successfully convinced" in feedbackLower ->
+            ChatViewModel.DecisionResult("Success! You have convinced the client.", true)
+        "did not convince" in feedbackLower ->
+            ChatViewModel.DecisionResult("You did not convince the client this time.", false)
         else -> null
     }
 }
+

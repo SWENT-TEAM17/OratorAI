@@ -174,7 +174,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
               ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
             }
             composable(Screen.FEEDBACK) {
-              FeedbackScreen(chatViewModel = chatViewModel, navigationActions = navigationActions)
+              FeedbackScreen(chatViewModel = chatViewModel, userProfileViewModel = userProfileViewModel, apiLinkViewModel = apiLinkViewModel, navigationActions = navigationActions)
             }
           }
 

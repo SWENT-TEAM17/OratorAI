@@ -14,8 +14,21 @@ data class UserProfile(
     val bio: String? = null
 )
 
+enum class SessionType {
+    SPEECH,
+    INTERVIEW,
+    NEGOTIATION
+}
+
+
 data class UserStatistics(
     val speechesGiven: Int = 0,
+    val successfulSessions: Int = 0,
+    val successfulSpeeches: Int = 0,
+    val interviewsGiven: Int = 0,
+    val successfulInterviews: Int = 0,
+    val negotiationsGiven: Int = 0,
+    val successfulNegotiations: Int = 0,
     val improvement: Float = 0.0f,
     val previousRuns: List<SpeechStats> = emptyList()
 )

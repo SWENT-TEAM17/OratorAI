@@ -219,7 +219,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       val statistics =
           statisticsMap?.let {
             UserStatistics(
-                speechesGiven = it["speechesGiven"] as? Int ?: 0,
+                speechesGiven = (it["speechesGiven"] as? Long)?.toInt() ?: 0,
+                successfulSessions = (it["successfulSessions"] as? Long)?.toInt() ?: 0,
+                successfulSpeeches = (it["successfulSpeeches"] as? Long)?.toInt() ?: 0,
+                interviewsGiven = (it["interviewsGiven"] as? Long)?.toInt() ?: 0,
+                successfulInterviews = (it["successfulInterviews"] as? Long)?.toInt() ?: 0,
+                negotiationsGiven = (it["negotiationsGiven"] as? Long)?.toInt() ?: 0,
+                successfulNegotiations = (it["successfulNegotiations"] as? Long)?.toInt() ?: 0,
                 improvement = it["improvement"] as? Float ?: 0.0f,
                 previousRuns =
                     (it["previousRuns"] as? List<Map<String, Any>>)?.map { run ->

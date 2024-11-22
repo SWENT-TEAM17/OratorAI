@@ -38,6 +38,11 @@ class ChatViewModel(
 
     private val practiceContext = apiLinkViewModel.practiceContext
 
+    data class DecisionResult(
+        val message: String,
+        val isSuccess: Boolean
+    )
+
     init {
         observeAnalysisData()
     }
