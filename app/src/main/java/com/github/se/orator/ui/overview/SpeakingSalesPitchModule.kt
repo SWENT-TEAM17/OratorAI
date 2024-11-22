@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
@@ -21,6 +22,7 @@ import com.github.se.orator.ui.navigation.Screen
 @Composable
 fun SpeakingSalesPitchModule(
     navigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
     apiLinkViewModel: ApiLinkViewModel
 ) {
   var productType by remember { mutableStateOf("") }
@@ -82,7 +84,9 @@ fun SpeakingSalesPitchModule(
 
         apiLinkViewModel.updatePracticeContext(salesPitchContext)
 
-        // Navigate to ChatScreen, passing the context and feedbackLanguage
+          chatViewModel.initializeConversation()
+
+          // Navigate to ChatScreen, passing the context and feedbackLanguage
         navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }

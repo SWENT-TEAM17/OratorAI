@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
@@ -19,6 +20,7 @@ import com.github.se.orator.ui.navigation.Screen
 @Composable
 fun SpeakingPublicSpeakingModule(
     navigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
     apiLinkViewModel: ApiLinkViewModel
 ) {
   var occasion by remember { mutableStateOf("") }
@@ -79,7 +81,9 @@ fun SpeakingPublicSpeakingModule(
 
         apiLinkViewModel.updatePracticeContext(publicSpeakingContext)
 
-        // Navigate to ChatScreen, passing the context and feedbackLanguage
+          chatViewModel.initializeConversation()
+
+          // Navigate to ChatScreen, passing the context and feedbackLanguage
         navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }

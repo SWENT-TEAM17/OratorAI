@@ -53,10 +53,10 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
 
   // Initialize and dispose of the conversation when the composable enters or leaves the
   // composition.
-  DisposableEffect(Unit) {
-    chatViewModel.initializeConversation()
-    onDispose { chatViewModel.endConversation() }
-  }
+//  DisposableEffect(Unit) {
+//    chatViewModel.initializeConversation()
+//    onDispose { chatViewModel.endConversation() }
+//  }
 
   // Scaffold provides the basic visual layout structure.
   Scaffold(
@@ -72,7 +72,10 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
             },
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = {
+                      navigationActions.goBack()
+                      chatViewModel.resetPracticeContext()
+                            },
                   modifier = Modifier.testTag("back_button")) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,

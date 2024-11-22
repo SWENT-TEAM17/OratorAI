@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
@@ -21,6 +22,7 @@ import com.github.se.orator.ui.navigation.Screen
 @Composable
 fun SpeakingJobInterviewModule(
     navigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
     apiLinkViewModel: ApiLinkViewModel
 ) {
   var targetPosition by remember { mutableStateOf("") }
@@ -81,7 +83,10 @@ fun SpeakingJobInterviewModule(
                 focusAreas = skills.split(",").map { it.trim() })
 
         apiLinkViewModel.updatePracticeContext(interviewContext)
-        // Navigate to ChatScreen with the collected data
+
+          chatViewModel.initializeConversation()
+
+          // Navigate to ChatScreen with the collected data
         navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }

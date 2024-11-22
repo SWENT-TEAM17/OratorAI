@@ -161,13 +161,13 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           navigation(startDestination = Screen.HOME, route = Route.HOME) {
             composable(Screen.HOME) { MainScreen(navigationActions) }
             composable(Screen.SPEAKING_JOB_INTERVIEW) {
-              SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
+              SpeakingJobInterviewModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
             composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-              SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
+              SpeakingPublicSpeakingModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
             composable(Screen.SPEAKING_SALES_PITCH) {
-              SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
+              SpeakingSalesPitchModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
             composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
             composable(Screen.CHAT_SCREEN) {
