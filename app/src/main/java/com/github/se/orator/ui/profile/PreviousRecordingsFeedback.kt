@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -38,29 +40,44 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
 import com.github.se.orator.model.symblAi.AudioRecorder
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.network.ChatGPTService
+import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @Composable
 fun PreviousRecordingsFeedbackScreen(
     context: Context,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    //chatViewModel: ChatGPTService,
+    viewModel: ChatViewModel
 ) {
+    val response by viewModel.response.collectAsState("")
+    viewModel.offlineRequest("i hate working so much")
+
     val recorder by lazy {
         AudioRecorder(context = context)
     }
@@ -71,6 +88,8 @@ fun PreviousRecordingsFeedbackScreen(
 
     val audioFile: File = File(context.cacheDir, "audio.mp3")
 
+
+    //val chatMessages by chatViewModel.chatMessages.collectAsState()
 
     Column(
         modifier =
@@ -107,6 +126,9 @@ fun PreviousRecordingsFeedbackScreen(
                     .clickable { navigationActions.goBack() }
                     .testTag("BackButton"),
                 tint = MaterialTheme.colorScheme.primary)
+
+            Text(text = response, color = Color.White)
+
         }
     }
 }

@@ -200,7 +200,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
 
             composable(Screen.FEEDBACK_SCREEN) {
-              PreviousRecordingsFeedbackScreen(LocalContext.current, navigationActions)
+              PreviousRecordingsFeedbackScreen(LocalContext.current, navigationActions, chatViewModel)
             }
 
             composable(Screen.EDIT_PROFILE) {

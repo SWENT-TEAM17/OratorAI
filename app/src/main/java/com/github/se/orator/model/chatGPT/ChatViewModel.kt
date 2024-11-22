@@ -1,6 +1,7 @@
 package com.github.se.orator.model.chatGPT
 
 import android.util.Log
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
@@ -12,6 +13,7 @@ import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -35,6 +37,9 @@ class ChatViewModel(
 
   private val practiceContext = apiLinkViewModel.practiceContext
 
+    private val has_responded = MutableStateFlow(false)
+    private val _response = MutableStateFlow("")
+    val response: StateFlow<String> get() = _response
   init {
     observeAnalysisData()
   }
@@ -119,6 +124,33 @@ class ChatViewModel(
       }
     }
   }
+
+    fun offlineRequest(msg: String) {
+        Log.d("ChatViewModel", "Getting next GPT response")
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val request = ChatRequest(model = "gpt-3.5-turbo", messages = listOf(Message(role = "system", content = "You are an interviewer talking to a potential hire who is currently talking about what his strengths are. He has said the following things: $msg" +
+                        "Give him constructive criticism based on what he has said")))
+
+                val response = chatGPTService.getChatCompletion(request)
+
+                if (!has_responded.value) {
+                    response.choices.firstOrNull()?.message?.let { responseMessage ->
+                        _response.value = responseMessage.content
+                        has_responded.value = true
+                        Log.d("aa", "$responseMessage.content")
+                    }
+                }
+
+            } catch (e: Exception) {
+                handleError(e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 
   fun endConversation() {
     apiLinkViewModel.resetAllPracticeData()
