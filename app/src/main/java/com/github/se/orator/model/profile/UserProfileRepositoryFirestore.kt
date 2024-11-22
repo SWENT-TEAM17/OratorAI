@@ -312,7 +312,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
-  override fun updateLoginStreak(uid: String, onSuccess: () -> Int, onFailure: () -> Int) {
+  override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
     val userRef = db.collection(collectionPath).document(uid)
     db.runTransaction { transaction ->
           val snapshot = transaction.get(userRef)

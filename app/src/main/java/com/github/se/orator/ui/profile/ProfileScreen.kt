@@ -198,7 +198,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                                   x =
                                                       -AppDimensions
                                                           .paddingLarge) // Push a little to the
-                                                                         // left
+                                              // left
                                               .testTag("current_streak")) {
                                         Icon(
                                             imageVector = Icons.Filled.Whatshot, // Fire icon
