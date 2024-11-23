@@ -6,6 +6,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.profile.FakeUserProfileRepository
+import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.network.ChatGPTService
@@ -41,14 +44,25 @@ class FeedbackScreenTest {
 
   private lateinit var apiLinkViewModel: ApiLinkViewModel
   private lateinit var chatViewModel: ChatViewModel
+  private lateinit var userProfileViewModel: UserProfileViewModel
 
   @Before
   fun setUp() {
     Dispatchers.setMain(testDispatcher)
 
     MockitoAnnotations.openMocks(this)
+    val fakeUserProfileRepository = FakeUserProfileRepository()
+    userProfileViewModel = UserProfileViewModel(fakeUserProfileRepository)
 
     apiLinkViewModel = ApiLinkViewModel()
+
+    val practiceContext =
+        InterviewContext(
+            interviewType = "Technical",
+            role = "Software Engineer",
+            company = "Tech Corp",
+            focusAreas = listOf("Algorithms", "Data Structures"))
+    apiLinkViewModel.updatePracticeContext(practiceContext)
   }
 
   @After
@@ -67,7 +81,9 @@ class FeedbackScreenTest {
 
     advanceUntilIdle()
 
-    composeTestRule.setContent { FeedbackScreen(chatViewModel, navigationActions) }
+    composeTestRule.setContent {
+      FeedbackScreen(chatViewModel, userProfileViewModel, apiLinkViewModel, navigationActions)
+    }
 
     composeTestRule.onNodeWithTag("feedbackScreen").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackTopAppBar").assertExists().assertIsDisplayed()
@@ -87,7 +103,9 @@ class FeedbackScreenTest {
   @Test
   fun clickingTheTryAgainButtonRedirectsToHomeScreen() = runTest {
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
-    composeTestRule.setContent { FeedbackScreen(chatViewModel, navigationActions) }
+    composeTestRule.setContent {
+      FeedbackScreen(chatViewModel, userProfileViewModel, apiLinkViewModel, navigationActions)
+    }
 
     composeTestRule.onNodeWithTag("retryButton").performClick()
 
@@ -111,7 +129,9 @@ class FeedbackScreenTest {
 
     advanceUntilIdle()
 
-    composeTestRule.setContent { FeedbackScreen(chatViewModel, navigationActions) }
+    composeTestRule.setContent {
+      FeedbackScreen(chatViewModel, userProfileViewModel, apiLinkViewModel, navigationActions)
+    }
 
     composeTestRule.onNodeWithTag("feedbackMessage").assertExists().assertIsDisplayed()
   }

@@ -84,9 +84,9 @@ fun SpeakingJobInterviewModule(
 
         apiLinkViewModel.updatePracticeContext(interviewContext)
 
-          chatViewModel.initializeConversation()
+        chatViewModel.initializeConversation()
 
-          // Navigate to ChatScreen with the collected data
+        // Navigate to ChatScreen with the collected data
         navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }

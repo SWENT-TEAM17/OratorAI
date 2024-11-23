@@ -3,7 +3,7 @@ package com.github.se.orator.ui.offline
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,7 +44,7 @@ fun RecordingReviewScreen(
                     .testTag("BackButtonRow"), // Test tag for the row with back button
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  imageVector = Icons.Filled.ArrowBack,
+                  imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                   contentDescription = "Back", // Accessibility description for the back icon
                   modifier =
                       Modifier.size(32.dp)

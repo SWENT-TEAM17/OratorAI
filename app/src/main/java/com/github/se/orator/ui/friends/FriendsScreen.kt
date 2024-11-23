@@ -112,7 +112,7 @@ fun ViewFriendsScreen(
                               Icon(Icons.Default.Menu, contentDescription = "Menu")
                             }
                       })
-                  Divider() // Adds a separation line below the TopAppBar
+                  HorizontalDivider() // Adds a separation line below the TopAppBar
                 }
               },
               bottomBar = {

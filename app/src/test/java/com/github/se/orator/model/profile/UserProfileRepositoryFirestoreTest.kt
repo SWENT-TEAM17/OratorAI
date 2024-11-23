@@ -4,7 +4,13 @@ import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
-import com.google.firebase.firestore.*
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import junit.framework.TestCase.fail
 import org.junit.Before
@@ -12,7 +18,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -191,22 +199,23 @@ class UserProfileRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("bio")).thenReturn("Test bio")
     val statisticsMap =
         mapOf(
-            "speechesGiven" to 10,
+            "speechesGiven" to 10L, // Ensure this is a Long
             "improvement" to 4.5f,
             "previousRuns" to
                 listOf(
                     mapOf(
                         "title" to "Speech 1",
                         "duration" to 5,
-                        "date" to 0,
+                        "date" to Timestamp.now(), // Use a valid Timestamp
                         "accuracy" to 85.0f,
                         "wordsPerMinute" to 120),
                     mapOf(
                         "title" to "Speech 2",
                         "duration" to 7,
-                        "date" to 0,
+                        "date" to Timestamp.now(), // Use a valid Timestamp
                         "accuracy" to 90.0f,
                         "wordsPerMinute" to 110)))
+
     `when`(mockDocumentSnapshot.get("statistics")).thenReturn(statisticsMap)
 
     // Simulate a successful Firestore query with Tasks.forResult()

@@ -81,9 +81,9 @@ fun SpeakingPublicSpeakingModule(
 
         apiLinkViewModel.updatePracticeContext(publicSpeakingContext)
 
-          chatViewModel.initializeConversation()
+        chatViewModel.initializeConversation()
 
-          // Navigate to ChatScreen, passing the context and feedbackLanguage
+        // Navigate to ChatScreen, passing the context and feedbackLanguage
         navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }

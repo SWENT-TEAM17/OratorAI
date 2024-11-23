@@ -15,11 +15,10 @@ data class UserProfile(
 )
 
 enum class SessionType {
-    SPEECH,
-    INTERVIEW,
-    NEGOTIATION
+  SPEECH,
+  INTERVIEW,
+  NEGOTIATION
 }
-
 
 data class UserStatistics(
     val speechesGiven: Int = 0,

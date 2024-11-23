@@ -295,77 +295,80 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
   }
 
-    fun incrementSuccessfulSessions() {
-        val currentUserProfile = userProfile_.value
-        if (currentUserProfile != null) {
-            val updatedStatistics = currentUserProfile.statistics.copy(
-                speechesGiven = currentUserProfile.statistics.speechesGiven + 1,
-                successfulSessions = currentUserProfile.statistics.successfulSessions + 1
-            )
+  fun incrementSuccessfulSessions() {
+    val currentUserProfile = userProfile_.value
+    if (currentUserProfile != null) {
+      val updatedStatistics =
+          currentUserProfile.statistics.copy(
+              speechesGiven = currentUserProfile.statistics.speechesGiven + 1,
+              successfulSessions = currentUserProfile.statistics.successfulSessions + 1)
 
-            val updatedProfile = currentUserProfile.copy(statistics = updatedStatistics)
+      val updatedProfile = currentUserProfile.copy(statistics = updatedStatistics)
 
-            // Save the updated profile to the database
-            updateUserProfile(updatedProfile)
+      // Save the updated profile to the database
+      updateUserProfile(updatedProfile)
 
-            // Update the StateFlow
-            userProfile_.value = updatedProfile
-        }
+      // Update the StateFlow
+      userProfile_.value = updatedProfile
     }
+  }
 
-    fun incrementSpeechesGiven() {
-        val currentUserProfile = userProfile_.value
-        if (currentUserProfile != null) {
-            val updatedStatistics = currentUserProfile.statistics.copy(
-                speechesGiven = currentUserProfile.statistics.speechesGiven + 1
-            )
+  fun incrementSpeechesGiven() {
+    val currentUserProfile = userProfile_.value
+    if (currentUserProfile != null) {
+      val updatedStatistics =
+          currentUserProfile.statistics.copy(
+              speechesGiven = currentUserProfile.statistics.speechesGiven + 1)
 
-            val updatedProfile = currentUserProfile.copy(statistics = updatedStatistics)
+      val updatedProfile = currentUserProfile.copy(statistics = updatedStatistics)
 
-            // Save the updated profile to the database
-            updateUserProfile(updatedProfile)
+      // Save the updated profile to the database
+      updateUserProfile(updatedProfile)
 
-            // Update the StateFlow
-            userProfile_.value = updatedProfile
-        }
+      // Update the StateFlow
+      userProfile_.value = updatedProfile
     }
+  }
 
-    fun updateSessionResult(isSuccess: Boolean, sessionType: SessionType) {
-        val currentUserProfile = userProfile_.value
-        if (currentUserProfile != null) {
-            val currentStats = currentUserProfile.statistics
+  fun updateSessionResult(isSuccess: Boolean, sessionType: SessionType) {
+    val currentUserProfile = userProfile_.value
+    if (currentUserProfile != null) {
+      val currentStats = currentUserProfile.statistics
 
-            val updatedStats = when (sessionType) {
-                SessionType.SPEECH -> {
-                    currentStats.copy(
-                        speechesGiven = currentStats.speechesGiven + 1,
-                        successfulSpeeches = if (isSuccess) currentStats.successfulSpeeches + 1 else currentStats.successfulSpeeches
-                    )
-                }
-                SessionType.INTERVIEW -> {
-                    currentStats.copy(
-                        interviewsGiven = currentStats.interviewsGiven + 1,
-                        successfulInterviews = if (isSuccess) currentStats.successfulInterviews + 1 else currentStats.successfulInterviews
-                    )
-                }
-                SessionType.NEGOTIATION -> {
-                    currentStats.copy(
-                        negotiationsGiven = currentStats.negotiationsGiven + 1,
-                        successfulNegotiations = if (isSuccess) currentStats.successfulNegotiations + 1 else currentStats.successfulNegotiations
-                    )
-                }
+      val updatedStats =
+          when (sessionType) {
+            SessionType.SPEECH -> {
+              currentStats.copy(
+                  speechesGiven = currentStats.speechesGiven + 1,
+                  successfulSpeeches =
+                      if (isSuccess) currentStats.successfulSpeeches + 1
+                      else currentStats.successfulSpeeches)
             }
+            SessionType.INTERVIEW -> {
+              currentStats.copy(
+                  interviewsGiven = currentStats.interviewsGiven + 1,
+                  successfulInterviews =
+                      if (isSuccess) currentStats.successfulInterviews + 1
+                      else currentStats.successfulInterviews)
+            }
+            SessionType.NEGOTIATION -> {
+              currentStats.copy(
+                  negotiationsGiven = currentStats.negotiationsGiven + 1,
+                  successfulNegotiations =
+                      if (isSuccess) currentStats.successfulNegotiations + 1
+                      else currentStats.successfulNegotiations)
+            }
+          }
 
-            val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
+      val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
 
-            // Save the updated profile to the database
-            updateUserProfile(updatedProfile)
+      // Save the updated profile to the database
+      updateUserProfile(updatedProfile)
 
-            // Update the StateFlow
-            userProfile_.value = updatedProfile
-        } else {
-            Log.e("UserProfileViewModel", "Current user profile is null.")
-        }
+      // Update the StateFlow
+      userProfile_.value = updatedProfile
+    } else {
+      Log.e("UserProfileViewModel", "Current user profile is null.")
     }
-
+  }
 }

@@ -35,154 +35,139 @@ fun FeedbackScreen(
     apiLinkViewModel: ApiLinkViewModel,
     navigationActions: NavigationActions
 ) {
-    // State variables for feedback message, decision, loading status, and error message.
-    var feedbackMessage by remember { mutableStateOf<String?>(null) }
-    var decisionResult by remember { mutableStateOf<ChatViewModel.DecisionResult?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+  // State variables for feedback message, decision, loading status, and error message.
+  var feedbackMessage by remember { mutableStateOf<String?>(null) }
+  var decisionResult by remember { mutableStateOf<ChatViewModel.DecisionResult?>(null) }
+  var isLoading by remember { mutableStateOf(true) }
+  var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
-    val userProfile by userProfileViewModel.userProfile.collectAsState()
+  val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
+  val userProfile by userProfileViewModel.userProfile.collectAsState()
 
-    val sessionType = when (practiceContext) {
+  val sessionType =
+      when (practiceContext) {
         is InterviewContext -> SessionType.INTERVIEW
         is PublicSpeakingContext -> SessionType.SPEECH
         is SalesPitchContext -> SessionType.NEGOTIATION
         else -> null
-    }
+      }
 
-    // Retrieve the number of successful sessions
-    val successfulSessionsCount = when (sessionType) {
+  // Retrieve the number of successful sessions
+  val successfulSessionsCount =
+      when (sessionType) {
         SessionType.SPEECH -> userProfile?.statistics?.successfulSpeeches ?: 0
         SessionType.INTERVIEW -> userProfile?.statistics?.successfulInterviews ?: 0
         SessionType.NEGOTIATION -> userProfile?.statistics?.successfulNegotiations ?: 0
         else -> 0
-    }
+      }
 
-    LaunchedEffect(Unit) {
-        try {
-            feedbackMessage = chatViewModel.generateFeedback()
-            feedbackMessage?.let {
-                decisionResult = parseDecisionFromFeedback(it)
+  LaunchedEffect(Unit) {
+    try {
+      feedbackMessage = chatViewModel.generateFeedback()
+      feedbackMessage?.let {
+        decisionResult = parseDecisionFromFeedback(it)
 
-                // Update user statistics based on the decision and session type
-                if (decisionResult != null && sessionType != null) {
-                    userProfileViewModel.updateSessionResult(
-                        isSuccess = decisionResult!!.isSuccess,
-                        sessionType = sessionType
-                    )
-                } else {
-                    Log.e("FeedbackScreen", "Session type or decision result is null.")
-                }
-            }
-        } catch (e: Exception) {
-            errorMessage = e.localizedMessage
-        } finally {
-            isLoading = false
+        // Update user statistics based on the decision and session type
+        if (decisionResult != null && sessionType != null) {
+          userProfileViewModel.updateSessionResult(
+              isSuccess = decisionResult!!.isSuccess, sessionType = sessionType)
+        } else {
+          Log.e("FeedbackScreen", "Session type or decision result is null.")
         }
+      }
+    } catch (e: Exception) {
+      errorMessage = e.localizedMessage
+    } finally {
+      isLoading = false
     }
+  }
 
+  DisposableEffect(Unit) { onDispose { chatViewModel.endConversation() } }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            chatViewModel.endConversation()
-        }
-    }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
-                title = {
-                    Text(
-                        text = "Feedback",
-                        modifier = Modifier.testTag("FeedbackText"),
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.textColor
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navigationActions.goBack() },
-                        modifier = Modifier.testTag("back_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                            tint = AppColors.textColor
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+  Scaffold(
+      modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
+      topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
+            title = {
+              Text(
+                  text = "Feedback",
+                  modifier = Modifier.testTag("FeedbackText"),
+                  fontWeight = FontWeight.Bold,
+                  color = AppColors.textColor)
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                        tint = AppColors.textColor)
+                  }
+            },
+            colors =
+                TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = AppColors.surfaceColor,
-                    titleContentColor = AppColors.textColor
-                )
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier.fillMaxSize()
-                    .padding(paddingValues)
-                    .testTag("feedbackContent"),
-            ) {
-                Divider()
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                        .padding(horizontal = AppDimensions.paddingMedium)
-                        .padding(top = AppDimensions.paddingSmall)
-                        .testTag("feedbackTitle"),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().testTag("feedbackSubtitle")
-                    ) {
-                        ChatMessageItem(
-                            message = Message(
-                                content = "Here's what you did well and where you can improve:",
-                                role = "assistant"
-                            )
-                        )
-                    }
+                    titleContentColor = AppColors.textColor))
+      },
+      content = { paddingValues ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("feedbackContent"),
+        ) {
+          HorizontalDivider()
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(horizontal = AppDimensions.paddingMedium)
+                      .padding(top = AppDimensions.paddingSmall)
+                      .testTag("feedbackTitle"),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(modifier = Modifier.fillMaxWidth().testTag("feedbackSubtitle")) {
+                  ChatMessageItem(
+                      message =
+                          Message(
+                              content = "Here's what you did well and where you can improve:",
+                              role = "assistant"))
+                }
 
-                    when {
-                        isLoading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                                    .padding(AppDimensions.paddingMedium)
-                                    .testTag("loadingIndicator"),
-                                color = AppColors.loadingIndicatorColor
-                            )
-                        }
-                        errorMessage != null -> {
+                when {
+                  isLoading -> {
+                    CircularProgressIndicator(
+                        modifier =
+                            Modifier.align(Alignment.CenterHorizontally)
+                                .padding(AppDimensions.paddingMedium)
+                                .testTag("loadingIndicator"),
+                        color = AppColors.loadingIndicatorColor)
+                  }
+                  errorMessage != null -> {
+                    Text(
+                        text = "Error: $errorMessage",
+                        color = AppColors.errorColor,
+                        modifier = Modifier.testTag("errorText"))
+                  }
+                  feedbackMessage != null -> {
+                    Column(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState())
+                                .testTag("feedbackMessage")) {
+                          // Display the decision prominently.
+                          decisionResult?.message?.let { decisionText ->
                             Text(
-                                text = "Error: $errorMessage",
-                                color = AppColors.errorColor,
-                                modifier = Modifier.testTag("errorText")
-                            )
-                        }
-                        feedbackMessage != null -> {
-                            Column(
-                                modifier = Modifier.fillMaxWidth()
-                                    .weight(1f)
-                                    .verticalScroll(rememberScrollState())
-                                    .testTag("feedbackMessage")
-                            ) {
-                                // Display the decision prominently.
-                                decisionResult?.message?.let { decisionText ->
-                                    Text(
-                                        text = decisionText,
-                                        style = AppTypography.largeTitleStyle,
-                                        modifier = Modifier
-                                            .align(Alignment.CenterHorizontally)
-                                            .padding(AppDimensions.paddingMedium)
-                                            .testTag("decisionText")
-                                    )
-                                }
+                                text = decisionText,
+                                style = AppTypography.largeTitleStyle,
+                                modifier =
+                                    Modifier.align(Alignment.CenterHorizontally)
+                                        .padding(AppDimensions.paddingMedium)
+                                        .testTag("decisionText"))
+                          }
 
-                                Text(
-                                    text = "You have successfully completed $successfulSessionsCount ${
+                          Text(
+                              text =
+                                  "You have successfully completed $successfulSessionsCount ${
                                         when (sessionType) {
                                             SessionType.SPEECH -> "speeches"
                                             SessionType.INTERVIEW -> "interviews"
@@ -190,78 +175,66 @@ fun FeedbackScreen(
                                             else -> "sessions"
                                         }
                                     } so far!",
-                                    style = AppTypography.bodyLargeStyle,
-                                    modifier = Modifier
-                                        .align(Alignment.CenterHorizontally)
-                                        .padding(AppDimensions.paddingMedium)
-                                        .testTag("successfulSessionsText")
-                                )
-                                // Display the detailed feedback message.
-                                ChatMessageItem(
-                                    message = Message(
-                                        content = feedbackMessage!!,
-                                        role = "assistant"
-                                    )
-                                )
-                            }
+                              style = AppTypography.bodyLargeStyle,
+                              modifier =
+                                  Modifier.align(Alignment.CenterHorizontally)
+                                      .padding(AppDimensions.paddingMedium)
+                                      .testTag("successfulSessionsText"))
+                          // Display the detailed feedback message.
+                          ChatMessageItem(
+                              message = Message(content = feedbackMessage!!, role = "assistant"))
                         }
-                        else -> {
-                            Text(
-                                text = "No feedback available.",
-                                style = AppTypography.bodyLargeStyle,
-                                color = AppColors.textColor,
-                                modifier = Modifier.testTag("feedbackNoMessage")
-                            )
-                        }
-                    }
+                  }
+                  else -> {
+                    Text(
+                        text = "No feedback available.",
+                        style = AppTypography.bodyLargeStyle,
+                        color = AppColors.textColor,
+                        modifier = Modifier.testTag("feedbackNoMessage"))
+                  }
+                }
 
-                    Button(
-                        onClick = {
-                            chatViewModel.resetPracticeContext()
-                            navigationActions.navigateTo(TopLevelDestinations.HOME)
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                Button(
+                    onClick = {
+                      chatViewModel.resetPracticeContext()
+                      navigationActions.navigateTo(TopLevelDestinations.HOME)
+                    },
+                    modifier =
+                        Modifier.fillMaxWidth()
                             .padding(top = AppDimensions.paddingMedium)
                             .border(
                                 width = AppDimensions.borderStrokeWidth,
                                 color = AppColors.buttonBorderColor,
-                                shape = MaterialTheme.shapes.medium
-                            )
+                                shape = MaterialTheme.shapes.medium)
                             .testTag("retryButton"),
-                        enabled = !isLoading,
-                        colors = ButtonDefaults.buttonColors(
+                    enabled = !isLoading,
+                    colors =
+                        ButtonDefaults.buttonColors(
                             containerColor = AppColors.buttonOverviewColor,
-                            contentColor = AppColors.textColor
-                        )
-                    ) {
-                        Text(
-                            text = "Try Again",
-                            modifier = Modifier.testTag("retryButtonText")
-                        )
+                            contentColor = AppColors.textColor)) {
+                      Text(text = "Try Again", modifier = Modifier.testTag("retryButtonText"))
                     }
-                }
-            }
+              }
         }
-    )
+      })
 }
 
 // Function to parse the decision from the feedback message
 private fun parseDecisionFromFeedback(feedback: String): ChatViewModel.DecisionResult? {
-    val feedbackLower = feedback.lowercase()
-    return when {
-        "would recommend hiring" in feedbackLower || "would hire" in feedbackLower ->
-            ChatViewModel.DecisionResult("Congratulations! You would be hired.", true)
-        "would not recommend hiring" in feedbackLower || "would not hire" in feedbackLower ->
-            ChatViewModel.DecisionResult("Unfortunately, you would not be hired.", false)
-        "would win the competition" in feedbackLower ->
-            ChatViewModel.DecisionResult("Great job! You would win the competition.", true)
-        "would not win the competition" in feedbackLower ->
-            ChatViewModel.DecisionResult("You might need to improve to win the competition.", false)
-        "successfully convinced" in feedbackLower ->
-            ChatViewModel.DecisionResult("Success! You have convinced the client.", true)
-        "did not convince" in feedbackLower ->
-            ChatViewModel.DecisionResult("You did not convince the client this time.", false)
-        else -> null
-    }
+  val feedbackLower = feedback.lowercase()
+  return when {
+    "would recommend hiring" in feedbackLower || "would hire" in feedbackLower ->
+        ChatViewModel.DecisionResult("Congratulations! You would be hired.", true)
+    "would not recommend hiring" in feedbackLower || "would not hire" in feedbackLower ->
+        ChatViewModel.DecisionResult("Unfortunately, you would not be hired.", false)
+    "would win the competition" in feedbackLower ->
+        ChatViewModel.DecisionResult("Great job! You would win the competition.", true)
+    "would not win the competition" in feedbackLower ->
+        ChatViewModel.DecisionResult("You might need to improve to win the competition.", false)
+    "successfully convinced" in feedbackLower ->
+        ChatViewModel.DecisionResult("Success! You have convinced the client.", true)
+    "did not convince" in feedbackLower ->
+        ChatViewModel.DecisionResult("You did not convince the client this time.", false)
+    else -> null
+  }
 }
-
