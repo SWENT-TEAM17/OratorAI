@@ -245,40 +245,16 @@ fun FriendItem(
       color = AppColors.LightPurpleGrey,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
-          ProfilePicture(
-              profilePictureUrl = friend.profilePic, onClick = { onProfilePictureClick(friend) })
-          Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-          Column {
-            Text(
-                text = friend.name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier =
-                    Modifier.padding(bottom = AppDimensions.smallPadding)
-                        .testTag("friendName#${friend.uid}"))
-            Text(
-                text = friend.bio ?: "No bio available",
-                style = MaterialTheme.typography.bodySmall,
-                color = AppColors.secondaryTextColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.testTag("friendBio#${friend.uid}"))
-          }
-          Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
-
-          DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
-        }
         Row(
             modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
-            verticalAlignment = Alignment.CenterVertically // Retain original vertical alignment
-            ) {
-              ProfilePicture(profilePictureUrl = friend.profilePic, onClick = {})
+            verticalAlignment = Alignment.CenterVertically) {
+              ProfilePicture(
+                  profilePictureUrl = friend.profilePic,
+                  onClick = { onProfilePictureClick(friend) })
               Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
               Column(
-                  modifier =
-                      Modifier.weight(
-                          1f), // Retain original weight to push DeleteFriendButton to the end
-                  verticalArrangement = Arrangement.Center) { // Friend details
+                  modifier = Modifier.weight(1f), // Expand to push DeleteFriendButton to the end
+                  verticalArrangement = Arrangement.Center) {
                     Text(
                         text = friend.name,
                         style = MaterialTheme.typography.titleMedium,
@@ -330,10 +306,6 @@ fun FriendItem(
                           modifier = Modifier.testTag("friendLastLogin#${friend.uid}"))
                     }
                   }
-              // Retain the Spacer with weight to keep DeleteFriendButton aligned to the end
-              // If this Spacer is causing layout issues, consider adjusting its weight or replacing
-              // it with fixed width
-              // Spacer(modifier = Modifier.weight(1f))
               DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
             }
       }
