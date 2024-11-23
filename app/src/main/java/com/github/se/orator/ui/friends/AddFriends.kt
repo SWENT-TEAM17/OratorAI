@@ -1,6 +1,8 @@
 package com.github.se.orator.ui.friends
 
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import com.github.se.orator.model.profile.UserProfile
@@ -50,6 +53,7 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
+import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
@@ -69,10 +73,23 @@ fun AddFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
+  val userProfile by userProfileViewModel.userProfile.collectAsState()
+  val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
   var query by remember { mutableStateOf("") } // Holds the search query input
   var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
   val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
   val focusRequester = FocusRequester() // Manages focus for the search field
+
+  // Exclude the current user's profile and their friends' profiles from the list
+  val filteredProfiles =
+      allProfiles.filter { profile ->
+        profile.uid != userProfile?.uid && // Exclude own profile
+            friendsProfiles.none { friend -> friend.uid == profile.uid } && // Exclude friends
+            profile.name.contains(query, ignoreCase = true) // Match search query
+      }
+
+  // State variable to keep track of the selected user's profile picture
+  var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
 
   ProjectTheme {
     Scaffold(
@@ -82,8 +99,7 @@ fun AddFriendsScreen(
               navigationIcon = {
                 IconButton(
                     onClick = { navigationActions.goBack() },
-                    modifier = Modifier.testTag("addFriendBackButton") // Added testTag
-                    ) {
+                    modifier = Modifier.testTag("addFriendBackButton")) {
                       Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
               },
@@ -114,27 +130,22 @@ fun AddFriendsScreen(
                             .height(AppDimensions.mediumHeight)
                             .focusRequester(focusRequester)
                             .testTag("addFriendSearchField"),
-                    label = {
-                      Text("Username", modifier = Modifier.testTag("searchFieldLabel"))
-                    }, // Added testTag
+                    label = { Text("Username", modifier = Modifier.testTag("searchFieldLabel")) },
                     leadingIcon = {
                       Icon(
                           Icons.Default.Search,
                           contentDescription = "Search Icon",
-                          modifier = Modifier.testTag("searchIcon") // Added testTag
-                          )
+                          modifier = Modifier.testTag("searchIcon"))
                     },
                     trailingIcon = {
                       if (query.isNotEmpty()) {
                         IconButton(
                             onClick = { query = "" },
-                            modifier = Modifier.testTag("clearSearchButton") // Added testTag
-                            ) {
+                            modifier = Modifier.testTag("clearSearchButton")) {
                               Icon(
                                   Icons.Default.Clear,
                                   contentDescription = "Clear Icon",
-                                  modifier = Modifier.testTag("clearIcon") // Added testTag
-                                  )
+                                  modifier = Modifier.testTag("clearIcon"))
                             }
                       }
                     },
@@ -145,18 +156,29 @@ fun AddFriendsScreen(
                   LazyColumn(
                       contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                       verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
-                      modifier = Modifier.testTag("searchResultsList") // Added testTag
-                      ) {
+                      modifier = Modifier.testTag("searchResultsList")) {
                         // Filter and display profiles matching the query
                         items(
-                            allProfiles.filter { profile ->
+                            filteredProfiles.filter { profile ->
                               profile.name.contains(query, ignoreCase = true)
                             }) { user ->
-                              UserItem(user = user, userProfileViewModel = userProfileViewModel)
+                              UserItem(
+                                  user = user,
+                                  userProfileViewModel = userProfileViewModel,
+                                  onProfilePictureClick = { selectedUser ->
+                                    selectedProfilePicUser = selectedUser
+                                  })
                             }
                       }
                 }
               }
+
+          // Dialog to show the enlarged profile picture
+          if (selectedProfilePicUser?.profilePic != null) {
+            ProfilePictureDialog(
+                profilePictureUrl = selectedProfilePicUser?.profilePic ?: "",
+                onDismiss = { selectedProfilePicUser = null })
+          }
         }
   }
 }
@@ -168,26 +190,39 @@ fun AddFriendsScreen(
  * @param user The [UserProfile] object representing the user being displayed.
  * @param userProfileViewModel The [UserProfileViewModel] that handles the logic of adding a user as
  *   a friend.
+ * @param onProfilePictureClick Callback when the profile picture is clicked.
  */
 @Composable
-fun UserItem(user: UserProfile, userProfileViewModel: UserProfileViewModel) {
+fun UserItem(
+    user: UserProfile,
+    userProfileViewModel: UserProfileViewModel,
+    onProfilePictureClick: (UserProfile) -> Unit
+) {
+  val context = LocalContext.current // Get the context for showing Toast
+
   Surface(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(horizontal = AppDimensions.smallPadding) // Side padding for each item
-              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius)),
+              .padding(horizontal = AppDimensions.smallPadding)
+              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
+              .clickable {
+                // Add friend when the item is clicked
+                userProfileViewModel.addFriend(user)
+                // Show Toast message
+                Toast.makeText(
+                        context, "${user.name} has been added as a friend", Toast.LENGTH_SHORT)
+                    .show()
+              },
       color = AppColors.LightPurpleGrey,
-      shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
-      ) {
+      shadowElevation = AppDimensions.elevationSmall) {
         Row(
             modifier =
                 Modifier.fillMaxWidth()
                     .padding(AppDimensions.paddingMedium)
                     .testTag("addFriendUserItem#${user.uid}")) {
-              // Profile picture and click listener to add the user as a friend
+              // Profile picture click listener to show enlarged picture
               ProfilePicture(
-                  profilePictureUrl = user.profilePic,
-                  onClick = { userProfileViewModel.addFriend(user) })
+                  profilePictureUrl = user.profilePic, onClick = { onProfilePictureClick(user) })
               Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
               Column {
                 // Display user name

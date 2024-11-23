@@ -3,7 +3,6 @@ package com.github.se.orator.ui.offline
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,10 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 
 @Composable
 fun OfflinePracticeQuestionsScreen(navigationActions: NavigationActions) {
@@ -41,35 +40,34 @@ fun OfflinePracticeQuestionsScreen(navigationActions: NavigationActions) {
           Modifier.fillMaxSize()
               .background(colors.background)
               .padding(WindowInsets.systemBars.asPaddingValues())
-              .padding(horizontal = 16.dp)
+              .padding(horizontal = AppDimensions.paddingMedium)
               .testTag("OfflinePracticeQuestionsScreen"), // Test tag for identifying this screen
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally) {
         // Row container for back button and title, positioned at the top
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = AppDimensions.paddingMedium),
             verticalAlignment = Alignment.CenterVertically) {
               // Back button icon, navigates back to Offline screen
               Icon(
                   imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                   contentDescription = "Back", // Accessibility description
                   modifier =
-                      Modifier.size(32.dp)
+                      Modifier.size(AppDimensions.iconSizeSmall)
                           .clickable {
                             navigationActions.navigateTo(Screen.OFFLINE)
                           } // Go back to Offline screen
-                          .background(colors.background, CircleShape)
-                          .padding(4.dp)
+                          .padding(AppDimensions.paddingExtraSmall)
                           .testTag("BackButton"), // Test tag for the back button
                   tint = colors.primary // Primary color from the theme for the icon
                   )
 
-              Spacer(modifier = Modifier.width(12.dp))
+              Spacer(modifier = Modifier.width(AppDimensions.spacerWidthMedium))
 
               // Title text for the screen, styled to be bold and centered vertically
               Text(
                   text = "Choose your practice question",
-                  fontSize = 20.sp,
+                  fontSize = AppFontSizes.titleMedium,
                   fontWeight = FontWeight.Bold,
                   color = colors.onBackground, // Color from theme
                   modifier =
@@ -78,16 +76,17 @@ fun OfflinePracticeQuestionsScreen(navigationActions: NavigationActions) {
                   )
             }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(AppDimensions.spacerHeightMedium))
 
         // Display each question in a Card with clickable functionality
         questions.forEachIndexed { index, question ->
           Card(
-              shape = RoundedCornerShape(16.dp),
-              elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+              shape = RoundedCornerShape(AppDimensions.cardCornerRadius),
+              elevation =
+                  CardDefaults.cardElevation(defaultElevation = AppDimensions.elevationSmall),
               modifier =
                   Modifier.fillMaxWidth()
-                      .padding(vertical = 8.dp)
+                      .padding(vertical = AppDimensions.paddingSmall)
                       .clickable {
                         // Navigate to OfflineRecordingScreen with the selected question
                         navigationActions.goToOfflineRecording(question)
@@ -98,11 +97,11 @@ fun OfflinePracticeQuestionsScreen(navigationActions: NavigationActions) {
                       containerColor = colors.surface) // Surface color for card background
               ) {
                 // Box container for the question text inside each card
-                Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Box(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
                   // Display the question text inside the card
                   Text(
                       text = question,
-                      fontSize = 16.sp,
+                      fontSize = AppFontSizes.bodyLarge,
                       color = colors.secondary, // Secondary color for text
                       fontWeight = FontWeight.Medium,
                       modifier =

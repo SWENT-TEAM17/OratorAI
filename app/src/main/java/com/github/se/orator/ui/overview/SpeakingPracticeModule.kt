@@ -1,4 +1,3 @@
-// File: SpeakingPracticeModule.kt
 package com.github.se.orator.ui.overview
 
 import android.widget.Toast
@@ -78,7 +77,7 @@ fun SpeakingPracticeModule(
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-          HorizontalDivider()
+          Divider()
           Column(
               modifier =
                   Modifier.fillMaxSize()
@@ -109,81 +108,12 @@ fun SpeakingPracticeModule(
                                   input.height.dp) // Assuming 'height' is defined in InputFieldData
                               .testTag(input.testTag),
                       colors =
-                          OutlinedTextFieldDefaults.colors(
-                              focusedTextColor = OutlinedTextFieldTokens.FocusInputColor.value,
-                              unfocusedTextColor = OutlinedTextFieldTokens.InputColor.value,
-                              disabledTextColor =
-                                  OutlinedTextFieldTokens.DisabledInputColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledInputOpacity),
-                              errorTextColor = OutlinedTextFieldTokens.ErrorInputColor.value,
-                              focusedContainerColor = Color.Transparent,
-                              unfocusedContainerColor = Color.Transparent,
-                              disabledContainerColor = Color.Transparent,
-                              errorContainerColor = Color.Transparent,
-                              cursorColor = AppColors.primaryColor,
-                              errorCursorColor = OutlinedTextFieldTokens.ErrorFocusCaretColor.value,
-                              selectionColors = LocalTextSelectionColors.current,
+                          TextFieldDefaults.outlinedTextFieldColors(
                               focusedBorderColor = AppColors.primaryColor,
                               unfocusedBorderColor = AppColors.textColor,
-                              disabledBorderColor =
-                                  OutlinedTextFieldTokens.DisabledOutlineColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledOutlineOpacity),
-                              errorBorderColor = OutlinedTextFieldTokens.ErrorOutlineColor.value,
-                              focusedLeadingIconColor =
-                                  OutlinedTextFieldTokens.FocusLeadingIconColor.value,
-                              unfocusedLeadingIconColor =
-                                  OutlinedTextFieldTokens.LeadingIconColor.value,
-                              disabledLeadingIconColor =
-                                  OutlinedTextFieldTokens.DisabledLeadingIconColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledLeadingIconOpacity),
-                              errorLeadingIconColor =
-                                  OutlinedTextFieldTokens.ErrorLeadingIconColor.value,
-                              focusedTrailingIconColor =
-                                  OutlinedTextFieldTokens.FocusTrailingIconColor.value,
-                              unfocusedTrailingIconColor =
-                                  OutlinedTextFieldTokens.TrailingIconColor.value,
-                              disabledTrailingIconColor =
-                                  OutlinedTextFieldTokens.DisabledTrailingIconColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledTrailingIconOpacity),
-                              errorTrailingIconColor =
-                                  OutlinedTextFieldTokens.ErrorTrailingIconColor.value,
+                              cursorColor = AppColors.primaryColor,
                               focusedLabelColor = AppColors.primaryColor,
-                              unfocusedLabelColor = AppColors.textColor,
-                              disabledLabelColor =
-                                  OutlinedTextFieldTokens.DisabledLabelColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledLabelOpacity),
-                              errorLabelColor = OutlinedTextFieldTokens.ErrorLabelColor.value,
-                              focusedPlaceholderColor =
-                                  OutlinedTextFieldTokens.InputPlaceholderColor.value,
-                              unfocusedPlaceholderColor =
-                                  OutlinedTextFieldTokens.InputPlaceholderColor.value,
-                              disabledPlaceholderColor =
-                                  OutlinedTextFieldTokens.DisabledInputColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledInputOpacity),
-                              errorPlaceholderColor =
-                                  OutlinedTextFieldTokens.InputPlaceholderColor.value,
-                              focusedSupportingTextColor =
-                                  OutlinedTextFieldTokens.FocusSupportingColor.value,
-                              unfocusedSupportingTextColor =
-                                  OutlinedTextFieldTokens.SupportingColor.value,
-                              disabledSupportingTextColor =
-                                  OutlinedTextFieldTokens.DisabledSupportingColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledSupportingOpacity),
-                              errorSupportingTextColor =
-                                  OutlinedTextFieldTokens.ErrorSupportingColor.value,
-                              focusedPrefixColor = OutlinedTextFieldTokens.InputPrefixColor.value,
-                              unfocusedPrefixColor = OutlinedTextFieldTokens.InputPrefixColor.value,
-                              disabledPrefixColor =
-                                  OutlinedTextFieldTokens.InputPrefixColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledInputOpacity),
-                              errorPrefixColor = OutlinedTextFieldTokens.InputPrefixColor.value,
-                              focusedSuffixColor = OutlinedTextFieldTokens.InputSuffixColor.value,
-                              unfocusedSuffixColor = OutlinedTextFieldTokens.InputSuffixColor.value,
-                              disabledSuffixColor =
-                                  OutlinedTextFieldTokens.InputSuffixColor.value.copy(
-                                      alpha = OutlinedTextFieldTokens.DisabledInputOpacity),
-                              errorSuffixColor = OutlinedTextFieldTokens.InputSuffixColor.value,
-                          ))
+                              unfocusedLabelColor = AppColors.textColor))
                 }
 
                 // Spacer to add space before the button
