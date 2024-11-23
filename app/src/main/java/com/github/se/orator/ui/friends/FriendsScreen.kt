@@ -1,6 +1,7 @@
 package com.github.se.orator.ui.friends
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -24,6 +25,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,6 +38,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
@@ -70,6 +73,9 @@ fun ViewFriendsScreen(
   val focusManager = LocalFocusManager.current
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val scope = rememberCoroutineScope()
+
+  // State variable to manage the currently selected friend for enlarged profile picture
+  var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
 
   ProjectTheme {
     ModalNavigationDrawer(
@@ -178,9 +184,19 @@ fun ViewFriendsScreen(
                             verticalArrangement =
                                 Arrangement.spacedBy(AppDimensions.paddingSmall)) {
                               items(filteredFriends) { friend ->
-                                FriendItem(friend = friend, userProfileViewModel)
+                                FriendItem(
+                                    friend = friend,
+                                    userProfileViewModel = userProfileViewModel,
+                                    onProfilePictureClick = { selectedFriend = it })
                               }
                             }
+                      }
+
+                      // Dialog to display the enlarged profile picture
+                      if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
+                        ProfilePictureDialog(
+                            profilePictureUrl = selectedFriend!!.profilePic!!,
+                            onDismiss = { selectedFriend = null })
                       }
                     }
               }
@@ -193,9 +209,14 @@ fun ViewFriendsScreen(
  * profile picture, name, and bio.
  *
  * @param friend The [UserProfile] object representing the friend being displayed.
+ * @param onProfilePictureClick Callback when the profile picture is clicked.
  */
 @Composable
-fun FriendItem(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
+fun FriendItem(
+    friend: UserProfile,
+    userProfileViewModel: UserProfileViewModel,
+    onProfilePictureClick: (UserProfile) -> Unit
+) {
   // Compute the displayedStreak
   val displayedStreak = currentFriendStreak(friend.lastLoginDate, friend.currentStreak)
   Log.d("FriendItem", "Days Since Last Login: ${friend.lastLoginDate}")
@@ -218,12 +239,35 @@ fun FriendItem(friend: UserProfile, userProfileViewModel: UserProfileViewModel) 
   Surface(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(horizontal = AppDimensions.smallPadding) // Side padding for each item
+              .padding(horizontal = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
               .testTag("viewFriendsItem#${friend.uid}"),
       color = AppColors.LightPurpleGrey,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
+          ProfilePicture(
+              profilePictureUrl = friend.profilePic, onClick = { onProfilePictureClick(friend) })
+          Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+          Column {
+            Text(
+                text = friend.name,
+                style = MaterialTheme.typography.titleMedium,
+                modifier =
+                    Modifier.padding(bottom = AppDimensions.smallPadding)
+                        .testTag("friendName#${friend.uid}"))
+            Text(
+                text = friend.bio ?: "No bio available",
+                style = MaterialTheme.typography.bodySmall,
+                color = AppColors.secondaryTextColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.testTag("friendBio#${friend.uid}"))
+          }
+          Spacer(modifier = Modifier.weight(1f)) // Pushes the delete button to the right
+
+          DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
+        }
         Row(
             modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
             verticalAlignment = Alignment.CenterVertically // Retain original vertical alignment
@@ -322,8 +366,15 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
  */
 @Composable
 fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
+  val context = LocalContext.current
+
   IconButton(
-      onClick = { userProfileViewModel.deleteFriend(friend) },
+      onClick = {
+        userProfileViewModel.deleteFriend(friend)
+        Toast.makeText(
+                context, "${friend.name} has been removed from your friends.", Toast.LENGTH_SHORT)
+            .show()
+      },
       modifier = Modifier.testTag("deleteFriendButton#${friend.uid}")) {
         Icon(
             imageVector = Icons.Default.Delete, // Built-in delete icon
