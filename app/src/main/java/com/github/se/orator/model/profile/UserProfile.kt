@@ -38,26 +38,22 @@ enum class SessionType(
     val successMessage: String,
     val failureMessage: String
 ) {
-    SPEECH(
-        positiveResponse = "would win the competition",
-        negativeResponse = "would not win the competition",
-        successMessage = "Great job! You would win the competition.",
-        failureMessage = "You might need to improve to win the competition."
-    ),
-    INTERVIEW(
-        positiveResponse = "would recommend hiring",
-        negativeResponse = "would not recommend hiring",
-        successMessage = "Congratulations! You would be hired.",
-        failureMessage = "Unfortunately, you would not be hired."
-    ),
-    NEGOTIATION(
-        positiveResponse = "successfully convinced",
-        negativeResponse = "did not convince",
-        successMessage = "Success! You have convinced the client.",
-        failureMessage = "You did not convince the client this time."
-    )
+  SPEECH(
+      positiveResponse = "would win the competition",
+      negativeResponse = "would not win the competition",
+      successMessage = "Great job! You would win the competition.",
+      failureMessage = "You might need to improve to win the competition."),
+  INTERVIEW(
+      positiveResponse = "would recommend hiring",
+      negativeResponse = "would not recommend hiring",
+      successMessage = "Congratulations! You would be hired.",
+      failureMessage = "Unfortunately, you would not be hired."),
+  NEGOTIATION(
+      positiveResponse = "successfully convinced",
+      negativeResponse = "did not convince",
+      successMessage = "Success! You have convinced the client.",
+      failureMessage = "You did not convince the client this time.")
 }
-
 
 /**
  * Data class representing the statistics of a user.

@@ -40,19 +40,15 @@ import org.mockito.kotlin.whenever
 
 class FeedbackScreenTest {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   private val testDispatcher = StandardTestDispatcher()
 
-  @Mock
-  private lateinit var chatGPTService: ChatGPTService
+  @Mock private lateinit var chatGPTService: ChatGPTService
 
-  @Mock
-  private lateinit var navigationActions: NavigationActions
+  @Mock private lateinit var navigationActions: NavigationActions
 
-  @Mock
-  private lateinit var userProfileRepository: UserProfileRepository
+  @Mock private lateinit var userProfileRepository: UserProfileRepository
 
   private lateinit var apiLinkViewModel: ApiLinkViewModel
   private lateinit var chatViewModel: ChatViewModel
@@ -72,37 +68,39 @@ class FeedbackScreenTest {
 
     // Mock data for UserProfile
     val testUid = "testUid"
-    val testUserProfile = UserProfile(
-      uid = testUid,
-      name = "Test User",
-      age = 25,
-      statistics = UserStatistics(),
-      friends = listOf(),
-      bio = "Test bio"
-    )
+    val testUserProfile =
+        UserProfile(
+            uid = testUid,
+            name = "Test User",
+            age = 25,
+            statistics = UserStatistics(),
+            friends = listOf(),
+            bio = "Test bio")
 
     // Mock getCurrentUserUid()
     `when`(userProfileRepository.getCurrentUserUid()).thenReturn(testUid)
 
     // Mock getUserProfile()
     doAnswer { invocation ->
-      val uid = invocation.arguments[0] as String
-      val onSuccess = invocation.arguments[1] as (UserProfile?) -> Unit
-      val onFailure = invocation.arguments[2] as (Exception) -> Unit
+          val uid = invocation.arguments[0] as String
+          val onSuccess = invocation.arguments[1] as (UserProfile?) -> Unit
+          val onFailure = invocation.arguments[2] as (Exception) -> Unit
 
-      // Simulate success callback with testUserProfile
-      onSuccess(testUserProfile)
-      null
-    }.whenever(userProfileRepository).getUserProfile(any(), any(), any())
+          // Simulate success callback with testUserProfile
+          onSuccess(testUserProfile)
+          null
+        }
+        .whenever(userProfileRepository)
+        .getUserProfile(any(), any(), any())
 
     apiLinkViewModel = ApiLinkViewModel()
 
-    val practiceContext = InterviewContext(
-      interviewType = "Technical",
-      role = "Software Engineer",
-      company = "Tech Corp",
-      focusAreas = listOf("Algorithms", "Data Structures")
-    )
+    val practiceContext =
+        InterviewContext(
+            interviewType = "Technical",
+            role = "Software Engineer",
+            company = "Tech Corp",
+            focusAreas = listOf("Algorithms", "Data Structures"))
     apiLinkViewModel.updatePracticeContext(practiceContext)
   }
 
@@ -115,7 +113,7 @@ class FeedbackScreenTest {
   @Test
   fun screenIsDisplayed() = runTest {
     `when`(chatGPTService.getChatCompletion(any()))
-      .thenReturn(ChatResponse("id", "object", 0, "model", emptyList(), Usage(0, 0, 0)))
+        .thenReturn(ChatResponse("id", "object", 0, "model", emptyList(), Usage(0, 0, 0)))
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
     chatViewModel.generateFeedback()
@@ -124,11 +122,10 @@ class FeedbackScreenTest {
 
     composeTestRule.setContent {
       FeedbackScreen(
-        chatViewModel = chatViewModel,
-        userProfileViewModel = userProfileViewModel,
-        apiLinkViewModel = apiLinkViewModel,
-        navigationActions = navigationActions
-      )
+          chatViewModel = chatViewModel,
+          userProfileViewModel = userProfileViewModel,
+          apiLinkViewModel = apiLinkViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("feedbackScreen").assertExists().assertIsDisplayed()
@@ -141,9 +138,9 @@ class FeedbackScreenTest {
     composeTestRule.onNodeWithTag("feedbackNoMessage").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("retryButton").assertExists().assertIsDisplayed()
     composeTestRule
-      .onNodeWithTag("retryButtonText", useUnmergedTree = true)
-      .assertExists()
-      .assertIsDisplayed()
+        .onNodeWithTag("retryButtonText", useUnmergedTree = true)
+        .assertExists()
+        .assertIsDisplayed()
   }
 
   @Test
@@ -151,11 +148,10 @@ class FeedbackScreenTest {
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
     composeTestRule.setContent {
       FeedbackScreen(
-        chatViewModel = chatViewModel,
-        userProfileViewModel = userProfileViewModel,
-        apiLinkViewModel = apiLinkViewModel,
-        navigationActions = navigationActions
-      )
+          chatViewModel = chatViewModel,
+          userProfileViewModel = userProfileViewModel,
+          apiLinkViewModel = apiLinkViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("retryButton").performClick()
@@ -166,16 +162,14 @@ class FeedbackScreenTest {
   @Test
   fun feedbackMessageIsShownWhenThereIsOne() = runTest {
     `when`(chatGPTService.getChatCompletion(any()))
-      .thenReturn(
-        ChatResponse(
-          "id",
-          "object",
-          0,
-          "model",
-          listOf(Choice(0, Message("assistant", "This is your feedback."), null)),
-          Usage(0, 0, 0)
-        )
-      )
+        .thenReturn(
+            ChatResponse(
+                "id",
+                "object",
+                0,
+                "model",
+                listOf(Choice(0, Message("assistant", "This is your feedback."), null)),
+                Usage(0, 0, 0)))
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
     chatViewModel.generateFeedback()
@@ -184,11 +178,10 @@ class FeedbackScreenTest {
 
     composeTestRule.setContent {
       FeedbackScreen(
-        chatViewModel = chatViewModel,
-        userProfileViewModel = userProfileViewModel,
-        apiLinkViewModel = apiLinkViewModel,
-        navigationActions = navigationActions
-      )
+          chatViewModel = chatViewModel,
+          userProfileViewModel = userProfileViewModel,
+          apiLinkViewModel = apiLinkViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("feedbackMessage").assertExists().assertIsDisplayed()

@@ -61,34 +61,31 @@ fun FeedbackScreen(
       }
 
   // Retrieve the number of successful sessions
-    val successfulSessionsCount = sessionType?.let {
-        userProfile?.statistics?.successfulSessions?.get(it.name) ?: 0
-    } ?: 0
+  val successfulSessionsCount =
+      sessionType?.let { userProfile?.statistics?.successfulSessions?.get(it.name) ?: 0 } ?: 0
 
+  LaunchedEffect(Unit) {
+    try {
+      feedbackMessage = chatViewModel.generateFeedback()
+      feedbackMessage?.let {
+        decisionResult = parseDecisionFromFeedback(it, sessionType)
 
-    LaunchedEffect(Unit) {
-        try {
-            feedbackMessage = chatViewModel.generateFeedback()
-            feedbackMessage?.let {
-                decisionResult = parseDecisionFromFeedback(it, sessionType)
-
-                // Update user statistics based on the decision and session type
-                if (decisionResult != null && sessionType != null) {
-                    userProfileViewModel.updateSessionResult(
-                        isSuccess = decisionResult!!.isSuccess, sessionType = sessionType)
-                } else {
-                    Log.e("FeedbackScreen", "Session type or decision result is null.")
-                }
-            }
-        } catch (e: Exception) {
-            errorMessage = e.localizedMessage
-        } finally {
-            isLoading = false
+        // Update user statistics based on the decision and session type
+        if (decisionResult != null && sessionType != null) {
+          userProfileViewModel.updateSessionResult(
+              isSuccess = decisionResult!!.isSuccess, sessionType = sessionType)
+        } else {
+          Log.e("FeedbackScreen", "Session type or decision result is null.")
         }
+      }
+    } catch (e: Exception) {
+      errorMessage = e.localizedMessage
+    } finally {
+      isLoading = false
     }
+  }
 
-
-    DisposableEffect(Unit) { onDispose { chatViewModel.endConversation() } }
+  DisposableEffect(Unit) { onDispose { chatViewModel.endConversation() } }
 
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
@@ -171,8 +168,9 @@ fun FeedbackScreen(
                                         .testTag("decisionText"))
                           }
 
-                        Text(
-                            text = "You have successfully completed $successfulSessionsCount ${
+                          Text(
+                              text =
+                                  "You have successfully completed $successfulSessionsCount ${
                                 when (sessionType) {
                                     SessionType.SPEECH -> "speeches"
                                     SessionType.INTERVIEW -> "interviews"
@@ -180,7 +178,7 @@ fun FeedbackScreen(
                                     else -> "sessions"
                                 }
                             } so far!",
-                        style = AppTypography.bodyLargeStyle,
+                              style = AppTypography.bodyLargeStyle,
                               modifier =
                                   Modifier.align(Alignment.CenterHorizontally)
                                       .padding(AppDimensions.paddingMedium)
@@ -231,16 +229,18 @@ fun FeedbackScreen(
  * @param sessionType The type of session.
  * @return The decision result.
  */
-private fun parseDecisionFromFeedback(feedback: String, sessionType: SessionType?): ChatViewModel.DecisionResult? {
-    if (sessionType == null) return null
+private fun parseDecisionFromFeedback(
+    feedback: String,
+    sessionType: SessionType?
+): ChatViewModel.DecisionResult? {
+  if (sessionType == null) return null
 
-    val feedbackLower = feedback.lowercase()
-    return when {
-        sessionType.positiveResponse.lowercase() in feedbackLower ->
-            ChatViewModel.DecisionResult(sessionType.successMessage, true)
-        sessionType.negativeResponse.lowercase() in feedbackLower ->
-            ChatViewModel.DecisionResult(sessionType.failureMessage, false)
-        else -> null
-    }
+  val feedbackLower = feedback.lowercase()
+  return when {
+    sessionType.positiveResponse.lowercase() in feedbackLower ->
+        ChatViewModel.DecisionResult(sessionType.successMessage, true)
+    sessionType.negativeResponse.lowercase() in feedbackLower ->
+        ChatViewModel.DecisionResult(sessionType.failureMessage, false)
+    else -> null
+  }
 }
-

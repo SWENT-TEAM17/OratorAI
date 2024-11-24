@@ -211,73 +211,73 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
    * @return The converted UserProfile object, or null if conversion fails.
    */
   private fun documentToUserProfile(document: DocumentSnapshot): UserProfile? {
-      return try {
-          val uid = document.id
-          val name = document.getString("name") ?: return null
-          val age = document.getLong("age")?.toInt() ?: return null
+    return try {
+      val uid = document.id
+      val name = document.getString("name") ?: return null
+      val age = document.getLong("age")?.toInt() ?: return null
 
-          // Retrieve the 'statistics' map from the document
-          val statisticsMap = document.get("statistics") as? Map<*, *>
-          val statistics = statisticsMap?.let {
-              // Extract 'sessionsGiven' map and convert values to Int
-              val sessionsGivenMapAny = it["sessionsGiven"] as? Map<String, Any>
-              val sessionsGiven = sessionsGivenMapAny?.mapValues { entry ->
-                  (entry.value as? Number)?.toInt() ?: 0
-              }?.toMutableMap() ?: mutableMapOf()
+      // Retrieve the 'statistics' map from the document
+      val statisticsMap = document.get("statistics") as? Map<*, *>
+      val statistics =
+          statisticsMap?.let {
+            // Extract 'sessionsGiven' map and convert values to Int
+            val sessionsGivenMapAny = it["sessionsGiven"] as? Map<String, Any>
+            val sessionsGiven =
+                sessionsGivenMapAny
+                    ?.mapValues { entry -> (entry.value as? Number)?.toInt() ?: 0 }
+                    ?.toMutableMap() ?: mutableMapOf()
 
-              // Extract 'successfulSessions' map and convert values to Int
-              val successfulSessionsMapAny = it["successfulSessions"] as? Map<String, Any>
-              val successfulSessions = successfulSessionsMapAny?.mapValues { entry ->
-                  (entry.value as? Number)?.toInt() ?: 0
-              }?.toMutableMap() ?: mutableMapOf()
+            // Extract 'successfulSessions' map and convert values to Int
+            val successfulSessionsMapAny = it["successfulSessions"] as? Map<String, Any>
+            val successfulSessions =
+                successfulSessionsMapAny
+                    ?.mapValues { entry -> (entry.value as? Number)?.toInt() ?: 0 }
+                    ?.toMutableMap() ?: mutableMapOf()
 
-              // Extract 'improvement' value
-              val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
+            // Extract 'improvement' value
+            val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
 
-              // Extract 'previousRuns' list and map each entry to 'SpeechStats'
-              val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
-              val previousRuns = previousRunsList?.map { run ->
+            // Extract 'previousRuns' list and map each entry to 'SpeechStats'
+            val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
+            val previousRuns =
+                previousRunsList?.map { run ->
                   SpeechStats(
                       title = run["title"] as? String ?: "",
                       duration = (run["duration"] as? Number)?.toInt() ?: 0,
                       date = run["date"] as? Timestamp ?: Timestamp.now(),
                       accuracy = (run["accuracy"] as? Number)?.toFloat() ?: 0.0f,
-                      wordsPerMinute = (run["wordsPerMinute"] as? Number)?.toInt() ?: 0
-                  )
-              } ?: emptyList()
+                      wordsPerMinute = (run["wordsPerMinute"] as? Number)?.toInt() ?: 0)
+                } ?: emptyList()
 
-              // Construct the 'UserStatistics' object
-              UserStatistics(
-                  sessionsGiven = sessionsGiven,
-                  successfulSessions = successfulSessions,
-                  improvement = improvement,
-                  previousRuns = previousRuns
-              )
+            // Construct the 'UserStatistics' object
+            UserStatistics(
+                sessionsGiven = sessionsGiven,
+                successfulSessions = successfulSessions,
+                improvement = improvement,
+                previousRuns = previousRuns)
           } ?: UserStatistics() // Default to an empty 'UserStatistics' if none found
 
-          // Retrieve other fields from the document
-          val friends = document.get("friends") as? List<String> ?: emptyList()
-          val profilePic = document.getString(FIELD_PROFILE_PIC)
-          val bio = document.getString("bio")
+      // Retrieve other fields from the document
+      val friends = document.get("friends") as? List<String> ?: emptyList()
+      val profilePic = document.getString(FIELD_PROFILE_PIC)
+      val bio = document.getString("bio")
 
-          // Construct and return the 'UserProfile' object
-          UserProfile(
-              uid = uid,
-              name = name,
-              age = age,
-              statistics = statistics,
-              friends = friends,
-              profilePic = profilePic,
-              bio = bio
-          )
-      } catch (e: Exception) {
-          Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
-          null
-      }
+      // Construct and return the 'UserProfile' object
+      UserProfile(
+          uid = uid,
+          name = name,
+          age = age,
+          statistics = statistics,
+          friends = friends,
+          profilePic = profilePic,
+          bio = bio)
+    } catch (e: Exception) {
+      Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
+      null
+    }
   }
 
-
-    /**
+  /**
    * Helper function to perform Firestore operations.
    *
    * @param task The Firestore task to be performed.
