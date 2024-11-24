@@ -197,24 +197,32 @@ class UserProfileRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getLong("age")).thenReturn(25L)
     `when`(mockDocumentSnapshot.get("friends")).thenReturn(listOf("friend1", "friend2"))
     `when`(mockDocumentSnapshot.getString("bio")).thenReturn("Test bio")
+
+    // Prepare sessionsGivenMap and successfulSessionsMap
+    val sessionsGivenMap = mapOf("SPEECH" to 10L, "INTERVIEW" to 5L, "NEGOTIATION" to 3L)
+
+    val successfulSessionsMap = mapOf("SPEECH" to 7L, "INTERVIEW" to 2L, "NEGOTIATION" to 1L)
+
+    // Prepare the statisticsMap
     val statisticsMap =
         mapOf(
-            "speechesGiven" to 10L, // Ensure this is a Long
+            "sessionsGiven" to sessionsGivenMap,
+            "successfulSessions" to successfulSessionsMap,
             "improvement" to 4.5f,
             "previousRuns" to
                 listOf(
                     mapOf(
                         "title" to "Speech 1",
-                        "duration" to 5,
+                        "duration" to 5L,
                         "date" to Timestamp.now(), // Use a valid Timestamp
                         "accuracy" to 85.0f,
-                        "wordsPerMinute" to 120),
+                        "wordsPerMinute" to 120L),
                     mapOf(
                         "title" to "Speech 2",
-                        "duration" to 7,
+                        "duration" to 7L,
                         "date" to Timestamp.now(), // Use a valid Timestamp
                         "accuracy" to 90.0f,
-                        "wordsPerMinute" to 110)))
+                        "wordsPerMinute" to 110L)))
 
     `when`(mockDocumentSnapshot.get("statistics")).thenReturn(statisticsMap)
 
@@ -236,7 +244,17 @@ class UserProfileRepositoryFirestoreTest {
           // Assertions for UserStatistics
           val statistics = userProfile?.statistics
           assert(statistics != null)
-          assert(statistics?.speechesGiven == 10)
+
+          // Check sessionsGiven
+          assert(statistics?.sessionsGiven?.get("SPEECH") == 10)
+          assert(statistics?.sessionsGiven?.get("INTERVIEW") == 5)
+          assert(statistics?.sessionsGiven?.get("NEGOTIATION") == 3)
+
+          // Check successfulSessions
+          assert(statistics?.successfulSessions?.get("SPEECH") == 7)
+          assert(statistics?.successfulSessions?.get("INTERVIEW") == 2)
+          assert(statistics?.successfulSessions?.get("NEGOTIATION") == 1)
+
           assert(statistics?.improvement == 4.5f)
 
           // Assertions for previous runs in UserStatistics
