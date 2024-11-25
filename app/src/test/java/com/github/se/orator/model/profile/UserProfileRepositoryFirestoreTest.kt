@@ -4,7 +4,13 @@ import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
-import com.google.firebase.firestore.*
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import junit.framework.TestCase.fail
 import org.junit.Before
@@ -12,7 +18,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -189,24 +197,33 @@ class UserProfileRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getLong("age")).thenReturn(25L)
     `when`(mockDocumentSnapshot.get("friends")).thenReturn(listOf("friend1", "friend2"))
     `when`(mockDocumentSnapshot.getString("bio")).thenReturn("Test bio")
+
+    // Prepare sessionsGivenMap and successfulSessionsMap
+    val sessionsGivenMap = mapOf("SPEECH" to 10L, "INTERVIEW" to 5L, "NEGOTIATION" to 3L)
+
+    val successfulSessionsMap = mapOf("SPEECH" to 7L, "INTERVIEW" to 2L, "NEGOTIATION" to 1L)
+
+    // Prepare the statisticsMap
     val statisticsMap =
         mapOf(
-            "speechesGiven" to 10,
+            "sessionsGiven" to sessionsGivenMap,
+            "successfulSessions" to successfulSessionsMap,
             "improvement" to 4.5f,
             "previousRuns" to
                 listOf(
                     mapOf(
                         "title" to "Speech 1",
-                        "duration" to 5,
-                        "date" to 0,
+                        "duration" to 5L,
+                        "date" to Timestamp.now(), // Use a valid Timestamp
                         "accuracy" to 85.0f,
-                        "wordsPerMinute" to 120),
+                        "wordsPerMinute" to 120L),
                     mapOf(
                         "title" to "Speech 2",
-                        "duration" to 7,
-                        "date" to 0,
+                        "duration" to 7L,
+                        "date" to Timestamp.now(), // Use a valid Timestamp
                         "accuracy" to 90.0f,
-                        "wordsPerMinute" to 110)))
+                        "wordsPerMinute" to 110L)))
+
     `when`(mockDocumentSnapshot.get("statistics")).thenReturn(statisticsMap)
 
     // Simulate a successful Firestore query with Tasks.forResult()
@@ -227,7 +244,17 @@ class UserProfileRepositoryFirestoreTest {
           // Assertions for UserStatistics
           val statistics = userProfile?.statistics
           assert(statistics != null)
-          assert(statistics?.speechesGiven == 10)
+
+          // Check sessionsGiven
+          assert(statistics?.sessionsGiven?.get("SPEECH") == 10)
+          assert(statistics?.sessionsGiven?.get("INTERVIEW") == 5)
+          assert(statistics?.sessionsGiven?.get("NEGOTIATION") == 3)
+
+          // Check successfulSessions
+          assert(statistics?.successfulSessions?.get("SPEECH") == 7)
+          assert(statistics?.successfulSessions?.get("INTERVIEW") == 2)
+          assert(statistics?.successfulSessions?.get("NEGOTIATION") == 1)
+
           assert(statistics?.improvement == 4.5f)
 
           // Assertions for previous runs in UserStatistics

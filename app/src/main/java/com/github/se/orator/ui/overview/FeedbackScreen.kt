@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.overview
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,190 +13,234 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.profile.SessionType
+import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.speaking.PublicSpeakingContext
+import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
-import com.github.se.orator.ui.network.Message // Import Message class for structured message data
-import com.github.se.orator.ui.theme.AppColors // Import theme colors
-import com.github.se.orator.ui.theme.AppDimensions // Import theme dimensions for consistent spacing
-import com.github.se.orator.ui.theme.AppTypography // Import theme typography for text styles
+import com.github.se.orator.ui.network.Message
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
- * The FeedbackScreen composable displays the feedback screen where users can see generated
- * feedback, retry, or navigate back.
+ * Composable function to display the feedback screen.
  *
- * @param chatViewModel The view model for the chat, providing feedback-related data.
- * @param navigationActions The navigation actions that can be performed from this screen.
+ * @param chatViewModel The view model for chat interactions.
+ * @param userProfileViewModel The view model for user profiles.
+ * @param apiLinkViewModel The view model for API links.
+ * @param navigationActions The actions used for navigation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedbackScreen(chatViewModel: ChatViewModel, navigationActions: NavigationActions) {
-  // State variables for feedback message, loading status, and error message.
+fun FeedbackScreen(
+    chatViewModel: ChatViewModel,
+    userProfileViewModel: UserProfileViewModel,
+    apiLinkViewModel: ApiLinkViewModel,
+    navigationActions: NavigationActions
+) {
+  // State variables for feedback message, decision, loading status, and error message.
   var feedbackMessage by remember { mutableStateOf<String?>(null) }
+  var decisionResult by remember { mutableStateOf<ChatViewModel.DecisionResult?>(null) }
   var isLoading by remember { mutableStateOf(true) }
   var errorMessage by remember { mutableStateOf<String?>(null) }
 
-  // Launch effect to generate feedback when the screen is first displayed.
-  // Tries to get feedback from `chatViewModel` and updates states based on success/failure.
+  val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
+  val userProfile by userProfileViewModel.userProfile.collectAsState()
+
+  val sessionType =
+      when (practiceContext) {
+        is InterviewContext -> SessionType.INTERVIEW
+        is PublicSpeakingContext -> SessionType.SPEECH
+        is SalesPitchContext -> SessionType.NEGOTIATION
+        else -> null
+      }
+
+  // Retrieve the number of successful sessions
+  val successfulSessionsCount =
+      sessionType?.let { userProfile?.statistics?.successfulSessions?.get(it.name) ?: 0 } ?: 0
+
   LaunchedEffect(Unit) {
     try {
       feedbackMessage = chatViewModel.generateFeedback()
+      feedbackMessage?.let {
+        decisionResult = parseDecisionFromFeedback(it, sessionType)
+
+        // Update user statistics based on the decision and session type
+        if (decisionResult != null && sessionType != null) {
+          userProfileViewModel.updateSessionResult(
+              isSuccess = decisionResult!!.isSuccess, sessionType = sessionType)
+        } else {
+          Log.e("FeedbackScreen", "Session type or decision result is null.")
+        }
+      }
     } catch (e: Exception) {
-      // In case of error, capture the error message.
       errorMessage = e.localizedMessage
     } finally {
-      // Set loading to false regardless of success or failure.
       isLoading = false
     }
   }
 
-  // Scaffold is the main layout component that provides a basic structure with top bar and content
-  // area.
+  DisposableEffect(Unit) { onDispose { chatViewModel.endConversation() } }
+
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
       topBar = {
-        // TopAppBar to display the screen title and back navigation.
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
             title = {
               Text(
                   text = "Feedback",
-                  modifier =
-                      Modifier.testTag("FeedbackText"), // Title text displayed in the top app bar.
-                  fontWeight = FontWeight.Bold, // Bold font for emphasis
-                  color = AppColors.textColor // Using theme color for title text
-                  )
+                  modifier = Modifier.testTag("FeedbackText"),
+                  fontWeight = FontWeight.Bold,
+                  color = AppColors.textColor)
             },
-            // Back button to navigate to the previous screen.
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() }, // Action to navigate back
-                  modifier = Modifier.testTag("back_button") // Test tag for UI testing
-                  ) {
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Back arrow icon
-                        contentDescription = "Back", // Content description for accessibility
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeSmall), // Icon size from theme
-                        tint = AppColors.textColor // Icon color from theme
-                        )
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                        tint = AppColors.textColor)
                   }
             },
-            // Background and title colors for the app bar, using themed colors.
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = AppColors.surfaceColor,
                     titleContentColor = AppColors.textColor))
       },
       content = { paddingValues ->
-        // Main content column, respecting the scaffold's padding values.
         Column(
-            modifier =
-                Modifier.fillMaxSize() // Fill the screen space
-                    .padding(paddingValues) // Apply padding from the scaffold
-                    .testTag("feedbackContent"),
+            modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("feedbackContent"),
         ) {
-          Divider() // Divider below the top bar for visual separation
+          HorizontalDivider()
           Column(
               modifier =
                   Modifier.fillMaxSize()
-                      .padding(
-                          horizontal = AppDimensions.paddingMedium) // Horizontal padding from theme
-                      .padding(top = AppDimensions.paddingSmall) // Top padding from theme
-                      .testTag("feedbackTitle"), // Test tag for UI testing
-              horizontalAlignment = Alignment.CenterHorizontally // Center alignment
-              ) {
-                // Subtitle at the top to introduce feedback.
-                Box(
-                    modifier =
-                        Modifier.fillMaxWidth().testTag("feedbackSubtitle") // Apply testTag here
-                    ) {
-                      ChatMessageItem(
-                          message =
-                              Message(
-                                  content = "Here's what you did well and where you can improve:",
-                                  role = "assistant"))
-                    }
+                      .padding(horizontal = AppDimensions.paddingMedium)
+                      .padding(top = AppDimensions.paddingSmall)
+                      .testTag("feedbackTitle"),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(modifier = Modifier.fillMaxWidth().testTag("feedbackSubtitle")) {
+                  ChatMessageItem(
+                      message =
+                          Message(
+                              content = "Here's what you did well and where you can improve:",
+                              role = "assistant"))
+                }
 
-                // Display appropriate content based on loading, error, or feedback state.
                 when {
                   isLoading -> {
-                    // Show loading spinner while feedback is being generated.
                     CircularProgressIndicator(
                         modifier =
                             Modifier.align(Alignment.CenterHorizontally)
-                                .padding(AppDimensions.paddingMedium) // Padding around the spinner
-                                .testTag("loadingIndicator"), // Test tag for UI testing
-                        color = AppColors.loadingIndicatorColor // Spinner color from theme
-                        )
+                                .padding(AppDimensions.paddingMedium)
+                                .testTag("loadingIndicator"),
+                        color = AppColors.loadingIndicatorColor)
                   }
                   errorMessage != null -> {
-                    // Show error message if there was an issue generating feedback.
                     Text(
-                        text = "Error: $errorMessage", // Display the error message
-                        color = AppColors.errorColor, // Text color from theme
-                        modifier = Modifier.testTag("errorText") // Test tag for UI testing
-                        )
+                        text = "Error: $errorMessage",
+                        color = AppColors.errorColor,
+                        modifier = Modifier.testTag("errorText"))
                   }
                   feedbackMessage != null -> {
-                    // Display the feedback message using `ChatMessageItem` for a consistent
-                    // look.
-                    Box(
+                    Column(
                         modifier =
-                            Modifier.fillMaxWidth() // Fill available width
-                                .weight(1f) // Allow Box to grow and take available space
+                            Modifier.fillMaxWidth()
+                                .weight(1f)
                                 .verticalScroll(rememberScrollState())
-                                .testTag("feedbackMessage")
-                        // Enable scrolling for long content
-                        ) {
+                                .testTag("feedbackMessage")) {
+                          // Display the decision prominently.
+                          decisionResult?.message?.let { decisionText ->
+                            Text(
+                                text = decisionText,
+                                style = AppTypography.largeTitleStyle,
+                                modifier =
+                                    Modifier.align(Alignment.CenterHorizontally)
+                                        .padding(AppDimensions.paddingMedium)
+                                        .testTag("decisionText"))
+                          }
+
+                          Text(
+                              text =
+                                  "You have successfully completed $successfulSessionsCount ${
+                                when (sessionType) {
+                                    SessionType.SPEECH -> "speeches"
+                                    SessionType.INTERVIEW -> "interviews"
+                                    SessionType.NEGOTIATION -> "negotiations"
+                                    else -> "sessions"
+                                }
+                            } so far!",
+                              style = AppTypography.bodyLargeStyle,
+                              modifier =
+                                  Modifier.align(Alignment.CenterHorizontally)
+                                      .padding(AppDimensions.paddingMedium)
+                                      .testTag("successfulSessionsText"))
+                          // Display the detailed feedback message.
                           ChatMessageItem(
-                              message =
-                                  Message(
-                                      content = feedbackMessage!!, // Display feedback content
-                                      role = "assistant" // Set role to "assistant" for styling
-                                      ))
+                              message = Message(content = feedbackMessage!!, role = "assistant"))
                         }
                   }
                   else -> {
-                    // Display if there is no feedback available (edge case).
                     Text(
                         text = "No feedback available.",
-                        style = AppTypography.bodyLargeStyle, // Style from theme typography
-                        color = AppColors.textColor, // Text color from theme
-                        modifier = Modifier.testTag("feedbackNoMessage") // Test tag for UI testing
-                        )
+                        style = AppTypography.bodyLargeStyle,
+                        color = AppColors.textColor,
+                        modifier = Modifier.testTag("feedbackNoMessage"))
                   }
                 }
 
-                // Button for retrying or navigating back, positioned below the feedback
-                // content.
                 Button(
                     onClick = {
-                      navigationActions.navigateTo(
-                          TopLevelDestinations.HOME) // Action to retry or go home
+                      chatViewModel.resetPracticeContext()
+                      navigationActions.navigateTo(TopLevelDestinations.HOME)
                     },
                     modifier =
-                        Modifier.fillMaxWidth() // Button fills available width
-                            .padding(top = AppDimensions.paddingMedium) // Top padding from theme
+                        Modifier.fillMaxWidth()
+                            .padding(top = AppDimensions.paddingMedium)
                             .border(
-                                width = AppDimensions.borderStrokeWidth, // Border width from theme
-                                color = AppColors.buttonBorderColor, // Border color from theme
-                                shape =
-                                    MaterialTheme.shapes.medium // Button shape from MaterialTheme
-                                )
+                                width = AppDimensions.borderStrokeWidth,
+                                color = AppColors.buttonBorderColor,
+                                shape = MaterialTheme.shapes.medium)
                             .testTag("retryButton"),
-                    enabled = !isLoading, // Disable button while loading
+                    enabled = !isLoading,
                     colors =
                         ButtonDefaults.buttonColors(
-                            containerColor =
-                                AppColors.buttonOverviewColor, // Background color from theme
-                            contentColor = AppColors.textColor // Text color from theme
-                            )) {
-                      Text(
-                          text = "Try Again",
-                          modifier = Modifier.testTag("retryButtonText")) // Button label
-                }
+                            containerColor = AppColors.buttonOverviewColor,
+                            contentColor = AppColors.textColor)) {
+                      Text(text = "Try Again", modifier = Modifier.testTag("retryButtonText"))
+                    }
               }
         }
       })
+}
+
+/**
+ * Function to parse the decision from the feedback message.
+ *
+ * @param feedback The feedback message.
+ * @param sessionType The type of session.
+ * @return The decision result.
+ */
+private fun parseDecisionFromFeedback(
+    feedback: String,
+    sessionType: SessionType?
+): ChatViewModel.DecisionResult? {
+  if (sessionType == null) return null
+
+  val feedbackLower = feedback.lowercase()
+  return when {
+    sessionType.positiveResponse.lowercase() in feedbackLower ->
+        ChatViewModel.DecisionResult(sessionType.successMessage, true)
+    sessionType.negativeResponse.lowercase() in feedbackLower ->
+        ChatViewModel.DecisionResult(sessionType.failureMessage, false)
+    else -> null
+  }
 }
