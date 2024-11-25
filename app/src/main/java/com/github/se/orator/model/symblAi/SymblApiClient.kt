@@ -21,6 +21,12 @@ import org.json.JSONObject
 
 private const val CLASS_LOG_ID = "SymblApiClient"
 
+/**
+ * The SymblApiClient class is responsible for making API calls to the Symbl.ai API.
+ *
+ * @param context The context of the application.
+ * @param client The OkHttpClient instance to use for making API calls.
+ */
 class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttpClient()) :
     VoiceAnalysisApi {
 
@@ -203,6 +209,13 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
     }
   }
 
+  /**
+   * Function to get the transcription of an audio file.
+   *
+   * @param audioFile The audio file to be transcribed.
+   * @param onSuccess The function to be called on success.
+   * @param onFailure The function to be called on failure.
+   */
   override fun getTranscription(
       audioFile: File,
       onSuccess: (AnalysisData) -> Unit,
