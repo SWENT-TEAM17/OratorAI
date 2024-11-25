@@ -203,45 +203,6 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
     }
   }
 
-  // In phase of being modified
-  private fun parseFillerResponse(fillerJson: JSONObject) {
-    try {
-      val insightsArray = fillerJson.getJSONArray("insights")
-      if (insightsArray.length() > 0) {
-        val fillersBuilder = StringBuilder()
-
-        for (i in 0 until insightsArray.length()) {
-          val insightObject = insightsArray.getJSONObject(i)
-          val fillerWord = insightObject.getString("text")
-          fillersBuilder.append("Filler word: $fillerWord\n")
-        }
-
-        // Store the fillers result
-        fillersResult = fillersBuilder.toString()
-
-        // These will be fixed later on
-
-        /*// Notify listener
-          listener?.onProcessingComplete(
-              transcribedText = transcribedText,
-              sentimentResult = sentimentResult,
-              fillersResult = fillersResult)
-        } else {
-          fillersResult = "No filler words detected."
-
-          listener?.onProcessingComplete(
-              transcribedText = transcribedText,
-              sentimentResult = sentimentResult,
-              fillersResult = fillersResult)*/
-      }
-    } catch (e: Exception) {
-      /*
-      listener?.onError("Error parsing filler words: ${e.message}")
-      Log.e("Filler Parsing Error", e.message ?: "Unknown error")
-       */
-    }
-  }
-
   override fun getTranscription(
       audioFile: File,
       onSuccess: (AnalysisData) -> Unit,
