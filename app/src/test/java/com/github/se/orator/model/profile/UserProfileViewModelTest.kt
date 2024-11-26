@@ -250,6 +250,29 @@ class UserProfileViewModelTest {
     testDispatcher.scheduler.advanceUntilIdle()
 
     val userProfile = viewModel.friendsProfiles.value
+    viewModel.updateLoginStreak()
     Assert.assertTrue(userProfile.size == 1)
+  }
+
+  @Test
+  fun `updateLoginStreak should call repository to update streak`() = runTest {
+    `when`(repository.getCurrentUserUid()).thenReturn(testUid)
+
+    doAnswer {
+          val onSuccess = it.getArgument<() -> Unit>(1)
+          onSuccess()
+          null
+        }
+        .`when`(repository)
+        .updateLoginStreak(any(), any(), any())
+
+    // Reset interactions to exclude calls from ViewModel initialization
+    clearInvocations(repository)
+
+    viewModel.updateLoginStreak()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    verify(repository).updateLoginStreak(eq(testUid), any(), any())
+    verify(repository).getUserProfile(eq(testUid), any(), any())
   }
 }

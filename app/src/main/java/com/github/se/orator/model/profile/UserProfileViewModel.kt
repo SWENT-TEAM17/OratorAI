@@ -334,4 +334,20 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       Log.e("UserProfileViewModel", "Current user profile is null.")
     }
   }
+
+  fun updateLoginStreak() {
+    val uid = repository.getCurrentUserUid()
+    if (uid != null) {
+      repository.updateLoginStreak(
+          uid = uid,
+          onSuccess = {
+            // Optionally, fetch the updated profile
+            getUserProfile(uid)
+            Log.d("UserProfileViewModel", "Login streak updated successfully.")
+          },
+          onFailure = { Log.e("UserProfileViewModel", "Failed to update login streak.") })
+    } else {
+      Log.e("UserProfileViewModel", "Cannot update streak: User is not authenticated.")
+    }
+  }
 }

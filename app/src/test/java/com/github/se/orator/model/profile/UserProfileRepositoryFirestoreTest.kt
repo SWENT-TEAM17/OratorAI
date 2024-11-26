@@ -11,7 +11,9 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
+import java.util.*
 import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.Test
@@ -20,10 +22,10 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -39,6 +41,7 @@ class UserProfileRepositoryFirestoreTest {
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
   private lateinit var repository: UserProfileRepositoryFirestore
   @Mock private lateinit var mockStorage: FirebaseStorage
+  @Mock private lateinit var mockTransaction: Transaction
 
   private val testUserProfile =
       UserProfile(
@@ -73,21 +76,18 @@ class UserProfileRepositoryFirestoreTest {
   fun getUserProfileCallsDocuments() {
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
-    // Ensure the QuerySnapshot returns a list of mock DocumentSnapshots
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf())
-
     // Call the method under test
     repository.getUserProfile(
         testUserProfile.uid,
         onSuccess = {},
         onFailure = { fail("Failure callback should not be called") })
 
-    verify(org.mockito.kotlin.timeout(100)) { (mockQuerySnapshot).documents }
+    verify(mockDocumentReference).get()
   }
 
   /**
-   * This test verifies that when fetching a user profile, the Firestore `get()` is called on the
-   * document reference and not the collection reference (to avoid fetching all documents).
+   * This test verifies that when adding a user profile, the Firestore `set()` is called on the
+   * document reference.
    */
   @Test
   fun addUserProfile_shouldCallFirestoreCollection() {
@@ -121,7 +121,6 @@ class UserProfileRepositoryFirestoreTest {
    */
   @Test
   fun getFriendsProfiles_whenFriendUidsEmpty_shouldReturnEmptyList() {
-    `when`(mockCollectionReference.whereIn(any<String>(), any())).thenReturn(mockQuery)
     // Call the method under test with an empty list of friend UIDs
     repository.getFriendsProfiles(
         emptyList(),
@@ -298,23 +297,74 @@ class UserProfileRepositoryFirestoreTest {
         .thenReturn(Tasks.forResult(null))
 
     var updateSuccess: Boolean? = null
-    var updateFailure: Exception? = null
 
     repository.updateUserProfilePicture(
         testUid,
         expectedDownloadUrl,
         onSuccess = { updateSuccess = true },
-        onFailure = { updateFailure = it })
+        onFailure = { fail("Failure callback should not be called") })
 
     // Ensure the Firestore update is processed
     shadowOf(Looper.getMainLooper()).idle()
 
     // Assertions
     assert(updateSuccess == true)
-    assert(updateFailure == null)
 
     // Verify that Firestore was called to update the profile picture
     verify(mockFirestore.collection(anyString()).document(testUid))
         .update(UserProfileRepositoryFirestore.FIELD_PROFILE_PIC, expectedDownloadUrl)
+  }
+
+  // New tests for updateLoginStreak
+
+  /** Test that updateLoginStreak calls runTransaction and calls onSuccess when successful. */
+  @Test
+  fun updateLoginStreak_callsRunTransaction_andCallsOnSuccess() {
+    val uid = "testUid"
+
+    // Mock the runTransaction method to return a successful Task
+    `when`(mockFirestore.runTransaction<Void>(any())).thenReturn(Tasks.forResult(null))
+
+    var successCalled = false
+
+    repository.updateLoginStreak(
+        uid,
+        onSuccess = { successCalled = true },
+        onFailure = { fail("Failure callback should not be called") })
+
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify that runTransaction was called
+    verify(mockFirestore).runTransaction<Void>(any())
+
+    // Assert that onSuccess was called
+    assert(successCalled)
+  }
+
+  /** Test that updateLoginStreak calls onFailure when transaction fails. */
+  @Test
+  fun updateLoginStreak_whenTransactionFails_callsOnFailure() {
+    val uid = "testUid"
+
+    // Mock the runTransaction method to return a failed Task
+    val exception = Exception("Transaction failed")
+    `when`(mockFirestore.runTransaction<Void>(any())).thenReturn(Tasks.forException(exception))
+
+    var failureCalled = false
+
+    repository.updateLoginStreak(
+        uid,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { failureCalled = true })
+
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify that runTransaction was called
+    verify(mockFirestore).runTransaction<Void>(any())
+
+    // Assert that onFailure was called
+    assert(failureCalled)
   }
 }

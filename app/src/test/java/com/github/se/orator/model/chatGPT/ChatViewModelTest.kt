@@ -84,6 +84,7 @@ class ChatViewModelTest {
     `when`(apiLinkViewModel.analysisData).thenReturn(analysisDataState)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @After
   fun tearDown() {
     Dispatchers.resetMain() // Reset the main dispatcher
@@ -121,6 +122,7 @@ class ChatViewModelTest {
     }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun analysisDataIsCorrectlyObserved() = runTest {
     // Create a ChatViewModel instance with the mocked ChatGPTService and ApiLinkViewModel

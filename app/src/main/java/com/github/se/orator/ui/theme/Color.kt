@@ -35,6 +35,7 @@ object AppColors {
   val recordingButtonColor = Color.Red
   val iconColor = Color.Black
   val visualizerBarColor = Color.Cyan
+  val amber = Color(0xFFFFA726) // Amber color
 
   // Gradients
   val primaryGradient = Brush.linearGradient(colors = listOf(primaryColor, secondaryColor))

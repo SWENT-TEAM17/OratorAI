@@ -2,12 +2,17 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
+import com.github.se.orator.utils.formatDate
+import com.github.se.orator.utils.getCurrentDate
+import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import java.util.Date
 
 /**
  * Repository class for managing user profiles in Firestore.
@@ -215,6 +220,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       val uid = document.id
       val name = document.getString("name") ?: return null
       val age = document.getLong("age")?.toInt() ?: return null
+      val lastLoginDate = document.getString("lastLoginDate")
+      val currentStreak = document.getLong("currentStreak") ?: 0L
 
       // Retrieve the 'statistics' map from the document
       val statisticsMap = document.get("statistics") as? Map<*, *>
@@ -270,6 +277,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           statistics = statistics,
           friends = friends,
           profilePic = profilePic,
+          currentStreak = currentStreak,
+          lastLoginDate = lastLoginDate,
           bio = bio)
     } catch (e: Exception) {
       Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
@@ -328,6 +337,40 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         .addOnFailureListener { exception ->
           Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
           onFailure(exception)
+        }
+  }
+
+  override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
+    val userRef = db.collection(collectionPath).document(uid)
+    db.runTransaction { transaction ->
+          val snapshot = transaction.get(userRef)
+          val currentDate = getCurrentDate()
+          val lastLoginDateString = snapshot.getString("lastLoginDate")
+          val currentStreak = snapshot.getLong("currentStreak") ?: 0L
+          val updatedStreak: Long
+          val lastLoginDate: Date?
+          if (lastLoginDateString != null) {
+            lastLoginDate = parseDate(lastLoginDateString)
+            val daysDifference = getDaysDifference(lastLoginDate, currentDate)
+            updatedStreak =
+                when (daysDifference) {
+                  0L -> currentStreak // Same day login
+                  1L -> currentStreak + 1 // Consecutive day
+                  else -> 1L // Streak broken
+                }
+          } else {
+            // First-time login
+            updatedStreak = 1L
+          }
+          // Update the fields
+          transaction.update(
+              userRef,
+              mapOf("lastLoginDate" to formatDate(currentDate), "currentStreak" to updatedStreak))
+        }
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error updating login streak", exception)
+          onFailure()
         }
   }
 }
