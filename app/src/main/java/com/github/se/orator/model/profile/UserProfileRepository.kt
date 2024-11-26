@@ -63,8 +63,31 @@ interface UserProfileRepository {
   )
 
   fun getAllUserProfiles(onSuccess: (List<UserProfile>) -> Unit, onFailure: (Exception) -> Unit)
+    fun sendFriendRequest(
+        currentUid: String,
+        friendUid: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    )
 
-  /**
+
+
+    fun acceptFriendRequest(
+        currentUid: String,
+        friendUid: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    )
+
+
+    fun declineFriendRequest(
+        currentUid: String,
+        friendUid: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    )
+
+    /**
    * Update the profile picture URL in the data store.
    *
    * @param uid The UID of the user.

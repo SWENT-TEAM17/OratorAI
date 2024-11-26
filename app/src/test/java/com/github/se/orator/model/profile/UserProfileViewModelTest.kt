@@ -246,7 +246,7 @@ class UserProfileViewModelTest {
         .`when`(repository)
         .updateUserProfile(any(), any(), any())
 
-    viewModel.addFriend(friendProfile)
+    viewModel.sendRequest(friendProfile)
     testDispatcher.scheduler.advanceUntilIdle()
 
     val userProfile = viewModel.friendsProfiles.value

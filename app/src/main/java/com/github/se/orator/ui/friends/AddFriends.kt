@@ -207,7 +207,7 @@ fun UserItem(
               .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .clickable {
                 // Add friend when the item is clicked
-                userProfileViewModel.addFriend(user)
+                userProfileViewModel.sendRequest(user)
                 // Show Toast message
                 Toast.makeText(
                         context, "${user.name} has been added as a friend", Toast.LENGTH_SHORT)
