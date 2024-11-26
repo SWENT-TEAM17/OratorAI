@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.QueryStats
@@ -115,7 +116,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                   },
                   modifier = Modifier.testTag("sign_out_button")) {
                     Icon(
-                        Icons.Filled.Logout,
+                        Icons.AutoMirrored.Filled.Logout,
                         contentDescription = "Sign out",
                         modifier =
                             Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"))

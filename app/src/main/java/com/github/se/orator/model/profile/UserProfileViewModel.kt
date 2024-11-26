@@ -295,6 +295,46 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
   }
 
+  /**
+   * Updates the session result in the user profile statistics.
+   *
+   * @param isSuccess The result of the session.
+   * @param sessionType The type of session.
+   */
+  fun updateSessionResult(isSuccess: Boolean, sessionType: SessionType) {
+    val currentUserProfile = userProfile_.value
+    if (currentUserProfile != null) {
+      val currentStats = currentUserProfile.statistics
+
+      val sessionTypeKey = sessionType.name
+
+      // Update sessions given
+      val updatedSessionsGiven = currentStats.sessionsGiven.toMutableMap()
+      updatedSessionsGiven[sessionTypeKey] = (updatedSessionsGiven[sessionTypeKey] ?: 0) + 1
+
+      // Update successful sessions if applicable
+      val updatedSuccessfulSessions = currentStats.successfulSessions.toMutableMap()
+      if (isSuccess) {
+        updatedSuccessfulSessions[sessionTypeKey] =
+            (updatedSuccessfulSessions[sessionTypeKey] ?: 0) + 1
+      }
+
+      val updatedStats =
+          currentStats.copy(
+              sessionsGiven = updatedSessionsGiven, successfulSessions = updatedSuccessfulSessions)
+
+      val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
+
+      // Save the updated profile to the database
+      updateUserProfile(updatedProfile)
+
+      // Update the StateFlow
+      userProfile_.value = updatedProfile
+    } else {
+      Log.e("UserProfileViewModel", "Current user profile is null.")
+    }
+  }
+
   fun updateLoginStreak() {
     val uid = repository.getCurrentUserUid()
     if (uid != null) {

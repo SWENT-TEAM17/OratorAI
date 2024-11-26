@@ -1,4 +1,3 @@
-// File: SpeakingPracticeModule.kt
 package com.github.se.orator.ui.overview
 
 import android.widget.Toast
