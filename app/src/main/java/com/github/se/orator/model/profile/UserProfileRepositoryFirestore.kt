@@ -2,17 +2,17 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
+import com.github.se.orator.utils.formatDate
+import com.github.se.orator.utils.getCurrentDate
+import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 /**
  * Repository class for managing user profiles in Firestore.
@@ -344,31 +344,5 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           Log.e("UserProfileRepository", "Error updating login streak", exception)
           onFailure()
         }
-  }
-  // Helper functions for date handling
-  private fun getCurrentDate(): Date {
-    val calendar = Calendar.getInstance(TimeZone.getDefault())
-    calendar.set(Calendar.HOUR_OF_DAY, 0)
-    calendar.set(Calendar.MINUTE, 0)
-    calendar.set(Calendar.SECOND, 0)
-    calendar.set(Calendar.MILLISECOND, 0)
-    return calendar.time
-  }
-
-  private fun parseDate(dateString: String): Date {
-    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    sdf.timeZone = TimeZone.getDefault()
-    return sdf.parse(dateString) ?: Date()
-  }
-
-  private fun formatDate(date: Date): String {
-    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    sdf.timeZone = TimeZone.getDefault()
-    return sdf.format(date)
-  }
-
-  private fun getDaysDifference(startDate: Date, endDate: Date): Long {
-    val diffInMillis = endDate.time - startDate.time
-    return diffInMillis / (1000 * 60 * 60 * 24)
   }
 }

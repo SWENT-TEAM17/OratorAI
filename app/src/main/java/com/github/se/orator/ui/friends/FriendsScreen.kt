@@ -42,11 +42,9 @@ import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import com.github.se.orator.utils.getCurrentDate
+import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.parseDate
 import kotlinx.coroutines.launch
 
 /**
@@ -374,25 +372,4 @@ fun currentFriendStreak(lastLoginDateString: String?, currentStreak: Long): Long
     }
   }
   return -1L // No last login date recorded
-}
-
-// Helper functions for date handling
-private fun getCurrentDate(): Date {
-  val calendar = Calendar.getInstance(TimeZone.getDefault())
-  calendar.set(Calendar.HOUR_OF_DAY, 0)
-  calendar.set(Calendar.MINUTE, 0)
-  calendar.set(Calendar.SECOND, 0)
-  calendar.set(Calendar.MILLISECOND, 0)
-  return calendar.time
-}
-
-private fun parseDate(dateString: String): Date {
-  val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-  sdf.timeZone = TimeZone.getDefault()
-  return sdf.parse(dateString) ?: Date()
-}
-
-private fun getDaysDifference(startDate: Date, endDate: Date): Long {
-  val diffInMillis = endDate.time - startDate.time
-  return diffInMillis / (1000 * 60 * 60 * 24)
 }
