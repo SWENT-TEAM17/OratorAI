@@ -109,23 +109,23 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     repository.getUserProfile(
         uid = uid,
         onSuccess = { profile ->
-            userProfile_.value = profile
-            profile?.let {
-                // Fetch Friends Profiles
-                fetchFriendsProfiles(it.friends)
+          userProfile_.value = profile
+          profile?.let {
+            // Fetch Friends Profiles
+            fetchFriendsProfiles(it.friends)
 
-                // Fetch Received Friend Requests Profiles
-                fetchRecReqProfiles(it.recReq)
+            // Fetch Received Friend Requests Profiles
+            fetchRecReqProfiles(it.recReq)
 
-                // Fetch Sent Friend Requests Profiles
-                fetchSentReqProfiles(it.sentReq)
+            // Fetch Sent Friend Requests Profiles
+            fetchSentReqProfiles(it.sentReq)
 
-                // Optionally, fetch all user profiles if needed
-                fetchAllUserProfiles()
-            }
-            isLoading_.value = false
-            Log.d("UserProfileViewModel", "User profile fetched successfully.")
-            Log.d("UserProfileViewModel", "Friends: ${profile?.name}")
+            // Optionally, fetch all user profiles if needed
+            fetchAllUserProfiles()
+          }
+          isLoading_.value = false
+          Log.d("UserProfileViewModel", "User profile fetched successfully.")
+          Log.d("UserProfileViewModel", "Friends: ${profile?.name}")
         },
         onFailure = {
           // Handle error
@@ -193,111 +193,108 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    *
    * @param friend The user profile of the friend to be added.
    */
-    /**
-     * Accepts a friend request from the specified friend.
-     *
-     * @param friend The `UserProfile` of the user whose request is being accepted.
-     */
-    fun acceptFriend(friend: UserProfile) {
-        val currentUid = repository.getCurrentUserUid()
-        if (currentUid != null) {
-            repository.acceptFriendRequest(
-                currentUid = currentUid,
-                friendUid = friend.uid,
-                onSuccess = {
-                    Log.d("UserProfileViewModel", "Friend request accepted from ${friend.name}")
+  /**
+   * Accepts a friend request from the specified friend.
+   *
+   * @param friend The `UserProfile` of the user whose request is being accepted.
+   */
+  fun acceptFriend(friend: UserProfile) {
+    val currentUid = repository.getCurrentUserUid()
+    if (currentUid != null) {
+      repository.acceptFriendRequest(
+          currentUid = currentUid,
+          friendUid = friend.uid,
+          onSuccess = {
+            Log.d("UserProfileViewModel", "Friend request accepted from ${friend.name}")
 
-                    // Update local state for friends
-                    val updatedFriendsList = userProfile_.value?.friends?.toMutableList()?.apply { add(friend.uid) }
-                    if (updatedFriendsList != null) {
-                        val updatedProfile = userProfile_.value!!.copy(friends = updatedFriendsList)
-                        userProfile_.value = updatedProfile
-                        friendsProfiles_.value += friend
+            // Update local state for friends
+            val updatedFriendsList =
+                userProfile_.value?.friends?.toMutableList()?.apply { add(friend.uid) }
+            if (updatedFriendsList != null) {
+              val updatedProfile = userProfile_.value!!.copy(friends = updatedFriendsList)
+              userProfile_.value = updatedProfile
+              friendsProfiles_.value += friend
 
-                        // Remove from received requests
-                        val updatedRecReq = userProfile_.value?.recReq?.toMutableList()?.apply { remove(friend.uid) }
-                        if (updatedRecReq != null) {
-                            val updatedProfileRecReq = userProfile_.value!!.copy(recReq = updatedRecReq)
-                            userProfile_.value = updatedProfileRecReq
-                            recReqProfiles_.value = recReqProfiles_.value.filter { it.uid != friend.uid }
-                        }
-                    }
-                },
-                onFailure = { exception ->
-                    Log.e("UserProfileViewModel", "Failed to accept friend request.", exception)
-                    // Optionally, notify the UI about the failure
-                }
-            )
-        } else {
-            Log.e("UserProfileViewModel", "Cannot accept friend request: User is not authenticated.")
-            // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
-        }
+              // Remove from received requests
+              val updatedRecReq =
+                  userProfile_.value?.recReq?.toMutableList()?.apply { remove(friend.uid) }
+              if (updatedRecReq != null) {
+                val updatedProfileRecReq = userProfile_.value!!.copy(recReq = updatedRecReq)
+                userProfile_.value = updatedProfileRecReq
+                recReqProfiles_.value = recReqProfiles_.value.filter { it.uid != friend.uid }
+              }
+            }
+          },
+          onFailure = { exception ->
+            Log.e("UserProfileViewModel", "Failed to accept friend request.", exception)
+            // Optionally, notify the UI about the failure
+          })
+    } else {
+      Log.e("UserProfileViewModel", "Cannot accept friend request: User is not authenticated.")
+      // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
     }
+  }
 
-    /**
-     * Declines a friend request from the specified friend.
-     *
-     * @param friend The `UserProfile` of the user whose request is being declined.
-     */
-    fun declineFriendRequest(friend: UserProfile) {
-        val currentUid = repository.getCurrentUserUid()
-        if (currentUid != null) {
-            repository.declineFriendRequest(
-                currentUid = currentUid,
-                friendUid = friend.uid,
-                onSuccess = {
-                    Log.d("UserProfileViewModel", "Friend request declined from ${friend.name}")
+  /**
+   * Declines a friend request from the specified friend.
+   *
+   * @param friend The `UserProfile` of the user whose request is being declined.
+   */
+  fun declineFriendRequest(friend: UserProfile) {
+    val currentUid = repository.getCurrentUserUid()
+    if (currentUid != null) {
+      repository.declineFriendRequest(
+          currentUid = currentUid,
+          friendUid = friend.uid,
+          onSuccess = {
+            Log.d("UserProfileViewModel", "Friend request declined from ${friend.name}")
 
-                    // Update local state by removing the declined request
-                    val updatedRecReq = userProfile_.value?.recReq?.toMutableList()?.apply { remove(friend.uid) }
-                    if (updatedRecReq != null) {
-                        val updatedProfile = userProfile_.value!!.copy(recReq = updatedRecReq)
-                        userProfile_.value = updatedProfile
-                        recReqProfiles_.value = recReqProfiles_.value.filter { it.uid != friend.uid }
-                    }
-                },
-                onFailure = { exception ->
-                    Log.e("UserProfileViewModel", "Failed to decline friend request.", exception)
-                    // Optionally, notify the UI about the failure
-                }
-            )
-        } else {
-            Log.e("UserProfileViewModel", "Cannot decline friend request: User is not authenticated.")
-            // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
-        }
+            // Update local state by removing the declined request
+            val updatedRecReq =
+                userProfile_.value?.recReq?.toMutableList()?.apply { remove(friend.uid) }
+            if (updatedRecReq != null) {
+              val updatedProfile = userProfile_.value!!.copy(recReq = updatedRecReq)
+              userProfile_.value = updatedProfile
+              recReqProfiles_.value = recReqProfiles_.value.filter { it.uid != friend.uid }
+            }
+          },
+          onFailure = { exception ->
+            Log.e("UserProfileViewModel", "Failed to decline friend request.", exception)
+            // Optionally, notify the UI about the failure
+          })
+    } else {
+      Log.e("UserProfileViewModel", "Cannot decline friend request: User is not authenticated.")
+      // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
     }
+  }
 
-    fun sendRequest(friend: UserProfile) {
-        val currentUid = repository.getCurrentUserUid()
-        if (currentUid != null) {
-            repository.sendFriendRequest(
-                currentUid = currentUid,
-                friendUid = friend.uid,
-                onSuccess = {
-                    Log.d("UserProfileViewModel", "Friend request sent to ${friend.name}")
+  fun sendRequest(friend: UserProfile) {
+    val currentUid = repository.getCurrentUserUid()
+    if (currentUid != null) {
+      repository.sendFriendRequest(
+          currentUid = currentUid,
+          friendUid = friend.uid,
+          onSuccess = {
+            Log.d("UserProfileViewModel", "Friend request sent to ${friend.name}")
 
-                    // Update local state for sent requests
-                    val updatedSentReq = userProfile_.value?.sentReq?.toMutableList()?.apply { add(friend.uid) }
-                    if (updatedSentReq != null) {
-                        val updatedProfile = userProfile_.value!!.copy(sentReq = updatedSentReq)
-                        userProfile_.value = updatedProfile
-                        sentReqProfiles_.value += friend
-                    }
-                },
-                onFailure = { exception ->
-                    Log.e("UserProfileViewModel", "Failed to send friend request.", exception)
-                    // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
-                }
-            )
-        } else {
-            Log.e("UserProfileViewModel", "Cannot send friend request: User is not authenticated.")
-            // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
-        }
+            // Update local state for sent requests
+            val updatedSentReq =
+                userProfile_.value?.sentReq?.toMutableList()?.apply { add(friend.uid) }
+            if (updatedSentReq != null) {
+              val updatedProfile = userProfile_.value!!.copy(sentReq = updatedSentReq)
+              userProfile_.value = updatedProfile
+              sentReqProfiles_.value += friend
+            }
+          },
+          onFailure = { exception ->
+            Log.e("UserProfileViewModel", "Failed to send friend request.", exception)
+            // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
+          })
+    } else {
+      Log.e("UserProfileViewModel", "Cannot send friend request: User is not authenticated.")
+      // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
     }
-
-
-
-
+  }
 
   /**
    * Updates the user profile.
@@ -396,39 +393,38 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    * @param friend The `UserProfile` of the friend to be deleted.
    */
   fun deleteFriend(friend: UserProfile) {
-      val currentUid = repository.getCurrentUserUid()
-      if (currentUid != null) {
-          repository.deleteFriend(
-              currentUid = currentUid,
-              friendUid = friend.uid,
-              onSuccess = {
-                  Log.d("UserProfileViewModel", "Friend deleted: ${friend.name}")
+    val currentUid = repository.getCurrentUserUid()
+    if (currentUid != null) {
+      repository.deleteFriend(
+          currentUid = currentUid,
+          friendUid = friend.uid,
+          onSuccess = {
+            Log.d("UserProfileViewModel", "Friend deleted: ${friend.name}")
 
-                  // Option 1: Refresh the user profile to reflect changes
-                  getUserProfile(currentUid)
+            // Option 1: Refresh the user profile to reflect changes
+            getUserProfile(currentUid)
 
-                  // Option 2: Manually update the local state
-                  /*
-                  // Remove the friend from the local friendsProfiles
-                  friendsProfiles_.value = friendsProfiles_.value.filter { it.uid != friend.uid }
+            // Option 2: Manually update the local state
+            /*
+            // Remove the friend from the local friendsProfiles
+            friendsProfiles_.value = friendsProfiles_.value.filter { it.uid != friend.uid }
 
-                  // Update the userProfile's friends list
-                  val updatedFriendsList = userProfile_.value?.friends?.toMutableList()?.apply { remove(friend.uid) }
-                  if (updatedFriendsList != null) {
-                      val updatedProfile = userProfile_.value!!.copy(friends = updatedFriendsList)
-                      userProfile_.value = updatedProfile
-                  }
-                  */
-              },
-              onFailure = { exception ->
-                  Log.e("UserProfileViewModel", "Failed to delete friend.", exception)
-                  // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
-              }
-          )
-      } else {
-          Log.e("UserProfileViewModel", "Cannot delete friend: User is not authenticated.")
-          // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
-      }
+            // Update the userProfile's friends list
+            val updatedFriendsList = userProfile_.value?.friends?.toMutableList()?.apply { remove(friend.uid) }
+            if (updatedFriendsList != null) {
+                val updatedProfile = userProfile_.value!!.copy(friends = updatedFriendsList)
+                userProfile_.value = updatedProfile
+            }
+            */
+          },
+          onFailure = { exception ->
+            Log.e("UserProfileViewModel", "Failed to delete friend.", exception)
+            // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
+          })
+    } else {
+      Log.e("UserProfileViewModel", "Cannot delete friend: User is not authenticated.")
+      // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
+    }
   }
 
   /**
