@@ -7,7 +7,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
+import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -24,6 +26,7 @@ class AudioRecorder(
   private var audioRecord: AudioRecord? = null
   private var isRecordingAudio = false
   private var audioFile: File? = null
+  private var mediaPlayer: MediaPlayer? = null
 
   // Listener to notify when recording is finished
   interface RecordingListener {
@@ -138,4 +141,24 @@ class AudioRecorder(
     header[offset] = (value.toInt() and 0xff).toByte()
     header[offset + 1] = ((value.toInt() shr 8) and 0xff).toByte()
   }
+
+  // Play the audio file
+  fun playAudio(audioFile: File) {
+    if (!audioFile.exists()) {
+      Log.e("AudioRecorder", "Audio file does not exist: ${audioFile.path}")
+      return
+    }
+
+    // Stop any currently playing audio
+    mediaPlayer?.stop()
+    mediaPlayer?.release()
+
+    // Initialize MediaPlayer
+    mediaPlayer = MediaPlayer().apply {
+      setDataSource(audioFile.absolutePath)
+      prepare()
+      start()
+    }
+  }
+
 }

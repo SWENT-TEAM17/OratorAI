@@ -3,6 +3,7 @@ package com.github.se.orator.ui.profile
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
@@ -28,15 +30,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,7 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.symblAi.AudioRecorder
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -70,14 +72,23 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
+
+
   // Get the context
   val context = LocalContext.current
+  // Load saved recordings when the screen is displayed
+  LaunchedEffect(Unit) {
+        profileViewModel.loadSavedRecordings(context)
+  }
 
   // State to control whether the profile picture dialog is open
   var isDialogOpen by remember { mutableStateOf(false) }
+    val audioRecorder = remember { AudioRecorder(context, isOffline = true) }
 
   // Collect the profile data from the ViewModel
   val userProfile by profileViewModel.userProfile.collectAsState()
+  // State to hold the saved recordings
+  val savedRecordings by profileViewModel.savedRecordings.collectAsState()
 
   Scaffold(
       topBar = {
@@ -241,12 +252,37 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
-                // Previous Sessions Section
-                CardSection(
-                    title = "Previous Recordings",
-                    imageVector = Icons.Outlined.History,
-                    onClick = { /*TODO: Handle previous sessions click */},
-                    modifier = Modifier.testTag("previous_sessions_section"))
+                  Column(
+                      modifier = Modifier
+                          .fillMaxSize()
+                          .padding(innerPadding)
+                          .padding(16.dp)
+                  ) {
+                      // Title for Offline Recordings
+                      Text(
+                          text = "My Offline Recordings",
+                          style = MaterialTheme.typography.bodyLarge,
+                          modifier = Modifier.padding(vertical = 8.dp)
+                      )
+
+                      // Display saved recordings
+                      if (savedRecordings.isNotEmpty()) {
+                          savedRecordings.forEach { audioFile ->
+                              AudioRecordingPlaceholder(
+                                  fileName = audioFile.name,
+                                  onPlayClicked = { audioRecorder.playAudio(audioFile) }
+                              )
+                          }
+                      } else {
+                          Text(
+                              text = "No offline recordings available",
+                              style = MaterialTheme.typography.bodySmall,
+                              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                              modifier = Modifier.padding(8.dp)
+                          )
+                      }
+                  }
+
               }
                   ?: run {
                     Text(
@@ -262,6 +298,33 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
               profilePictureUrl = userProfile!!.profilePic!!, onDismiss = { isDialogOpen = false })
         }
       }
+}
+
+
+@Composable
+fun AudioRecordingPlaceholder(fileName: String, onPlayClicked: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(10.dp))
+            .clickable { onPlayClicked() }
+            .padding(16.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.PlayArrow, // Replace with your custom play icon if needed
+            contentDescription = "Play",
+            modifier = Modifier.size(36.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = fileName,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+    }
 }
 
 @Composable

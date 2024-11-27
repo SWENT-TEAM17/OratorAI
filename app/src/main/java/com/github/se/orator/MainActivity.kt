@@ -62,6 +62,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
   private lateinit var auth: FirebaseAuth
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
   private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
@@ -224,4 +225,5 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
       }
     }
   }
+
 }
