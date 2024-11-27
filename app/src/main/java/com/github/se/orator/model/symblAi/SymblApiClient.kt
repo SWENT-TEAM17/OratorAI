@@ -21,7 +21,14 @@ import org.json.JSONObject
 
 private const val CLASS_LOG_ID = "SymblApiClient"
 
-class SymblApiClient(context: Context) : VoiceAnalysisApi {
+/**
+ * The SymblApiClient class is responsible for making API calls to the Symbl.ai API.
+ *
+ * @param context The context of the application.
+ * @param client The OkHttpClient instance to use for making API calls.
+ */
+class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttpClient()) :
+    VoiceAnalysisApi {
 
   // Variables to hold Symbl.ai credentials
   private var symblAppId: String
@@ -53,8 +60,6 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onFailure(SpeakingError.CREDENTIALS_ERROR)
       return
     }
-
-    val client = OkHttpClient()
 
     val url = "https://api.symbl.ai/oauth2/token:generate"
 
@@ -143,8 +148,6 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
         onSuccess(
             AnalysisData(
                 transcription = textBuilder.toString(),
-                fillerWordsCount = -1,
-                averagePauseDuration = -1.0,
                 sentimentScore =
                     sentimentJson
                         .getJSONArray("messages")
@@ -162,45 +165,57 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
     }
   }
 
-  // In phase of being modified
-  private fun parseFillerResponse(fillerJson: JSONObject) {
+  /**
+   * Function to parse the analytics response from the Symbl API.
+   *
+   * @param analyticsJSONObject The JSON object containing the analytics data.
+   * @param onSuccess The function to be called on success. The `AnalysisData` object passed is set
+   *   with non-default values for fields `talkTimePercentage`, `talkTimeSeconds`, and `pace`.
+   */
+  private fun parseAnalyticsResponse(
+      analyticsJSONObject: JSONObject,
+      onSuccess: (AnalysisData) -> Unit,
+      onFailure: (SpeakingError) -> Unit
+  ) {
     try {
-      val insightsArray = fillerJson.getJSONArray("insights")
-      if (insightsArray.length() > 0) {
-        val fillersBuilder = StringBuilder()
+      val userAnalyticsArray = analyticsJSONObject.getJSONArray("members")
 
-        for (i in 0 until insightsArray.length()) {
-          val insightObject = insightsArray.getJSONObject(i)
-          val fillerWord = insightObject.getString("text")
-          fillersBuilder.append("Filler word: $fillerWord\n")
-        }
-
-        // Store the fillers result
-        fillersResult = fillersBuilder.toString()
-
-        // These will be fixed later on
-
-        /*// Notify listener
-          listener?.onProcessingComplete(
-              transcribedText = transcribedText,
-              sentimentResult = sentimentResult,
-              fillersResult = fillersResult)
-        } else {
-          fillersResult = "No filler words detected."
-
-          listener?.onProcessingComplete(
-              transcribedText = transcribedText,
-              sentimentResult = sentimentResult,
-              fillersResult = fillersResult)*/
+      if (userAnalyticsArray.length() != 1) {
+        onFailure(SpeakingError.NO_ANALYTICS_FOUND_ERROR)
+        Log.e(CLASS_LOG_ID, "No analytics found in the response.")
+        return
       }
+
+      val userAnalytics = userAnalyticsArray.getJSONObject(0)
+
+      // Pace
+      val pace = userAnalytics.getJSONObject("pace").getInt("wpm")
+      // Talk time
+      val talkTimePercentage = userAnalytics.getJSONObject("talkTime").getDouble("percentage")
+      val talkTimeSeconds = userAnalytics.getJSONObject("talkTime").getDouble("seconds")
+
+      // Pass the result on success
+      onSuccess(
+          AnalysisData(
+              talkTimePercentage = talkTimePercentage,
+              talkTimeSeconds = talkTimeSeconds,
+              pace = pace))
     } catch (e: Exception) {
-      /*
-      listener?.onError("Error parsing filler words: ${e.message}")
-      Log.e("Filler Parsing Error", e.message ?: "Unknown error")
-       */
+      Log.e(
+          CLASS_LOG_ID,
+          "Failed to parse the response while trying to retrieve analytics: ${e.message}",
+          e)
+      onFailure(SpeakingError.JSON_PARSING_ERROR)
     }
   }
 
+  /**
+   * Function to get the transcription of an audio file.
+   *
+   * @param audioFile The audio file to be transcribed.
+   * @param onSuccess The function to be called on success.
+   * @param onFailure The function to be called on failure.
+   */
   override fun getTranscription(
       audioFile: File,
       onSuccess: (AnalysisData) -> Unit,
@@ -231,11 +246,13 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
 
             Log.d(CLASS_LOG_ID, "Job started. Waiting for completion...")
 
-            while (getJobStatus(jobId, onFailure) == "in_progress") {
+            var status: String?
+            do {
+              status = getJobStatus(jobId, onFailure)
               Thread.sleep(2000)
-            }
+            } while (status == "in_progress")
 
-            if (getJobStatus(jobId, onFailure) == "completed") {
+            if (status == "completed") {
               fetchAnalysis(conversationId, onSuccess, onFailure)
               // pollForFillers(conversationId, accessToken!!)
             } else {
@@ -258,24 +275,72 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onSuccess: (AnalysisData) -> Unit,
       onFailure: (SpeakingError) -> Unit
   ) {
-    urlCallRequest(
-        request =
-            buildUrlGetRequestWithHeader(
-                "https://api.symbl.ai/v1/conversations/$conversationId/messages?sentiment=true&enableAllInsights=true",
-                accessToken),
-        onSuccess = { response ->
-          parseSentimentResponse(JSONObject(response), onSuccess, onFailure)
-        },
-        onFailure = {
-          Log.e(CLASS_LOG_ID, "Failed to fetch analysis data online")
-          onFailure(SpeakingError.HTTP_REQUEST_ERROR)
-        })
+
+    try {
+
+      var tempAnalysisData: AnalysisData? = null
+      urlCallRequestBlocking(
+          request =
+              buildUrlGetRequestWithHeader(
+                  "https://api.symbl.ai/v1/conversations/$conversationId/messages?sentiment=true&enableAllInsights=true",
+                  accessToken),
+          onSuccess = { response ->
+            parseSentimentResponse(JSONObject(response), { tempAnalysisData = it }, onFailure)
+          },
+          onFailure = {
+            Log.e(CLASS_LOG_ID, "Failed to fetch message data online")
+            onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+          })
+
+      if (tempAnalysisData == null) {
+        Log.e(
+            CLASS_LOG_ID, "Failed to fetch message data online (analysisData is unexpectedly null)")
+        onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+        return
+      }
+
+      Log.d(CLASS_LOG_ID, "Successfully parsed speech's transcription and sentiment data")
+
+      urlCallRequestBlocking(
+          request =
+              buildUrlGetRequestWithHeader(
+                  "https://api.symbl.ai/v1/conversations/$conversationId/analytics", accessToken),
+          onSuccess = { response ->
+            parseAnalyticsResponse(
+                JSONObject(response),
+                {
+                  tempAnalysisData =
+                      tempAnalysisData!!.copy(
+                          talkTimePercentage = it.talkTimePercentage,
+                          talkTimeSeconds = it.talkTimeSeconds,
+                          pace = it.pace)
+                },
+                onFailure)
+          },
+          onFailure = {
+            Log.e(CLASS_LOG_ID, "Failed to fetch analysis data online)")
+            onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+          })
+
+      if (tempAnalysisData!!.pace ==
+          -1) { // Meaning the processing of analytics data was unsuccessful
+        return
+      }
+
+      Log.d(CLASS_LOG_ID, "Successfully parsed speech's analytics data: $tempAnalysisData")
+
+      onSuccess(tempAnalysisData!!)
+    } catch (e: Exception) {
+      Log.e("Failed to parse response", e.message, e)
+      onFailure(SpeakingError.JSON_PARSING_ERROR)
+    }
   }
 
   /**
    * Function to get the current state of the job.
    *
    * @param jobId The ID of the job to check.
+   * @param onFailure The function to be called on failure.
    * @return The status (String?) of the job : either "completed", "failed", "in_progress" or null
    *   if the call to the api was unsuccessful.
    */
@@ -285,8 +350,12 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
     urlCallRequestBlocking(
         request = buildUrlGetRequest("https://api.symbl.ai/v1/job/$jobId"),
         onSuccess = { response ->
-          val jsonObject = JSONObject(response)
-          status = jsonObject.getString("status")
+          try {
+            val jsonObject = JSONObject(response)
+            status = jsonObject.getString("status")
+          } catch (e: Exception) {
+            status = null
+          }
         },
         onFailure = onFailure)
 
@@ -351,8 +420,6 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onSuccess: (String) -> Unit,
       onFailure: (SpeakingError) -> Unit
   ) {
-    val client = OkHttpClient()
-
     client
         .newCall(request)
         .enqueue(
@@ -387,12 +454,10 @@ class SymblApiClient(context: Context) : VoiceAnalysisApi {
       onSuccess: (String) -> Unit,
       onFailure: (SpeakingError) -> Unit
   ) {
-    val client = OkHttpClient()
-
     client.newCall(request).execute().use { response ->
       val responseData = response.body?.string() ?: "No Response"
       Log.d(CLASS_LOG_ID, responseData)
-      if (response.isSuccessful) {
+      if (response.isSuccessful && responseData.isNotEmpty()) {
         onSuccess(responseData)
       } else {
         onFailure(SpeakingError.HTTP_REQUEST_ERROR)

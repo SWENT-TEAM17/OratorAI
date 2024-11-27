@@ -1,6 +1,7 @@
 package com.github.se.orator.ui.profile
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,8 +27,10 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.QueryStats
@@ -44,8 +47,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -61,9 +66,13 @@ import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
+  // Get the context
+  val context = LocalContext.current
+
   // State to control whether the profile picture dialog is open
   var isDialogOpen by remember { mutableStateOf(false) }
 
@@ -98,11 +107,16 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             navigationIcon = {
               IconButton(
                   onClick = {
-                    // TODO: Implement sign-out functionality
+                    // Sign out the user
+                    FirebaseAuth.getInstance().signOut()
+                    // Display a toast message
+                    Toast.makeText(context, "Logout successful!", Toast.LENGTH_SHORT).show()
+                    // Navigate to the sign in screen
+                    navigationActions.navigateTo(Screen.AUTH)
                   },
                   modifier = Modifier.testTag("sign_out_button")) {
                     Icon(
-                        Icons.Filled.Logout,
+                        Icons.AutoMirrored.Filled.Logout,
                         contentDescription = "Sign out",
                         modifier =
                             Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"))
@@ -114,20 +128,22 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.PROFILE)
-      }) {
+      }) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(it).padding(AppDimensions.paddingMedium),
+            modifier =
+                Modifier.fillMaxSize().padding(innerPadding).padding(AppDimensions.paddingMedium),
             horizontalAlignment = Alignment.CenterHorizontally) {
               userProfile?.let { profile ->
                 Box(
                     modifier =
                         Modifier.fillMaxWidth()
-                            .height(200.dp)
+                            .height(AppDimensions.profileBoxHeight)
                             .padding(top = AppDimensions.paddingXXXLarge),
                     contentAlignment = Alignment.TopCenter) {
                       // Background "card" behind the profile picture
                       Card(
-                          modifier = Modifier.fillMaxWidth(0.95f).height(140.dp),
+                          modifier =
+                              Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
                           elevation = AppDimensions.elevationSmall) {}
 
                       // Profile Picture with overlapping positioning
@@ -143,8 +159,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                           onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
                           modifier =
                               Modifier.testTag("edit_button")
-                                  .width(40.dp)
-                                  .height(40.dp)
+                                  .size(AppDimensions.spacingXLarge)
                                   .align(Alignment.TopEnd)
                                   .offset(y = (-20).dp),
                           // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
@@ -163,11 +178,46 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                           horizontalAlignment = Alignment.CenterHorizontally,
                           modifier = Modifier.align(Alignment.TopCenter)) {
                             Spacer(modifier = Modifier.height(AppDimensions.MediumSpacerHeight))
-                            // Username
-                            Text(
-                                text = profile.name,
-                                fontSize = 20.sp,
-                                modifier = Modifier.testTag("profile_name"))
+
+                            // Box to hold username and streak
+                            Box(
+                                modifier = Modifier.fillMaxWidth().testTag("profile_name_box"),
+                                contentAlignment = Alignment.Center) {
+                                  // Username remains centered
+                                  Text(
+                                      text = profile.name,
+                                      fontSize = 20.sp,
+                                      fontWeight = FontWeight.Bold,
+                                      modifier = Modifier.testTag("profile_name"))
+
+                                  // Current Streak aligned to the end with fire icon
+                                  Row(
+                                      verticalAlignment = Alignment.CenterVertically,
+                                      modifier =
+                                          Modifier.align(Alignment.CenterEnd)
+                                              .offset(
+                                                  x =
+                                                      -AppDimensions
+                                                          .paddingLarge) // Push a little to the
+                                              // left
+                                              .testTag("current_streak")) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Whatshot, // Fire icon
+                                            contentDescription = "Active Streak",
+                                            tint = AppColors.amber,
+                                            modifier = Modifier.size(AppDimensions.iconSizeSmall))
+                                        Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+                                        Text(
+                                            text = "${profile.currentStreak}",
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = AppColors.amber,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.testTag("current_streak_text"))
+                                      }
+                                }
+
                             Spacer(modifier = Modifier.height(AppDimensions.SmallSpacerHeight))
 
                             Text(

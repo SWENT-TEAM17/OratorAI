@@ -2,12 +2,17 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
+import com.github.se.orator.utils.formatDate
+import com.github.se.orator.utils.getCurrentDate
+import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import java.util.Date
 
 /**
  * Repository class for managing user profiles in Firestore.
@@ -215,26 +220,56 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       val uid = document.id
       val name = document.getString("name") ?: return null
       val age = document.getLong("age")?.toInt() ?: return null
+      val lastLoginDate = document.getString("lastLoginDate")
+      val currentStreak = document.getLong("currentStreak") ?: 0L
+
+      // Retrieve the 'statistics' map from the document
       val statisticsMap = document.get("statistics") as? Map<*, *>
       val statistics =
           statisticsMap?.let {
-            UserStatistics(
-                speechesGiven = it["speechesGiven"] as? Int ?: 0,
-                improvement = it["improvement"] as? Float ?: 0.0f,
-                previousRuns =
-                    (it["previousRuns"] as? List<Map<String, Any>>)?.map { run ->
-                      SpeechStats(
-                          title = run["title"] as? String ?: "",
-                          duration = run["duration"] as? Int ?: 0,
-                          date = run["date"] as? Timestamp ?: Timestamp.now(),
-                          accuracy = run["accuracy"] as? Float ?: 0.0f,
-                          wordsPerMinute = run["wordsPerMinute"] as? Int ?: 0)
-                    } ?: emptyList())
-          } ?: UserStatistics()
+            // Extract 'sessionsGiven' map and convert values to Int
+            val sessionsGivenMapAny = it["sessionsGiven"] as? Map<String, Any>
+            val sessionsGiven =
+                sessionsGivenMapAny
+                    ?.mapValues { entry -> (entry.value as? Number)?.toInt() ?: 0 }
+                    ?.toMutableMap() ?: mutableMapOf()
 
+            // Extract 'successfulSessions' map and convert values to Int
+            val successfulSessionsMapAny = it["successfulSessions"] as? Map<String, Any>
+            val successfulSessions =
+                successfulSessionsMapAny
+                    ?.mapValues { entry -> (entry.value as? Number)?.toInt() ?: 0 }
+                    ?.toMutableMap() ?: mutableMapOf()
+
+            // Extract 'improvement' value
+            val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
+
+            // Extract 'previousRuns' list and map each entry to 'SpeechStats'
+            val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
+            val previousRuns =
+                previousRunsList?.map { run ->
+                  SpeechStats(
+                      title = run["title"] as? String ?: "",
+                      duration = (run["duration"] as? Number)?.toInt() ?: 0,
+                      date = run["date"] as? Timestamp ?: Timestamp.now(),
+                      accuracy = (run["accuracy"] as? Number)?.toFloat() ?: 0.0f,
+                      wordsPerMinute = (run["wordsPerMinute"] as? Number)?.toInt() ?: 0)
+                } ?: emptyList()
+
+            // Construct the 'UserStatistics' object
+            UserStatistics(
+                sessionsGiven = sessionsGiven,
+                successfulSessions = successfulSessions,
+                improvement = improvement,
+                previousRuns = previousRuns)
+          } ?: UserStatistics() // Default to an empty 'UserStatistics' if none found
+
+      // Retrieve other fields from the document
       val friends = document.get("friends") as? List<String> ?: emptyList()
       val profilePic = document.getString(FIELD_PROFILE_PIC)
       val bio = document.getString("bio")
+
+      // Construct and return the 'UserProfile' object
       UserProfile(
           uid = uid,
           name = name,
@@ -242,6 +277,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           statistics = statistics,
           friends = friends,
           profilePic = profilePic,
+          currentStreak = currentStreak,
+          lastLoginDate = lastLoginDate,
           bio = bio)
     } catch (e: Exception) {
       Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
@@ -303,21 +340,55 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
-    /**
-     * Calculates the mean (average) of the elements in a given queue.
-     *
-     * This function takes a queue of numerical values (represented as an `ArrayDeque<Double>`)
-     * and returns the mean of its elements. If the queue is empty, the function returns 0.
-     *
-     * @param values An `ArrayDeque<Double>` containing the metrics values.
-     * @return The mean of the values or 0 if it is empty
-     */
-    override fun getMetricMean(values: ArrayDeque<Double>): Double {
-      // Check if the queue is empty to avoid division by zero
-      if (values.isEmpty()) return 0.0
+  /**
+   * Calculates the mean (average) of the elements in a given queue.
+   *
+   * This function takes a queue of numerical values (represented as an `ArrayDeque<Double>`) and
+   * returns the mean of its elements. If the queue is empty, the function returns 0.
+   *
+   * @param values An `ArrayDeque<Double>` containing the metrics values.
+   * @return The mean of the values or 0 if it is empty
+   */
+  override fun getMetricMean(values: ArrayDeque<Double>): Double {
+    // Check if the queue is empty to avoid division by zero
+    if (values.isEmpty()) return 0.0
 
-      // Sum the elements and divide by the size of the queue
-      val sum = values.sum()
-      return sum / values.size
-    }
+    // Sum the elements and divide by the size of the queue
+    val sum = values.sum()
+    return sum / values.size
+  }
+
+  override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
+    val userRef = db.collection(collectionPath).document(uid)
+    db.runTransaction { transaction ->
+          val snapshot = transaction.get(userRef)
+          val currentDate = getCurrentDate()
+          val lastLoginDateString = snapshot.getString("lastLoginDate")
+          val currentStreak = snapshot.getLong("currentStreak") ?: 0L
+          val updatedStreak: Long
+          val lastLoginDate: Date?
+          if (lastLoginDateString != null) {
+            lastLoginDate = parseDate(lastLoginDateString)
+            val daysDifference = getDaysDifference(lastLoginDate, currentDate)
+            updatedStreak =
+                when (daysDifference) {
+                  0L -> currentStreak // Same day login
+                  1L -> currentStreak + 1 // Consecutive day
+                  else -> 1L // Streak broken
+                }
+          } else {
+            // First-time login
+            updatedStreak = 1L
+          }
+          // Update the fields
+          transaction.update(
+              userRef,
+              mapOf("lastLoginDate" to formatDate(currentDate), "currentStreak" to updatedStreak))
+        }
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error updating login streak", exception)
+          onFailure()
+        }
+  }
 }

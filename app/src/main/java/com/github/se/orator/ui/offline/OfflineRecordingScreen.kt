@@ -15,7 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,13 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.orator.R
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -73,42 +73,54 @@ fun OfflineRecordingScreen(
           Modifier.fillMaxSize()
               .background(colors.background)
               .padding(WindowInsets.systemBars.asPaddingValues())
-              .padding(horizontal = 16.dp)
+              .padding(horizontal = AppDimensions.paddingMedium)
               .testTag("OfflineRecordingScreen"),
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).testTag("BackButtonRow"),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(vertical = AppDimensions.paddingMedium)
+                    .testTag("BackButtonRow"),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  imageVector = Icons.Filled.ArrowBack,
+                  imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                   contentDescription = "Back",
                   modifier =
-                      Modifier.size(32.dp)
+                      Modifier.size(AppDimensions.iconSizeSmall)
                           .clickable { navigationActions.goBack() }
+                          .padding(AppDimensions.paddingExtraSmall)
                           .testTag("BackButton"),
                   tint = colors.primary)
             }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(
+            modifier =
+                Modifier.height(
+                    AppDimensions.largeSpacerHeight)) // /// or   val buttonHeight = 48.dp
 
         Column(
             modifier =
-                Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag("RecordingColumn"),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                Modifier.fillMaxSize()
+                    .padding(horizontal = AppDimensions.paddingMedium)
+                    .testTag("RecordingColumn"),
+            verticalArrangement =
+                Arrangement.spacedBy(AppDimensions.paddingMedium, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally) {
               Box(
                   contentAlignment = Alignment.Center,
-                  modifier = Modifier.size(203.dp).testTag("MicIconContainer")) {
+                  modifier =
+                      Modifier.size(AppDimensions.logoSize)
+                          .testTag("MicIconContainer")) { // // should be 203.dp
                     Image(
                         painter = painterResource(id = R.drawable.bckgrnd_blobs),
                         contentDescription = "Background",
-                        modifier = Modifier.size(203.dp).testTag("BackgroundBlob"))
+                        modifier = Modifier.size(AppDimensions.logoSize).testTag("BackgroundBlob"))
                     Icon(
                         imageVector = Icons.Filled.Mic,
                         contentDescription = "Microphone",
                         modifier =
-                            Modifier.size(48.dp)
+                            Modifier.size(AppDimensions.iconSizeMic)
                                 .scale(if (isRecording) scale else 1f)
                                 .clickable {
                                   if (permissionGranted) {
@@ -123,9 +135,10 @@ fun OfflineRecordingScreen(
 
               Text(
                   text = question,
-                  fontSize = 18.sp,
+                  fontSize = AppFontSizes.bodyLarge,
                   color = colors.onSurface,
-                  modifier = Modifier.padding(top = 16.dp).testTag("QuestionText"))
+                  modifier =
+                      Modifier.padding(top = AppDimensions.paddingMedium).testTag("QuestionText"))
 
               Spacer(modifier = Modifier.weight(1f))
 
@@ -134,9 +147,15 @@ fun OfflineRecordingScreen(
                     speakingViewModel.endAndSave()
                     navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
                   },
-                  modifier = Modifier.fillMaxWidth(0.6f).padding(8.dp).testTag("DoneButton"),
+                  modifier =
+                      Modifier.fillMaxWidth(0.6f)
+                          .padding(AppDimensions.paddingSmall)
+                          .testTag("DoneButton"),
                   colors = ButtonDefaults.buttonColors(containerColor = colors.primary)) {
-                    Text(text = "Done!", fontSize = 14.sp, color = colors.onPrimary)
+                    Text(
+                        text = "Done!",
+                        fontSize = AppFontSizes.buttonText,
+                        color = colors.onPrimary)
                   }
             }
       }

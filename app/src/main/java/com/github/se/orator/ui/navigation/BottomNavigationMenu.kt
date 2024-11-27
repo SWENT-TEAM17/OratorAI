@@ -1,7 +1,11 @@
 package com.github.se.orator.ui.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
@@ -20,10 +24,13 @@ fun BottomNavigationMenu(
     tabList: List<TopLevelDestination>,
     selectedItem: String
 ) {
+  val insets = WindowInsets.systemBars.asPaddingValues()
+
   BottomNavigation(
       modifier =
           Modifier.fillMaxWidth()
-              .height(AppDimensions.bottomNavigationHeight)
+              .height(AppDimensions.bottomNavigationHeight + insets.calculateBottomPadding())
+              .padding(bottom = insets.calculateBottomPadding())
               .testTag("bottomNavigationMenu"),
       backgroundColor = MaterialTheme.colorScheme.surface,
       content = {
