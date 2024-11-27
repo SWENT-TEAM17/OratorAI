@@ -84,6 +84,7 @@ class ChatViewModelTest {
     `when`(apiLinkViewModel.analysisData).thenReturn(analysisDataState)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @After
   fun tearDown() {
     Dispatchers.resetMain() // Reset the main dispatcher
@@ -104,12 +105,12 @@ class ChatViewModelTest {
 
       advanceUntilIdle()
 
-      // Verify that the chat messages are empty
+      // Verify that the chat messages are as expected
       assert(chatViewModel.chatMessages.value.size == 2)
       assert(chatViewModel.chatMessages.value[0] == Message(role = "system", content = expected))
       assert(
           chatViewModel.chatMessages.value[1] ==
-              Message(role = "user", content = "I'm ready to begin the interview."))
+              Message(role = "user", content = "I'm ready to begin the session."))
 
       if (i == 1) {
         `when`(apiLinkViewModel.practiceContext).thenReturn(MutableStateFlow(publicContext))
@@ -121,6 +122,7 @@ class ChatViewModelTest {
     }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun analysisDataIsCorrectlyObserved() = runTest {
     // Create a ChatViewModel instance with the mocked ChatGPTService and ApiLinkViewModel

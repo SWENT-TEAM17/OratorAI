@@ -4,14 +4,17 @@ import android.net.Uri
 import android.util.Log
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.SpeechBattle
-import com.github.se.orator.ui.network.ChatResponse
 import com.github.se.orator.ui.network.Message
+import com.github.se.orator.utils.formatDate
+import com.github.se.orator.utils.getCurrentDate
+import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import java.util.Date
 
 /**
  * Repository class for managing user profiles in Firestore.
@@ -215,55 +218,73 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
    * @return The converted UserProfile object, or null if conversion fails.
    */
   private fun documentToUserProfile(document: DocumentSnapshot): UserProfile? {
-      return try {
-          val uid = document.id
-          val name = document.getString("name") ?: return null
-          val age = document.getLong("age")?.toInt() ?: return null
-          val statisticsMap = document.get("statistics") as? Map<*, *>
-          val statistics = statisticsMap?.let {
-              UserStatistics(
-                  speechesGiven = it["speechesGiven"] as? Int ?: 0,
-                  improvement = it["improvement"] as? Float ?: 0.0f,
-                  battleStats = (it["battleStats"] as? List<Map<String, Any>>)?.map { battle ->
-                      SpeechBattle(
-                          battleId = battle["battleId"] as? String ?: "",
-                          challenger = battle["challenger"] as? String ?: "",
-                          opponent = battle["opponent"] as? String ?: "",
-                          status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
-                          initialMessages = (battle["initialMessages"] as? List<Map<String, Any>>)?.map { message ->
-                              Message(
-                                  role = message["role"] as? String ?: "user",
-                                  content = message["content"] as? String ?: ""
-                              )
+    return try {
+      val uid = document.id
+      val name = document.getString("name") ?: return null
+      val age = document.getLong("age")?.toInt() ?: return null
+      val lastLoginDate = document.getString("lastLoginDate") ?: "1970-10-10"
+      val currentStreak = document.getLong("currentStreak") ?: 0L
+
+      // Retrieve 'statistics' map
+      val statisticsMap = document.get("statistics") as? Map<*, *>
+      val statistics =
+          statisticsMap?.let {
+            val sessionsGivenMap = it["sessionsGiven"] as? Map<String, Number>
+            val successfulSessionsMap = it["successfulSessions"] as? Map<String, Number>
+
+            val sessionsGiven =
+                sessionsGivenMap?.mapValues { (_, value) -> value.toInt() } ?: emptyMap()
+            val successfulSessions =
+                successfulSessionsMap?.mapValues { (_, value) -> value.toInt() } ?: emptyMap()
+
+            val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
+
+            val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
+            val battleStats =
+                battleStatsList?.map { battle ->
+                  SpeechBattle(
+                      battleId = battle["battleId"] as? String ?: "",
+                      challenger = battle["challenger"] as? String ?: "",
+                      opponent = battle["opponent"] as? String ?: "",
+                      status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
+                      initialMessages =
+                          (battle["initialMessages"] as? List<Map<String, Any>>)?.map { message ->
+                            Message(
+                                role = message["role"] as? String ?: "system",
+                                content = message["content"] as? String ?: "")
                           } ?: emptyList(),
-                          winner = battle["winner"] as? String ?: ""
-                      )
-                  } ?: emptyList()
-              )
+                      winner = battle["winner"] as? String ?: "")
+                } ?: emptyList()
+
+            UserStatistics(
+                sessionsGiven = sessionsGiven,
+                successfulSessions = successfulSessions,
+                improvement = improvement,
+                battleStats = battleStats)
           } ?: UserStatistics()
 
-          val friends = document.get("friends") as? List<String> ?: emptyList()
-          val profilePic = document.getString(FIELD_PROFILE_PIC)
-          val bio = document.getString("bio")
+      // Retrieve other fields
+      val friends = document.get("friends") as? List<String> ?: emptyList()
+      val profilePic = document.getString("profilePic")
+      val bio = document.getString("bio")
 
-          UserProfile(
-              uid = uid,
-              name = name,
-              age = age,
-              statistics = statistics,
-              friends = friends,
-              profilePic = profilePic,
-              bio = bio
-          )
-      } catch (e: Exception) {
-          Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
-          null
-      }
+      UserProfile(
+          uid = uid,
+          name = name,
+          age = age,
+          profilePic = profilePic,
+          statistics = statistics,
+          friends = friends,
+          bio = bio,
+          currentStreak = currentStreak,
+          lastLoginDate = lastLoginDate)
+    } catch (e: Exception) {
+      Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
+      null
+    }
   }
 
-
-
-    /**
+  /**
    * Helper function to perform Firestore operations.
    *
    * @param task The Firestore task to be performed.
@@ -314,6 +335,40 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         .addOnFailureListener { exception ->
           Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
           onFailure(exception)
+        }
+  }
+
+  override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
+    val userRef = db.collection(collectionPath).document(uid)
+    db.runTransaction { transaction ->
+          val snapshot = transaction.get(userRef)
+          val currentDate = getCurrentDate()
+          val lastLoginDateString = snapshot.getString("lastLoginDate")
+          val currentStreak = snapshot.getLong("currentStreak") ?: 0L
+          val updatedStreak: Long
+          val lastLoginDate: Date?
+          if (lastLoginDateString != null) {
+            lastLoginDate = parseDate(lastLoginDateString)
+            val daysDifference = getDaysDifference(lastLoginDate, currentDate)
+            updatedStreak =
+                when (daysDifference) {
+                  0L -> currentStreak // Same day login
+                  1L -> currentStreak + 1 // Consecutive day
+                  else -> 1L // Streak broken
+                }
+          } else {
+            // First-time login
+            updatedStreak = 1L
+          }
+          // Update the fields
+          transaction.update(
+              userRef,
+              mapOf("lastLoginDate" to formatDate(currentDate), "currentStreak" to updatedStreak))
+        }
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error updating login streak", exception)
+          onFailure()
         }
   }
 }

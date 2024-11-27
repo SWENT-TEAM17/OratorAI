@@ -39,8 +39,8 @@ data class ChatResponse(
 )
 
 enum class SessionType {
-    PRACTICE,
-    BATTLE
+  PRACTICE,
+  BATTLE
 }
 
 // Define the choices in the response

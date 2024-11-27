@@ -151,6 +151,8 @@ object AppDimensions {
   val imageLargeXXL = 350.dp
   val smallTitleFontSize = 20.dp
   val mediumTitleFontSize = 30.dp
+  val profileBoxHeight = 200.dp
+  val profileCardHeight = 140.dp
 
   /// Offline Mode layout definition
   val buttonWidthMin = 200.dp // Minimum width for buttons

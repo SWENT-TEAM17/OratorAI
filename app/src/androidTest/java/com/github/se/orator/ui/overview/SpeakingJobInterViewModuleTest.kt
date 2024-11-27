@@ -9,8 +9,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.network.ChatGPTService
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -24,16 +26,21 @@ class SpeakingJobInterViewModuleTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var chatViewModel: ChatViewModel
 
   @Before
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
+    val chatGPTService = mock(ChatGPTService::class.java)
     apiLinkViewModel = ApiLinkViewModel()
+
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.SPEAKING_JOB_INTERVIEW)
 
     composeTestRule.setContent {
-      SpeakingJobInterviewModule(navigationActions = navigationActions, apiLinkViewModel)
+      SpeakingJobInterviewModule(
+          navigationActions = navigationActions, chatViewModel, apiLinkViewModel)
     }
   }
 

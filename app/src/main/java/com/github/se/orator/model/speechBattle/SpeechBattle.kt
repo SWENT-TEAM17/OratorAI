@@ -3,10 +3,10 @@ package com.github.se.orator.model.speechBattle
 import com.github.se.orator.ui.network.Message
 
 enum class BattleStatus {
-    PENDING,
-    IN_PROGRESS,
-    CANCELLED,
-    FINISHED
+  PENDING,
+  IN_PROGRESS,
+  CANCELLED,
+  FINISHED
 }
 
 data class SpeechBattle(
@@ -17,4 +17,3 @@ data class SpeechBattle(
     val initialMessages: List<Message>, // First response from GPT that contains the info
     val winner: String // User ID of the winner
 )
-

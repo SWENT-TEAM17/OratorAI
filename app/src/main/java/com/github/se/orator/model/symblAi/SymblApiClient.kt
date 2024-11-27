@@ -21,6 +21,12 @@ import org.json.JSONObject
 
 private const val CLASS_LOG_ID = "SymblApiClient"
 
+/**
+ * The SymblApiClient class is responsible for making API calls to the Symbl.ai API.
+ *
+ * @param context The context of the application.
+ * @param client The OkHttpClient instance to use for making API calls.
+ */
 class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttpClient()) :
     VoiceAnalysisApi {
 
@@ -203,45 +209,13 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
     }
   }
 
-  // In phase of being modified
-  private fun parseFillerResponse(fillerJson: JSONObject) {
-    try {
-      val insightsArray = fillerJson.getJSONArray("insights")
-      if (insightsArray.length() > 0) {
-        val fillersBuilder = StringBuilder()
-
-        for (i in 0 until insightsArray.length()) {
-          val insightObject = insightsArray.getJSONObject(i)
-          val fillerWord = insightObject.getString("text")
-          fillersBuilder.append("Filler word: $fillerWord\n")
-        }
-
-        // Store the fillers result
-        fillersResult = fillersBuilder.toString()
-
-        // These will be fixed later on
-
-        /*// Notify listener
-          listener?.onProcessingComplete(
-              transcribedText = transcribedText,
-              sentimentResult = sentimentResult,
-              fillersResult = fillersResult)
-        } else {
-          fillersResult = "No filler words detected."
-
-          listener?.onProcessingComplete(
-              transcribedText = transcribedText,
-              sentimentResult = sentimentResult,
-              fillersResult = fillersResult)*/
-      }
-    } catch (e: Exception) {
-      /*
-      listener?.onError("Error parsing filler words: ${e.message}")
-      Log.e("Filler Parsing Error", e.message ?: "Unknown error")
-       */
-    }
-  }
-
+  /**
+   * Function to get the transcription of an audio file.
+   *
+   * @param audioFile The audio file to be transcribed.
+   * @param onSuccess The function to be called on success.
+   * @param onFailure The function to be called on failure.
+   */
   override fun getTranscription(
       audioFile: File,
       onSuccess: (AnalysisData) -> Unit,
