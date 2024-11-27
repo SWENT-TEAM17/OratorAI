@@ -25,7 +25,7 @@ class SpeakingRepositoryTest {
     context = ApplicationProvider.getApplicationContext()
 
     // Initialize SpeakingRepository with the context
-    speakingRepository = SpeakingRepositoryRecord(context)
+    speakingRepository = SpeakingRepositoryRecord(context, isOffline= false)
   }
 
   @Test
