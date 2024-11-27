@@ -98,13 +98,13 @@ fun PreviousRecordingsFeedbackScreen(
 
     val response by viewModel.response.collectAsState("")
 
-        if (offlineAnalysisData != null) {
-            viewModel.offlineRequest(offlineAnalysisData!!.transcription)
-            //Text(text = "What you said: ${what_has_been_said.value}")
-            Text(text = "Interviewer's response: $response", color = Color.White)
-
-            Log.d("d", "Hello! This is has been said: ${offlineAnalysisData!!.transcription}")
-        }
+    if (offlineAnalysisData != null) {
+        viewModel.offlineRequest(offlineAnalysisData!!.transcription.removePrefix("You said:").trim())
+        Log.d("testing offline chat view model", "the gpt model offline value response is $response")
+        //Text(text = "What you said: ${what_has_been_said.value}")
+        Text(text = "Interviewer's response: $response", color = Color.Black)
+        Log.d("d", "Hello! This is has been said: ${offlineAnalysisData!!.transcription}")
+    }
 
 
 

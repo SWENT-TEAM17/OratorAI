@@ -124,6 +124,10 @@ class ChatViewModel(
       }
     }
   }
+    /**
+     * Function to send individual requests to GPT to get feedback for the offline queries
+     * @param msg: What the user said and wishes to get feedback on
+     */
 
     fun offlineRequest(msg: String) {
         Log.d("ChatViewModel", "Getting next GPT response")
@@ -131,9 +135,12 @@ class ChatViewModel(
             try {
                 _isLoading.value = true
 
-                Log.d("mr smith", msg)
-                val request = ChatRequest(model = "gpt-3.5-turbo", messages = listOf(Message(role = "system", content = "Here are my greatest strenghts: $msg" +
-                        "Tell me what I should work on? Be brief in your answer and mention lollipops.")))
+                val gptQuery = "For the upcoming query you will respond as if you are a very strict interviewer who is interviewing someone applying for a hardware engineer position at apple that is very competitive. " +
+                        "For example if the user only gives a few strengths you will tell him to cite more. If his strengths don't aline with a job as a programmer or are off topic you will mention that." +
+                        "The query the interviewee has said that you will critique is: $msg"
+                Log.d("mr smith", gptQuery)
+
+                val request = ChatRequest(model = "gpt-3.5-turbo", messages = listOf(Message(role = "system", content = gptQuery)))
 
                 val response = chatGPTService.getChatCompletion(request)
 
