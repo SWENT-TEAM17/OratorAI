@@ -48,10 +48,10 @@ class AudioRecorder(
         AudioRecord(
             MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, bufferSize)
 
-
     // Save file to the appropriate directory based on offline mode
     val saveDir = if (isOffline) context.filesDir else context.cacheDir
-    audioFile = File(saveDir, "audio_record_${System.currentTimeMillis()}.wav") // Recording in WAV format
+    audioFile =
+        File(saveDir, "audio_record_${System.currentTimeMillis()}.wav") // Recording in WAV format
 
     audioRecord?.startRecording()
     isRecordingAudio = true

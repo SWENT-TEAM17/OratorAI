@@ -3,14 +3,13 @@ package com.github.se.orator.model.profile
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.io.File
 
 /**
  * ViewModel for managing user profiles and friends' profiles.
@@ -358,11 +357,11 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
   }
 
-    // Method to load recordings from filesDir
-    fun loadSavedRecordings(context: Context) {
-        val recordingsDir = context.filesDir
-        val recordings = recordingsDir.listFiles { _, name -> name.endsWith(".wav") }?.toList() ?: emptyList()
-        savedRecordings_.value = recordings
-    }
-
+  // Method to load recordings from filesDir
+  fun loadSavedRecordings(context: Context) {
+    val recordingsDir = context.filesDir
+    val recordings =
+        recordingsDir.listFiles { _, name -> name.endsWith(".wav") }?.toList() ?: emptyList()
+    savedRecordings_.value = recordings
+  }
 }

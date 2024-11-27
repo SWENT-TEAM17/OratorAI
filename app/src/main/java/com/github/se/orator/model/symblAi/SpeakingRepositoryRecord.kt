@@ -6,7 +6,8 @@ import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class SpeakingRepositoryRecord(private val context: Context, private val isOffline : Boolean) : SpeakingRepository {
+class SpeakingRepositoryRecord(private val context: Context, private val isOffline: Boolean) :
+    SpeakingRepository {
 
   private val audioRecorder = AudioRecorder(context, isOffline)
   private val symblApiClient = SymblApiClient(context)

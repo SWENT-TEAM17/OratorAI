@@ -20,7 +20,7 @@ class AudioRecorderTest {
   @Before
   fun setUp() {
     context = mock()
-    audioRecorder = AudioRecorder(context, isOffline= false)
+    audioRecorder = AudioRecorder(context, isOffline = false)
   }
 
   @Test
@@ -172,5 +172,4 @@ class AudioRecorderTest {
 
     assertTrue(savedFile.name.matches(Regex("audio_record_\\d+\\.wav")))
   }
-
 }
