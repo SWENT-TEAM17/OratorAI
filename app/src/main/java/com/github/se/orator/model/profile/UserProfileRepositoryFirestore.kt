@@ -414,6 +414,9 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             // Retrieve friend's sent requests
             val friendSentReq = friendUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
 
+            // Retrieve friend's friends
+            val friendFriends = friendUserSnapshot.get("friends") as? List<String> ?: emptyList()
+
             // Check if there's a pending friend request
             if (!currentRecReq.contains(friendUid)) {
                 throw Exception("No friend request from this user to accept.")
@@ -434,6 +437,10 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             // Remove currentUid from friend's sent requests
             val updatedFriendSentReq = friendSentReq - currentUid
             transaction.update(friendUserRef, "sentReq", updatedFriendSentReq)
+
+            // add currentUid to friend's friends list
+            val updatedFriendFriends = friendFriends + currentUid
+            transaction.update(friendUserRef, "friends", updatedFriendFriends)
         }.addOnSuccessListener {
             // Invoke the success callback if the transaction succeeds
             onSuccess()
@@ -490,6 +497,50 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             onFailure(exception)
         }
     }
+
+    override fun deleteFriend(
+        currentUid: String,
+        friendUid: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        // References to both user documents
+        val currentUserRef = db.collection(collectionPath).document(currentUid)
+        val friendUserRef = db.collection(collectionPath).document(friendUid)
+
+        // Run a Firestore transaction to ensure atomicity
+        db.runTransaction { transaction ->
+            // Get snapshots of both users
+            val currentUserSnapshot = transaction.get(currentUserRef)
+            val friendUserSnapshot = transaction.get(friendUserRef)
+
+            // Retrieve current user's friends
+            val currentFriends = currentUserSnapshot.get("friends") as? List<String> ?: emptyList()
+
+            // Retrieve friend's friends
+            val friendFriends = friendUserSnapshot.get("friends") as? List<String> ?: emptyList()
+
+            // Check if they are friends
+            if (!currentFriends.contains(friendUid)) {
+                throw Exception("Users are not friends.")
+            }
+
+            // Remove friendUid from current user's friends
+            val updatedCurrentFriends = currentFriends - friendUid
+            transaction.update(currentUserRef, "friends", updatedCurrentFriends)
+
+            // Remove currentUid from friend's friends
+            val updatedFriendFriends = friendFriends - currentUid
+            transaction.update(friendUserRef, "friends", updatedFriendFriends)
+        }.addOnSuccessListener {
+            // Invoke the success callback if the transaction succeeds
+            onSuccess()
+        }.addOnFailureListener { exception ->
+            // Invoke the failure callback if the transaction fails
+            onFailure(exception)
+        }
+    }
+
 
 
     override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {

@@ -396,29 +396,39 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    * @param friend The `UserProfile` of the friend to be deleted.
    */
   fun deleteFriend(friend: UserProfile) {
-    val currentUserProfile = userProfile_.value
-    if (currentUserProfile != null) {
-      // Asserts that the friend is in the friends list
-      if (currentUserProfile.friends.contains(friend.uid)) {
-        Log.d("UserProfileViewModel", "Removing friend: ${friend.name}")
+      val currentUid = repository.getCurrentUserUid()
+      if (currentUid != null) {
+          repository.deleteFriend(
+              currentUid = currentUid,
+              friendUid = friend.uid,
+              onSuccess = {
+                  Log.d("UserProfileViewModel", "Friend deleted: ${friend.name}")
 
-        // Removes the friend from the friends list
-        val updatedFriendsList = friendsProfiles_.value.toMutableList().apply { remove(friend) }
+                  // Option 1: Refresh the user profile to reflect changes
+                  getUserProfile(currentUid)
 
-        val updatedProfile = currentUserProfile.copy(friends = updatedFriendsList.map { it.uid })
+                  // Option 2: Manually update the local state
+                  /*
+                  // Remove the friend from the local friendsProfiles
+                  friendsProfiles_.value = friendsProfiles_.value.filter { it.uid != friend.uid }
 
-        // Updates the user profile with the new one
-        updateUserProfile(updatedProfile)
-        userProfile_.value = updatedProfile
-
-        // Updates the local state with the new friends list
-        friendsProfiles_.value = updatedFriendsList
+                  // Update the userProfile's friends list
+                  val updatedFriendsList = userProfile_.value?.friends?.toMutableList()?.apply { remove(friend.uid) }
+                  if (updatedFriendsList != null) {
+                      val updatedProfile = userProfile_.value!!.copy(friends = updatedFriendsList)
+                      userProfile_.value = updatedProfile
+                  }
+                  */
+              },
+              onFailure = { exception ->
+                  Log.e("UserProfileViewModel", "Failed to delete friend.", exception)
+                  // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
+              }
+          )
       } else {
-        Log.d("UserProfileViewModel", "${friend.name} cannot be deleted: not in the friends list !")
+          Log.e("UserProfileViewModel", "Cannot delete friend: User is not authenticated.")
+          // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
       }
-    } else {
-      Log.e("UserProfileViewModel", "Failed to remove a friend: current user profile is null.")
-    }
   }
 
   /**
