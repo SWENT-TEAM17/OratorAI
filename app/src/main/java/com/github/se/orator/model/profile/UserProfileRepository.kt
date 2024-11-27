@@ -1,6 +1,7 @@
 package com.github.se.orator.model.profile
 
 import android.net.Uri
+import java.io.File
 
 /** Interface for managing user profiles in a data store. */
 interface UserProfileRepository {
@@ -102,4 +103,13 @@ interface UserProfileRepository {
   fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit)
+
+    /**
+     * Retrieve offline recordings stored locally.
+     *
+     * @return A list of File objects representing offline recordings.
+     */
+    ///fun getOfflineRecordings(): List<File>
+
+
 }

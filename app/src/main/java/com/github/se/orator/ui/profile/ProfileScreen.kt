@@ -144,7 +144,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                       Card(
                           modifier =
                               Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
-                          elevation = AppDimensions.elevationSmall) {}
+                          elevation = AppDimensions.elevationSmall
+                      ) {}
 
                       // Profile Picture with overlapping positioning
                       ProfilePicture(
