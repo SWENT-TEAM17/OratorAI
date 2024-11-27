@@ -90,6 +90,9 @@ data class AppDimensionsObject(
     val largeTitleFontSize: Dp,
     val mediumTitleFontSize: Dp,
     val buttonTextSize: Dp,
+
+    val graphHeight: Dp,
+    val graphWidth: Dp
 )
 
 object AppDimensions {
@@ -161,6 +164,8 @@ object AppDimensions {
   val shadowElevation = 5.dp // Elevation/shadow for buttons
   // Specific Spacing Needs
   val spacerHeightDefault = 32.dp // Spacer height for default spacing in between elements
+  val graphHeight = 150.dp
+  val graphWidth = 200.dp
 }
 
 object AppShapes {

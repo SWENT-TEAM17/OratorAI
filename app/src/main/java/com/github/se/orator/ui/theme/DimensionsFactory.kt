@@ -83,5 +83,8 @@ fun createAppDimensions(): AppDimensionsObject {
       largeTitleFontSize = (screenWidth * 0.1f).coerceIn(24.dp, 64.dp),
       mediumTitleFontSize = (screenWidth * 0.08f).coerceIn(20.dp, 55.dp),
       buttonTextSize = (screenWidth * 0.05f).coerceIn(14.dp, 20.dp),
+
+      graphHeight = (screenHeight * 0.2f).coerceIn(100.dp, 150.dp),
+      graphWidth = (screenWidth * 0.5f).coerceIn(150.dp, 200.dp)
   )
 }

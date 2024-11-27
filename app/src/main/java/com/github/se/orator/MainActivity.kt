@@ -54,6 +54,7 @@ import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
+import com.github.se.orator.ui.profile.GraphStats
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
@@ -201,6 +202,9 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
             composable(Screen.EDIT_PROFILE) {
               EditProfileScreen(navigationActions, userProfileViewModel)
+            }
+            composable(Screen.STAT) {
+              GraphStats(navigationActions,userProfileViewModel)
             }
             composable(Screen.LEADERBOARD) {
               LeaderboardScreen(navigationActions, userProfileViewModel)
