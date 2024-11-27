@@ -92,6 +92,14 @@ interface UserProfileRepository {
       onFailure: (Exception) -> Unit
   )
 
+
+    fun cancelFriendRequest(
+        currentUid: String,
+        friendUid: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    )
+
   /**
    * Update the profile picture URL in the data store.
    *

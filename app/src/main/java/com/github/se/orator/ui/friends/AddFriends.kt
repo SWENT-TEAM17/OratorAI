@@ -25,6 +25,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,10 +41,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,114 +76,229 @@ fun AddFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  val userProfile by userProfileViewModel.userProfile.collectAsState()
-  val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
-  var query by remember { mutableStateOf("") } // Holds the search query input
-  var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
-  val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
-  val focusRequester = FocusRequester() // Manages focus for the search field
+    val userProfile by userProfileViewModel.userProfile.collectAsState()
+    val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
+    var query by remember { mutableStateOf("") } // Holds the search query input
+    var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
+    val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
+    val focusRequester = FocusRequester() // Manages focus for the search field
+    val sentReqProfiles by userProfileViewModel.sentReqProfiles.collectAsState()
 
-  // Exclude the current user's profile and their friends' profiles from the list
-  val filteredProfiles =
-      allProfiles.filter { profile ->
-        profile.uid != userProfile?.uid && // Exclude own profile
-            friendsProfiles.none { friend -> friend.uid == profile.uid } && // Exclude friends
-            profile.name.contains(query, ignoreCase = true) // Match search query
-      }
+    // Exclude the current user's profile and their friends' profiles from the list
+    val filteredProfiles =
+        allProfiles.filter { profile ->
+            profile.uid != userProfile?.uid && // Exclude own profile
+                    friendsProfiles.none { friend -> friend.uid == profile.uid } && // Exclude friends
+                    profile.name.contains(query, ignoreCase = true) // Match search query
+        }
 
-  // State variable to keep track of the selected user's profile picture
-  var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
+    // State variable to keep track of the selected user's profile picture
+    var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
 
-  ProjectTheme {
-    Scaffold(
-        topBar = {
-          TopAppBar(
-              title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
-              navigationIcon = {
-                IconButton(
-                    onClick = { navigationActions.goBack() },
-                    modifier = Modifier.testTag("addFriendBackButton")) {
-                      Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-              },
-          )
-          Divider()
-        },
-        bottomBar = {
-          BottomNavigationMenu(
-              onTabSelect = { route -> navigationActions.navigateTo(route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION,
-              selectedItem = Route.FRIENDS)
-        }) { paddingValues ->
-          Column(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .padding(paddingValues)
-                      .padding(AppDimensions.paddingMedium)) {
+    ProjectTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navigationActions.goBack() },
+                            modifier = Modifier.testTag("addFriendBackButton")) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                )
+                Divider()
+            },
+            bottomBar = {
+                BottomNavigationMenu(
+                    onTabSelect = { route -> navigationActions.navigateTo(route) },
+                    tabList = LIST_TOP_LEVEL_DESTINATION,
+                    selectedItem = Route.FRIENDS
+                )
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(AppDimensions.paddingMedium)
+            ) {
                 // Text field with search icon and clear button
                 OutlinedTextField(
                     value = query,
                     onValueChange = { newValue ->
-                      query = newValue
-                      expanded = newValue.isNotEmpty()
+                        query = newValue
+                        expanded = newValue.isNotEmpty()
                     },
-                    modifier =
-                        Modifier.wrapContentWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .height(AppDimensions.mediumHeight)
-                            .focusRequester(focusRequester)
-                            .testTag("addFriendSearchField"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(AppDimensions.mediumHeight)
+                        .focusRequester(focusRequester)
+                        .testTag("addFriendSearchField"),
                     label = { Text("Username", modifier = Modifier.testTag("searchFieldLabel")) },
                     leadingIcon = {
-                      Icon(
-                          Icons.Default.Search,
-                          contentDescription = "Search Icon",
-                          modifier = Modifier.testTag("searchIcon"))
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Search Icon",
+                            modifier = Modifier.testTag("searchIcon")
+                        )
                     },
                     trailingIcon = {
-                      if (query.isNotEmpty()) {
-                        IconButton(
-                            onClick = { query = "" },
-                            modifier = Modifier.testTag("clearSearchButton")) {
-                              Icon(
-                                  Icons.Default.Clear,
-                                  contentDescription = "Clear Icon",
-                                  modifier = Modifier.testTag("clearIcon"))
+                        if (query.isNotEmpty()) {
+                            IconButton(
+                                onClick = { query = "" },
+                                modifier = Modifier.testTag("clearSearchButton")
+                            ) {
+                                Icon(
+                                    Icons.Default.Clear,
+                                    contentDescription = "Clear Icon",
+                                    modifier = Modifier.testTag("clearIcon")
+                                )
                             }
-                      }
+                        }
                     },
                     singleLine = true,
-                    keyboardActions = KeyboardActions.Default)
+                    keyboardActions = KeyboardActions.Default
+                )
+
+                Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
+                // **New Section: Sent Friend Requests**
+                if (sentReqProfiles.isNotEmpty()) {
+                    Text(
+                        text = "Sent Friend Requests",
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier
+                            .padding(bottom = AppDimensions.smallPadding)
+                            .testTag("sentFriendRequestsHeader")
+                    )
+                    LazyColumn(
+                        modifier = Modifier.testTag("sentFriendRequestsList"),
+                        contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                        verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)
+                    ) {
+                        items(sentReqProfiles) { sentRequest ->
+                            SentFriendRequestItem(
+                                sentRequest = sentRequest,
+                                userProfileViewModel = userProfileViewModel
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                }
+
                 // Display search results if there is a query
                 if (query.isNotEmpty()) {
-                  LazyColumn(
-                      contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                      verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
-                      modifier = Modifier.testTag("searchResultsList")) {
+                    LazyColumn(
+                        contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                        verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
+                        modifier = Modifier.testTag("searchResultsList")
+                    ) {
                         // Filter and display profiles matching the query
-                        items(
-                            filteredProfiles.filter { profile ->
-                              profile.name.contains(query, ignoreCase = true)
-                            }) { user ->
-                              UserItem(
-                                  user = user,
-                                  userProfileViewModel = userProfileViewModel,
-                                  onProfilePictureClick = { selectedUser ->
+                        items(filteredProfiles.filter { profile ->
+                            profile.name.contains(query, ignoreCase = true)
+                        }) { user ->
+                            UserItem(
+                                user = user,
+                                userProfileViewModel = userProfileViewModel,
+                                onProfilePictureClick = { selectedUser ->
                                     selectedProfilePicUser = selectedUser
-                                  })
-                            }
-                      }
+                                }
+                            )
+                        }
+                    }
                 }
-              }
+            }
 
-          // Dialog to show the enlarged profile picture
-          if (selectedProfilePicUser?.profilePic != null) {
-            ProfilePictureDialog(
-                profilePictureUrl = selectedProfilePicUser?.profilePic ?: "",
-                onDismiss = { selectedProfilePicUser = null })
-          }
+            // Dialog to show the enlarged profile picture
+            if (selectedProfilePicUser?.profilePic != null) {
+                ProfilePictureDialog(
+                    profilePictureUrl = selectedProfilePicUser?.profilePic ?: "",
+                    onDismiss = { selectedProfilePicUser = null }
+                )
+            }
         }
-  }
+    }
+}
+
+/**
+ * Composable function that represents a single sent friend request item in the list. Displays the
+ * friend's profile picture, name, bio, and an option to cancel the request.
+ *
+ * @param sentRequest The [UserProfile] object representing the friend to whom the request was sent.
+ * @param userProfileViewModel The [UserProfileViewModel] that handles request cancellation.
+ */
+@Composable
+fun SentFriendRequestItem(
+    sentRequest: UserProfile,
+    userProfileViewModel: UserProfileViewModel
+) {
+    val context = LocalContext.current
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = AppDimensions.smallPadding)
+            .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
+            .testTag("sentFriendRequestItem#${sentRequest.uid}"),
+        color = AppColors.LightPurpleGrey,
+        shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppDimensions.paddingMedium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Friend's Profile Picture
+            ProfilePicture(
+                profilePictureUrl = sentRequest.profilePic,
+                onClick = { /* Optionally, show enlarged picture */ }
+            )
+            Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+            Column(
+                modifier = Modifier.weight(1f), // Expand to push Cancel button to the end
+                verticalArrangement = Arrangement.Center
+            ) {
+                // Friend's Name
+                Text(
+                    text = sentRequest.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .padding(bottom = AppDimensions.smallPadding)
+                        .testTag("sentFriendRequestName#${sentRequest.uid}")
+                )
+                // Friend's Bio
+                Text(
+                    text = sentRequest.bio ?: "No bio available",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppColors.secondaryTextColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("sentFriendRequestBio#${sentRequest.uid}")
+                )
+            }
+            // Cancel Friend Request Button
+            IconButton(
+                onClick = {
+                    userProfileViewModel.cancelFriendRequest(sentRequest)
+                    Toast.makeText(
+                        context,
+                        "Friend request to ${sentRequest.name} has been canceled.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                modifier = Modifier.testTag("cancelFriendRequestButton#${sentRequest.uid}")
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close, // Using Close icon for cancellation
+                    contentDescription = "Cancel Friend Request",
+                    tint = Color.Red
+                )
+            }
+        }
+    }
 }
 
 /**
