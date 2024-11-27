@@ -109,16 +109,23 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     repository.getUserProfile(
         uid = uid,
         onSuccess = { profile ->
-          userProfile_.value = profile
-          profile?.friends?.let {
-            fetchFriendsProfiles(it)
-            fetchSentReqProfiles(it)
-            fetchRecReqProfiles(it)
-            fetchAllUserProfiles()
-          }
-          isLoading_.value = false
-          Log.d("UserProfileViewModel", "User profile fetched successfully.")
-          Log.d("UserProfileViewModel", "Friends: ${profile?.name}")
+            userProfile_.value = profile
+            profile?.let {
+                // Fetch Friends Profiles
+                fetchFriendsProfiles(it.friends)
+
+                // Fetch Received Friend Requests Profiles
+                fetchRecReqProfiles(it.recReq)
+
+                // Fetch Sent Friend Requests Profiles
+                fetchSentReqProfiles(it.sentReq)
+
+                // Optionally, fetch all user profiles if needed
+                fetchAllUserProfiles()
+            }
+            isLoading_.value = false
+            Log.d("UserProfileViewModel", "User profile fetched successfully.")
+            Log.d("UserProfileViewModel", "Friends: ${profile?.name}")
         },
         onFailure = {
           // Handle error

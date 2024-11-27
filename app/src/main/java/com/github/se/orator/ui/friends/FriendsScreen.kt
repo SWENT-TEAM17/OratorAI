@@ -65,7 +65,7 @@ fun ViewFriendsScreen(
 ) {
     // State variables for managing friends list and search functionality
     val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
-    val recReqProfiles by userProfileViewModel.sentReqProfiles.collectAsState()
+    val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     val filteredFriends =
         friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
