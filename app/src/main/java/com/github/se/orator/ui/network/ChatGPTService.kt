@@ -38,6 +38,11 @@ data class ChatResponse(
     val usage: Usage
 )
 
+enum class SessionType {
+    PRACTICE,
+    BATTLE
+}
+
 // Define the choices in the response
 data class Choice(val index: Int, val message: Message, val finish_reason: String?)
 

@@ -1,5 +1,6 @@
 package com.github.se.orator.model.profile
 
+import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.google.firebase.Timestamp
 
 data class UserProfile(
@@ -17,7 +18,7 @@ data class UserProfile(
 data class UserStatistics(
     val speechesGiven: Int = 0,
     val improvement: Float = 0.0f,
-    val previousRuns: List<SpeechStats> = emptyList()
+    val battleStats: List<SpeechBattle> = emptyList()
 )
 
 data class SpeechStats(

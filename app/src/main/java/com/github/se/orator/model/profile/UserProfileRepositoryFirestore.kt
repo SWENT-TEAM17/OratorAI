@@ -2,6 +2,10 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
+import com.github.se.orator.model.speechBattle.BattleStatus
+import com.github.se.orator.model.speechBattle.SpeechBattle
+import com.github.se.orator.ui.network.ChatResponse
+import com.github.se.orator.ui.network.Message
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -211,45 +215,55 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
    * @return The converted UserProfile object, or null if conversion fails.
    */
   private fun documentToUserProfile(document: DocumentSnapshot): UserProfile? {
-    return try {
-      val uid = document.id
-      val name = document.getString("name") ?: return null
-      val age = document.getLong("age")?.toInt() ?: return null
-      val statisticsMap = document.get("statistics") as? Map<*, *>
-      val statistics =
-          statisticsMap?.let {
-            UserStatistics(
-                speechesGiven = it["speechesGiven"] as? Int ?: 0,
-                improvement = it["improvement"] as? Float ?: 0.0f,
-                previousRuns =
-                    (it["previousRuns"] as? List<Map<String, Any>>)?.map { run ->
-                      SpeechStats(
-                          title = run["title"] as? String ?: "",
-                          duration = run["duration"] as? Int ?: 0,
-                          date = run["date"] as? Timestamp ?: Timestamp.now(),
-                          accuracy = run["accuracy"] as? Float ?: 0.0f,
-                          wordsPerMinute = run["wordsPerMinute"] as? Int ?: 0)
-                    } ?: emptyList())
+      return try {
+          val uid = document.id
+          val name = document.getString("name") ?: return null
+          val age = document.getLong("age")?.toInt() ?: return null
+          val statisticsMap = document.get("statistics") as? Map<*, *>
+          val statistics = statisticsMap?.let {
+              UserStatistics(
+                  speechesGiven = it["speechesGiven"] as? Int ?: 0,
+                  improvement = it["improvement"] as? Float ?: 0.0f,
+                  battleStats = (it["battleStats"] as? List<Map<String, Any>>)?.map { battle ->
+                      SpeechBattle(
+                          battleId = battle["battleId"] as? String ?: "",
+                          challenger = battle["challenger"] as? String ?: "",
+                          opponent = battle["opponent"] as? String ?: "",
+                          status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
+                          initialMessages = (battle["initialMessages"] as? List<Map<String, Any>>)?.map { message ->
+                              Message(
+                                  role = message["role"] as? String ?: "user",
+                                  content = message["content"] as? String ?: ""
+                              )
+                          } ?: emptyList(),
+                          winner = battle["winner"] as? String ?: ""
+                      )
+                  } ?: emptyList()
+              )
           } ?: UserStatistics()
 
-      val friends = document.get("friends") as? List<String> ?: emptyList()
-      val profilePic = document.getString(FIELD_PROFILE_PIC)
-      val bio = document.getString("bio")
-      UserProfile(
-          uid = uid,
-          name = name,
-          age = age,
-          statistics = statistics,
-          friends = friends,
-          profilePic = profilePic,
-          bio = bio)
-    } catch (e: Exception) {
-      Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
-      null
-    }
+          val friends = document.get("friends") as? List<String> ?: emptyList()
+          val profilePic = document.getString(FIELD_PROFILE_PIC)
+          val bio = document.getString("bio")
+
+          UserProfile(
+              uid = uid,
+              name = name,
+              age = age,
+              statistics = statistics,
+              friends = friends,
+              profilePic = profilePic,
+              bio = bio
+          )
+      } catch (e: Exception) {
+          Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
+          null
+      }
   }
 
-  /**
+
+
+    /**
    * Helper function to perform Firestore operations.
    *
    * @param task The Firestore task to be performed.

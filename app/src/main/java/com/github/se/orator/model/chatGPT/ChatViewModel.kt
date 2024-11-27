@@ -8,9 +8,11 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
+import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
+import com.github.se.orator.ui.network.SessionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -18,8 +20,10 @@ import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val chatGPTService: ChatGPTService,
-    private val apiLinkViewModel: ApiLinkViewModel
-) : ViewModel() {
+    private val apiLinkViewModel: ApiLinkViewModel,
+    private val sessionType: SessionType = SessionType.PRACTICE,
+    private val speechBattle: SpeechBattle? = null
+    ) : ViewModel() {
 
   private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
   val chatMessages = _chatMessages.asStateFlow()
@@ -39,7 +43,18 @@ class ChatViewModel(
     observeAnalysisData()
   }
 
-  fun initializeConversation() {
+    fun initializeConversation(){
+        when (sessionType) {
+            SessionType.PRACTICE -> initializePracticeConversation()
+            SessionType.BATTLE -> initializeBattleConversation()
+        }
+    }
+
+    private fun initializeBattleConversation(){
+
+    }
+
+  private fun initializePracticeConversation() {
 
     _collectedAnalysisData.value.clear() // Resets the analysis data history
     val practiceContextAsValue = practiceContext.value ?: return
