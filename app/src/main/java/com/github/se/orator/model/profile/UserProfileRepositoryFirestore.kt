@@ -122,7 +122,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         onFailure)
   }
 
-  // Delete a user profile
+  /**
+   * Deletes a user profile from Firestore.
+   *
+   * @param uid The UID of the user to delete.
+   * @param onSuccess Callback invoked on successful deletion.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
   override fun deleteUserProfile(
       uid: String,
       onSuccess: () -> Unit,
@@ -266,6 +272,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
 
       // Retrieve other fields from the document
       val friends = document.get("friends") as? List<String> ?: emptyList()
+      val recReq = document.get("recReq") as? List<String> ?: emptyList()
+      val sentReq = document.get("sentReq") as? List<String> ?: emptyList()
       val profilePic = document.getString(FIELD_PROFILE_PIC)
       val bio = document.getString("bio")
 
@@ -276,6 +284,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           age = age,
           statistics = statistics,
           friends = friends,
+          recReq = recReq,
+          sentReq = sentReq,
           profilePic = profilePic,
           currentStreak = currentStreak,
           lastLoginDate = lastLoginDate,
@@ -340,6 +350,372 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
+  /**
+   * Get profiles the user received requests from based on the UIDs stored in the user's profile.
+   *
+   * @param recReqUIds List of UIDs of the users the user received requests from to be retrieved.
+   * @param onSuccess Callback to be invoked with the list of friends' profiles.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  override fun getRecReqProfiles(
+      friendUids: List<String>,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (friendUids.isEmpty()) {
+      onSuccess(emptyList()) // Return an empty list if no friends
+      return
+    }
+
+    db.collection(collectionPath)
+        .whereIn("uid", friendUids)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(friends)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
+          onFailure(exception)
+        }
+  }
+
+  /**
+   * Get profiles the user received requests from based on the UIDs stored in the user's profile.
+   *
+   * @param recReqUIds List of UIDs of the users the user received requests from to be retrieved.
+   * @param onSuccess Callback to be invoked with the list of friends' profiles.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  override fun getSentReqProfiles(
+      friendUids: List<String>,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (friendUids.isEmpty()) {
+      onSuccess(emptyList()) // Return an empty list if no friends
+      return
+    }
+
+    db.collection(collectionPath)
+        .whereIn("uid", friendUids)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(friends)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
+          onFailure(exception)
+        }
+  }
+
+  /**
+   * Sends a friend request from the current user to another user.
+   *
+   * @param currentUid The UID of the user sending the request.
+   * @param friendUid The UID of the user receiving the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  override fun sendFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // Reference to the current user's document
+    val currentUserRef = db.collection(collectionPath).document(currentUid)
+    // Reference to the friend user's document
+    val friendUserRef = db.collection(collectionPath).document(friendUid)
+
+    // Run a Firestore transaction to ensure atomicity
+    db.runTransaction { transaction ->
+          // Get the current user's snapshot
+          val currentUserSnapshot = transaction.get(currentUserRef)
+          // Get the friend user's snapshot
+          val friendUserSnapshot = transaction.get(friendUserRef)
+
+          // Retrieve the current user's sent requests
+          val currentSentReq = currentUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+          // Retrieve the friend user's received requests
+          val friendRecReq = friendUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+
+          // Check if the friend request has already been sent
+          if (currentSentReq.contains(friendUid)) {
+            throw Exception("Friend request already sent.")
+          }
+
+          // Optionally, check if the friend has already sent a request to the current user
+          if (friendRecReq.contains(currentUid)) {
+            throw Exception("The user has already sent you a friend request.")
+          }
+
+          // Update the current user's sent requests
+          val updatedSentReq = currentSentReq + friendUid
+          transaction.update(currentUserRef, "sentReq", updatedSentReq)
+
+          // Update the friend user's received requests
+          val updatedRecReq = friendRecReq + currentUid
+          transaction.update(friendUserRef, "recReq", updatedRecReq)
+        }
+        .addOnSuccessListener {
+          // Invoke the success callback if the transaction succeeds
+          onSuccess()
+        }
+        .addOnFailureListener { exception ->
+          // Invoke the failure callback if the transaction fails
+          onFailure(exception)
+        }
+  }
+  /**
+   * Accepts a friend request, establishing a friendship between two users.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user who sent the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  override fun acceptFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // References to both user documents
+    val currentUserRef = db.collection(collectionPath).document(currentUid)
+    val friendUserRef = db.collection(collectionPath).document(friendUid)
+
+    // Run a Firestore transaction to ensure atomicity
+    db.runTransaction { transaction ->
+          // Get snapshots of both users
+          val currentUserSnapshot = transaction.get(currentUserRef)
+          val friendUserSnapshot = transaction.get(friendUserRef)
+
+          // Retrieve current user's friends and received requests
+          val currentFriends = currentUserSnapshot.get("friends") as? List<String> ?: emptyList()
+          val currentRecReq = currentUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+
+          // Retrieve friend's sent requests
+          val friendSentReq = friendUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+
+          // Retrieve friend's friends
+          val friendFriends = friendUserSnapshot.get("friends") as? List<String> ?: emptyList()
+
+          // Check if there's a pending friend request
+          if (!currentRecReq.contains(friendUid)) {
+            throw Exception("No friend request from this user to accept.")
+          }
+
+          if (!friendSentReq.contains(currentUid)) {
+            throw Exception("No sent friend request from current user to this user.")
+          }
+
+          // Update current user's friends list
+          val updatedCurrentFriends = currentFriends + friendUid
+          transaction.update(currentUserRef, "friends", updatedCurrentFriends)
+
+          // Remove friendUid from current user's received requests
+          val updatedCurrentRecReq = currentRecReq - friendUid
+          transaction.update(currentUserRef, "recReq", updatedCurrentRecReq)
+
+          // Remove currentUid from friend's sent requests
+          val updatedFriendSentReq = friendSentReq - currentUid
+          transaction.update(friendUserRef, "sentReq", updatedFriendSentReq)
+
+          // add currentUid to friend's friends list
+          val updatedFriendFriends = friendFriends + currentUid
+          transaction.update(friendUserRef, "friends", updatedFriendFriends)
+        }
+        .addOnSuccessListener {
+          // Invoke the success callback if the transaction succeeds
+          onSuccess()
+        }
+        .addOnFailureListener { exception ->
+          // Invoke the failure callback if the transaction fails
+          onFailure(exception)
+        }
+  }
+
+  /**
+   * Declines a friend request from another user.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user who sent the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  override fun declineFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // References to both user documents
+    val currentUserRef = db.collection(collectionPath).document(currentUid)
+    val friendUserRef = db.collection(collectionPath).document(friendUid)
+
+    // Run a Firestore transaction to ensure atomicity
+    db.runTransaction { transaction ->
+          // Get snapshots of both users
+          val currentUserSnapshot = transaction.get(currentUserRef)
+          val friendUserSnapshot = transaction.get(friendUserRef)
+
+          // Retrieve current user's received requests
+          val currentRecReq = currentUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+
+          // Retrieve friend's sent requests
+          val friendSentReq = friendUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+
+          // Check if there's a pending friend request
+          if (!currentRecReq.contains(friendUid)) {
+            throw Exception("No friend request from this user to decline.")
+          }
+
+          if (!friendSentReq.contains(currentUid)) {
+            throw Exception("No sent friend request from current user to this user.")
+          }
+
+          // Remove friendUid from current user's received requests
+          val updatedCurrentRecReq = currentRecReq - friendUid
+          transaction.update(currentUserRef, "recReq", updatedCurrentRecReq)
+
+          // Remove currentUid from friend's sent requests
+          val updatedFriendSentReq = friendSentReq - currentUid
+          transaction.update(friendUserRef, "sentReq", updatedFriendSentReq)
+        }
+        .addOnSuccessListener {
+          // Invoke the success callback if the transaction succeeds
+          onSuccess()
+        }
+        .addOnFailureListener { exception ->
+          // Invoke the failure callback if the transaction fails
+          onFailure(exception)
+        }
+  }
+  /**
+   * Cancel a previously sent friend request.
+   *
+   * This function removes the `friendUid` from the current user's `sentReq` list and removes the
+   * `currentUid` from the friend's `recReq` list, effectively canceling the friend request.
+   *
+   * @param currentUid The UID of the current user who sent the friend request.
+   * @param friendUid The UID of the friend to whom the request was sent.
+   * @param onSuccess Callback to be invoked on successful cancellation.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  override fun cancelFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // References to both user documents in Firestore
+    val currentUserRef = db.collection(collectionPath).document(currentUid)
+    val friendUserRef = db.collection(collectionPath).document(friendUid)
+
+    // Run a Firestore transaction to ensure atomicity
+    db.runTransaction { transaction ->
+          // Retrieve snapshots of both users
+          val currentUserSnapshot = transaction.get(currentUserRef)
+          val friendUserSnapshot = transaction.get(friendUserRef)
+
+          // Retrieve current user's sent friend requests
+          val currentSentReq = currentUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+
+          // Retrieve friend's received friend requests
+          val friendRecReq = friendUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+
+          // Check if the current user has actually sent a friend request to the friend
+          if (!currentSentReq.contains(friendUid)) {
+            throw Exception("No sent friend request to cancel.")
+          }
+
+          // Check if the friend has the current user in their received requests
+          if (!friendRecReq.contains(currentUid)) {
+            throw Exception("Friend does not have you in their received requests.")
+          }
+
+          // Remove `friendUid` from current user's `sentReq` list
+          val updatedSentReq = currentSentReq - friendUid
+          transaction.update(currentUserRef, "sentReq", updatedSentReq)
+
+          // Remove `currentUid` from friend's `recReq` list
+          val updatedRecReq = friendRecReq - currentUid
+          transaction.update(friendUserRef, "recReq", updatedRecReq)
+        }
+        .addOnSuccessListener {
+          // Invoke the success callback if the transaction succeeds
+          Log.d("UserProfileRepositoryFirestore", "Friend request canceled successfully.")
+          onSuccess()
+        }
+        .addOnFailureListener { exception ->
+          // Log the error and invoke the failure callback if the transaction fails
+          Log.e("UserProfileRepositoryFirestore", "Failed to cancel friend request.", exception)
+          onFailure(exception)
+        }
+  }
+
+  /**
+   * Deletes an existing friendship between two users.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the friend to remove.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  override fun deleteFriend(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // References to both user documents
+    val currentUserRef = db.collection(collectionPath).document(currentUid)
+    val friendUserRef = db.collection(collectionPath).document(friendUid)
+
+    // Run a Firestore transaction to ensure atomicity
+    db.runTransaction { transaction ->
+          // Get snapshots of both users
+          val currentUserSnapshot = transaction.get(currentUserRef)
+          val friendUserSnapshot = transaction.get(friendUserRef)
+
+          // Retrieve current user's friends
+          val currentFriends = currentUserSnapshot.get("friends") as? List<String> ?: emptyList()
+
+          // Retrieve friend's friends
+          val friendFriends = friendUserSnapshot.get("friends") as? List<String> ?: emptyList()
+
+          // Check if they are friends
+          if (!currentFriends.contains(friendUid)) {
+            throw Exception("Users are not friends.")
+          }
+
+          // Remove friendUid from current user's friends
+          val updatedCurrentFriends = currentFriends - friendUid
+          transaction.update(currentUserRef, "friends", updatedCurrentFriends)
+
+          // Remove currentUid from friend's friends
+          val updatedFriendFriends = friendFriends - currentUid
+          transaction.update(friendUserRef, "friends", updatedFriendFriends)
+        }
+        .addOnSuccessListener {
+          // Invoke the success callback if the transaction succeeds
+          onSuccess()
+        }
+        .addOnFailureListener { exception ->
+          // Invoke the failure callback if the transaction fails
+          onFailure(exception)
+        }
+  }
+
+  /**
+   * Updates the login streak for a user based on their last login date.
+   *
+   * @param uid The UID of the user.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked on failure.
+   */
   override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
     val userRef = db.collection(collectionPath).document(uid)
     db.runTransaction { transaction ->
