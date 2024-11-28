@@ -95,6 +95,8 @@ fun AddFriendsScreen(
             sentReqProfiles.none { sent -> sent.uid == profile.uid } && // Exclude sent requests
             profile.name.contains(query, ignoreCase = true) // Match search query
       }
+  val filteredSentReq =
+      sentReqProfiles.filter { recReq -> recReq.name.contains(query, ignoreCase = true) }
 
   // State variable to keep track of the selected user's profile picture
   var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
@@ -165,7 +167,7 @@ fun AddFriendsScreen(
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
                 // **Expandable Section: Sent Friend Requests**
-                if (sentReqProfiles.isNotEmpty()) {
+                if (filteredSentReq.isNotEmpty()) {
                   // Header with Toggle Button
                   Row(
                       modifier =
@@ -201,7 +203,7 @@ fun AddFriendsScreen(
                             contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                             verticalArrangement =
                                 Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-                              items(sentReqProfiles) { sentRequest ->
+                              items(filteredSentReq) { sentRequest ->
                                 SentFriendRequestItem(
                                     sentRequest = sentRequest,
                                     userProfileViewModel = userProfileViewModel)
@@ -386,57 +388,51 @@ fun UserItem(
 
         // Mutual request dialog
         if (showMutualRequestDialog) {
-            AlertDialog(
-                onDismissRequest = { showMutualRequestDialog = false },
-                title = { Text("Friend Request") },
-                text = {
-                    Text(
-                        text = "${user.name} has already sent you a friend request. Would you like to accept, reject, or decide later?"
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            // Accept the incoming friend request
-                            userProfileViewModel.acceptFriend(user)
-                            Toast.makeText(
+          AlertDialog(
+              onDismissRequest = { showMutualRequestDialog = false },
+              title = { Text("Friend Request") },
+              text = {
+                Text(
+                    text =
+                        "${user.name} has already sent you a friend request. Would you like to accept, reject, or decide later?")
+              },
+              confirmButton = {
+                TextButton(
+                    onClick = {
+                      // Accept the incoming friend request
+                      userProfileViewModel.acceptFriend(user)
+                      Toast.makeText(
+                              context, "You are now friends with ${user.name}.", Toast.LENGTH_SHORT)
+                          .show()
+                      showMutualRequestDialog = false
+                    }) {
+                      Text("Accept")
+                    }
+              },
+              dismissButton = {
+                Row {
+                  TextButton(
+                      onClick = {
+                        // Reject the incoming friend request
+                        userProfileViewModel.declineFriendRequest(user)
+                        Toast.makeText(
                                 context,
-                                "You are now friends with ${user.name}.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            showMutualRequestDialog = false
-                        }
-                    ) {
-                        Text("Accept")
-                    }
-                },
-                dismissButton = {
-                    Row {
-                        TextButton(
-                            onClick = {
-                                // Reject the incoming friend request
-                                userProfileViewModel.declineFriendRequest(user)
-                                Toast.makeText(
-                                    context,
-                                    "Friend request from ${user.name} has been rejected.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                showMutualRequestDialog = false
-                            }
-                        ) {
-                            Text("Reject")
-                        }
-                        TextButton(
-                            onClick = {
-                                // Decide Later: Just dismiss the dialog
-                                showMutualRequestDialog = false
-                            }
-                        ) {
-                            Text("Decide Later")
-                        }
-                    }
+                                "Friend request from ${user.name} has been rejected.",
+                                Toast.LENGTH_SHORT)
+                            .show()
+                        showMutualRequestDialog = false
+                      }) {
+                        Text("Reject")
+                      }
+                  TextButton(
+                      onClick = {
+                        // Decide Later: Just dismiss the dialog
+                        showMutualRequestDialog = false
+                      }) {
+                        Text("Decide Later")
+                      }
                 }
-            )
+              })
         }
-  }
+      }
 }

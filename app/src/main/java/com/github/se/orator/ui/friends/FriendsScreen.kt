@@ -2,19 +2,22 @@ package com.github.se.orator.ui.friends
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
@@ -63,24 +66,29 @@ fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  // State variables for managing friends list and search functionality
+  // State variables
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
   val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
   var searchQuery by remember { mutableStateOf("") }
   val filteredFriends =
       friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
+  val filteredRecReq =
+      recReqProfiles.filter { recReq -> recReq.name.contains(searchQuery, ignoreCase = true) }
 
-  // State variables for managing UI components
+  // State variables for UI components
   val focusRequester = FocusRequester()
   val focusManager = LocalFocusManager.current
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
-  // State variable to manage the currently selected friend for enlarged profile picture
+  // State variable for selected friend
   var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
 
-  // State variable for Snackbar messages
+  // State variable for Snackbar
   val snackbarHostState = remember { SnackbarHostState() }
+
+  // New state variable for Friend Requests expansion
+  var isFriendRequestsExpanded by remember { mutableStateOf(true) }
 
   ProjectTheme {
     ModalNavigationDrawer(
@@ -173,25 +181,56 @@ fun ViewFriendsScreen(
 
                       Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-                      // Section for Received Friend Requests
-                      if (recReqProfiles.isNotEmpty()) {
-                        Text(
-                            text = "Friend Requests",
-                            style = MaterialTheme.typography.titleSmall,
+                      // **Expandable Section: Received Friend Requests**
+                      if (filteredFriends.isNotEmpty()) {
+                        // Header with Toggle Button
+                        Row(
                             modifier =
-                                Modifier.padding(bottom = AppDimensions.smallPadding)
-                                    .testTag("friendRequestsHeader"))
-                        LazyColumn(
-                            modifier = Modifier.testTag("receivedFriendRequestsList"),
-                            contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                            verticalArrangement =
-                                Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-                              items(recReqProfiles) { friendRequest ->
-                                FriendRequestItem(
-                                    friendRequest = friendRequest,
-                                    userProfileViewModel = userProfileViewModel)
-                              }
+                                Modifier.fillMaxWidth()
+                                    .clickable {
+                                      isFriendRequestsExpanded = !isFriendRequestsExpanded
+                                    }
+                                    .padding(vertical = AppDimensions.smallPadding),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween) {
+                              Text(
+                                  text = "Friend Requests",
+                                  style = MaterialTheme.typography.titleSmall,
+                                  modifier = Modifier.weight(1f).testTag("friendRequestsHeader"))
+                              IconButton(
+                                  onClick = {
+                                    isFriendRequestsExpanded = !isFriendRequestsExpanded
+                                  },
+                                  modifier = Modifier.testTag("toggleFriendRequestsButton")) {
+                                    Icon(
+                                        imageVector =
+                                            if (isFriendRequestsExpanded) Icons.Default.ExpandLess
+                                            else Icons.Default.ExpandMore,
+                                        contentDescription =
+                                            if (isFriendRequestsExpanded) "Collapse Friend Requests"
+                                            else "Expand Friend Requests")
+                                  }
                             }
+
+                        // Animated Visibility for the Friend Requests List
+                        AnimatedVisibility(
+                            visible = isFriendRequestsExpanded,
+                            enter = expandVertically(),
+                            exit = shrinkVertically()) {
+                              LazyColumn(
+                                  modifier = Modifier.testTag("receivedFriendRequestsList"),
+                                  contentPadding =
+                                      PaddingValues(vertical = AppDimensions.paddingSmall),
+                                  verticalArrangement =
+                                      Arrangement.spacedBy(AppDimensions.paddingSmall)) {
+                                    items(filteredRecReq) { friendRequest ->
+                                      FriendRequestItem(
+                                          friendRequest = friendRequest,
+                                          userProfileViewModel = userProfileViewModel)
+                                    }
+                                  }
+                            }
+
                         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                       }
 
