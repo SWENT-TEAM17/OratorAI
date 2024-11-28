@@ -296,46 +296,47 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
   }
 
-    /**
-     * Cancels a previously sent friend request to the specified friend.
-     *
-     * @param friend The `UserProfile` of the friend whose request is to be canceled.
-     */
-    fun cancelFriendRequest(friend: UserProfile) {
-        val currentUid = repository.getCurrentUserUid()
-        if (currentUid != null) {
-            repository.cancelFriendRequest(
-                currentUid = currentUid,
-                friendUid = friend.uid,
-                onSuccess = {
-                    Log.d("UserProfileViewModel", "Friend request to ${friend.name} canceled successfully.")
+  /**
+   * Cancels a previously sent friend request to the specified friend.
+   *
+   * @param friend The `UserProfile` of the friend whose request is to be canceled.
+   */
+  fun cancelFriendRequest(friend: UserProfile) {
+    val currentUid = repository.getCurrentUserUid()
+    if (currentUid != null) {
+      repository.cancelFriendRequest(
+          currentUid = currentUid,
+          friendUid = friend.uid,
+          onSuccess = {
+            Log.d("UserProfileViewModel", "Friend request to ${friend.name} canceled successfully.")
 
-                    // Update the sent requests list by removing the friend
-                    val updatedSentReq = userProfile_.value?.sentReq?.toMutableList()?.apply {
-                        remove(friend.uid)
-                    }
-                    if (updatedSentReq != null) {
-                        // Update the userProfile state
-                        val updatedProfile = userProfile_.value!!.copy(sentReq = updatedSentReq)
-                        userProfile_.value = updatedProfile
+            // Update the sent requests list by removing the friend
+            val updatedSentReq =
+                userProfile_.value?.sentReq?.toMutableList()?.apply { remove(friend.uid) }
+            if (updatedSentReq != null) {
+              // Update the userProfile state
+              val updatedProfile = userProfile_.value!!.copy(sentReq = updatedSentReq)
+              userProfile_.value = updatedProfile
 
-                        // Update the sentReqProfiles state by removing the canceled friend
-                        sentReqProfiles_.value = sentReqProfiles_.value.filter { it.uid != friend.uid }
-                    }
+              // Update the sentReqProfiles state by removing the canceled friend
+              sentReqProfiles_.value = sentReqProfiles_.value.filter { it.uid != friend.uid }
+            }
 
-                    // Optionally, remove the friend from allProfiles if necessary
-                    // allProfiles_.value = allProfiles_.value // No change needed here
-                },
-                onFailure = { exception ->
-                    Log.e("UserProfileViewModel", "Failed to cancel friend request to ${friend.name}.", exception)
-                    // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
-                }
-            )
-        } else {
-            Log.e("UserProfileViewModel", "Cannot cancel friend request: User is not authenticated.")
-            // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
-        }
+            // Optionally, remove the friend from allProfiles if necessary
+            // allProfiles_.value = allProfiles_.value // No change needed here
+          },
+          onFailure = { exception ->
+            Log.e(
+                "UserProfileViewModel",
+                "Failed to cancel friend request to ${friend.name}.",
+                exception)
+            // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
+          })
+    } else {
+      Log.e("UserProfileViewModel", "Cannot cancel friend request: User is not authenticated.")
+      // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
     }
+  }
 
   /**
    * Updates the user profile.

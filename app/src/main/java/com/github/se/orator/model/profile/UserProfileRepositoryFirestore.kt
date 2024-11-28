@@ -504,69 +504,68 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           onFailure(exception)
         }
   }
-    /**
-     * Cancel a previously sent friend request.
-     *
-     * This function removes the `friendUid` from the current user's `sentReq` list and
-     * removes the `currentUid` from the friend's `recReq` list, effectively canceling
-     * the friend request.
-     *
-     * @param currentUid The UID of the current user who sent the friend request.
-     * @param friendUid The UID of the friend to whom the request was sent.
-     * @param onSuccess Callback to be invoked on successful cancellation.
-     * @param onFailure Callback to be invoked on failure with the exception.
-     */
-    override fun cancelFriendRequest(
-        currentUid: String,
-        friendUid: String,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        // References to both user documents in Firestore
-        val currentUserRef = db.collection(collectionPath).document(currentUid)
-        val friendUserRef = db.collection(collectionPath).document(friendUid)
+  /**
+   * Cancel a previously sent friend request.
+   *
+   * This function removes the `friendUid` from the current user's `sentReq` list and removes the
+   * `currentUid` from the friend's `recReq` list, effectively canceling the friend request.
+   *
+   * @param currentUid The UID of the current user who sent the friend request.
+   * @param friendUid The UID of the friend to whom the request was sent.
+   * @param onSuccess Callback to be invoked on successful cancellation.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  override fun cancelFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // References to both user documents in Firestore
+    val currentUserRef = db.collection(collectionPath).document(currentUid)
+    val friendUserRef = db.collection(collectionPath).document(friendUid)
 
-        // Run a Firestore transaction to ensure atomicity
-        db.runTransaction { transaction ->
-            // Retrieve snapshots of both users
-            val currentUserSnapshot = transaction.get(currentUserRef)
-            val friendUserSnapshot = transaction.get(friendUserRef)
+    // Run a Firestore transaction to ensure atomicity
+    db.runTransaction { transaction ->
+          // Retrieve snapshots of both users
+          val currentUserSnapshot = transaction.get(currentUserRef)
+          val friendUserSnapshot = transaction.get(friendUserRef)
 
-            // Retrieve current user's sent friend requests
-            val currentSentReq = currentUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+          // Retrieve current user's sent friend requests
+          val currentSentReq = currentUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
 
-            // Retrieve friend's received friend requests
-            val friendRecReq = friendUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+          // Retrieve friend's received friend requests
+          val friendRecReq = friendUserSnapshot.get("recReq") as? List<String> ?: emptyList()
 
-            // Check if the current user has actually sent a friend request to the friend
-            if (!currentSentReq.contains(friendUid)) {
-                throw Exception("No sent friend request to cancel.")
-            }
+          // Check if the current user has actually sent a friend request to the friend
+          if (!currentSentReq.contains(friendUid)) {
+            throw Exception("No sent friend request to cancel.")
+          }
 
-            // Check if the friend has the current user in their received requests
-            if (!friendRecReq.contains(currentUid)) {
-                throw Exception("Friend does not have you in their received requests.")
-            }
+          // Check if the friend has the current user in their received requests
+          if (!friendRecReq.contains(currentUid)) {
+            throw Exception("Friend does not have you in their received requests.")
+          }
 
-            // Remove `friendUid` from current user's `sentReq` list
-            val updatedSentReq = currentSentReq - friendUid
-            transaction.update(currentUserRef, "sentReq", updatedSentReq)
+          // Remove `friendUid` from current user's `sentReq` list
+          val updatedSentReq = currentSentReq - friendUid
+          transaction.update(currentUserRef, "sentReq", updatedSentReq)
 
-            // Remove `currentUid` from friend's `recReq` list
-            val updatedRecReq = friendRecReq - currentUid
-            transaction.update(friendUserRef, "recReq", updatedRecReq)
+          // Remove `currentUid` from friend's `recReq` list
+          val updatedRecReq = friendRecReq - currentUid
+          transaction.update(friendUserRef, "recReq", updatedRecReq)
         }
-            .addOnSuccessListener {
-                // Invoke the success callback if the transaction succeeds
-                Log.d("UserProfileRepositoryFirestore", "Friend request canceled successfully.")
-                onSuccess()
-            }
-            .addOnFailureListener { exception ->
-                // Log the error and invoke the failure callback if the transaction fails
-                Log.e("UserProfileRepositoryFirestore", "Failed to cancel friend request.", exception)
-                onFailure(exception)
-            }
-    }
+        .addOnSuccessListener {
+          // Invoke the success callback if the transaction succeeds
+          Log.d("UserProfileRepositoryFirestore", "Friend request canceled successfully.")
+          onSuccess()
+        }
+        .addOnFailureListener { exception ->
+          // Log the error and invoke the failure callback if the transaction fails
+          Log.e("UserProfileRepositoryFirestore", "Failed to cancel friend request.", exception)
+          onFailure(exception)
+        }
+  }
 
   override fun deleteFriend(
       currentUid: String,
