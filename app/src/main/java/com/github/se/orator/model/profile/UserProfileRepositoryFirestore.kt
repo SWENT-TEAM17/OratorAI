@@ -350,6 +350,67 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
+    /**
+     * Get profiles the user received requests from based on the UIDs stored in the user's profile.
+     *
+     * @param recReqUIds List of UIDs of the users the user received requests from to be retrieved.
+     * @param onSuccess Callback to be invoked with the list of friends' profiles.
+     * @param onFailure Callback to be invoked on failure with the exception.
+     */
+    override fun getRecReqProfiles(
+        friendUids: List<String>,
+        onSuccess: (List<UserProfile>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ){
+        if (friendUids.isEmpty()) {
+            onSuccess(emptyList()) // Return an empty list if no friends
+            return
+        }
+
+        db.collection(collectionPath)
+            .whereIn("uid", friendUids)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+                onSuccess(friends)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
+                onFailure(exception)
+            }
+    }
+
+
+    /**
+     * Get profiles the user received requests from based on the UIDs stored in the user's profile.
+     *
+     * @param recReqUIds List of UIDs of the users the user received requests from to be retrieved.
+     * @param onSuccess Callback to be invoked with the list of friends' profiles.
+     * @param onFailure Callback to be invoked on failure with the exception.
+     */
+    override fun getSentReqProfiles(
+        SentReqUids: List<String>,
+        onSuccess: (List<UserProfile>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ){
+        if (SentReqUids.isEmpty()) {
+            onSuccess(emptyList()) // Return an empty list if no friends
+            return
+        }
+
+        db.collection(collectionPath)
+            .whereIn("uid", SentReqUids)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+                onSuccess(friends)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
+                onFailure(exception)
+            }
+    }
+
   /**
    * Sends a friend request from the current user to another user.
    *

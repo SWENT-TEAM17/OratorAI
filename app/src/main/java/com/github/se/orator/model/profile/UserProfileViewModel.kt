@@ -129,6 +129,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
           isLoading_.value = false
           Log.d("UserProfileViewModel", "User profile fetched successfully.")
           Log.d("UserProfileViewModel", "Friends: ${profile?.name}")
+
         },
         onFailure = {
           // Handle error
@@ -158,7 +159,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    * @param friendUids List of UIDs of the friends to be retrieved.
    */
   private fun fetchRecReqProfiles(friendUids: List<String>) {
-    repository.getFriendsProfiles(
+    repository.getRecReqProfiles(
         friendUids = friendUids,
         onSuccess = { profiles -> recReqProfiles_.value = profiles },
         onFailure = {
