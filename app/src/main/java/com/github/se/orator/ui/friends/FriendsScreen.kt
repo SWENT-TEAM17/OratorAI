@@ -185,7 +185,10 @@ fun ViewFriendsScreen(
                                 FriendItem(
                                     friend = friend,
                                     userProfileViewModel = userProfileViewModel,
-                                    onProfilePictureClick = { selectedFriend = it })
+                                    onProfilePictureClick = { selectedFriend = it },
+                                    onClick = { selectedFriend ->
+                                      navigationActions.navigateToBattleScreen(selectedFriend.uid)
+                                    })
                               }
                             }
                       }
@@ -207,13 +210,16 @@ fun ViewFriendsScreen(
  * profile picture, name, and bio.
  *
  * @param friend The [UserProfile] object representing the friend being displayed.
+ * @param userProfileViewModel ViewModel for managing user profile data.
  * @param onProfilePictureClick Callback when the profile picture is clicked.
+ * @param onClick Callback when the entire item is clicked.
  */
 @Composable
 fun FriendItem(
     friend: UserProfile,
     userProfileViewModel: UserProfileViewModel,
-    onProfilePictureClick: (UserProfile) -> Unit
+    onProfilePictureClick: (UserProfile) -> Unit,
+    onClick: (UserProfile) -> Unit
 ) {
   // Compute the displayedStreak
   val displayedStreak = currentFriendStreak(friend.lastLoginDate, friend.currentStreak)
@@ -239,7 +245,8 @@ fun FriendItem(
           Modifier.fillMaxWidth()
               .padding(horizontal = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
-              .testTag("viewFriendsItem#${friend.uid}"),
+              .testTag("viewFriendsItem#${friend.uid}")
+              .clickable { onClick(friend) }, // Handle click
       color = AppColors.LightPurpleGrey,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {

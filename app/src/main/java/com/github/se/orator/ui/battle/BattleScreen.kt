@@ -1,30 +1,29 @@
-package com.github.se.orator.ui.overview
+package com.github.se.orator.ui.battle
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.github.se.orator.model.apiLink.ApiLinkViewModel
-import com.github.se.orator.model.chatGPT.ChatViewModel
-import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
-import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.overview.InputFieldData
+import com.github.se.orator.ui.overview.SpeakingPracticeModule
 
 /**
- * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview
- * module.
+ * The BattleScreen composable is a screen where the user can initiate a battle with a friend.
  *
- * @param navigationActions The navigation actions that can be performed.
+ * @param friendUid The UID of the friend to battle with.
+ * @param userProfileViewModel ViewModel for managing user profile data.
+ * @param navigationActions Actions to handle navigation within the app.
  */
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun SpeakingJobInterviewModule(
-    navigationActions: NavigationActions,
-    chatViewModel: ChatViewModel,
-    apiLinkViewModel: ApiLinkViewModel
+fun BattleScreen(
+    friendUid: String,
+    userProfileViewModel: UserProfileViewModel,
+    navigationActions: NavigationActions
 ) {
+
+  val friendName = userProfileViewModel.getName(friendUid)
   var targetPosition by remember { mutableStateOf("") }
   var companyName by remember { mutableStateOf("") }
   var skills by remember { mutableStateOf("") }
@@ -37,7 +36,7 @@ fun SpeakingJobInterviewModule(
               onValueChange = { newValue: String ->
                 targetPosition = newValue
               }, // Explicitly specify String for newValue
-              label = "What is your target job position?",
+              label = "For which position are you challenging $friendName?",
               placeholder = "e.g Senior executive",
               testTag = "levelInput"),
           InputFieldData(
@@ -68,25 +67,18 @@ fun SpeakingJobInterviewModule(
               height = 85,
               testTag = "experienceInput"))
 
+  // Use the existing SpeakingPracticeModule for consistent UI
   SpeakingPracticeModule(
       navigationActions = navigationActions,
-      screenTitle = "Job Interview",
-      headerText = "Ace your next job interview",
+      screenTitle = "Interview battle with $friendName",
+      headerText = "Challenge $friendName to an interview battle!",
       inputs = inputFields,
       onClick = {
-        // Collect the inputs and create an InterviewContext object
-        val interviewContext =
-            InterviewContext(
-                interviewType = "job interview",
-                role = targetPosition,
-                company = companyName,
-                focusAreas = skills.split(",").map { it.trim() })
+        // Simulate sending battle request
+        // TODO: Implement actual battle request logic
 
-        apiLinkViewModel.updatePracticeContext(interviewContext)
-
-        chatViewModel.initializeConversation()
-
-        // Navigate to ChatScreen with the collected data
-        navigationActions.navigateTo(Screen.CHAT_SCREEN)
-      })
+        // Navigate to the BattleRequestSentScreen
+        navigationActions.navigateToBattleRequestSentScreen(friendUid)
+      },
+      buttonName = "Send Battle Request")
 }

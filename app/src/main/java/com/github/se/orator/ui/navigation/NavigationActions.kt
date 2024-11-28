@@ -33,6 +33,8 @@ object Route {
   const val PRACTICE_QUESTIONS = "PracticeQuestions"
   const val OFFLINE_RECORDING = "OfflineRecording"
   const val OFFLINE_RECORDING_REVIEW = "OfflineRecordingReview"
+  const val BATTLE = "BattleScreen"
+  const val BATTLE_REQUEST_SENT = "BattleRequestSentScreen"
 }
 
 object Screen {
@@ -57,6 +59,8 @@ object Screen {
   const val OFFLINE = "Offline Screen"
   const val OFFLINE_RECORDING_SCREEN = "OfflineRecording Screen"
   const val OFFLINE_RECORDING_REVIEW_SCREEN = "OfflineRecordingReview Screen"
+  const val BATTLE_SCREEN = "Battle Screen"
+  const val BATTLE_REQUEST_SENT_SCREEN = "Battle Request Sent Screen"
 }
 
 data class TopLevelDestination(
@@ -155,5 +159,23 @@ open class NavigationActions(
   // and verifying in tests.
   open fun goToOfflineRecording(question: String) {
     navigateToOfflineRecording(question)
+  }
+
+  /**
+   * Navigate to the Battle Screen, passing the friend's UID as an argument.
+   *
+   * @param friendUid The UID of the friend to battle with.
+   */
+  open fun navigateToBattleScreen(friendUid: String) {
+    navController.navigate("${Route.BATTLE}/$friendUid")
+  }
+
+  /**
+   * Navigate to the Battle Request Sent Screen, passing the friend's UID as an argument.
+   *
+   * @param friendUid The UID of the friend.
+   */
+  open fun navigateToBattleRequestSentScreen(friendUid: String) {
+    navController.navigate("${Route.BATTLE_REQUEST_SENT}/$friendUid")
   }
 }

@@ -34,6 +34,8 @@ import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.network.OfflineViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
+import com.github.se.orator.ui.battle.BattleRequestSentScreen
+import com.github.se.orator.ui.battle.BattleScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
@@ -210,6 +212,30 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             }
             composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
           }
+
+          // Battle screen integration
+          composable(
+              route = "${Route.BATTLE}/{friendUid}",
+              arguments = listOf(navArgument("friendUid") { type = NavType.StringType })) {
+                  backStackEntry ->
+                val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
+                BattleScreen(
+                    friendUid = friendUid,
+                    userProfileViewModel = userProfileViewModel,
+                    navigationActions = navigationActions)
+              }
+
+          // Battle Request Sent Screen
+          composable(
+              route = "${Route.BATTLE_REQUEST_SENT}/{friendUid}",
+              arguments = listOf(navArgument("friendUid") { type = NavType.StringType })) {
+                  backStackEntry ->
+                val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
+                BattleRequestSentScreen(
+                    friendUid = friendUid,
+                    navigationActions = navigationActions,
+                    userProfileViewModel = userProfileViewModel)
+              }
         }
 
     // Handle transitions based on network status and ensure smooth navigation.

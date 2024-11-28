@@ -350,4 +350,15 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       Log.e("UserProfileViewModel", "Cannot update streak: User is not authenticated.")
     }
   }
+
+  /**
+   * Fetches the name of a user based on their UID.
+   *
+   * @param uid The UID of the user.
+   * @return The name of the user.
+   */
+  fun getName(uid: String): String {
+    val profile = allProfiles_.value.find { it.uid == uid }
+    return profile?.name ?: "Unknown"
+  }
 }
