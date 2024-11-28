@@ -21,39 +21,39 @@ class ChatViewModel(
     private val apiLinkViewModel: ApiLinkViewModel
 ) : ViewModel() {
 
-  private var isConversationInitialized = false
+    private var isConversationInitialized = false
 
-  private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
-  val chatMessages = _chatMessages.asStateFlow()
+    private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
+    val chatMessages = _chatMessages.asStateFlow()
 
-  private val _isLoading = MutableStateFlow(false)
-  val isLoading = _isLoading.asStateFlow()
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
 
-  private val _errorMessage = MutableStateFlow<String?>(null)
-  val errorMessage = _errorMessage.asStateFlow()
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage = _errorMessage.asStateFlow()
 
-  // Change to List<AnalysisData> and update properly
-  private val _collectedAnalysisData = MutableStateFlow<List<AnalysisData>>(emptyList())
-  val collectedAnalysisData = _collectedAnalysisData.asStateFlow()
+    // Change to List<AnalysisData> and update properly
+    private val _collectedAnalysisData = MutableStateFlow<List<AnalysisData>>(emptyList())
+    val collectedAnalysisData = _collectedAnalysisData.asStateFlow()
 
-  private val practiceContext = apiLinkViewModel.practiceContext
+    private val practiceContext = apiLinkViewModel.practiceContext
 
-  data class DecisionResult(val message: String, val isSuccess: Boolean)
+    data class DecisionResult(val message: String, val isSuccess: Boolean)
 
-  init {
-    observeAnalysisData()
-  }
+    init {
+        observeAnalysisData()
+    }
 
-  fun initializeConversation() {
-    if (isConversationInitialized) return
-    isConversationInitialized = true
+    fun initializeConversation() {
+        if (isConversationInitialized) return
+        isConversationInitialized = true
 
-    _collectedAnalysisData.value = emptyList() // Reset the analysis data history
-    val practiceContextAsValue = practiceContext.value ?: return
-    val systemMessageContent =
-        when (practiceContextAsValue) {
-          is InterviewContext ->
-              """
+        _collectedAnalysisData.value = emptyList() // Reset the analysis data history
+        val practiceContextAsValue = practiceContext.value ?: return
+        val systemMessageContent =
+            when (practiceContextAsValue) {
+                is InterviewContext ->
+                    """
                 You are simulating a realistic professional interview experience for the position of ${practiceContextAsValue.role} at ${practiceContextAsValue.company}. Your goal is to create an authentic and challenging interview simulation. Follow these detailed guidelines:
                 
                 1. **Research-Driven Context**:
@@ -80,9 +80,9 @@ class ChatViewModel(
                 
                 Start the session by introducing yourself, the position, and setting expectations for the user.
                 """
-                  .trimIndent()
-          is PublicSpeakingContext ->
-              """
+                        .trimIndent()
+                is PublicSpeakingContext ->
+                    """
                 You are a professional public speaking coach assisting the user in preparing a speech for the occasion of ${practiceContextAsValue.occasion}. Your objective is to guide the user in structuring and delivering a compelling speech. Follow these detailed guidelines:
                 
                 1. **Speech Structure**:
@@ -109,9 +109,9 @@ class ChatViewModel(
                 
                 Start by introducing your role as the coach, the goals for the session, and setting expectations for the user.
                 """
-                  .trimIndent()
-          is SalesPitchContext ->
-              """
+                        .trimIndent()
+                is SalesPitchContext ->
+                    """
                 You are simulating a sales negotiation practice session for the user, who is preparing to pitch the product ${practiceContextAsValue.product} to ${practiceContextAsValue.targetAudience}. Your goal is to provide a realistic and challenging sales scenario. Follow these detailed guidelines:
                 
                 1. **Scenario Setup**:
@@ -137,97 +137,97 @@ class ChatViewModel(
                 
                 Start the session by introducing the negotiation scenario, your role, and setting expectations for the user.
                 """
-                  .trimIndent()
-          else -> "You are assisting the user with their speaking practice."
-        }
+                        .trimIndent()
+                else -> "You are assisting the user with their speaking practice."
+            }
 
-    val systemMessage = Message(role = "system", content = systemMessageContent)
+        val systemMessage = Message(role = "system", content = systemMessageContent)
 
-    val userStartMessage = Message(role = "user", content = "I'm ready to begin the session.")
+        val userStartMessage = Message(role = "user", content = "I'm ready to begin the session.")
 
-    _chatMessages.value = listOf(systemMessage, userStartMessage)
+        _chatMessages.value = listOf(systemMessage, userStartMessage)
 
-    getNextGPTResponse()
-  }
-
-  fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
-    val userMessage = Message(role = "user", content = transcript)
-    _chatMessages.value = _chatMessages.value + userMessage
-
-    // Update the collected analysis data list properly
-    _collectedAnalysisData.value = _collectedAnalysisData.value + analysisData
-
-    getNextGPTResponse()
-  }
-
-  private fun getNextGPTResponse() {
-    Log.d("ChatViewModel", "Getting next GPT response")
-    viewModelScope.launch {
-      try {
-        _isLoading.value = true
-
-        val request = ChatRequest(model = "gpt-3.5-turbo", messages = _chatMessages.value)
-
-        val response = chatGPTService.getChatCompletion(request)
-
-        response.choices.firstOrNull()?.message?.let { responseMessage ->
-          _chatMessages.value = _chatMessages.value + responseMessage
-        }
-      } catch (e: Exception) {
-        handleError(e)
-      } finally {
-        _isLoading.value = false
-      }
+        getNextGPTResponse()
     }
-  }
 
-  fun resetPracticeContext() {
-    apiLinkViewModel.clearPracticeContext()
-  }
+    fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
+        val userMessage = Message(role = "user", content = transcript)
+        _chatMessages.value = _chatMessages.value + userMessage
 
-  fun endConversation() {
-    isConversationInitialized = false
-    apiLinkViewModel.clearAnalysisData() // because I don t want to reset before generating Feedback
-  }
+        // Update the collected analysis data list properly
+        _collectedAnalysisData.value = _collectedAnalysisData.value + analysisData
 
-  private fun getAnalysisSummary(): String {
-    return generateAnalysisSummary(_collectedAnalysisData.value)
-  }
+        getNextGPTResponse()
+    }
 
-  private fun generateAnalysisSummary(analysisDataList: List<AnalysisData>): String {
-    // Implement logic to summarize analysis data
-    return analysisDataList.joinToString("\n") { analysisData ->
-      """
+    private fun getNextGPTResponse() {
+        Log.d("ChatViewModel", "Getting next GPT response")
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val request = ChatRequest(model = "gpt-3.5-turbo", messages = _chatMessages.value)
+
+                val response = chatGPTService.getChatCompletion(request)
+
+                response.choices.firstOrNull()?.message?.let { responseMessage ->
+                    _chatMessages.value = _chatMessages.value + responseMessage
+                }
+            } catch (e: Exception) {
+                handleError(e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun resetPracticeContext() {
+        apiLinkViewModel.clearPracticeContext()
+    }
+
+    fun endConversation() {
+        isConversationInitialized = false
+        apiLinkViewModel.clearAnalysisData() // because I don t want to reset before generating Feedback
+    }
+
+    private fun getAnalysisSummary(): String {
+        return generateAnalysisSummary(_collectedAnalysisData.value)
+    }
+
+    private fun generateAnalysisSummary(analysisDataList: List<AnalysisData>): String {
+        // Implement logic to summarize analysis data
+        return analysisDataList.joinToString("\n") { analysisData ->
+            """
             Transcription: ${analysisData.transcription}
             Sentiment Score: ${"%.2f".format(analysisData.sentimentScore)}
             Filler Words Count: ${analysisData.fillerWordsCount}
             Average Pause Duration: ${"%.2f".format(analysisData.averagePauseDuration)}
             """
-          .trimIndent()
+                .trimIndent()
+        }
     }
-  }
 
-  // Keep generateFeedback() returning String?
-  suspend fun generateFeedback(): String? {
-    try {
-      Log.d("ChatViewModel", "Starting generateFeedback()")
+    // Keep generateFeedback() returning String?
+    suspend fun generateFeedback(): String? {
+        try {
+            Log.d("ChatViewModel", "Starting generateFeedback()")
 
-      val analysisSummary = getAnalysisSummary()
-      Log.d("ChatViewModel", "Analysis Summary: $analysisSummary")
+            val analysisSummary = getAnalysisSummary()
+            Log.d("ChatViewModel", "Analysis Summary: $analysisSummary")
 
-      val practiceContextAsValue = practiceContext.value
-      if (practiceContextAsValue == null) {
-        Log.e("ChatViewModel", "Practice context is null")
-        return null
-      } else {
-        Log.d("ChatViewModel", "Practice context: $practiceContextAsValue")
-      }
+            val practiceContextAsValue = practiceContext.value
+            if (practiceContextAsValue == null) {
+                Log.e("ChatViewModel", "Practice context is null")
+                return null
+            } else {
+                Log.d("ChatViewModel", "Practice context: $practiceContextAsValue")
+            }
 
-      // Determine the context-specific request
-      val outcomeRequest =
-          when (practiceContextAsValue) {
-            is InterviewContext ->
-                """
+            // Determine the context-specific request
+            val outcomeRequest =
+                when (practiceContextAsValue) {
+                    is InterviewContext ->
+                        """
                 The session is now over. Please evaluate my performance during the simulated interview for the role of ${practiceContextAsValue.role} at ${practiceContextAsValue.company}. Your feedback should follow this structure:
                 
                 1. **Overall Performance**:
@@ -249,8 +249,8 @@ class ChatViewModel(
                 
                 Be detailed, constructive, and specific to help me understand how I can improve for future interviews.
                 """
-            is PublicSpeakingContext ->
-                """
+                    is PublicSpeakingContext ->
+                        """
                 The session is now over. Please evaluate my performance during the public speaking practice for the occasion of ${practiceContextAsValue.occasion}, aimed at an audience of ${practiceContextAsValue.audienceDemographic}. Your feedback should follow this structure:
                 
                 1. **Speech Content**:
@@ -275,8 +275,8 @@ class ChatViewModel(
                 
                 Provide detailed, constructive feedback that will help me refine my public speaking skills.
                 """
-            is SalesPitchContext ->
-                """
+                    is SalesPitchContext ->
+                        """
                 The session is now over. Please evaluate my performance during the sales pitch practice for the product ${practiceContextAsValue.product}, targeted at ${practiceContextAsValue.targetAudience}. Your feedback should follow this structure:
                 
                 1. **Pitch Content**:
@@ -302,64 +302,64 @@ class ChatViewModel(
                 
                 Provide constructive, actionable feedback to help me refine my sales pitch skills.
                 """
-            else -> "Please evaluate my performance and provide feedback."
-          }
-      Log.d("ChatViewModel", "Outcome Request: $outcomeRequest")
+                    else -> "Please evaluate my performance and provide feedback."
+                }
+            Log.d("ChatViewModel", "Outcome Request: $outcomeRequest")
 
-      val feedbackRequestMessage =
-          Message(
-              role = "user",
-              content =
-                  """
+            val feedbackRequestMessage =
+                Message(
+                    role = "user",
+                    content =
+                    """
                 The session is now over. Please provide feedback on my performance, considering the following analysis of my responses:
 
                 $analysisSummary
 
                 $outcomeRequest
             """
-                      .trimIndent())
+                        .trimIndent())
 
-      val messages = _chatMessages.value + feedbackRequestMessage
-      Log.d("ChatViewModel", "Total messages: ${messages.size}")
+            val messages = _chatMessages.value + feedbackRequestMessage
+            Log.d("ChatViewModel", "Total messages: ${messages.size}")
 
-      val request = ChatRequest(model = "gpt-3.5-turbo", messages = messages)
-      Log.d("ChatViewModel", "ChatRequest prepared")
+            val request = ChatRequest(model = "gpt-3.5-turbo", messages = messages)
+            Log.d("ChatViewModel", "ChatRequest prepared")
 
-      val response = chatGPTService.getChatCompletion(request)
-      Log.d("ChatViewModel", "Received response from ChatGPT")
+            val response = chatGPTService.getChatCompletion(request)
+            Log.d("ChatViewModel", "Received response from ChatGPT")
 
-      val content = response.choices.firstOrNull()?.message?.content
-      if (content == null) {
-        Log.e("ChatViewModel", "Content from ChatGPT is null")
-        return null
-      } else {
-        Log.d("ChatViewModel", "Feedback content received")
-        return content
-      }
-    } catch (e: Exception) {
-      Log.e("ChatViewModel", "Exception in generateFeedback(): ${e.localizedMessage}", e)
-      return null
-    }
-  }
-
-  private fun handleError(e: Exception) {
-    // Handle exceptions and update _errorMessage
-    _errorMessage.value = e.localizedMessage
-    Log.e("ChatViewModel", "Error: ${e.localizedMessage}", e)
-  }
-
-  /**
-   * Observe the analysis data from the ApiLinkViewModel and send the user response to the chat when
-   * a new one is received.
-   */
-  private fun observeAnalysisData() {
-    viewModelScope.launch {
-      apiLinkViewModel.analysisData.collectLatest { data ->
-        data?.let {
-          Log.d("ChatViewModel", "Analysis data received: $it")
-          sendUserResponse(it.transcription, it)
+            val content = response.choices.firstOrNull()?.message?.content
+            if (content == null) {
+                Log.e("ChatViewModel", "Content from ChatGPT is null")
+                return null
+            } else {
+                Log.d("ChatViewModel", "Feedback content received")
+                return content
+            }
+        } catch (e: Exception) {
+            Log.e("ChatViewModel", "Exception in generateFeedback(): ${e.localizedMessage}", e)
+            return null
         }
-      }
     }
-  }
+
+    private fun handleError(e: Exception) {
+        // Handle exceptions and update _errorMessage
+        _errorMessage.value = e.localizedMessage
+        Log.e("ChatViewModel", "Error: ${e.localizedMessage}", e)
+    }
+
+    /**
+     * Observe the analysis data from the ApiLinkViewModel and send the user response to the chat when
+     * a new one is received.
+     */
+    private fun observeAnalysisData() {
+        viewModelScope.launch {
+            apiLinkViewModel.analysisData.collectLatest { data ->
+                data?.let {
+                    Log.d("ChatViewModel", "Analysis data received: $it")
+                    sendUserResponse(it.transcription, it)
+                }
+            }
+        }
+    }
 }
