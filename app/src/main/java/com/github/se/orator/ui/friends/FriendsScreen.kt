@@ -165,8 +165,7 @@ fun ViewFriendsScreen(
                                       contentDescription = "Search Icon")
                                 },
                                 modifier =
-                                    Modifier.wrapContentWidth()
-                                        .horizontalScroll(rememberScrollState())
+                                    Modifier.fillMaxWidth(1f)
                                         .height(AppDimensions.mediumHeight)
                                         .focusRequester(focusRequester)
                                         .testTag("viewFriendsSearch"))
