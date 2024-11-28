@@ -13,11 +13,10 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
-import junit.framework.TestCase.assertEquals
+import java.util.*
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
-import java.util.*
 import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.Test
@@ -374,492 +373,465 @@ class UserProfileRepositoryFirestoreTest {
     assert(failureCalled)
   }
 
-    /**
-     * Test that sendFriendRequest successfully sends a friend request.
-     */
-    @Test
-    fun sendFriendRequest_whenSuccessful_callsOnSuccess() {
-        val currentUid = "currentUserUid"
-        val friendUid = "friendUserUid"
+  /** Test that sendFriendRequest successfully sends a friend request. */
+  @Test
+  fun sendFriendRequest_whenSuccessful_callsOnSuccess() {
+    val currentUid = "currentUserUid"
+    val friendUid = "friendUserUid"
 
-        // Mock references
-        val currentUserRef = mock(DocumentReference::class.java)
-        val friendUserRef = mock(DocumentReference::class.java)
+    // Mock references
+    val currentUserRef = mock(DocumentReference::class.java)
+    val friendUserRef = mock(DocumentReference::class.java)
 
-        // Set up the collection and document references
-        `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
-        `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
+    // Set up the collection and document references
+    `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
+    `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
 
-        // Mock user snapshots
-        val currentUserSnapshot = mock(DocumentSnapshot::class.java)
-        val friendUserSnapshot = mock(DocumentSnapshot::class.java)
+    // Mock user snapshots
+    val currentUserSnapshot = mock(DocumentSnapshot::class.java)
+    val friendUserSnapshot = mock(DocumentSnapshot::class.java)
 
-        // Set up the current sent requests and friend received requests
-        `when`(currentUserSnapshot.get("sentReq")).thenReturn(emptyList<String>())
-        `when`(friendUserSnapshot.get("recReq")).thenReturn(emptyList<String>())
+    // Set up the current sent requests and friend received requests
+    `when`(currentUserSnapshot.get("sentReq")).thenReturn(emptyList<String>())
+    `when`(friendUserSnapshot.get("recReq")).thenReturn(emptyList<String>())
 
-        // Inside the transaction, simulate getting the snapshots and updating fields
-        `when`(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
-        `when`(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
+    // Inside the transaction, simulate getting the snapshots and updating fields
+    `when`(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
+    `when`(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
 
-        // Mock the transaction
-        `when`(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
-            val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
-            transactionFunction.apply(mockTransaction)
-            Tasks.forResult(null)
-        }
-
-        var successCalled = false
-        var failureCalled = false
-
-        repository.sendFriendRequest(
-            currentUid,
-            friendUid,
-            onSuccess = { successCalled = true },
-            onFailure = { failureCalled = true }
-        )
-
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
-
-        // Verify that success was called
-        assertTrue(successCalled)
-        assertFalse(failureCalled)
-
-        // Verify that transaction was run
-        verify(mockFirestore).runTransaction<Void>(any())
-
-        // Verify that transaction updated the correct fields
-        verify(mockTransaction).update(currentUserRef, "sentReq", listOf(friendUid))
-        verify(mockTransaction).update(friendUserRef, "recReq", listOf(currentUid))
+    // Mock the transaction
+    `when`(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
+      val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
+      transactionFunction.apply(mockTransaction)
+      Tasks.forResult(null)
     }
 
-    /**
-     * Test that acceptFriendRequest successfully accepts a friend request.
-     */
-    @Test
-    fun acceptFriendRequest_whenSuccessful_callsOnSuccess() {
-        val currentUid = "currentUserUid"
-        val friendUid = "friendUserUid"
+    var successCalled = false
+    var failureCalled = false
 
-        // Mock references
-        val currentUserRef = mock(DocumentReference::class.java)
-        val friendUserRef = mock(DocumentReference::class.java)
+    repository.sendFriendRequest(
+        currentUid,
+        friendUid,
+        onSuccess = { successCalled = true },
+        onFailure = { failureCalled = true })
 
-        // Set up the collection and document references
-        `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
-        `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        // Mock user snapshots
-        val currentUserSnapshot = mock(DocumentSnapshot::class.java)
-        val friendUserSnapshot = mock(DocumentSnapshot::class.java)
+    // Verify that success was called
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
 
-        // Set up the current received requests and friend sent requests
-        `when`(currentUserSnapshot.get("recReq")).thenReturn(listOf(friendUid))
-        `when`(currentUserSnapshot.get("friends")).thenReturn(emptyList<String>())
-        `when`(friendUserSnapshot.get("sentReq")).thenReturn(listOf(currentUid))
-        `when`(friendUserSnapshot.get("friends")).thenReturn(emptyList<String>())
+    // Verify that transaction was run
+    verify(mockFirestore).runTransaction<Void>(any())
 
-        // Inside the transaction, simulate getting the snapshots and updating fields
-        `when`(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
-        `when`(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
+    // Verify that transaction updated the correct fields
+    verify(mockTransaction).update(currentUserRef, "sentReq", listOf(friendUid))
+    verify(mockTransaction).update(friendUserRef, "recReq", listOf(currentUid))
+  }
 
-        // Mock the transaction
-        `when`(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
-            val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
-            transactionFunction.apply(mockTransaction)
-            Tasks.forResult(null)
-        }
+  /** Test that acceptFriendRequest successfully accepts a friend request. */
+  @Test
+  fun acceptFriendRequest_whenSuccessful_callsOnSuccess() {
+    val currentUid = "currentUserUid"
+    val friendUid = "friendUserUid"
 
-        var successCalled = false
-        var failureCalled = false
+    // Mock references
+    val currentUserRef = mock(DocumentReference::class.java)
+    val friendUserRef = mock(DocumentReference::class.java)
 
-        repository.acceptFriendRequest(
-            currentUid,
-            friendUid,
-            onSuccess = { successCalled = true },
-            onFailure = { failureCalled = true }
-        )
+    // Set up the collection and document references
+    `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
+    `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Mock user snapshots
+    val currentUserSnapshot = mock(DocumentSnapshot::class.java)
+    val friendUserSnapshot = mock(DocumentSnapshot::class.java)
 
-        // Verify that success was called
-        assertTrue(successCalled)
-        assertFalse(failureCalled)
+    // Set up the current received requests and friend sent requests
+    `when`(currentUserSnapshot.get("recReq")).thenReturn(listOf(friendUid))
+    `when`(currentUserSnapshot.get("friends")).thenReturn(emptyList<String>())
+    `when`(friendUserSnapshot.get("sentReq")).thenReturn(listOf(currentUid))
+    `when`(friendUserSnapshot.get("friends")).thenReturn(emptyList<String>())
 
-        // Verify that transaction was run
-        verify(mockFirestore).runTransaction<Void>(any())
+    // Inside the transaction, simulate getting the snapshots and updating fields
+    `when`(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
+    `when`(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
 
-        // Verify that transaction updated the correct fields
-        verify(mockTransaction).update(currentUserRef, "friends", listOf(friendUid))
-        verify(mockTransaction).update(currentUserRef, "recReq", emptyList<String>())
-        verify(mockTransaction).update(friendUserRef, "sentReq", emptyList<String>())
-        verify(mockTransaction).update(friendUserRef, "friends", listOf(currentUid))
+    // Mock the transaction
+    `when`(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
+      val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
+      transactionFunction.apply(mockTransaction)
+      Tasks.forResult(null)
     }
 
-    /**
-     * Test that declineFriendRequest successfully declines a friend request.
-     */
-    @Test
-    fun declineFriendRequest_whenSuccessful_callsOnSuccess() {
-        val currentUid = "currentUserUid"
-        val friendUid = "friendUserUid"
+    var successCalled = false
+    var failureCalled = false
 
-        // Mock references
-        val currentUserRef = mock(DocumentReference::class.java)
-        val friendUserRef = mock(DocumentReference::class.java)
+    repository.acceptFriendRequest(
+        currentUid,
+        friendUid,
+        onSuccess = { successCalled = true },
+        onFailure = { failureCalled = true })
 
-        // Set up the collection and document references
-        `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
-        `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        // Mock user snapshots
-        val currentUserSnapshot = mock(DocumentSnapshot::class.java)
-        val friendUserSnapshot = mock(DocumentSnapshot::class.java)
+    // Verify that success was called
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
 
-        // Set up the current received requests and friend sent requests
-        `when`(currentUserSnapshot.get("recReq")).thenReturn(listOf(friendUid))
-        `when`(friendUserSnapshot.get("sentReq")).thenReturn(listOf(currentUid))
+    // Verify that transaction was run
+    verify(mockFirestore).runTransaction<Void>(any())
 
-        // Inside the transaction, simulate getting the snapshots and updating fields
-        `when`(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
-        `when`(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
+    // Verify that transaction updated the correct fields
+    verify(mockTransaction).update(currentUserRef, "friends", listOf(friendUid))
+    verify(mockTransaction).update(currentUserRef, "recReq", emptyList<String>())
+    verify(mockTransaction).update(friendUserRef, "sentReq", emptyList<String>())
+    verify(mockTransaction).update(friendUserRef, "friends", listOf(currentUid))
+  }
 
-        // Mock the transaction
-        `when`(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
-            val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
-            transactionFunction.apply(mockTransaction)
-            Tasks.forResult(null)
-        }
+  /** Test that declineFriendRequest successfully declines a friend request. */
+  @Test
+  fun declineFriendRequest_whenSuccessful_callsOnSuccess() {
+    val currentUid = "currentUserUid"
+    val friendUid = "friendUserUid"
 
-        var successCalled = false
-        var failureCalled = false
+    // Mock references
+    val currentUserRef = mock(DocumentReference::class.java)
+    val friendUserRef = mock(DocumentReference::class.java)
 
-        repository.declineFriendRequest(
-            currentUid,
-            friendUid,
-            onSuccess = { successCalled = true },
-            onFailure = { failureCalled = true }
-        )
+    // Set up the collection and document references
+    `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
+    `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Mock user snapshots
+    val currentUserSnapshot = mock(DocumentSnapshot::class.java)
+    val friendUserSnapshot = mock(DocumentSnapshot::class.java)
 
-        // Verify that success was called
-        assertTrue(successCalled)
-        assertFalse(failureCalled)
+    // Set up the current received requests and friend sent requests
+    `when`(currentUserSnapshot.get("recReq")).thenReturn(listOf(friendUid))
+    `when`(friendUserSnapshot.get("sentReq")).thenReturn(listOf(currentUid))
 
-        // Verify that transaction was run
-        verify(mockFirestore).runTransaction<Void>(any())
+    // Inside the transaction, simulate getting the snapshots and updating fields
+    `when`(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
+    `when`(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
 
-        // Verify that transaction updated the correct fields
-        verify(mockTransaction).update(currentUserRef, "recReq", emptyList<String>())
-        verify(mockTransaction).update(friendUserRef, "sentReq", emptyList<String>())
+    // Mock the transaction
+    `when`(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
+      val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
+      transactionFunction.apply(mockTransaction)
+      Tasks.forResult(null)
     }
 
-    /**
-     * Test that cancelFriendRequest successfully cancels a sent friend request.
-     */
-    @Test
-    fun cancelFriendRequest_whenSuccessful_callsOnSuccess() {
-        val currentUid = "currentUserUid"
-        val friendUid = "friendUserUid"
+    var successCalled = false
+    var failureCalled = false
 
-        // Mock references
-        val currentUserRef = mock(DocumentReference::class.java)
-        val friendUserRef = mock(DocumentReference::class.java)
+    repository.declineFriendRequest(
+        currentUid,
+        friendUid,
+        onSuccess = { successCalled = true },
+        onFailure = { failureCalled = true })
 
-        // Set up the collection and document references
-        `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
-        `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        // Mock user snapshots
-        val currentUserSnapshot = mock(DocumentSnapshot::class.java)
-        val friendUserSnapshot = mock(DocumentSnapshot::class.java)
+    // Verify that success was called
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
 
-        // Set up the current sent requests and friend received requests
-        `when`(currentUserSnapshot.get("sentReq")).thenReturn(listOf(friendUid))
-        `when`(friendUserSnapshot.get("recReq")).thenReturn(listOf(currentUid))
+    // Verify that transaction was run
+    verify(mockFirestore).runTransaction<Void>(any())
 
-        // Inside the transaction, simulate getting the snapshots and updating fields
-        `when`(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
-        `when`(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
+    // Verify that transaction updated the correct fields
+    verify(mockTransaction).update(currentUserRef, "recReq", emptyList<String>())
+    verify(mockTransaction).update(friendUserRef, "sentReq", emptyList<String>())
+  }
 
-        // Mock the transaction
-        `when`(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
-            val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
-            transactionFunction.apply(mockTransaction)
-            Tasks.forResult(null)
-        }
+  /** Test that cancelFriendRequest successfully cancels a sent friend request. */
+  @Test
+  fun cancelFriendRequest_whenSuccessful_callsOnSuccess() {
+    val currentUid = "currentUserUid"
+    val friendUid = "friendUserUid"
 
-        var successCalled = false
-        var failureCalled = false
+    // Mock references
+    val currentUserRef = mock(DocumentReference::class.java)
+    val friendUserRef = mock(DocumentReference::class.java)
 
-        repository.cancelFriendRequest(
-            currentUid,
-            friendUid,
-            onSuccess = { successCalled = true },
-            onFailure = { failureCalled = true }
-        )
+    // Set up the collection and document references
+    `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
+    `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Mock user snapshots
+    val currentUserSnapshot = mock(DocumentSnapshot::class.java)
+    val friendUserSnapshot = mock(DocumentSnapshot::class.java)
 
-        // Verify that success was called
-        assertTrue(successCalled)
-        assertFalse(failureCalled)
+    // Set up the current sent requests and friend received requests
+    `when`(currentUserSnapshot.get("sentReq")).thenReturn(listOf(friendUid))
+    `when`(friendUserSnapshot.get("recReq")).thenReturn(listOf(currentUid))
 
-        // Verify that transaction was run
-        verify(mockFirestore).runTransaction<Void>(any())
+    // Inside the transaction, simulate getting the snapshots and updating fields
+    `when`(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
+    `when`(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
 
-        // Verify that transaction updated the correct fields
-        verify(mockTransaction).update(currentUserRef, "sentReq", emptyList<String>())
-        verify(mockTransaction).update(friendUserRef, "recReq", emptyList<String>())
+    // Mock the transaction
+    `when`(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
+      val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
+      transactionFunction.apply(mockTransaction)
+      Tasks.forResult(null)
     }
 
+    var successCalled = false
+    var failureCalled = false
 
-    /**
-     * Test deleteFriend successfully deletes a friend.
-     */
-    @Test
-    fun deleteFriend_whenSuccessful_callsOnSuccess() {
-        val currentUid = "currentUserUid"
-        val friendUid = "friendUserUid"
+    repository.cancelFriendRequest(
+        currentUid,
+        friendUid,
+        onSuccess = { successCalled = true },
+        onFailure = { failureCalled = true })
 
-        // Mock references
-        val currentUserRef = mock(DocumentReference::class.java)
-        val friendUserRef = mock(DocumentReference::class.java)
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        // Set up the collection and document references
-        whenever(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
-        whenever(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
+    // Verify that success was called
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
 
-        // Mock user snapshots
-        val currentUserSnapshot = mock(DocumentSnapshot::class.java)
-        val friendUserSnapshot = mock(DocumentSnapshot::class.java)
+    // Verify that transaction was run
+    verify(mockFirestore).runTransaction<Void>(any())
 
-        // Set up the current friends lists
-        whenever(currentUserSnapshot.get("friends")).thenReturn(listOf(friendUid))
-        whenever(friendUserSnapshot.get("friends")).thenReturn(listOf(currentUid))
+    // Verify that transaction updated the correct fields
+    verify(mockTransaction).update(currentUserRef, "sentReq", emptyList<String>())
+    verify(mockTransaction).update(friendUserRef, "recReq", emptyList<String>())
+  }
 
-        // Inside the transaction, simulate getting the snapshots and updating fields
-        whenever(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
-        whenever(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
+  /** Test deleteFriend successfully deletes a friend. */
+  @Test
+  fun deleteFriend_whenSuccessful_callsOnSuccess() {
+    val currentUid = "currentUserUid"
+    val friendUid = "friendUserUid"
 
-        // Mock the transaction
-        whenever(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
-            val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
-            transactionFunction.apply(mockTransaction)
-            Tasks.forResult(null)
-        }
+    // Mock references
+    val currentUserRef = mock(DocumentReference::class.java)
+    val friendUserRef = mock(DocumentReference::class.java)
 
-        var successCalled = false
-        var failureCalled = false
+    // Set up the collection and document references
+    whenever(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
+    whenever(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
 
-        repository.deleteFriend(
-            currentUid,
-            friendUid,
-            onSuccess = { successCalled = true },
-            onFailure = { failureCalled = true }
-        )
+    // Mock user snapshots
+    val currentUserSnapshot = mock(DocumentSnapshot::class.java)
+    val friendUserSnapshot = mock(DocumentSnapshot::class.java)
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Set up the current friends lists
+    whenever(currentUserSnapshot.get("friends")).thenReturn(listOf(friendUid))
+    whenever(friendUserSnapshot.get("friends")).thenReturn(listOf(currentUid))
 
-        // Verify that success was called
-        assertTrue(successCalled)
-        assertFalse(failureCalled)
+    // Inside the transaction, simulate getting the snapshots and updating fields
+    whenever(mockTransaction.get(currentUserRef)).thenReturn(currentUserSnapshot)
+    whenever(mockTransaction.get(friendUserRef)).thenReturn(friendUserSnapshot)
 
-        // Verify that transaction was run
-        verify(mockFirestore).runTransaction<Void>(any())
-
-        // Verify that transaction updated the correct fields
-        verify(mockTransaction).update(currentUserRef, "friends", emptyList<String>())
-        verify(mockTransaction).update(friendUserRef, "friends", emptyList<String>())
+    // Mock the transaction
+    whenever(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
+      val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
+      transactionFunction.apply(mockTransaction)
+      Tasks.forResult(null)
     }
 
-    /**
-     * Test updateLoginStreak updates the streak correctly.
-     */
-    @Test
-    fun updateLoginStreak_whenSuccessful_callsOnSuccess() {
-        val uid = "testUid"
+    var successCalled = false
+    var failureCalled = false
 
-        // Mock user document reference
-        val userRef = mock(DocumentReference::class.java)
-        whenever(mockCollectionReference.document(uid)).thenReturn(userRef)
+    repository.deleteFriend(
+        currentUid,
+        friendUid,
+        onSuccess = { successCalled = true },
+        onFailure = { failureCalled = true })
 
-        // Mock user snapshot
-        val userSnapshot = mock(DocumentSnapshot::class.java)
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        // Set up the last login date and current streak
-        whenever(userSnapshot.getString("lastLoginDate")).thenReturn("2021-09-01")
-        whenever(userSnapshot.getLong("currentStreak")).thenReturn(5L)
+    // Verify that success was called
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
 
-        // Inside the transaction, simulate getting the snapshot and updating fields
-        whenever(mockTransaction.get(userRef)).thenReturn(userSnapshot)
+    // Verify that transaction was run
+    verify(mockFirestore).runTransaction<Void>(any())
 
-        // Mock the transaction
-        whenever(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
-            val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
-            transactionFunction.apply(mockTransaction)
-            Tasks.forResult(null)
-        }
+    // Verify that transaction updated the correct fields
+    verify(mockTransaction).update(currentUserRef, "friends", emptyList<String>())
+    verify(mockTransaction).update(friendUserRef, "friends", emptyList<String>())
+  }
 
-        var successCalled = false
-        var failureCalled = false
+  /** Test updateLoginStreak updates the streak correctly. */
+  @Test
+  fun updateLoginStreak_whenSuccessful_callsOnSuccess() {
+    val uid = "testUid"
 
-        repository.updateLoginStreak(
-            uid,
-            onSuccess = { successCalled = true },
-            onFailure = { failureCalled = true }
-        )
+    // Mock user document reference
+    val userRef = mock(DocumentReference::class.java)
+    whenever(mockCollectionReference.document(uid)).thenReturn(userRef)
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Mock user snapshot
+    val userSnapshot = mock(DocumentSnapshot::class.java)
 
-        // Verify that success was called
-        assertTrue(successCalled)
-        assertFalse(failureCalled)
+    // Set up the last login date and current streak
+    whenever(userSnapshot.getString("lastLoginDate")).thenReturn("2021-09-01")
+    whenever(userSnapshot.getLong("currentStreak")).thenReturn(5L)
 
-        // Verify that transaction was run
-        verify(mockFirestore).runTransaction<Void>(any())
+    // Inside the transaction, simulate getting the snapshot and updating fields
+    whenever(mockTransaction.get(userRef)).thenReturn(userSnapshot)
 
-        // Verify that transaction updated the correct fields
-        verify(mockTransaction).update(eq(userRef), anyMap<String, Any>())
+    // Mock the transaction
+    whenever(mockFirestore.runTransaction<Void>(any())).thenAnswer { invocation ->
+      val transactionFunction = invocation.getArgument<Transaction.Function<Void>>(0)
+      transactionFunction.apply(mockTransaction)
+      Tasks.forResult(null)
     }
 
-    /**
-     * Test getRecReqProfiles returns the correct profiles.
-     */
-    @Test
-    fun getRecReqProfiles_whenSuccessful_returnsProfiles() {
-        val recReqUids = listOf("user1", "user2")
-        val mockUserProfile1 = UserProfile(uid = "user1", name = "User One", age = 20, statistics = UserStatistics())
-        val mockUserProfile2 = UserProfile(uid = "user2", name = "User Two", age = 22, statistics = UserStatistics())
+    var successCalled = false
+    var failureCalled = false
 
-        // Mock query
-        whenever(mockCollectionReference.whereIn("uid", recReqUids)).thenReturn(mockQuery)
-        whenever(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
-        whenever(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot, mockDocumentSnapshot))
+    repository.updateLoginStreak(
+        uid, onSuccess = { successCalled = true }, onFailure = { failureCalled = true })
 
-        // Mock document snapshots to return user profiles
-        whenever(mockDocumentSnapshot.toObject(UserProfile::class.java))
-            .thenReturn(mockUserProfile1)
-            .thenReturn(mockUserProfile2)
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        var profiles: List<UserProfile>? = null
+    // Verify that success was called
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
 
-        repository.getRecReqProfiles(
-            recReqUids,
-            onSuccess = { profiles = it },
-            onFailure = { fail("Failure callback should not be called") }
-        )
+    // Verify that transaction was run
+    verify(mockFirestore).runTransaction<Void>(any())
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Verify that transaction updated the correct fields
+    verify(mockTransaction).update(eq(userRef), anyMap<String, Any>())
+  }
 
-        // Verify the results
-        assertNotNull(profiles)
-    }
+  /** Test getRecReqProfiles returns the correct profiles. */
+  @Test
+  fun getRecReqProfiles_whenSuccessful_returnsProfiles() {
+    val recReqUids = listOf("user1", "user2")
+    val mockUserProfile1 =
+        UserProfile(uid = "user1", name = "User One", age = 20, statistics = UserStatistics())
+    val mockUserProfile2 =
+        UserProfile(uid = "user2", name = "User Two", age = 22, statistics = UserStatistics())
 
-    /**
-     * Test getSentReqProfiles returns the correct profiles.
-     */
-    @Test
-    fun getSentReqProfiles_whenSuccessful_returnsProfiles() {
-        val sentReqUids = listOf("user3", "user4")
-        val mockUserProfile3 = UserProfile(uid = "user3", name = "User Three", age = 23, statistics = UserStatistics())
-        val mockUserProfile4 = UserProfile(uid = "user4", name = "User Four", age = 24, statistics = UserStatistics())
+    // Mock query
+    whenever(mockCollectionReference.whereIn("uid", recReqUids)).thenReturn(mockQuery)
+    whenever(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+    whenever(mockQuerySnapshot.documents)
+        .thenReturn(listOf(mockDocumentSnapshot, mockDocumentSnapshot))
 
-        // Mock query
-        whenever(mockCollectionReference.whereIn("uid", sentReqUids)).thenReturn(mockQuery)
-        whenever(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
-        whenever(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot, mockDocumentSnapshot))
+    // Mock document snapshots to return user profiles
+    whenever(mockDocumentSnapshot.toObject(UserProfile::class.java))
+        .thenReturn(mockUserProfile1)
+        .thenReturn(mockUserProfile2)
 
-        // Mock document snapshots to return user profiles
-        whenever(mockDocumentSnapshot.toObject(UserProfile::class.java))
-            .thenReturn(mockUserProfile3)
-            .thenReturn(mockUserProfile4)
+    var profiles: List<UserProfile>? = null
 
-        var profiles: List<UserProfile>? = null
+    repository.getRecReqProfiles(
+        recReqUids,
+        onSuccess = { profiles = it },
+        onFailure = { fail("Failure callback should not be called") })
 
-        repository.getSentReqProfiles(
-            sentReqUids,
-            onSuccess = { profiles = it },
-            onFailure = { fail("Failure callback should not be called") }
-        )
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Verify the results
+    assertNotNull(profiles)
+  }
 
-        // Verify the results
-        assertNotNull(profiles)
-    }
+  /** Test getSentReqProfiles returns the correct profiles. */
+  @Test
+  fun getSentReqProfiles_whenSuccessful_returnsProfiles() {
+    val sentReqUids = listOf("user3", "user4")
+    val mockUserProfile3 =
+        UserProfile(uid = "user3", name = "User Three", age = 23, statistics = UserStatistics())
+    val mockUserProfile4 =
+        UserProfile(uid = "user4", name = "User Four", age = 24, statistics = UserStatistics())
 
-    /**
-     * Test getAllUserProfiles returns all profiles.
-     */
-    @Test
-    fun getAllUserProfiles_whenSuccessful_returnsProfiles() {
-        val mockUserProfile1 = UserProfile(uid = "user1", name = "User One", age = 20, statistics = UserStatistics())
-        val mockUserProfile2 = UserProfile(uid = "user2", name = "User Two", age = 22, statistics = UserStatistics())
+    // Mock query
+    whenever(mockCollectionReference.whereIn("uid", sentReqUids)).thenReturn(mockQuery)
+    whenever(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+    whenever(mockQuerySnapshot.documents)
+        .thenReturn(listOf(mockDocumentSnapshot, mockDocumentSnapshot))
 
-        // Mock query
-        whenever(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
-        whenever(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot, mockDocumentSnapshot))
+    // Mock document snapshots to return user profiles
+    whenever(mockDocumentSnapshot.toObject(UserProfile::class.java))
+        .thenReturn(mockUserProfile3)
+        .thenReturn(mockUserProfile4)
 
-        // Mock document snapshots to return user profiles
-        whenever(mockDocumentSnapshot.toObject(UserProfile::class.java))
-            .thenReturn(mockUserProfile1)
-            .thenReturn(mockUserProfile2)
+    var profiles: List<UserProfile>? = null
 
-        var profiles: List<UserProfile>? = null
+    repository.getSentReqProfiles(
+        sentReqUids,
+        onSuccess = { profiles = it },
+        onFailure = { fail("Failure callback should not be called") })
 
-        repository.getAllUserProfiles(
-            onSuccess = { profiles = it },
-            onFailure = { fail("Failure callback should not be called") }
-        )
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Verify the results
+    assertNotNull(profiles)
+  }
 
-        // Verify the results
-        assertNotNull(profiles)
-    }
+  /** Test getAllUserProfiles returns all profiles. */
+  @Test
+  fun getAllUserProfiles_whenSuccessful_returnsProfiles() {
+    val mockUserProfile1 =
+        UserProfile(uid = "user1", name = "User One", age = 20, statistics = UserStatistics())
+    val mockUserProfile2 =
+        UserProfile(uid = "user2", name = "User Two", age = 22, statistics = UserStatistics())
 
-    /**
-     * Test deleteUserProfile deletes the profile successfully.
-     */
-    @Test
-    fun deleteUserProfile_whenSuccessful_callsOnSuccess() {
-        val uid = "testUid"
+    // Mock query
+    whenever(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+    whenever(mockQuerySnapshot.documents)
+        .thenReturn(listOf(mockDocumentSnapshot, mockDocumentSnapshot))
 
-        // Mock delete
-        whenever(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
+    // Mock document snapshots to return user profiles
+    whenever(mockDocumentSnapshot.toObject(UserProfile::class.java))
+        .thenReturn(mockUserProfile1)
+        .thenReturn(mockUserProfile2)
 
-        var successCalled = false
-        var failureCalled = false
+    var profiles: List<UserProfile>? = null
 
-        repository.deleteUserProfile(
-            uid,
-            onSuccess = { successCalled = true },
-            onFailure = { failureCalled = true }
-        )
+    repository.getAllUserProfiles(
+        onSuccess = { profiles = it },
+        onFailure = { fail("Failure callback should not be called") })
 
-        // Execute pending tasks
-        shadowOf(Looper.getMainLooper()).idle()
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
 
-        // Verify that success was called
-        assertTrue(successCalled)
-        assertFalse(failureCalled)
+    // Verify the results
+    assertNotNull(profiles)
+  }
 
-        // Verify that delete was called on the document reference
-        verify(mockDocumentReference).delete()
-    }
+  /** Test deleteUserProfile deletes the profile successfully. */
+  @Test
+  fun deleteUserProfile_whenSuccessful_callsOnSuccess() {
+    val uid = "testUid"
 
-    // Add any additional tests if necessary
+    // Mock delete
+    whenever(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
+    var successCalled = false
+    var failureCalled = false
+
+    repository.deleteUserProfile(
+        uid, onSuccess = { successCalled = true }, onFailure = { failureCalled = true })
+
+    // Execute pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify that success was called
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
+
+    // Verify that delete was called on the document reference
+    verify(mockDocumentReference).delete()
+  }
+
+  // Add any additional tests if necessary
 
 }

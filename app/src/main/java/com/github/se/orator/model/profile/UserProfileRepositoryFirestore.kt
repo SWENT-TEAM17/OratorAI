@@ -749,6 +749,4 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           onFailure()
         }
   }
-
-
 }

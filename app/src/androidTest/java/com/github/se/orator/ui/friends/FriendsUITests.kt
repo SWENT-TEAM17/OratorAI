@@ -35,7 +35,14 @@ class FriendsUITests {
   @get:Rule val composeTestRule = createComposeRule()
 
   // Friends List
-  private val profile1 = UserProfile("1", "John Doe", 99, statistics = UserStatistics(), currentStreak = 1, lastLoginDate = formatDate(getCurrentDate()))
+  private val profile1 =
+      UserProfile(
+          "1",
+          "John Doe",
+          99,
+          statistics = UserStatistics(),
+          currentStreak = 1,
+          lastLoginDate = formatDate(getCurrentDate()))
   private val profile2 = UserProfile("2", "Jane Doe", 100, statistics = UserStatistics())
 
   val profile3 =
@@ -196,27 +203,28 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("viewFriendsItem#1", useUnmergedTree = true).assertIsDisplayed()
   }
 
+  @Test
+  fun testFriendStreakIsDisplayed() {
+    // Set up the test environment
+    viewFriendsTestsSetup()
 
-    @Test
-    fun testFriendStreakIsDisplayed() {
-        // Set up the test environment
-        viewFriendsTestsSetup()
+    // Ensure that profile1 is part of the friends list
+    // This is already handled in the setUp() method where profile1 and profile2 are returned as
+    // friends
 
-        // Ensure that profile1 is part of the friends list
-        // This is already handled in the setUp() method where profile1 and profile2 are returned as friends
+    // Wait for the UI to render the friends list
+    composeTestRule.waitForIdle()
 
-        // Wait for the UI to render the friends list
-        composeTestRule.waitForIdle()
+    // Define the expected streak text for profile1
+    val expectedStreakText = "1 day streak"
 
-        // Define the expected streak text for profile1
-        val expectedStreakText = "1 day streak"
-
-        // Locate the streak text for profile1 using the unique test tag
-        composeTestRule
-            .onNodeWithTag("friendStreak", useUnmergedTree = true)            .assertExists("Streak text for profile1 does not exist")
-            .assertIsDisplayed()
-            .assertTextEquals(expectedStreakText)
-    }
+    // Locate the streak text for profile1 using the unique test tag
+    composeTestRule
+        .onNodeWithTag("friendStreak", useUnmergedTree = true)
+        .assertExists("Streak text for profile1 does not exist")
+        .assertIsDisplayed()
+        .assertTextEquals(expectedStreakText)
+  }
 
   /** Tests that navigation to Add Friend and Leaderboard screens works correctly. */
   @Test

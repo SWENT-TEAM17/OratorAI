@@ -189,7 +189,6 @@ class UserProfileViewModelTest {
     Assert.assertEquals(friendProfile, selectedFriend)
   }
 
-
   @Test
   fun `updateLoginStreak should call repository to update streak`() = runTest {
     `when`(repository.getCurrentUserUid()).thenReturn(testUid)
