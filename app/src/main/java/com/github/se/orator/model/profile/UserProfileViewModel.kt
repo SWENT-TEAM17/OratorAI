@@ -271,31 +271,37 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   fun sendRequest(friend: UserProfile) {
     val currentUid = repository.getCurrentUserUid()
     if (currentUid != null) {
-      repository.sendFriendRequest(
-          currentUid = currentUid,
-          friendUid = friend.uid,
-          onSuccess = {
-            Log.d("UserProfileViewModel", "Friend request sent to ${friend.name}")
+      // Check if there's already an incoming request from this user
+      if (recReqProfiles.value.any { it.uid == friend.uid }) {
+        // Handle mutual request scenario
+        // This logic will be managed in the UI, so no action here
+      } else {
+        repository.sendFriendRequest(
+            currentUid = currentUid,
+            friendUid = friend.uid,
+            onSuccess = {
+              Log.d("UserProfileViewModel", "Friend request sent to ${friend.name}")
 
-            // Update local state for sent requests
-            val updatedSentReq =
-                userProfile_.value?.sentReq?.toMutableList()?.apply { add(friend.uid) }
-            if (updatedSentReq != null) {
-              val updatedProfile = userProfile_.value!!.copy(sentReq = updatedSentReq)
-              userProfile_.value = updatedProfile
-              sentReqProfiles_.value += friend
-            }
-          },
-          onFailure = { exception ->
-            Log.e("UserProfileViewModel", "Failed to send friend request.", exception)
-            // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
-          })
+              // Update local state for sent requests
+              val updatedSentReq =
+                  userProfile_.value?.sentReq?.toMutableList()?.apply { add(friend.uid) }
+              if (updatedSentReq != null) {
+                val updatedProfile = userProfile_.value!!.copy(sentReq = updatedSentReq)
+                userProfile_.value = updatedProfile
+                sentReqProfiles_.value += friend
+              }
+            },
+            onFailure = { exception ->
+              Log.e("UserProfileViewModel", "Failed to send friend request.", exception)
+              // Optionally, notify the UI about the failure (e.g., via another StateFlow or
+              // LiveData)
+            })
+      }
     } else {
       Log.e("UserProfileViewModel", "Cannot send friend request: User is not authenticated.")
       // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
     }
   }
-
   /**
    * Cancels a previously sent friend request to the specified friend.
    *

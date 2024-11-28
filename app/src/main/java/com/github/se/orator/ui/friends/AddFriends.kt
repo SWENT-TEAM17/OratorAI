@@ -2,6 +2,9 @@ package com.github.se.orator.ui.friends
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,7 +26,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -80,18 +87,20 @@ fun AddFriendsScreen(
   val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
   val focusRequester = FocusRequester() // Manages focus for the search field
   val sentReqProfiles by userProfileViewModel.sentReqProfiles.collectAsState()
-
   // Exclude the current user's profile and their friends' profiles from the list
   val filteredProfiles =
       allProfiles.filter { profile ->
         profile.uid != userProfile?.uid && // Exclude own profile
             friendsProfiles.none { friend -> friend.uid == profile.uid } && // Exclude friends
-            sentReqProfiles.none { sent -> sent.uid == profile.uid } && // Exclude friends
+            sentReqProfiles.none { sent -> sent.uid == profile.uid } && // Exclude sent requests
             profile.name.contains(query, ignoreCase = true) // Match search query
       }
 
   // State variable to keep track of the selected user's profile picture
   var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
+
+  // State variable to control the expansion of Sent Friend Requests
+  var isSentRequestsExpanded by remember { mutableStateOf(false) }
 
   ProjectTheme {
     Scaffold(
@@ -119,7 +128,7 @@ fun AddFriendsScreen(
                   Modifier.fillMaxSize()
                       .padding(paddingValues)
                       .padding(AppDimensions.paddingMedium)) {
-                // Text field with search icon and clear button
+                // Search Field
                 OutlinedTextField(
                     value = query,
                     onValueChange = { newValue ->
@@ -155,24 +164,51 @@ fun AddFriendsScreen(
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-                // **New Section: Sent Friend Requests**
+                // **Expandable Section: Sent Friend Requests**
                 if (sentReqProfiles.isNotEmpty()) {
-                  Text(
-                      text = "Sent Friend Requests",
-                      style = MaterialTheme.typography.titleSmall,
+                  // Header with Toggle Button
+                  Row(
                       modifier =
-                          Modifier.padding(bottom = AppDimensions.smallPadding)
-                              .testTag("sentFriendRequestsHeader"))
-                  LazyColumn(
-                      modifier = Modifier.testTag("sentFriendRequestsList"),
-                      contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                      verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-                        items(sentReqProfiles) { sentRequest ->
-                          SentFriendRequestItem(
-                              sentRequest = sentRequest,
-                              userProfileViewModel = userProfileViewModel)
-                        }
+                          Modifier.fillMaxWidth()
+                              .clickable { isSentRequestsExpanded = !isSentRequestsExpanded }
+                              .padding(vertical = AppDimensions.smallPadding),
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(
+                            text = "Sent Friend Requests",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.weight(1f).testTag("sentFriendRequestsHeader"))
+                        IconButton(
+                            onClick = { isSentRequestsExpanded = !isSentRequestsExpanded },
+                            modifier = Modifier.testTag("toggleSentRequestsButton")) {
+                              Icon(
+                                  imageVector =
+                                      if (isSentRequestsExpanded) Icons.Default.ExpandLess
+                                      else Icons.Default.ExpandMore,
+                                  contentDescription =
+                                      if (isSentRequestsExpanded) "Collapse Sent Requests"
+                                      else "Expand Sent Requests")
+                            }
                       }
+
+                  // Animated Visibility for the Sent Requests List
+                  AnimatedVisibility(
+                      visible = isSentRequestsExpanded,
+                      enter = expandVertically(),
+                      exit = shrinkVertically()) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth().testTag("sentFriendRequestsList"),
+                            contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                            verticalArrangement =
+                                Arrangement.spacedBy(AppDimensions.paddingSmall)) {
+                              items(sentReqProfiles) { sentRequest ->
+                                SentFriendRequestItem(
+                                    sentRequest = sentRequest,
+                                    userProfileViewModel = userProfileViewModel)
+                              }
+                            }
+                      }
+
                   Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 }
 
@@ -291,6 +327,10 @@ fun UserItem(
     onProfilePictureClick: (UserProfile) -> Unit
 ) {
   val context = LocalContext.current // Get the context for showing Toast
+  val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
+
+  // State to manage the visibility of the mutual request dialog
+  var showMutualRequestDialog by remember { mutableStateOf(false) }
 
   Surface(
       modifier =
@@ -298,22 +338,32 @@ fun UserItem(
               .padding(horizontal = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .clickable {
-                // Add friend when the item is clicked
-                userProfileViewModel.sendRequest(user)
-                // Show Toast message
-                Toast.makeText(
-                        context,
-                        "You have sent a friend request to ${user.name}.",
-                        Toast.LENGTH_SHORT)
-                    .show()
+                // Check if the target user has already sent a friend request to the current user
+                val hasIncomingRequest = recReqProfiles.any { it.uid == user.uid }
+
+                if (hasIncomingRequest) {
+                  // Show the mutual request dialog
+                  showMutualRequestDialog = true
+                } else {
+                  // Send the friend request as usual
+                  userProfileViewModel.sendRequest(user)
+                  // Show a toast message confirming the action
+                  Toast.makeText(
+                          context,
+                          "You have sent a friend request to ${user.name}.",
+                          Toast.LENGTH_SHORT)
+                      .show()
+                }
               },
       color = AppColors.LightPurpleGrey,
-      shadowElevation = AppDimensions.elevationSmall) {
+      shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
+      ) {
         Row(
             modifier =
                 Modifier.fillMaxWidth()
                     .padding(AppDimensions.paddingMedium)
-                    .testTag("addFriendUserItem#${user.uid}")) {
+                    .testTag("addFriendUserItem#${user.uid}"),
+            verticalAlignment = Alignment.CenterVertically) {
               // Profile picture click listener to show enlarged picture
               ProfilePicture(
                   profilePictureUrl = user.profilePic, onClick = { onProfilePictureClick(user) })
@@ -333,5 +383,45 @@ fun UserItem(
                     overflow = TextOverflow.Ellipsis)
               }
             }
+
+        // Mutual request dialog
+        if (showMutualRequestDialog) {
+          AlertDialog(
+              onDismissRequest = { showMutualRequestDialog = false },
+              title = { Text("Friend Request") },
+              text = {
+                Text(
+                    text =
+                        "${user.name} has already sent you a friend request. Would you like to accept or reject it?")
+              },
+              confirmButton = {
+                TextButton(
+                    onClick = {
+                      // Accept the incoming friend request
+                      userProfileViewModel.acceptFriend(user)
+                      Toast.makeText(
+                              context, "You are now friends with ${user.name}.", Toast.LENGTH_SHORT)
+                          .show()
+                      showMutualRequestDialog = false
+                    }) {
+                      Text("Accept")
+                    }
+              },
+              dismissButton = {
+                TextButton(
+                    onClick = {
+                      // Reject the incoming friend request
+                      userProfileViewModel.declineFriendRequest(user)
+                      Toast.makeText(
+                              context,
+                              "Friend request from ${user.name} has been rejected.",
+                              Toast.LENGTH_SHORT)
+                          .show()
+                      showMutualRequestDialog = false
+                    }) {
+                      Text("Reject")
+                    }
+              })
+        }
       }
 }
