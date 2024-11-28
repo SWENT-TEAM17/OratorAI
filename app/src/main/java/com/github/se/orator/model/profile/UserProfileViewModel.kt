@@ -129,7 +129,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
           isLoading_.value = false
           Log.d("UserProfileViewModel", "User profile fetched successfully.")
           Log.d("UserProfileViewModel", "Friends: ${profile?.name}")
-
         },
         onFailure = {
           // Handle error
@@ -173,7 +172,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    * @param friendUids List of UIDs of the friends to be retrieved.
    */
   private fun fetchSentReqProfiles(friendUids: List<String>) {
-    repository.getFriendsProfiles(
+    repository.getSentReqProfiles(
         friendUids = friendUids,
         onSuccess = { profiles -> sentReqProfiles_.value = profiles },
         onFailure = {
@@ -454,22 +453,22 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
           currentUid = currentUid,
           friendUid = friend.uid,
           onSuccess = {
-              Log.d("UserProfileViewModel", "Friend ${friend.name} removed successfully.")
+            Log.d("UserProfileViewModel", "Friend ${friend.name} removed successfully.")
 
-              // Update the sent requests list by removing the friend
-              val updatedFriends =
-                  userProfile_.value?.friends?.toMutableList()?.apply { remove(friend.uid) }
-              if (updatedFriends != null) {
-                  // Update the userProfile state
-                  val updatedProfile = userProfile_.value!!.copy(friends = updatedFriends)
-                  userProfile_.value = updatedProfile
+            // Update the sent requests list by removing the friend
+            val updatedFriends =
+                userProfile_.value?.friends?.toMutableList()?.apply { remove(friend.uid) }
+            if (updatedFriends != null) {
+              // Update the userProfile state
+              val updatedProfile = userProfile_.value!!.copy(friends = updatedFriends)
+              userProfile_.value = updatedProfile
 
-                  // Update the sentReqProfiles state by removing the canceled friend
-                  friendsProfiles_.value = friendsProfiles_.value.filter { it.uid != friend.uid }
-              }
+              // Update the sentReqProfiles state by removing the canceled friend
+              friendsProfiles_.value = friendsProfiles_.value.filter { it.uid != friend.uid }
+            }
 
-              // Optionally, remove the friend from allProfiles if necessary
-              // allProfiles_.value = allProfiles_.value // No change needed here
+            // Optionally, remove the friend from allProfiles if necessary
+            // allProfiles_.value = allProfiles_.value // No change needed here
           },
           onFailure = { exception ->
             Log.e("UserProfileViewModel", "Failed to delete friend.", exception)

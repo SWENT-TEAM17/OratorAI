@@ -177,31 +177,31 @@ interface UserProfileRepository {
       onFailure: (Exception) -> Unit
   )
 
-    /**
-     * Get friends' profiles based on their UIDs.
-     *
-     * @param friendUids List of UIDs of the friends.
-     * @param onSuccess Callback to be invoked with the list of friends' profiles.
-     * @param onFailure Callback to be invoked on failure with the exception.
-     */
-    fun getRecReqProfiles(
-        friendUids: List<String>,
-        onSuccess: (List<UserProfile>) -> Unit,
-        onFailure: (Exception) -> Unit
-    )
+  /**
+   * Get friends' profiles based on their UIDs.
+   *
+   * @param friendUids List of UIDs of the friends.
+   * @param onSuccess Callback to be invoked with the list of friends' profiles.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  fun getRecReqProfiles(
+      friendUids: List<String>,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
-    /**
-     * Get friends' profiles based on their UIDs.
-     *
-     * @param friendUids List of UIDs of the friends.
-     * @param onSuccess Callback to be invoked with the list of friends' profiles.
-     * @param onFailure Callback to be invoked on failure with the exception.
-     */
-    fun getSentReqProfiles(
-        friendUids: List<String>,
-        onSuccess: (List<UserProfile>) -> Unit,
-        onFailure: (Exception) -> Unit
-    )
+  /**
+   * Get friends' profiles based on their UIDs.
+   *
+   * @param friendUids List of UIDs of the friends.
+   * @param onSuccess Callback to be invoked with the list of friends' profiles.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  fun getSentReqProfiles(
+      friendUids: List<String>,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
   /**
    * Delete a user profile from the data store.

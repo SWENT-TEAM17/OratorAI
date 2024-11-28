@@ -337,123 +337,110 @@ fun UserItem(
     onProfilePictureClick: (UserProfile) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
+  val context = LocalContext.current
+  val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
 
-    var showMutualRequestDialog by remember { mutableStateOf(false) }
+  var showMutualRequestDialog by remember { mutableStateOf(false) }
 
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = AppDimensions.smallPadding)
-            .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
-            .testTag("userItem#${user.uid}"),
-        color = AppColors.LightPurpleGrey,
-        shadowElevation = AppDimensions.elevationSmall
-    ) {
+  Surface(
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .padding(horizontal = AppDimensions.smallPadding)
+              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
+              .testTag("userItem#${user.uid}"),
+      color = AppColors.LightPurpleGrey,
+      shadowElevation = AppDimensions.elevationSmall) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(AppDimensions.paddingMedium)
-                .testTag("userItemRow#${user.uid}"),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ProfilePicture(
-                profilePictureUrl = user.profilePic,
-                onClick = { onProfilePictureClick(user) },
-            )
-            Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-            Column {
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(AppDimensions.paddingMedium)
+                    .testTag("userItemRow#${user.uid}"),
+            verticalAlignment = Alignment.CenterVertically) {
+              ProfilePicture(
+                  profilePictureUrl = user.profilePic,
+                  onClick = { onProfilePictureClick(user) },
+              )
+              Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+              Column {
                 Text(
                     text = user.name,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(bottom = AppDimensions.smallPadding)
-                        .testTag("userName#${user.uid}")
-                )
+                    modifier =
+                        Modifier.padding(bottom = AppDimensions.smallPadding)
+                            .testTag("userName#${user.uid}"))
                 Text(
                     text = user.bio ?: "No bio available",
                     style = MaterialTheme.typography.bodySmall,
                     color = AppColors.secondaryTextColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.testTag("userBio#${user.uid}")
-                )
-            }
-            // **Send Friend Request Button with Correct testTag**
-            IconButton(
-                onClick = {
+                    modifier = Modifier.testTag("userBio#${user.uid}"))
+              }
+              // **Send Friend Request Button with Correct testTag**
+              IconButton(
+                  onClick = {
                     val hasIncomingRequest = recReqProfiles.any { it.uid == user.uid }
 
                     if (hasIncomingRequest) {
-                        showMutualRequestDialog = true
+                      showMutualRequestDialog = true
                     } else {
-                        userProfileViewModel.sendRequest(user)
-                        Toast.makeText(
-                            context,
-                            "You have sent a friend request to ${user.name}.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                      userProfileViewModel.sendRequest(user)
+                      Toast.makeText(
+                              context,
+                              "You have sent a friend request to ${user.name}.",
+                              Toast.LENGTH_SHORT)
+                          .show()
                     }
-                },
-                modifier = Modifier.testTag("sendFriendRequestButton#${user.uid}")
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Send Friend Request",
-                    tint = AppColors.primaryColor,
-                    modifier = Modifier.testTag("sendFriendRequestIcon#${user.uid}")
-                )
+                  },
+                  modifier = Modifier.testTag("sendFriendRequestButton#${user.uid}")) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Send Friend Request",
+                        tint = AppColors.primaryColor,
+                        modifier = Modifier.testTag("sendFriendRequestIcon#${user.uid}"))
+                  }
             }
-        }
 
         // Mutual request dialog remains unchanged
         if (showMutualRequestDialog) {
-            AlertDialog(
-                onDismissRequest = { showMutualRequestDialog = false },
-                title = { Text("Friend Request") },
-                text = {
-                    Text(
-                        text =
-                        "${user.name} has already sent you a friend request. Would you like to accept, reject, or decide later?"
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            userProfileViewModel.acceptFriend(user)
-                            Toast.makeText(
-                                context, "You are now friends with ${user.name}.", Toast.LENGTH_SHORT
-                            ).show()
-                            showMutualRequestDialog = false
-                        }) {
-                        Text("Accept")
+          AlertDialog(
+              onDismissRequest = { showMutualRequestDialog = false },
+              title = { Text("Friend Request") },
+              text = {
+                Text(
+                    text =
+                        "${user.name} has already sent you a friend request. Would you like to accept, reject, or decide later?")
+              },
+              confirmButton = {
+                TextButton(
+                    onClick = {
+                      userProfileViewModel.acceptFriend(user)
+                      Toast.makeText(
+                              context, "You are now friends with ${user.name}.", Toast.LENGTH_SHORT)
+                          .show()
+                      showMutualRequestDialog = false
+                    }) {
+                      Text("Accept")
                     }
-                },
-                dismissButton = {
-                    Row {
-                        TextButton(
-                            onClick = {
-                                userProfileViewModel.declineFriendRequest(user)
-                                Toast.makeText(
-                                    context,
-                                    "Friend request from ${user.name} has been rejected.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                showMutualRequestDialog = false
-                            }) {
-                            Text("Reject")
-                        }
-                        TextButton(
-                            onClick = {
-                                showMutualRequestDialog = false
-                            }) {
-                            Text("Decide Later")
-                        }
-                    }
+              },
+              dismissButton = {
+                Row {
+                  TextButton(
+                      onClick = {
+                        userProfileViewModel.declineFriendRequest(user)
+                        Toast.makeText(
+                                context,
+                                "Friend request from ${user.name} has been rejected.",
+                                Toast.LENGTH_SHORT)
+                            .show()
+                        showMutualRequestDialog = false
+                      }) {
+                        Text("Reject")
+                      }
+                  TextButton(onClick = { showMutualRequestDialog = false }) { Text("Decide Later") }
                 }
-            )
+              })
         }
-    }
+      }
 }
-
