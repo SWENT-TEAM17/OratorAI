@@ -66,7 +66,8 @@ class SpeakingScreenTest {
 
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
@@ -89,7 +90,8 @@ class SpeakingScreenTest {
 
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.RECORDING))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
@@ -118,7 +120,8 @@ class SpeakingScreenTest {
 
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
@@ -134,7 +137,8 @@ class SpeakingScreenTest {
 
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.FINISHED))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
     }
@@ -147,7 +151,8 @@ class SpeakingScreenTest {
   fun testAudioVisualizerIsDisplayedInRecordingState() {
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.RECORDING))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, viewModel = speakingViewModel)
