@@ -110,7 +110,7 @@ interface UserProfileRepository {
    * @param values An `ArrayDeque<Double>` containing the metrics values.
    * @return The mean of the values or 0 if it is empty
    */
-  fun getMetricMean(values: ArrayDeque<Double>): Double
+  fun getMetricMean(values: List<Double>): Double
 
   fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit)
 }

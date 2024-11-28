@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.github.se.orator.model.speaking.AnalysisData
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,13 +37,9 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
 
-  // Queue of the last ten "words per minute" metric
-  private val recentTalkTimeSec_ = MutableStateFlow<ArrayDeque<Double>>(ArrayDeque())
-  val recentWPM: StateFlow<ArrayDeque<Double>> = recentTalkTimeSec_.asStateFlow()
-
-  // Queue of the last ten "talk time" metric
-  private val recentTalkTimePerc_ = MutableStateFlow<ArrayDeque<Double>>(ArrayDeque())
-  val recentTalkTime: StateFlow<ArrayDeque<Double>> = recentTalkTimePerc_.asStateFlow()
+  // Queue of the last ten analysis data
+  private val recentData_ = MutableStateFlow<ArrayDeque<AnalysisData>>(ArrayDeque())
+  val recentData: StateFlow<ArrayDeque<AnalysisData>> = recentData_.asStateFlow()
 
   // Init block to fetch user profile automatically after authentication
   init {
@@ -304,73 +301,45 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   }
 
   /**
-   * Adds a metric value to the queue while ensuring the queue maintains a maximum size of 10
+   * Adds a analysis data to the queue while ensuring the queue maintains a maximum size of 10
    * elements.
    *
-   * This function adds the given metric value to the end of the queue. If the queue already
-   * contains 10 elements, the oldest element (at the front of the queue) is removed before adding
-   * the new metric.
+   * This function adds the given data to the end of the queue. If the queue already contains 10
+   * elements, the oldest element (at the front of the queue) is removed before adding the new
+   * metric.
    *
-   * @param queue The queue to which the metric will be added. The queue is updated in-place to
-   *   reflect the changes.
+   * @param queue The queue to which the data will be added.
    * @param value The new value to be added to the queue.
    * @return The queue with the new value
    */
-  private fun addLatestMetric(
-      queue: MutableStateFlow<ArrayDeque<Double>>,
-      value: Double
-  ): ArrayDeque<Double> {
+  private fun addData(
+      queue: MutableStateFlow<ArrayDeque<AnalysisData>>,
+      value: AnalysisData
+  ): ArrayDeque<AnalysisData> {
     val updatedQueue =
         queue.value.apply {
           if (size >= 10) {
             removeFirst()
           } // Remove the oldest element if the queue is full
-          addLast(value) // Add the new metric to the end of the queue
+          addLast(value) // Add the new data to the end of the queue
         }
     return updatedQueue
   }
 
   /**
-   * Adds the latest "talk time seconds" value to its respective queue and update the profile to
-   * save the updated queue
+   * Adds the latest analysis data to its respective queue and update the profile to save the
+   * updated queue
    *
    * @param value The new value to be added to the queue.
    */
-  fun addTalkTimeSec(value: Double) {
+  fun addNewestData(value: AnalysisData) {
     val currentUserProfile = userProfile_.value
     if (currentUserProfile != null) {
       val currentStats = currentUserProfile.statistics
-      val updatedQueue = addLatestMetric(recentTalkTimeSec_, value)
+      val updatedQueue = addData(recentData_, value)
 
       // Create a new statistics object with the updated queue
-      val updatedStats = currentStats.copy(recentTalkTimeSec = updatedQueue)
-
-      // Create a new profile object with the updated queue
-      val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
-
-      // Updates the user profile with the new one
-      updateUserProfile(updatedProfile)
-
-      userProfile_.value = updatedProfile
-    } else {
-      Log.e("UserProfileViewModel", "Failed to add new metric value: Current user profile is null.")
-    }
-  }
-
-  /**
-   * Adds the latest "talk time percentage" value to its respective queue and update the profile to
-   * save the updated queue
-   *
-   * @param value The new value to be added to the queue.
-   */
-  fun addTalkTimePerc(value: Double) {
-    val currentUserProfile = userProfile_.value
-    if (currentUserProfile != null) {
-      val currentStats = currentUserProfile.statistics
-      val updatedQueue = addLatestMetric(recentTalkTimePerc_, value)
-
-      // Create a new statistics object with the updated queue
-      val updatedStats = currentStats.copy(recentTalkTimePerc = updatedQueue)
+      val updatedStats = currentStats.copy(recentData = updatedQueue)
 
       // Create a new profile object with the updated queue
       val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
@@ -394,8 +363,10 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     if (currentUserProfile != null) {
       val currentStats = currentUserProfile.statistics
       // Calculate the mean of the values of the metric queues
-      val updatedTalkTimeSecMean = repository.getMetricMean(recentTalkTimeSec_.value)
-      val updatedTalkTimePercMean = repository.getMetricMean(recentTalkTimePerc_.value)
+      val updatedTalkTimeSecMean =
+          repository.getMetricMean(recentData_.value.map { data -> data.talkTimeSeconds })
+      val updatedTalkTimePercMean =
+          repository.getMetricMean(recentData_.value.map { data -> data.talkTimePercentage })
 
       // Create a new statistics object with the updated means
       val updatedStats =

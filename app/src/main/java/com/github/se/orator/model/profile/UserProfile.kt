@@ -1,5 +1,6 @@
 package com.github.se.orator.model.profile
 
+import com.github.se.orator.model.speaking.AnalysisData
 import com.google.firebase.Timestamp
 
 /**
@@ -70,8 +71,7 @@ data class UserStatistics(
     val successfulSessions: Map<String, Int> = SessionType.values().associate { it.name to 0 },
     val improvement: Float = 0.0f,
     val previousRuns: List<SpeechStats> = emptyList(),
-    val recentTalkTimeSec: ArrayDeque<Double> = ArrayDeque(),
-    val recentTalkTimePerc: ArrayDeque<Double> = ArrayDeque(),
+    val recentData: ArrayDeque<AnalysisData> = ArrayDeque(),
     val talkTimeSecMean: Double = 0.0,
     val talkTimePercMean: Double = 0.0
 )

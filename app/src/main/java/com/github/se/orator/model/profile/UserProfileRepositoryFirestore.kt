@@ -349,7 +349,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
    * @param values An `ArrayDeque<Double>` containing the metrics values.
    * @return The mean of the values or 0 if it is empty
    */
-  override fun getMetricMean(values: ArrayDeque<Double>): Double {
+  override fun getMetricMean(values: List<Double>): Double {
     // Check if the queue is empty to avoid division by zero
     if (values.isEmpty()) return 0.0
 
