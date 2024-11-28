@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.rule.GrantPermissionRule
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.symblAi.SpeakingRepository
@@ -36,6 +37,7 @@ class SpeakingScreenTest {
   private lateinit var speakingViewModel: SpeakingViewModel
   private lateinit var apiLinkViewModel: ApiLinkViewModel
   private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var userProfileRepository: UserProfileRepository
   private lateinit var data: AnalysisData
   private lateinit var speech: String
 
@@ -43,7 +45,8 @@ class SpeakingScreenTest {
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
     apiLinkViewModel = ApiLinkViewModel()
-    userProfileViewModel = mock()
+    userProfileRepository = mock(UserProfileRepository::class.java)
+    userProfileViewModel = UserProfileViewModel(userProfileRepository)
     speakingRepository = mock(SpeakingRepository::class.java)
     speech = "Hello! My name is John. I am an entrepreneur"
 
