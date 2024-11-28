@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.media.AudioRecord
 import androidx.core.app.ActivityCompat
 import java.io.File
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -158,6 +159,8 @@ class AudioRecorderTest {
     val savedFile = audioFileField.get(onlineRecorder) as File
 
     assertTrue(savedFile.path.startsWith(mockCacheDir.path))
+
+    savedFile.delete()
   }
 
   @Test
@@ -171,5 +174,14 @@ class AudioRecorderTest {
     val savedFile = audioFileField.get(recorder) as File
 
     assertTrue(savedFile.name.matches(Regex("audio_record_\\d+\\.wav")))
+
+    savedFile.delete()
+  }
+
+  @After
+  fun tearDown() {
+    val testFiles =
+        File(".").listFiles { _, name -> name.startsWith("test_audio") && name.endsWith(".wav") }
+    testFiles?.forEach { it.delete() }
   }
 }
