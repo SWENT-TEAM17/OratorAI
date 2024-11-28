@@ -2,6 +2,11 @@ package com.github.se.orator.ui.profile
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,7 +39,6 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -75,22 +80,20 @@ import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
 import com.google.firebase.auth.FirebaseAuth
 
-
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
-    val colors = MaterialTheme.colorScheme
+  val colors = MaterialTheme.colorScheme
 
+  var isStatsVisible by remember { mutableStateOf(false) }
 
   // Get the context
   val context = LocalContext.current
   // Load saved recordings when the screen is displayed
-  LaunchedEffect(Unit) {
-        profileViewModel.loadSavedRecordings(context)
-  }
+  LaunchedEffect(Unit) { profileViewModel.loadSavedRecordings(context) }
 
   // State to control whether the profile picture dialog is open
   var isDialogOpen by remember { mutableStateOf(false) }
-    val audioRecorder = remember { AudioRecorder(context, isOffline = true) }
+  val audioRecorder = remember { AudioRecorder(context, isOffline = true) }
 
   // Collect the profile data from the ViewModel
   val userProfile by profileViewModel.userProfile.collectAsState()
@@ -161,7 +164,13 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                       // Background "card" behind the profile picture
                       Card(
                           modifier =
-                              Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
+                              Modifier.fillMaxWidth(0.95f)
+                                  .height(AppDimensions.profileCardHeight)
+                                  .shadow(
+                                      4.dp, shape = RoundedCornerShape(size = 10.dp), clip = false)
+                                  .background(
+                                      MaterialTheme.colorScheme.onSecondary,
+                                      shape = RoundedCornerShape(size = 10.dp)),
                           elevation = AppDimensions.elevationSmall) {}
 
                       // Profile Picture with overlapping positioning
@@ -186,10 +195,10 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                               ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
                           contentPadding = PaddingValues(0.dp)) {
                             Icon(
-                                Icons.Outlined.Edit,
+                                imageVector = Icons.Outlined.Edit,
                                 contentDescription = "Edit button",
                                 modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                                tint = AppColors.surfaceColor)
+                                tint = colors.errorContainer)
                           }
 
                       Column(
@@ -209,6 +218,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                       modifier = Modifier.testTag("profile_name"))
 
                                   // Current Streak aligned to the end with fire icon
+                                  // TODO : remove this streak
                                   Row(
                                       verticalAlignment = Alignment.CenterVertically,
                                       modifier =
@@ -250,113 +260,185 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Log.d("scn", "bio is: ${profile.bio}")
 
-                // stats section
-                CardSection(
-                    title = "My stats",
-                    imageVector = Icons.Outlined.QueryStats,
-                    onClick = { /*TODO: Handle achievements click */},
-                    modifier = Modifier.testTag("statistics_section"))
-
+                // Stats section
+                StatsSection(
+                    streak = profile.currentStreak,
+                    totalSpeakingTime = "10",
+                    onStatsClick = { isStatsVisible = !isStatsVisible })
+                // Spacer
                 Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
-                  Column(
-                      modifier = Modifier
-                          .fillMaxSize()
-                          .padding(innerPadding)
-                          .padding(16.dp)
-                  ) {
-                      // Title for Offline Recordings
-                /*      Text(
-                          text = "My Offline Recordings",
-                          style = MaterialTheme.typography.bodyLarge,
-                          modifier = Modifier.padding(vertical = 8.dp)
-                      )
-*/
-                      Text(
-                          text = "My Offline Recordings",
-                          style = TextStyle(
-                              fontSize = 18.sp,
-                              fontFamily = FontFamily(Font(R.font.poppins_black)),
-                              color = colors.onSurface
-                          ),
-                          maxLines = 1,
-                          overflow = TextOverflow.Ellipsis,
-                          modifier = Modifier.padding(vertical = 8.dp))
-
-                      // Display saved recordings
-                      if (savedRecordings.isNotEmpty()) {
-                          savedRecordings.forEach { audioFile ->
-                              AudioRecordingPlaceholder(
-                                  fileName = audioFile.name,
-                                  onPlayClicked = { audioRecorder.playAudio(audioFile) }
-                              )
+                // AnimatedVisibility for Stats Screen
+                // TODO: we can even adapt it so it pops out a screen with a graph covering 75% of
+                // the area for example
+                AnimatedVisibility(
+                    visible = isStatsVisible,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                    modifier = Modifier.fillMaxSize() // You can adjust the modifier as needed
+                    ) {
+                      // This will be the content of your stats screen or graph
+                      Box(
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .fillMaxHeight()
+                                  .background(Color.White) // Adjust this to match your design
+                                  .padding(16.dp)) {
+                            // Example content for the stats screen (you can replace this with your
+                            // graph)
+                            Text("Graph or Stats content goes here")
                           }
-                      } else {
-                          Text(
-                              text = "No offline recordings available",
-                              style = MaterialTheme.typography.bodySmall,
-                              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                              modifier = Modifier.padding(8.dp)
-                          )
-                      }
-                  }
-
+                    }
               }
-                  ?: run {
-                    Text(
-                        text = "Loading profile...",
-                        style = AppTypography.bodyLargeStyle,
-                        modifier = Modifier.testTag("loading_profile_text"))
-                  }
-            }
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
-        // Dialog to show the profile picture in larger format
-        if (isDialogOpen && userProfile?.profilePic != null) {
-          ProfilePictureDialog(
-              profilePictureUrl = userProfile!!.profilePic!!, onDismiss = { isDialogOpen = false })
-        }
+              Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+
+                // Title for Offline Recordings
+                Text(
+                    text = "My Offline Recordings",
+                    style =
+                        TextStyle(
+                            fontSize = 18.sp,
+                            fontFamily = FontFamily(Font(R.font.poppins_black)),
+                            color = colors.onSurface),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(vertical = 8.dp))
+
+                // Display saved recordings
+                if (savedRecordings.isNotEmpty()) {
+                  savedRecordings.forEach { audioFile ->
+                    AudioRecordingPlaceholder(
+                        fileName = audioFile.name,
+                        onPlayClicked = { audioRecorder.playAudio(audioFile) })
+                  }
+                } else {
+                  Text(
+                      text = "No offline recordings available",
+                      style = MaterialTheme.typography.bodySmall,
+                      color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                      modifier = Modifier.padding(8.dp))
+                }
+              }
+            }
+            ?: run {
+              Text(
+                  text = "Loading profile...",
+                  style = AppTypography.bodyLargeStyle,
+                  modifier = Modifier.testTag("loading_profile_text"))
+            }
       }
+
+  // Dialog to show the profile picture in larger format
+  if (isDialogOpen && userProfile?.profilePic != null) {
+    ProfilePictureDialog(
+        profilePictureUrl = userProfile!!.profilePic!!, onDismiss = { isDialogOpen = false })
+  }
 }
 
+@Composable
+fun StatsSection(
+    streak: Long, // The streak value from your data model
+    totalSpeakingTime: String, // Hardcoded for now
+    onStatsClick: () -> Unit
+) {
+  val colors = MaterialTheme.colorScheme
+  // This column will hold two sections: Streak and Total Speaking Time
+  Column(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
+    // Title for the stats section (matching the "My Offline Recordings" style)
+    Text(
+        text = "My Stats",
+        style =
+            TextStyle(
+                fontSize = 20.sp,
+                fontFamily = FontFamily(Font(R.font.poppins_black)),
+                fontWeight = FontWeight.Bold,
+                color = colors.onBackground),
+        modifier = Modifier.padding(AppDimensions.paddingMedium))
+
+    // Section 1: Streak
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier.fillMaxWidth()
+                .clickable(onClick = onStatsClick)
+                .padding(AppDimensions.paddingSmall)) {
+          Icon(
+              imageVector = Icons.Filled.Whatshot,
+              contentDescription = "Streak",
+              tint = AppColors.amber,
+              modifier = Modifier.size(AppDimensions.iconSizeMedium))
+          Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+          Text(
+              text = "Current Streak: $streak",
+              fontSize = 20.sp,
+              fontWeight = FontWeight.Bold,
+              color = AppColors.amber,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis)
+        }
+
+    // Section 2: Total Speaking Time
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier.fillMaxWidth()
+                .clickable(onClick = onStatsClick)
+                .padding(AppDimensions.paddingSmall)) {
+          Icon(
+              imageVector = Icons.Filled.PlayArrow, // Use an appropriate icon for time
+              contentDescription = "Total Speaking Time",
+              modifier = Modifier.size(AppDimensions.iconSizeMedium))
+          Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+          Text(
+              text = "Total Speaking Time: $totalSpeakingTime",
+              fontSize = 20.sp,
+              fontWeight = FontWeight.Bold,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis)
+        }
+  }
+}
 
 @Composable
 fun AudioRecordingPlaceholder(fileName: String, onPlayClicked: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
 
-    Row(
-        modifier = Modifier
-            .width(351.dp)
-            .height(96.dp)
-            .shadow(4.dp, shape = RoundedCornerShape(size = 10.dp), clip = false)
-            .background(colors.onSecondary, shape = RoundedCornerShape(size = 10.dp))
-            .clickable { onPlayClicked() }
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
+  // TODO : Display the Title of the saved audio in the placeholder
+  val colors = MaterialTheme.colorScheme
+
+  Row(
+      modifier =
+          Modifier.width(351.dp)
+              .height(96.dp)
+              .shadow(4.dp, shape = RoundedCornerShape(size = 10.dp), clip = false)
+              .background(colors.onSecondary, shape = RoundedCornerShape(size = 10.dp))
+              .clickable { onPlayClicked() }
+              .padding(horizontal = 16.dp, vertical = 8.dp)) {
         // Play Button Icon
         Icon(
             imageVector = Icons.Default.PlayArrow,
             contentDescription = "Play",
-            modifier = Modifier
-                .size(36.dp)
-                .align(Alignment.CenterVertically)
-                .background(colors.errorContainer, shape = CircleShape)
-        )
+            modifier =
+                Modifier.size(36.dp)
+                    .align(Alignment.CenterVertically)
+                    .background(colors.errorContainer, shape = CircleShape))
         // Title of the Recording
         Text(
-            text = fileName,
-            style = TextStyle(
-                fontSize = 18.sp,
-                fontFamily = FontFamily(Font(R.font.inter)),
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF000000)
-            ),
+            text = fileName, // /////// recording.title !
+            style =
+                TextStyle(
+                    fontSize = 18.sp,
+                    fontFamily = FontFamily(Font(R.font.inter)),
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.onBackground),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .weight(1f) // Ensures text takes available space
-        )
-    }
+            modifier =
+                Modifier.align(Alignment.CenterVertically)
+                    .weight(1f) // Ensures text takes available space
+            )
+      }
 }
 
 @Composable

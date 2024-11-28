@@ -154,11 +154,11 @@ class AudioRecorder(
     mediaPlayer?.release()
 
     // Initialize MediaPlayer
-    mediaPlayer = MediaPlayer().apply {
-      setDataSource(audioFile.absolutePath)
-      prepare()
-      start()
-    }
+    mediaPlayer =
+        MediaPlayer().apply {
+          setDataSource(audioFile.absolutePath)
+          prepare()
+          start()
+        }
   }
-
 }

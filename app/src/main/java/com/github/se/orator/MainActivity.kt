@@ -225,5 +225,4 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
       }
     }
   }
-
 }
