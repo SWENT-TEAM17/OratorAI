@@ -66,12 +66,15 @@ import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
 
 /**
- * Composable function that displays the "Add Friends" screen, allowing users to search and add
- * friends. The screen contains a top app bar with a back button, a search field to look for
- * friends, and a list of matching user profiles based on the search query.
+ * Composable function that displays the "Add Friends" screen, where users can:
+ * - Search for other users to send friend requests.
+ * - View and manage their sent friend requests.
+ *
+ * The screen includes a search bar, a list of filtered user profiles, and an expandable section
+ * showing filtered sent friend requests.
  *
  * @param navigationActions Actions to handle navigation within the app.
- * @param userProfileViewModel ViewModel for managing user profile data and friend addition logic.
+ * @param userProfileViewModel ViewModel for managing user profile data and friend request logic.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -247,11 +250,12 @@ fun AddFriendsScreen(
 }
 
 /**
- * Composable function that represents a single sent friend request item in the list. Displays the
- * friend's profile picture, name, bio, and an option to cancel the request.
+ * Composable function that represents a single sent friend request item in the list.
  *
- * @param sentRequest The [UserProfile] object representing the friend to whom the request was sent.
- * @param userProfileViewModel The [UserProfileViewModel] that handles request cancellation.
+ * It displays the friend's profile picture, name, bio, and a button to cancel the request.
+ *
+ * @param sentRequest The [UserProfile] object representing the user to whom the request was sent.
+ * @param userProfileViewModel The [UserProfileViewModel] that handles friend request cancellation.
  */
 @Composable
 fun SentFriendRequestItem(sentRequest: UserProfile, userProfileViewModel: UserProfileViewModel) {
@@ -314,13 +318,17 @@ fun SentFriendRequestItem(sentRequest: UserProfile, userProfileViewModel: UserPr
 }
 
 /**
- * Composable function that represents a single user item in a list. Displays the user's profile
- * picture, name, and bio, and allows adding the user as a friend.
+ * Composable function that represents a single user item in a list of search results.
+ *
+ * It displays the user's profile picture, name, and bio. Users can click on the profile picture to
+ * view an enlarged version or click on the user item to send a friend request.
+ *
+ * If the user has already sent a friend request to the current user, a dialog will appear, giving
+ * the option to accept, reject, or decide later.
  *
  * @param user The [UserProfile] object representing the user being displayed.
- * @param userProfileViewModel The [UserProfileViewModel] that handles the logic of adding a user as
- *   a friend.
- * @param onProfilePictureClick Callback when the profile picture is clicked.
+ * @param userProfileViewModel The [UserProfileViewModel] that handles friend request actions.
+ * @param onProfilePictureClick Callback triggered when the profile picture is clicked.
  */
 @Composable
 fun UserItem(

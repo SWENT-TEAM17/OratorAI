@@ -122,7 +122,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         onFailure)
   }
 
-  // Delete a user profile
+  /**
+   * Deletes a user profile from Firestore.
+   *
+   * @param uid The UID of the user to delete.
+   * @param onSuccess Callback invoked on successful deletion.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
   override fun deleteUserProfile(
       uid: String,
       onSuccess: () -> Unit,
@@ -344,6 +350,14 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
+  /**
+   * Sends a friend request from the current user to another user.
+   *
+   * @param currentUid The UID of the user sending the request.
+   * @param friendUid The UID of the user receiving the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
   override fun sendFriendRequest(
       currentUid: String,
       friendUid: String,
@@ -394,7 +408,14 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           onFailure(exception)
         }
   }
-
+  /**
+   * Accepts a friend request, establishing a friendship between two users.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user who sent the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
   override fun acceptFriendRequest(
       currentUid: String,
       friendUid: String,
@@ -456,6 +477,14 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
+  /**
+   * Declines a friend request from another user.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user who sent the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
   override fun declineFriendRequest(
       currentUid: String,
       friendUid: String,
@@ -567,6 +596,14 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
+  /**
+   * Deletes an existing friendship between two users.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the friend to remove.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
   override fun deleteFriend(
       currentUid: String,
       friendUid: String,
@@ -612,6 +649,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
+  /**
+   * Updates the login streak for a user based on their last login date.
+   *
+   * @param uid The UID of the user.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked on failure.
+   */
   override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
     val userRef = db.collection(collectionPath).document(uid)
     db.runTransaction { transaction ->

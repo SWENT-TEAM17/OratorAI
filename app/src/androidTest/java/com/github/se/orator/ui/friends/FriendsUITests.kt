@@ -226,7 +226,6 @@ class FriendsUITests {
         .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
         .assertExists()
         .performClick()
-
     composeTestRule
         .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
         .assertIsNotDisplayed()

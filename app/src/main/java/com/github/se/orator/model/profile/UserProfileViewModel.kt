@@ -10,9 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * ViewModel for managing user profiles and friends' profiles.
+ * ViewModel for managing user profiles and their interactions, including:
+ * - Fetching and updating user profiles.
+ * - Managing friends, friend requests, and session statistics.
+ * - Handling profile picture uploads and login streaks.
  *
- * @property repository The repository for accessing user profile data.
+ * @param repository The repository for accessing user profile data.
  */
 class UserProfileViewModel(internal val repository: UserProfileRepository) : ViewModel() {
 
@@ -268,6 +271,11 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
   }
 
+  /**
+   * Sends a friend request to the specified user if the user did not already sent one
+   *
+   * @param friend The [UserProfile] of the user to send a request to.
+   */
   fun sendRequest(friend: UserProfile) {
     val currentUid = repository.getCurrentUserUid()
     if (currentUid != null) {
@@ -336,11 +344,9 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
                 "UserProfileViewModel",
                 "Failed to cancel friend request to ${friend.name}.",
                 exception)
-            // Optionally, notify the UI about the failure (e.g., via another StateFlow or LiveData)
           })
     } else {
       Log.e("UserProfileViewModel", "Cannot cancel friend request: User is not authenticated.")
-      // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
     }
   }
 
@@ -436,7 +442,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   }
 
   /**
-   * Deletes a friend from the current user's list of friends.
+   * Deletes a friend from both the current user's and friend's list of friends.
    *
    * @param friend The `UserProfile` of the friend to be deleted.
    */
@@ -450,10 +456,10 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
             Log.d("UserProfileViewModel", "Friend deleted: ${friend.name}")
 
             // Option 1: Refresh the user profile to reflect changes
-            getUserProfile(currentUid)
+            //getUserProfile(currentUid)
 
             // Option 2: Manually update the local state
-            /*
+
             // Remove the friend from the local friendsProfiles
             friendsProfiles_.value = friendsProfiles_.value.filter { it.uid != friend.uid }
 
@@ -463,7 +469,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
                 val updatedProfile = userProfile_.value!!.copy(friends = updatedFriendsList)
                 userProfile_.value = updatedProfile
             }
-            */
+
           },
           onFailure = { exception ->
             Log.e("UserProfileViewModel", "Failed to delete friend.", exception)

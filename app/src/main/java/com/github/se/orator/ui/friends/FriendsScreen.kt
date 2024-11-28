@@ -53,12 +53,16 @@ import com.github.se.orator.utils.parseDate
 import kotlinx.coroutines.launch
 
 /**
- * Composable function that displays the "View Friends" screen, showing a list of friends with a
- * search bar and options to navigate to other screens like "Add Friends" and "Leaderboard."
- * Additionally, displays received friend requests with options to accept or decline them.
+ * Composable function that displays the "View Friends" screen.
  *
- * @param navigationActions Actions to handle navigation within the app.
- * @param userProfileViewModel ViewModel for managing user profile data and fetching friends.
+ * The screen includes:
+ * - A search bar to filter both the friends list and received friend requests.
+ * - An expandable section showing received friend requests with options to accept or decline.
+ * - A list of friends with options to view their details or remove them.
+ * - Navigation options to "Add Friends" and "Leaderboard."
+ *
+ * @param navigationActions Object to handle navigation within the app.
+ * @param userProfileViewModel ViewModel providing user data and friend management functionality.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -218,7 +222,7 @@ fun ViewFriendsScreen(
                             enter = expandVertically(),
                             exit = shrinkVertically()) {
                               LazyColumn(
-                                  modifier = Modifier.testTag("receivedFriendRequestsList"),
+                                  modifier = Modifier.testTag("viewFriendsList"),
                                   contentPadding =
                                       PaddingValues(vertical = AppDimensions.paddingSmall),
                                   verticalArrangement =
@@ -280,12 +284,16 @@ fun ViewFriendsScreen(
 }
 
 /**
- * Composable function that represents a single friend item in the list. Displays the friend's
- * profile picture, name, and bio, along with an option to delete the friend.
+ * Composable function that represents a single friend item in the list.
+ *
+ * It displays:
+ * - The friend's profile picture, name, and bio.
+ * - The friend's login streak or the last login date.
+ * - An option to remove the friend from the user's friend list.
  *
  * @param friend The [UserProfile] object representing the friend being displayed.
  * @param userProfileViewModel The [UserProfileViewModel] that handles friend deletion.
- * @param onProfilePictureClick Callback when the profile picture is clicked.
+ * @param onProfilePictureClick Callback triggered when the friend's profile picture is clicked.
  */
 @Composable
 fun FriendItem(
@@ -388,11 +396,12 @@ fun FriendItem(
 }
 
 /**
- * Composable function to display a profile picture with a circular shape. Uses Coil to load the
- * image asynchronously.
+ * Composable function to display a profile picture in a circular shape.
+ * - Loads the image asynchronously using the Coil library.
+ * - Defaults to a placeholder if the profile picture URL is null.
+ * - Supports a click action on the profile picture.
  *
- * @param profilePictureUrl The URL of the profile picture to display. Defaults to a placeholder if
- *   null.
+ * @param profilePictureUrl The URL of the profile picture to display.
  * @param onClick Action to be performed when the profile picture is clicked.
  */
 @Composable
@@ -410,10 +419,12 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
 }
 
 /**
- * Button triggering the removing of a friend in the user's friend list.
+ * Composable function for the button to remove a friend from the user's friend list.
+ * - Displays a delete icon.
+ * - Shows a Toast message on successful removal of the friend.
  *
- * @param friend The friend to be removed.
- * @param userProfileViewModel The view model for the user's profile.
+ * @param friend The [UserProfile] of the friend to be removed.
+ * @param userProfileViewModel The [UserProfileViewModel] that handles friend deletion logic.
  */
 @Composable
 fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
@@ -436,10 +447,12 @@ fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileVie
 
 /**
  * Computes the current streak of a friend based on their last login date and current streak.
+ * - A streak continues if the last login was on the same day or the following day.
+ * - A broken streak resets to 0.
  *
  * @param lastLoginDateString The last login date as a string in "yyyy-MM-dd" format. Can be null.
  * @param currentStreak The current streak value.
- * @return The streak to be displayed: either currentStreak or 0.
+ * @return The streak to be displayed: the `currentStreak` if active, otherwise 0.
  */
 fun currentFriendStreak(lastLoginDateString: String?, currentStreak: Long): Long {
   if (!lastLoginDateString.isNullOrEmpty()) {
@@ -455,12 +468,16 @@ fun currentFriendStreak(lastLoginDateString: String?, currentStreak: Long): Long
   return -1L // No last login date recorded
 }
 /**
- * Composable function that represents a single friend request item in the list. Displays the
- * friend's profile picture, name, bio, and options to accept or decline the request.
+ * Composable function that represents a single friend request item in the list.
  *
- * @param friendRequest The [UserProfile] object representing the friend who sent the request.
- * @param userProfileViewModel The [UserProfileViewModel] that handles accepting or declining
- *   requests.
+ * It displays:
+ * - The requester's profile picture, name, and bio.
+ * - Buttons to accept or decline the friend request.
+ * - Handles user interactions and updates the state through the ViewModel.
+ *
+ * @param friendRequest The [UserProfile] object representing the user who sent the request.
+ * @param userProfileViewModel The [UserProfileViewModel] that handles accepting or declining the
+ *   request.
  */
 @Composable
 fun FriendRequestItem(friendRequest: UserProfile, userProfileViewModel: UserProfileViewModel) {
