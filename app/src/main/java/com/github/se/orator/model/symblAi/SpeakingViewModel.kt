@@ -3,10 +3,8 @@ package com.github.se.orator.model.symblAi
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
-import com.github.se.orator.model.profile.UserProfileRepositoryFirestore
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,8 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class SpeakingViewModel(
     private val repository: SpeakingRepository,
     private val apiLinkViewModel: ApiLinkViewModel,
-    private val userProfileViewModel: UserProfileViewModel =
-        UserProfileViewModel(UserProfileRepositoryFirestore(FirebaseFirestore.getInstance()))
+    private val userProfileViewModel: UserProfileViewModel
 ) : ViewModel() {
 
   /** The analysis data collected. It is not final as the user can still re-record another audio. */
