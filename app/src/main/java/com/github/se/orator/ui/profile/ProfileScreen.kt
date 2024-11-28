@@ -46,10 +46,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -70,8 +75,10 @@ import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
 import com.google.firebase.auth.FirebaseAuth
 
+
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
+    val colors = MaterialTheme.colorScheme
 
 
   // Get the context
@@ -259,11 +266,22 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                           .padding(16.dp)
                   ) {
                       // Title for Offline Recordings
-                      Text(
+                /*      Text(
                           text = "My Offline Recordings",
                           style = MaterialTheme.typography.bodyLarge,
                           modifier = Modifier.padding(vertical = 8.dp)
                       )
+*/
+                      Text(
+                          text = "My Offline Recordings",
+                          style = TextStyle(
+                              fontSize = 18.sp,
+                              fontFamily = FontFamily(Font(R.font.poppins_black)),
+                              color = colors.onSurface
+                          ),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis,
+                          modifier = Modifier.padding(vertical = 8.dp))
 
                       // Display saved recordings
                       if (savedRecordings.isNotEmpty()) {
@@ -303,26 +321,40 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
 @Composable
 fun AudioRecordingPlaceholder(fileName: String, onPlayClicked: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(10.dp))
+            .width(351.dp)
+            .height(96.dp)
+            .shadow(4.dp, shape = RoundedCornerShape(size = 10.dp), clip = false)
+            .background(colors.onSecondary, shape = RoundedCornerShape(size = 10.dp))
             .clickable { onPlayClicked() }
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
+        // Play Button Icon
         Icon(
-            imageVector = Icons.Default.PlayArrow, // Replace with your custom play icon if needed
+            imageVector = Icons.Default.PlayArrow,
             contentDescription = "Play",
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier
+                .size(36.dp)
+                .align(Alignment.CenterVertically)
+                .background(colors.errorContainer, shape = CircleShape)
         )
-        Spacer(modifier = Modifier.width(16.dp))
+        // Title of the Recording
         Text(
             text = fileName,
-            style = MaterialTheme.typography.bodySmall,
+            style = TextStyle(
+                fontSize = 18.sp,
+                fontFamily = FontFamily(Font(R.font.inter)),
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF000000)
+            ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .weight(1f) // Ensures text takes available space
         )
     }
 }
