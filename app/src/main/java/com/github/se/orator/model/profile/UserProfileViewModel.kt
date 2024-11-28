@@ -453,23 +453,22 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
           currentUid = currentUid,
           friendUid = friend.uid,
           onSuccess = {
-            Log.d("UserProfileViewModel", "Friend deleted: ${friend.name}")
+              Log.d("UserProfileViewModel", "Friend ${friend.name} removed successfully.")
 
-            // Option 1: Refresh the user profile to reflect changes
-            //getUserProfile(currentUid)
+              // Update the sent requests list by removing the friend
+              val updatedFriends =
+                  userProfile_.value?.friends?.toMutableList()?.apply { remove(friend.uid) }
+              if (updatedFriends != null) {
+                  // Update the userProfile state
+                  val updatedProfile = userProfile_.value!!.copy(friends = updatedFriends)
+                  userProfile_.value = updatedProfile
 
-            // Option 2: Manually update the local state
+                  // Update the sentReqProfiles state by removing the canceled friend
+                  friendsProfiles_.value = friendsProfiles_.value.filter { it.uid != friend.uid }
+              }
 
-            // Remove the friend from the local friendsProfiles
-            friendsProfiles_.value = friendsProfiles_.value.filter { it.uid != friend.uid }
-
-            // Update the userProfile's friends list
-            val updatedFriendsList = userProfile_.value?.friends?.toMutableList()?.apply { remove(friend.uid) }
-            if (updatedFriendsList != null) {
-                val updatedProfile = userProfile_.value!!.copy(friends = updatedFriendsList)
-                userProfile_.value = updatedProfile
-            }
-
+              // Optionally, remove the friend from allProfiles if necessary
+              // allProfiles_.value = allProfiles_.value // No change needed here
           },
           onFailure = { exception ->
             Log.e("UserProfileViewModel", "Failed to delete friend.", exception)

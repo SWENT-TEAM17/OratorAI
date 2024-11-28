@@ -209,28 +209,111 @@ class FriendsUITests {
 
   @Test
   fun deleteFriendButtonCallsRepositoryUpdateProfileMethod() {
-    `when`(mockUserProfileRepository.getUserProfile(any(), any(), any())).then {
-      it.getArgument<(UserProfile) -> Unit>(1)(
-          testProfile.copy(friends = listOf(profile1.uid, profile2.uid)))
+    // Define test profiles
+    val profile1 = UserProfile(
+      uid = "profile1",
+      name = "Friend One",
+      age = 25,
+      statistics = UserStatistics(),
+      friends = listOf(testProfile.uid),
+      recReq = emptyList(),
+      sentReq = emptyList(),
+      profilePic = null,
+      currentStreak = 0,
+      lastLoginDate = null,
+      bio = "Bio of Friend One"
+    )
+
+    val profile2 = UserProfile(
+      uid = "profile2",
+      name = "Friend Two",
+      age = 30,
+      statistics = UserStatistics(),
+      friends = listOf(testProfile.uid),
+      recReq = emptyList(),
+      sentReq = emptyList(),
+      profilePic = null,
+      currentStreak = 0,
+      lastLoginDate = null,
+      bio = "Bio of Friend Two"
+    )
+
+    val testProfile = UserProfile(
+      uid = "testUser",
+      name = "Test User",
+      age = 28,
+      statistics = UserStatistics(),
+      friends = listOf(profile1.uid, profile2.uid),
+      recReq = emptyList(),
+      sentReq = emptyList(),
+      profilePic = null,
+      currentStreak = 0,
+      lastLoginDate = null,
+      bio = "Test User Bio"
+    )
+
+    // Mock getCurrentUserUid to return testProfile.uid
+    `when`(mockUserProfileRepository.getCurrentUserUid()).thenReturn(testProfile.uid)
+
+    // Mock getUserProfile to return testProfile
+    `when`(mockUserProfileRepository.getUserProfile(eq(testProfile.uid), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
+      onSuccess(testProfile)
     }
+
+    // Mock getFriendsProfiles to return profile1 and profile2
+    `when`(mockUserProfileRepository.getFriendsProfiles(eq(listOf(profile1.uid, profile2.uid)), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(List<UserProfile>) -> Unit>(1)
+      onSuccess(listOf(profile1, profile2))
+    }
+
+    // Mock deleteFriend to simulate successful deletion
+    `when`(mockUserProfileRepository.deleteFriend(eq(testProfile.uid), eq(profile1.uid), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<() -> Unit>(2)
+      onSuccess()
+    }
+
+    // Initialize ViewModel with mocked repository
+    val userProfileViewModel = UserProfileViewModel(mockUserProfileRepository)
+
+    // Trigger the initial profile fetch
     userProfileViewModel.getUserProfile(testProfile.uid)
+
     // Set up the content with the ViewFriendsScreen composable
     composeTestRule.setContent { ViewFriendsScreen(mockNavigationActions, userProfileViewModel) }
 
+    // Assert that profile2 is displayed
     composeTestRule
-        .onNodeWithTag("viewFriendsItem#${profile2.uid}", useUnmergedTree = true)
-        .assertExists()
-        .assertIsDisplayed()
-    // Click the delete friend button
+      .onNodeWithTag("viewFriendsItem#${profile2.uid}", useUnmergedTree = true)
+      .assertExists()
+      .assertIsDisplayed()
+
+    // Assert that deleteFriendButton for profile1 is displayed initially
     composeTestRule
-        .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
-        .assertExists()
-        .performClick()
+      .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
+      .assertExists()
+      .assertIsDisplayed()
+
+    // Click the delete friend button for profile1
     composeTestRule
-        .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
-        .assertIsNotDisplayed()
+      .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
+      .performClick()
+
+    // Wait for the UI to process the state change
+    composeTestRule.waitForIdle()
+
+    // Verify that deleteFriend was called with correct parameters
+    verify(mockUserProfileRepository).deleteFriend(eq(testProfile.uid), eq(profile1.uid), any(), any())
+
+    // Assert that the deleteFriendButton for profile1 is no longer displayed
     composeTestRule
-        .onNodeWithTag("viewFriendsItem#${profile2.uid}", useUnmergedTree = true)
-        .assertIsDisplayed()
+      .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
+      .assertDoesNotExist()
+
+    // Optionally, assert that profile2 is still displayed
+    composeTestRule
+      .onNodeWithTag("viewFriendsItem#${profile2.uid}", useUnmergedTree = true)
+      .assertIsDisplayed()
   }
+
 }
