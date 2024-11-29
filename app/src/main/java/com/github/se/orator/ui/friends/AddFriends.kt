@@ -340,22 +340,23 @@ fun UserItem(
                   onClick = { onProfilePictureClick(user) },
               )
               Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-              Column {
-                Text(
-                    text = user.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier =
-                        Modifier.padding(bottom = AppDimensions.smallPadding)
-                            .testTag("userName#${user.uid}"))
-                Text(
-                    text = user.bio ?: "No bio available",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = AppColors.secondaryTextColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.testTag("userBio#${user.uid}"))
-              }
-              // **Send Friend Request Button with Correct testTag**
+              Column(
+                  modifier = Modifier.weight(1f) // This modifier makes the column expand
+                  ) {
+                    Text(
+                        text = user.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier =
+                            Modifier.padding(bottom = AppDimensions.smallPadding)
+                                .testTag("userName#${user.uid}"))
+                    Text(
+                        text = user.bio ?: "No bio available",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AppColors.secondaryTextColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("userBio#${user.uid}"))
+                  }
               IconButton(
                   onClick = {
                     val hasIncomingRequest = recReqProfiles.any { it.uid == user.uid }
@@ -379,7 +380,6 @@ fun UserItem(
                         modifier = Modifier.testTag("sendFriendRequestIcon#${user.uid}"))
                   }
             }
-
         // Mutual request dialog remains unchanged
         if (showMutualRequestDialog) {
           AlertDialog(
