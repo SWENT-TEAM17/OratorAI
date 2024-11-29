@@ -421,8 +421,6 @@ class FriendsUITests {
     composeTestRule
         .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
         .assertDoesNotExist()
-
-
   }
 
   /**
