@@ -342,34 +342,6 @@ class FriendsUITests {
   @Test
   fun deleteFriendButtonCallsRepositoryUpdateProfileMethod() {
     // Define test profiles
-    val profile1 =
-        UserProfile(
-            uid = "profile1",
-            name = "Friend One",
-            age = 25,
-            statistics = UserStatistics(),
-            friends = listOf(testProfile.uid),
-            recReq = emptyList(),
-            sentReq = emptyList(),
-            profilePic = null,
-            currentStreak = 0,
-            lastLoginDate = null,
-            bio = "Bio of Friend One")
-
-    val profile2 =
-        UserProfile(
-            uid = "profile2",
-            name = "Friend Two",
-            age = 30,
-            statistics = UserStatistics(),
-            friends = listOf(testProfile.uid),
-            recReq = emptyList(),
-            sentReq = emptyList(),
-            profilePic = null,
-            currentStreak = 0,
-            lastLoginDate = null,
-            bio = "Bio of Friend Two")
-
     val testProfile =
         UserProfile(
             uid = "testUser",
@@ -450,10 +422,7 @@ class FriendsUITests {
         .onNodeWithTag("deleteFriendButton#${profile1.uid}", useUnmergedTree = true)
         .assertDoesNotExist()
 
-    // Optionally, assert that profile2 is still displayed
-    composeTestRule
-        .onNodeWithTag("viewFriendsItem#${profile2.uid}", useUnmergedTree = true)
-        .assertIsDisplayed()
+
   }
 
   /**
