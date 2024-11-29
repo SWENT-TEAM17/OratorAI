@@ -50,10 +50,13 @@ class SpeakingViewModel(
   fun getTranscript(audioFile: File) {
     repository.getTranscript(
       audioFile,
-      onSuccess = {ad -> _offlineAnalysisData.value = ad},
+      onSuccess = {ad ->
+        _offlineAnalysisData.value = ad },
       onFailure = { error -> _analysisError.value = error }
     )
     Log.d("cute", "smile")
+    repository.startRecording()
+    repository.stopRecording()
   }
 
   // Function to handle microphone button click

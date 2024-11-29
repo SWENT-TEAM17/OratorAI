@@ -53,23 +53,21 @@ fun OfflineRecordingScreen(
 ) {
     val analysisState = remember { MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)} //viewModel.analysisState.collectAsState()
     val collState = analysisState.collectAsState()
-    val analysisData by viewModel.analysisData.collectAsState()
+    //val analysisData by viewModel.analysisData.collectAsState()
     val recorder by lazy {
         AudioRecorder(context = context)
     }
 
-    val player by lazy {
-        AndroidAudioPlayer(context)
-    }
+//    val player by lazy {
+//        AndroidAudioPlayer(context)
+//    }
 
-    var audioFile: File? = null
-
-
+    var audioFile: File? = null // Keep this!! It should not be greyed out (bug?)
     val permissionGranted = remember { mutableStateOf(false) }
-  val permissionLauncher =
-      rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
-          isGranted -> permissionGranted.value = isGranted
-      }
+    val permissionLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+                isGranted -> permissionGranted.value = isGranted
+        }
 
     DisposableEffect(Unit) {
         permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -77,97 +75,78 @@ fun OfflineRecordingScreen(
         onDispose { viewModel.endAndSave() }
     }
 
-  val colors = MaterialTheme.colorScheme
+    val colors = MaterialTheme.colorScheme
     val amplitudes = remember { mutableStateListOf<Float>() }
     handleAudioRecording(collState, permissionGranted, amplitudes)
 
-  Column(
-      modifier =
-          Modifier.fillMaxSize()
-              .background(colors.background)
-              .padding(WindowInsets.systemBars.asPaddingValues())
-              .padding(horizontal = AppDimensions.paddingMedium)
-              .testTag("OfflineRecordingScreen"),
-      verticalArrangement = Arrangement.Top,
-      horizontalAlignment = Alignment.CenterHorizontally) {
+    // back button
+    Column(
+        modifier =
+        Modifier.fillMaxSize()
+            .background(colors.background)
+            .padding(WindowInsets.systemBars.asPaddingValues())
+            .padding(horizontal = AppDimensions.paddingMedium)
+            .testTag("OfflineRecordingScreen"),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             modifier =
-                Modifier.fillMaxWidth()
-                    .padding(vertical = AppDimensions.paddingMedium)
-                    .testTag("BackButtonRow"),
+            Modifier.fillMaxWidth()
+                .padding(vertical = AppDimensions.paddingMedium)
+                .testTag("BackButtonRow"),
             verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  imageVector = Icons.Filled.ArrowBack,
-                  contentDescription = "Back",
-                  modifier =
-                      Modifier.size(AppDimensions.iconSizeSmall)
-                          .clickable { navigationActions.goBack() }
-                          .padding(AppDimensions.paddingExtraSmall)
-                          .testTag("BackButton"),
-                  tint = colors.primary)
-            }
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier =
+                Modifier.size(AppDimensions.iconSizeSmall)
+                    .clickable { navigationActions.goBack() }
+                    .padding(AppDimensions.paddingExtraSmall)
+                    .testTag("BackButton"),
+                tint = colors.primary)
+        }
 
-        Spacer(
-            modifier =
-                Modifier.height(
-                    AppDimensions.largeSpacerHeight)) // /// or   val buttonHeight = 48.dp
-
-      Button( onClick = {
-          File(context.cacheDir, "audio.mp3").also{
-              recorder.startRecording(it)
-              audioFile = it
-          }
-      }) {
-          Text(text = "Start Recording")
-      }
-
-      Button( onClick = {
-          File(context.cacheDir, "audio.mp3").also{
-              recorder.stopRecording()
-          }
-      }) {
-          Text(text = "Stop Recording")
-      }
-
-
-
+        // Microphone UI and its functionality
         Column(
             modifier =
-                Modifier.fillMaxSize()
-                    .padding(horizontal = AppDimensions.paddingMedium)
-                    .testTag("RecordingColumn"),
+            Modifier.fillMaxSize()
+                .padding(horizontal = AppDimensions.paddingMedium)
+                .testTag("RecordingColumn"),
             verticalArrangement =
-                Arrangement.spacedBy(AppDimensions.paddingMedium, Alignment.CenterVertically),
+            Arrangement.spacedBy(AppDimensions.paddingMedium, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally) {
-              Box(
-                  contentAlignment = Alignment.Center,
-                  modifier =
-                      Modifier.size(AppDimensions.logoSize)
-                          .testTag("MicIconContainer")) { // // should be 203.dp
-                  MicrophoneButton(
-                      viewModel,
-                      collState,
-                      permissionGranted,
-                      LocalContext.current,
-                      funRec = {
-                          if (analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
-                              File(context.cacheDir, "audio.mp3").also {
-                                  recorder.startRecording(it)
-                                  audioFile = it
-                              }
-                              analysisState.value = SpeakingRepository.AnalysisState.RECORDING
-                          }
-                          else if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-                              File(context.cacheDir, "audio.mp3").also{
-                                  recorder.stopRecording()
-                              }
-                              analysisState.value = SpeakingRepository.AnalysisState.FINISHED
-                          }
-                      }
-                  )
-                  }
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier =
+                Modifier.size(AppDimensions.logoSize)
+                    .testTag("MicIconContainer")) {
+                MicrophoneButton(
+                    viewModel,
+                    collState,
+                    permissionGranted,
+                    LocalContext.current,
+                    funRec = {
+                        // what to do when user begins to record a file
+                        if (analysisState.value == SpeakingRepository.AnalysisState.IDLE || analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
+                            File(context.cacheDir, "audio.mp3").also {
+                                recorder.startRecording(it)
+                                audioFile = it
+                            }
+                            analysisState.value = SpeakingRepository.AnalysisState.RECORDING
+                        }
+                        // what to do when user finishes recording a file
+                        else if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
+                            File(context.cacheDir, "audio.mp3").also{
+                                recorder.stopRecording()
+                            }
+                            analysisState.value = SpeakingRepository.AnalysisState.FINISHED
+                        }
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
             // Display feedback messages
             val feedbackMessage =
                 when (analysisState.value) {
@@ -176,36 +155,40 @@ fun OfflineRecordingScreen(
                     else ->
                         when (viewModel.analysisError.value) {
                             SpeakingError.NO_ERROR -> "Analysis finished."
-                            else -> "mhmm"
+                            else -> "Finished recording"
                         }
                 }
+
             Text(feedbackMessage, modifier = Modifier.testTag("mic_text"),
                 fontSize = AppFontSizes.bodyLarge,
                 color = colors.onSurface)
+
+            // question for user to remember
             Text(
-                  text = question,
-                  fontSize = AppFontSizes.bodyLarge,
-                  color = colors.onSurface,
-                  modifier =
-                      Modifier.padding(top = AppDimensions.paddingMedium).testTag("QuestionText"))
+                text = question,
+                fontSize = AppFontSizes.bodyLarge,
+                color = colors.onSurface,
+                modifier =
+                Modifier.padding(top = AppDimensions.paddingMedium).testTag("QuestionText"))
 
-              Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
 
-              Button(
-                  onClick = {
+            // button for user to click when he is done recording
+            Button(
+                onClick = {
                     viewModel.endAndSave()
                     navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
-                  },
-                  modifier =
-                      Modifier.fillMaxWidth(0.6f)
-                          .padding(AppDimensions.paddingSmall)
-                          .testTag("DoneButton"),
-                  colors = ButtonDefaults.buttonColors(containerColor = colors.primary)) {
-                    Text(
-                        text = "Done!",
-                        fontSize = AppFontSizes.buttonText,
-                        color = colors.onPrimary)
-                  }
+                },
+                modifier =
+                Modifier.fillMaxWidth(0.6f)
+                    .padding(AppDimensions.paddingSmall)
+                    .testTag("DoneButton"),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.primary)) {
+                Text(
+                    text = "Done!",
+                    fontSize = AppFontSizes.buttonText,
+                    color = colors.onPrimary)
             }
-      }
+        }
+    }
 }

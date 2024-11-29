@@ -67,6 +67,7 @@ import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import loadPromptsFromFile
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,7 +92,11 @@ fun PreviousRecordingsFeedbackScreen(
 
     val offlineAnalysisData by speakingViewModel.offlineAnalysisData.collectAsState()
 
+    val prompts = loadPromptsFromFile(context)
+
     speakingViewModel.getTranscript(audioFile)
+
+
     Log.d("hi", "hello!")
 //    symblApiClient.getTranscription(audioFile, {analysisData -> whatUserSaid.value = analysisData.transcription
 //                                               Log.d("this is inside getTranscription in feedback", whatUserSaid.value)}, {})
@@ -99,12 +104,15 @@ fun PreviousRecordingsFeedbackScreen(
     val response by viewModel.response.collectAsState("")
 
     if (offlineAnalysisData != null) {
-        viewModel.offlineRequest(offlineAnalysisData!!.transcription.removePrefix("You said:").trim())
+        viewModel.offlineRequest(offlineAnalysisData!!.transcription.removePrefix("You said:").trim(), prompts?.get("targetCompany") ?: "Apple", prompts?.get("targetPosition") ?: "engineer")
         Log.d("testing offline chat view model", "the gpt model offline value response is $response")
         //Text(text = "What you said: ${what_has_been_said.value}")
         Text(text = "Interviewer's response: $response", color = Color.Black)
         Log.d("d", "Hello! This is has been said: ${offlineAnalysisData!!.transcription}")
     }
+    //prompts?.get("targetPosition") ?: "Default Value"
+    //val jobPosition = prompts?.get("jobPosition")
+    Log.d("prompts are: ", prompts?.get("targetPosition") ?: "Default Value")
 
 
 

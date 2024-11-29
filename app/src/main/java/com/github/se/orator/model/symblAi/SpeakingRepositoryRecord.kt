@@ -3,9 +3,13 @@ package com.github.se.orator.model.symblAi
 import android.content.Context
 import android.util.Log
 import com.github.se.orator.model.speaking.AnalysisData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepository {
 
@@ -64,8 +68,34 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
 
     override fun getTranscript(audioFile: File, onSuccess: (AnalysisData) -> Unit, onFailure: (SpeakingError) -> Unit) {
         Log.d("smiling", "again")
+//        setupAnalysisResultsUsage(onSuccess, onFailure)
+//
+//        symblApiClient.getTranscription(audioFile,
+//            onSuccess = { analysisData ->
+//                Log.d("SymblApiClient", "Transcription successful: ${analysisData.transcription}")
+//                onSuccess(analysisData)
+//            },
+//            onFailure = { error ->
+//                Log.e("SymblApiClient", "Transcription failed: $error")
+//                onFailure(error)
+//            })
+//    }
+        CoroutineScope(Dispatchers.IO).launch {
+            delay(5_000) // Delay for 10 seconds (10,000 milliseconds)
 
-        symblApiClient.getTranscription(audioFile, onSuccess, onFailure)
+            // Now proceed with transcription after the delay
+            symblApiClient.getTranscription(audioFile,
+                onSuccess = { analysisData ->
+                    Log.d(
+                        "SymblApiClient",
+                        "Transcription successful: ${analysisData.transcription}"
+                    )
+                    onSuccess(analysisData)
+                },
+                onFailure = { error ->
+                    Log.e("SymblApiClient", "Transcription failed: $error")
+                    onFailure(error)
+                })
+        }
     }
-
 }

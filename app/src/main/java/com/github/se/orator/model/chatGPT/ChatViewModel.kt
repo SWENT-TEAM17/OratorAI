@@ -129,14 +129,19 @@ class ChatViewModel(
      * @param msg: What the user said and wishes to get feedback on
      */
 
-    fun offlineRequest(msg: String) {
+    fun offlineRequest(
+        msg: String,
+        company: String,
+        position: String
+    ) {
         Log.d("ChatViewModel", "Getting next GPT response")
         viewModelScope.launch {
             try {
                 _isLoading.value = true
 
-                val gptQuery = "For the upcoming query you will respond as if you are a very strict interviewer who is interviewing someone applying for a hardware engineer position at apple that is very competitive. " +
-                        "For example if the user only gives a few strengths you will tell him to cite more. If his strengths don't aline with a job as a programmer or are off topic you will mention that." +
+                val gptQuery = "For the upcoming query you will respond as if you are a very strict interviewer who is interviewing someone applying for a $position position at $company that is very competitive. " +
+                        "For example if the user only gives a few strengths you will tell him to cite more. If his strengths don't aline with a job as a $position or are off topic you will mention that." +
+                        "Do not ask questions for the user to provide more skills or strengths. Assume this is a one time exchange where you can only give remarks without expecting any more messages." +
                         "The query the interviewee has said that you will critique is: $msg"
                 Log.d("mr smith", gptQuery)
 

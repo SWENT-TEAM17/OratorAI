@@ -51,6 +51,7 @@ import com.github.se.orator.ui.offline.OfflineScreen
 import com.github.se.orator.ui.offline.RecordingReviewScreen
 import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
+import com.github.se.orator.ui.overview.OfflineInterviewModule
 import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
 import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
@@ -151,6 +152,10 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
             RecordingReviewScreen(LocalContext.current, navigationActions, speakingViewModel)
           }
+      composable(Screen.OFFLINE_INTERVIEW_MODULE) {
+        OfflineInterviewModule(LocalContext.current, navigationActions)
+      }
+
           composable(
               route = "offline_recording/{question}",
               arguments = listOf(navArgument("question") { type = NavType.StringType })) {

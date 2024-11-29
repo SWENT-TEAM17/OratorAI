@@ -55,7 +55,7 @@ fun OfflinePracticeQuestionsScreen(navigationActions: NavigationActions) {
                   modifier =
                       Modifier.size(AppDimensions.iconSizeSmall)
                           .clickable {
-                            navigationActions.navigateTo(Screen.OFFLINE)
+                            navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
                           } // Go back to Offline screen
                           .padding(AppDimensions.paddingExtraSmall)
                           .testTag("BackButton"), // Test tag for the back button

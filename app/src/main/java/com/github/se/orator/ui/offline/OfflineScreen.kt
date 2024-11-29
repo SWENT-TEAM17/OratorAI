@@ -95,7 +95,7 @@ fun OfflineScreen(navigationActions: NavigationActions) {
               Button(
                   onClick = {
                     Log.d("offline screen", "Practice Offline button clicked")
-                    navigationActions.navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
+                    navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
                   },
                   colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
                   shape = RoundedCornerShape(AppDimensions.buttonHeightRounded),

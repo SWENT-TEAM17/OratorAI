@@ -33,6 +33,7 @@ object Route {
   const val PRACTICE_QUESTIONS = "PracticeQuestions"
   const val OFFLINE_RECORDING = "OfflineRecording"
   const val OFFLINE_RECORDING_REVIEW = "OfflineRecordingReview"
+    const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
 }
 
 object Screen {
@@ -58,6 +59,7 @@ object Screen {
   const val OFFLINE = "Offline Screen"
   const val OFFLINE_RECORDING_SCREEN = "OfflineRecording Screen"
   const val OFFLINE_RECORDING_REVIEW_SCREEN = "OfflineRecordingReview Screen"
+    const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
 }
 
 data class TopLevelDestination(
