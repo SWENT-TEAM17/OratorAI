@@ -1,13 +1,11 @@
-name: Build App APK
+name: Build and Test App APK
 
 env:
   # The name of the main module repository
   main_project_module: app
 
-
 on:
-  workflow_dispatch:
-
+  workflow_dispatch: # Allows manual triggering
   push:
     branches:
       - main
@@ -17,11 +15,41 @@ on:
     types:
       - closed
 
-#  release:
-
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
 
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Run Lint
+        run: ./gradlew lint
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Run Unit Tests
+        run: ./gradlew test
+
+  build:
+    needs: [lint, test] # Ensure lint and tests pass before building
     runs-on: ubuntu-latest
 
     permissions:
@@ -83,12 +111,11 @@ jobs:
 
       - name: Build APK
         run: |
-          ./gradlew build assemble
+          ./gradlew build assembleRelease
           ls -R ${{ env.main_project_module }}/build/outputs/apk/
 
       - uses: r0adkll/sign-android-release@v1
         name: Sign app APK
-        # ID used to access action output
         id: sign_app
         with:
           releaseDirectory: ${{ env.main_project_module }}/build/outputs/apk/release/
@@ -97,15 +124,12 @@ jobs:
           keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
         env:
-          # override default build-tools version (33.0.0) -- optional
           BUILD_TOOLS_VERSION: "34.0.0"
 
-      # Example use of `signedReleaseFile` output -- not needed
       - uses: actions/upload-artifact@v4
         with:
           name: Signed app bundle
           path: ${{steps.sign_app.outputs.signedReleaseFile}}
-
 
       # Save time to environment variable
       - name: Set current date and time as environment variables
@@ -130,7 +154,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{steps.sign_app.outputs.signedReleaseFile}}
           asset_name: OratorAI.apk
           asset_content_type: application/zip
