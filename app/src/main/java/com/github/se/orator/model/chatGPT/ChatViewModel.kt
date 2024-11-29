@@ -95,6 +95,12 @@ class ChatViewModel(
     getNextGPTResponse()
   }
 
+    fun resetResponse() {
+        _response.value = ""
+        has_responded.value = false
+    }
+
+
   fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
     val userMessage = Message(role = "user", content = transcript)
     _chatMessages.value += userMessage

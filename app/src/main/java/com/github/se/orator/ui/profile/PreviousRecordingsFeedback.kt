@@ -87,16 +87,26 @@ fun PreviousRecordingsFeedbackScreen(
     val player by lazy {
         AndroidAudioPlayer(context)
     }
-    val prompts = loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value}
-
-    val ID = prompts?.get("ID") ?: "audio.mp3"
-
-    val audioFile: File = File(context.cacheDir, "$ID.mp3")
+    var prompts: Map<String, String>? = loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value}
+    var ID: String = prompts?.get("ID") ?: "audio.mp3"
+    var audioFile: File = File(context.cacheDir, "$ID.mp3")
 
     val offlineAnalysisData by speakingViewModel.offlineAnalysisData.collectAsState()
 
-    speakingViewModel.getTranscript(audioFile)
+    LaunchedEffect(Unit) {
+        prompts = loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value}
 
+        ID = prompts?.get("ID") ?: "audio.mp3"
+
+        audioFile = File(context.cacheDir, "$ID.mp3")
+
+        Log.d("PreviousRecordingsFeedbackScreen", "Screen is opened, running code.")
+        // Call necessary methods or logic when the screen is opened
+        speakingViewModel.getTranscript(audioFile)
+        // Any other initialization logic
+        Log.d("prompts are: ", prompts?.get("targetPosition") ?: "Default Value")
+        viewModel.resetResponse()
+    }
 
     Log.d("hi", "hello!")
 //    symblApiClient.getTranscription(audioFile, {analysisData -> whatUserSaid.value = analysisData.transcription
@@ -104,8 +114,12 @@ fun PreviousRecordingsFeedbackScreen(
 
     val response by viewModel.response.collectAsState("")
 
+    LaunchedEffect (response) {
+        Log.d("gpt said: ", "gpt said: $response")
+    }
+
     if (offlineAnalysisData != null) {
-        viewModel.offlineRequest(offlineAnalysisData!!.transcription.removePrefix("You said:").trim(), prompts?.get("targetCompany") ?: "Apple", prompts?.get("targetPosition") ?: "engineer")
+        viewModel.offlineRequest(offlineAnalysisData!!.transcription.removePrefix("You said:").trim(), prompts?.get("targetCompany") ?: "Apple", prompts?.get("jobPosition") ?: "engineer")
         Log.d("testing offline chat view model", "the gpt model offline value response is $response")
         //Text(text = "What you said: ${what_has_been_said.value}")
         Text(text = "Interviewer's response: $response", color = Color.Black)
@@ -113,8 +127,6 @@ fun PreviousRecordingsFeedbackScreen(
     }
     //prompts?.get("targetPosition") ?: "Default Value"
     //val jobPosition = prompts?.get("jobPosition")
-    Log.d("prompts are: ", prompts?.get("targetPosition") ?: "Default Value")
-
 
 
     //val chatMessages by chatViewModel.chatMessages.collectAsState()
