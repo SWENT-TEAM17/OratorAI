@@ -10,7 +10,8 @@ on:
 
   push:
     branches:
-      - '*'
+      - main
+      - feature/friendship-management
 
   pull_request:
     types:
