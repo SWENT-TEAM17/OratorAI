@@ -87,12 +87,13 @@ fun PreviousRecordingsFeedbackScreen(
     val player by lazy {
         AndroidAudioPlayer(context)
     }
+    val prompts = loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value}
 
-    val audioFile: File = File(context.cacheDir, "audio.mp3")
+    val ID = prompts?.get("ID") ?: "audio.mp3"
+
+    val audioFile: File = File(context.cacheDir, "$ID.mp3")
 
     val offlineAnalysisData by speakingViewModel.offlineAnalysisData.collectAsState()
-
-    val prompts = loadPromptsFromFile(context)
 
     speakingViewModel.getTranscript(audioFile)
 

@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppColors
@@ -37,6 +38,14 @@ import com.github.se.orator.ui.theme.AppDimensionsObject
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.createAppDimensions
 import savePromptsToFile
+import kotlin.random.Random
+
+fun generateRandomString(length: Int = 8): String {
+    val charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    return (1..length)
+        .map { charset[Random.nextInt(charset.length)] }
+        .joinToString("")
+}
 
 /**
  * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview
@@ -49,10 +58,12 @@ import savePromptsToFile
 @Composable
 fun OfflineInterviewModule(
     context: Context,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    speakingViewModel: SpeakingViewModel
 ) {
     var targetCompany by remember { mutableStateOf("") }
     var jobPosition by remember { mutableStateOf("") }
+    val ID = generateRandomString()
 
     val dimensions: AppDimensionsObject = createAppDimensions()
 
@@ -112,9 +123,11 @@ fun OfflineInterviewModule(
                     context = context,
                     prompts = mapOf(
                         "targetCompany" to targetCompany,
-                        "jobPosition" to jobPosition
-                    )
+                        "jobPosition" to jobPosition,
+                        "ID" to ID
+                    ),
                 )
+                speakingViewModel.interviewPromptNb.value = ID
                 navigationActions.navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
             },
             modifier =

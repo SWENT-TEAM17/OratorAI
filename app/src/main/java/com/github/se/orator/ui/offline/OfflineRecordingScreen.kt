@@ -3,6 +3,7 @@ package com.github.se.orator.ui.offline
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
@@ -128,7 +129,7 @@ fun OfflineRecordingScreen(
                     funRec = {
                         // what to do when user begins to record a file
                         if (analysisState.value == SpeakingRepository.AnalysisState.IDLE || analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
-                            File(context.cacheDir, "audio.mp3").also {
+                            File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3").also {
                                 recorder.startRecording(it)
                                 audioFile = it
                             }
@@ -136,7 +137,8 @@ fun OfflineRecordingScreen(
                         }
                         // what to do when user finishes recording a file
                         else if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-                            File(context.cacheDir, "audio.mp3").also{
+                            File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3").also{
+                                Log.d("aall", "\"${viewModel.interviewPromptNb.value}.mp3\"")
                                 recorder.stopRecording()
                             }
                             analysisState.value = SpeakingRepository.AnalysisState.FINISHED

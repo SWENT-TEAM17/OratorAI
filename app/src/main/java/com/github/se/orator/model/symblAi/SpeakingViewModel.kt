@@ -1,6 +1,7 @@
 package com.github.se.orator.model.symblAi
 
 import android.util.Log
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.speaking.AnalysisData
@@ -34,6 +35,7 @@ class SpeakingViewModel(
   /** True if the user is currently recording their speech, false otherwise. */
   val isRecording: StateFlow<Boolean> = _isRecording
 
+  val interviewPromptNb = MutableStateFlow("")
   /** To be called when the speaking screen is closed or the "Done" button is pressed. */
   fun endAndSave() {
     if (_isRecording.value) {

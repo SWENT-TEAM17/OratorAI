@@ -57,6 +57,7 @@ import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
+import com.github.se.orator.ui.profile.OfflineRecordingsProfileScreen
 import com.github.se.orator.ui.profile.PreviousRecordingsFeedbackScreen
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.settings.SettingsScreen
@@ -152,8 +153,11 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
             RecordingReviewScreen(LocalContext.current, navigationActions, speakingViewModel)
           }
+      composable(Screen.OFFLINE_RECORDING_PROFILE) {
+        OfflineRecordingsProfileScreen(LocalContext.current, navigationActions, speakingViewModel)
+      }
       composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-        OfflineInterviewModule(LocalContext.current, navigationActions)
+        OfflineInterviewModule(LocalContext.current, navigationActions, speakingViewModel)
       }
 
           composable(

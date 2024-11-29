@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.offline
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import java.io.File
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun RecordingReviewScreen(
     context: Context,
@@ -36,7 +38,7 @@ fun RecordingReviewScreen(
         AndroidAudioPlayer(context)
     }
 
-    val audioFile: File = File(context.cacheDir, "audio.mp3")
+    val audioFile: File = File(context.cacheDir, "${speakingViewModel.interviewPromptNb.value}.mp3")
 
     Column(
       modifier =
