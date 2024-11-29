@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -395,7 +396,7 @@ fun UserItem(
                   },
                   modifier = Modifier.testTag("sendFriendRequestButton#${user.uid}")) {
                     Icon(
-                        imageVector = Icons.Default.Search,
+                        imageVector = Icons.Default.PersonAdd,
                         contentDescription = "Send Friend Request",
                         tint = AppColors.primaryColor,
                         modifier = Modifier.testTag("sendFriendRequestIcon#${user.uid}"))
