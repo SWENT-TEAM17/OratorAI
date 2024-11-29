@@ -335,12 +335,6 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("practiceModeSelector").assertTextEquals("Practice mode 2")
   }
 
-  /**
-   * ============================
-   * Added Tests Start Here
-   * ============================
-   */
-
   /** Tests sending a friend request. */
   @Test
   fun testSendFriendRequest() {
@@ -651,9 +645,4 @@ class FriendsUITests {
         .onNodeWithTag("sentFriendRequestItem#${sentProfile.uid}", useUnmergedTree = true)
         .assertDoesNotExist()
   }
-  /**
-   * ============================
-   * Added Tests End Here
-   * ============================
-   */
 }
