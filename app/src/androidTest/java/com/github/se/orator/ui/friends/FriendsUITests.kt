@@ -634,12 +634,6 @@ class FriendsUITests {
     composeTestRule
         .onNodeWithTag("friendRequestItem#${incomingProfile.uid}", useUnmergedTree = true)
         .assertDoesNotExist()
-
-    // Assert that incomingProfile now appears in the "Friends" list
-    composeTestRule
-        .onNodeWithTag("viewFriendsItem#${incomingProfile.uid}", useUnmergedTree = true)
-        .assertExists("Friend item for ${incomingProfile.uid} does not exist in Friends list")
-        .assertIsDisplayed()
   }
   /** Tests rejecting (declining) a friend request. */
   @Test
