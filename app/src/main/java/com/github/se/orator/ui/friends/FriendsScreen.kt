@@ -70,218 +70,227 @@ fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  // State variables
-  val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
-  val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
-  var searchQuery by remember { mutableStateOf("") }
-  val filteredFriends =
-      friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
-  val filteredRecReq =
-      recReqProfiles.filter { recReq -> recReq.name.contains(searchQuery, ignoreCase = true) }
+    // State variables
+    val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
+    val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredFriends =
+        friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
+    val filteredRecReq =
+        recReqProfiles.filter { recReq -> recReq.name.contains(searchQuery, ignoreCase = true) }
 
-  // State variables for UI components
-  val focusRequester = FocusRequester()
-  val focusManager = LocalFocusManager.current
-  val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-  val scope = rememberCoroutineScope()
+    // State variables for UI components
+    val focusRequester = FocusRequester()
+    val focusManager = LocalFocusManager.current
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-  // State variable for selected friend
-  var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
+    // State variable for selected friend
+    var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
 
-  // State variable for Snackbar
-  val snackbarHostState = remember { SnackbarHostState() }
+    // State variable for Snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
 
-  // New state variable for Friend Requests expansion
-  var isFriendRequestsExpanded by remember { mutableStateOf(true) }
+    // New state variable for Friend Requests expansion
+    var isFriendRequestsExpanded by remember { mutableStateOf(true) }
 
-  ProjectTheme {
-    ModalNavigationDrawer(
-        modifier = Modifier.testTag("viewFriendsDrawerMenu"),
-        drawerState = drawerState,
-        drawerContent = {
-          ModalDrawerSheet {
-            Column(modifier = Modifier.fillMaxHeight().padding(AppDimensions.paddingMedium)) {
-              Text(
-                  "Actions",
-                  modifier = Modifier.testTag("viewFriendsDrawerTitle"),
-                  style = MaterialTheme.typography.titleMedium)
-              Spacer(modifier = Modifier.height(AppDimensions.heightMedium))
-              TextButton(
-                  modifier = Modifier.testTag("viewFriendsAddFriendButton"),
-                  onClick = {
-                    scope.launch {
-                      drawerState.close()
-                      navigationActions.navigateTo(Screen.ADD_FRIENDS)
+    ProjectTheme {
+        ModalNavigationDrawer(
+            modifier = Modifier.testTag("viewFriendsDrawerMenu"),
+            drawerState = drawerState,
+            drawerContent = {
+                ModalDrawerSheet {
+                    Column(modifier = Modifier.fillMaxHeight().padding(AppDimensions.paddingMedium)) {
+                        Text(
+                            "Actions",
+                            modifier = Modifier.testTag("viewFriendsDrawerTitle"),
+                            style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(AppDimensions.heightMedium))
+                        TextButton(
+                            modifier = Modifier.testTag("viewFriendsAddFriendButton"),
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    navigationActions.navigateTo(Screen.ADD_FRIENDS)
+                                }
+                            }) {
+                            Text("➕ Add a friend")
+                        }
+                        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                        TextButton(
+                            modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    navigationActions.navigateTo(Screen.LEADERBOARD)
+                                }
+                            }) {
+                            Text("⭐ Leaderboard")
+                        }
                     }
-                  }) {
-                    Text("➕ Add a friend")
-                  }
-              Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-              TextButton(
-                  modifier = Modifier.testTag("viewFriendsLeaderboardButton"),
-                  onClick = {
-                    scope.launch {
-                      drawerState.close()
-                      navigationActions.navigateTo(Screen.LEADERBOARD)
-                    }
-                  }) {
-                    Text("⭐ Leaderboard")
-                  }
-            }
-          }
-        }) {
-          Scaffold(
-              snackbarHost = { SnackbarHost(snackbarHostState) },
-              topBar = {
-                Column {
-                  CenterAlignedTopAppBar(
-                      title = { Text("My Friends", modifier = Modifier.testTag("myFriendsTitle")) },
-                      navigationIcon = {
-                        IconButton(
-                            onClick = { scope.launch { drawerState.open() } },
-                            modifier = Modifier.testTag("viewFriendsMenuButton")) {
-                              Icon(Icons.Default.Menu, contentDescription = "Menu")
-                            }
-                      })
-                  HorizontalDivider() // Adds a separation line below the TopAppBar
                 }
-              },
-              bottomBar = {
-                BottomNavigationMenu(
-                    onTabSelect = { route ->
-                      scope.launch {
-                        drawerState.close()
-                        navigationActions.navigateTo(route)
-                      }
-                    },
-                    tabList = LIST_TOP_LEVEL_DESTINATION,
-                    selectedItem = Route.FRIENDS)
-              }) { innerPadding ->
-                Column(
+            }) {
+            Scaffold(
+                snackbarHost = { SnackbarHost(snackbarHostState) },
+                topBar = {
+                    Column {
+                        CenterAlignedTopAppBar(
+                            title = { Text("My Friends", modifier = Modifier.testTag("myFriendsTitle")) },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { scope.launch { drawerState.open() } },
+                                    modifier = Modifier.testTag("viewFriendsMenuButton")) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                }
+                            })
+                        HorizontalDivider() // Adds a separation line below the TopAppBar
+                    }
+                },
+                bottomBar = {
+                    BottomNavigationMenu(
+                        onTabSelect = { route ->
+                            scope.launch {
+                                drawerState.close()
+                                navigationActions.navigateTo(route)
+                            }
+                        },
+                        tabList = LIST_TOP_LEVEL_DESTINATION,
+                        selectedItem = Route.FRIENDS)
+                }) { innerPadding ->
+                // Replace the Column with a LazyColumn
+                LazyColumn(
                     modifier =
-                        Modifier.fillMaxSize()
-                            .padding(innerPadding)
-                            .padding(horizontal = AppDimensions.paddingMedium)
-                            .clickable { focusManager.clearFocus() }) {
-                      // Search bar for filtering friends
-                      Box(
-                          modifier =
-                              Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
+                    Modifier.fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = AppDimensions.paddingMedium)
+                        .clickable { focusManager.clearFocus() }
+                ) {
+                    // Search bar for filtering friends
+                    item {
+                        Box(
+                            modifier =
+                            Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
                             OutlinedTextField(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
                                 label = { Text("Search for a friend.") },
                                 leadingIcon = {
-                                  Icon(
-                                      imageVector = Icons.Default.Search,
-                                      contentDescription = "Search Icon")
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = "Search Icon")
                                 },
                                 modifier =
-                                    Modifier.fillMaxWidth(1f)
-                                        .height(AppDimensions.mediumHeight)
-                                        .focusRequester(focusRequester)
-                                        .testTag("viewFriendsSearch"))
-                          }
+                                Modifier.fillMaxWidth(1f)
+                                    .height(AppDimensions.mediumHeight)
+                                    .focusRequester(focusRequester)
+                                    .testTag("viewFriendsSearch"))
+                        }
+                    }
 
-                      Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                    // Spacer
+                    item {
+                        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                    }
 
-                      // **Expandable Section: Received Friend Requests**
-                      if (filteredFriends.isNotEmpty()) {
+                    // Expandable Section: Received Friend Requests
+                    if (filteredRecReq.isNotEmpty()) {
                         // Header with Toggle Button
-                        Row(
-                            modifier =
+                        item {
+                            Row(
+                                modifier =
                                 Modifier.fillMaxWidth()
                                     .clickable {
-                                      isFriendRequestsExpanded = !isFriendRequestsExpanded
+                                        isFriendRequestsExpanded = !isFriendRequestsExpanded
                                     }
                                     .padding(vertical = AppDimensions.smallPadding),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween) {
-                              Text(
-                                  text = "Friend Requests",
-                                  style = MaterialTheme.typography.titleSmall,
-                                  modifier = Modifier.weight(1f).testTag("friendRequestsHeader"))
-                              IconButton(
-                                  onClick = {
-                                    isFriendRequestsExpanded = !isFriendRequestsExpanded
-                                  },
-                                  modifier = Modifier.testTag("toggleFriendRequestsButton")) {
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(
+                                    text = "Friend Requests",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.weight(1f).testTag("friendRequestsHeader"))
+                                IconButton(
+                                    onClick = {
+                                        isFriendRequestsExpanded = !isFriendRequestsExpanded
+                                    },
+                                    modifier = Modifier.testTag("toggleFriendRequestsButton")) {
                                     Icon(
                                         imageVector =
-                                            if (isFriendRequestsExpanded) Icons.Default.ExpandLess
-                                            else Icons.Default.ExpandMore,
+                                        if (isFriendRequestsExpanded) Icons.Default.ExpandLess
+                                        else Icons.Default.ExpandMore,
                                         contentDescription =
-                                            if (isFriendRequestsExpanded) "Collapse Friend Requests"
-                                            else "Expand Friend Requests")
-                                  }
+                                        if (isFriendRequestsExpanded) "Collapse Friend Requests"
+                                        else "Expand Friend Requests")
+                                }
                             }
+                        }
 
-                        // Animated Visibility for the Friend Requests List
-                        AnimatedVisibility(
-                            visible = isFriendRequestsExpanded,
-                            enter = expandVertically(),
-                            exit = shrinkVertically()) {
-                              LazyColumn(
-                                  modifier = Modifier.testTag("viewFriendsList"),
-                                  contentPadding =
-                                      PaddingValues(vertical = AppDimensions.paddingSmall),
-                                  verticalArrangement =
-                                      Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-                                    items(filteredRecReq) { friendRequest ->
-                                      FriendRequestItem(
-                                          friendRequest = friendRequest,
-                                          userProfileViewModel = userProfileViewModel)
+                        // Friend Requests List with AnimatedVisibility
+                        item {
+                            AnimatedVisibility(
+                                visible = isFriendRequestsExpanded,
+                                enter = expandVertically(),
+                                exit = shrinkVertically()
+                            ) {
+                                Column {
+                                    Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+                                    // Friend Requests Items
+                                    for (friendRequest in filteredRecReq) {
+                                        FriendRequestItem(
+                                            friendRequest = friendRequest,
+                                            userProfileViewModel = userProfileViewModel)
+                                        Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
                                     }
-                                  }
+                                    Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                                }
                             }
-
-                        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-                      }
-
-                      // Section for Friends List
-                      Text(
-                          text = "Your Friends",
-                          style = MaterialTheme.typography.titleSmall,
-                          modifier =
-                              Modifier.padding(bottom = AppDimensions.smallPadding)
-                                  .testTag("friendsListHeader"))
-                      // Display message if no friends match the search query
-                      if (filteredFriends.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize().testTag("noFriendsFound"),
-                            contentAlignment = Alignment.Center) {
-                              Text(
-                                  "No friends found.",
-                                  style = MaterialTheme.typography.bodyLarge,
-                                  modifier = Modifier.testTag("noFriendsFoundText"))
-                            }
-                      } else {
-                        // Display the list of friends if any match the search query
-                        LazyColumn(
-                            modifier = Modifier.testTag("friendsList"),
-                            contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                            verticalArrangement =
-                                Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-                              items(filteredFriends) { friend ->
-                                FriendItem(
-                                    friend = friend,
-                                    userProfileViewModel = userProfileViewModel,
-                                    onProfilePictureClick = { selectedFriend = it })
-                              }
-                            }
-                      }
-
-                      // Dialog to display the enlarged profile picture
-                      if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
-                        ProfilePictureDialog(
-                            profilePictureUrl = selectedFriend!!.profilePic!!,
-                            onDismiss = { selectedFriend = null })
-                      }
+                        }
                     }
-              }
+
+                    // Section for Friends List
+                    item {
+                        Text(
+                            text = "Your Friends",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier =
+                            Modifier.padding(bottom = AppDimensions.smallPadding)
+                                .testTag("viewFriendsList"))
+                    }
+
+                    // Display message if no friends match the search query
+                    if (filteredFriends.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxSize().testTag("noFriendsFound"),
+                                contentAlignment = Alignment.Center) {
+                                Text(
+                                    "No friends found.",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.testTag("noFriendsFoundText"))
+                            }
+                        }
+                    } else {
+                        // Display the list of friends if any match the search query
+                        items(filteredFriends) { friend ->
+                            FriendItem(
+                                friend = friend,
+                                userProfileViewModel = userProfileViewModel,
+                                onProfilePictureClick = { selectedFriend = it })
+                        }
+                    }
+                }
+
+                // Dialog to display the enlarged profile picture
+                if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
+                    ProfilePictureDialog(
+                        profilePictureUrl = selectedFriend!!.profilePic!!,
+                        onDismiss = { selectedFriend = null })
+                }
+            }
         }
-  }
+    }
 }
+
 
 /**
  * Composable function that represents a single friend item in the list.
@@ -323,7 +332,7 @@ fun FriendItem(
   Surface(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(horizontal = AppDimensions.smallPadding)
+              .padding(horizontal = AppDimensions.smallPadding, vertical = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
               .testTag("viewFriendsItem#${friend.uid}"),
       color = AppColors.LightPurpleGrey,
