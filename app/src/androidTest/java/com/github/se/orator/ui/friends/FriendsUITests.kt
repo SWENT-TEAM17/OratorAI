@@ -545,22 +545,22 @@ class FriendsUITests {
     // **Verify that sendFriendRequest was called with correct parameters**
     verify(mockUserProfileRepository)
         .sendFriendRequest(eq(testProfile.uid), eq(profile3.uid), any(), any())
-      // Step 6: Check if the Sent Requests list is already expanded
-      val sentRequestsList = composeTestRule.onAllNodesWithTag("sentFriendRequestsList", useUnmergedTree = true)
-      if (sentRequestsList.fetchSemanticsNodes().isEmpty()) {
-          // If the list is not displayed, expand the Sent Friend Requests section
-          composeTestRule
-              .onNodeWithTag("toggleSentRequestsButton", useUnmergedTree = true)
-              .assertExists("Toggle Sent Requests button does not exist")
-              .assertIsEnabled()
-              .performClick()
+    // Step 6: Check if the Sent Requests list is already expanded
+    val sentRequestsList =
+        composeTestRule.onAllNodesWithTag("sentFriendRequestsList", useUnmergedTree = true)
+    if (sentRequestsList.fetchSemanticsNodes().isEmpty()) {
+      // If the list is not displayed, expand the Sent Friend Requests section
+      composeTestRule
+          .onNodeWithTag("toggleSentRequestsButton", useUnmergedTree = true)
+          .assertExists("Toggle Sent Requests button does not exist")
+          .assertIsEnabled()
+          .performClick()
 
-          // Wait for the UI to render the expanded list
-          composeTestRule.waitForIdle()
-      }
+      // Wait for the UI to render the expanded list
+      composeTestRule.waitForIdle()
+    }
 
-
-      // **Assert that profile3 now appears in the "Sent Requests" list**
+    // **Assert that profile3 now appears in the "Sent Requests" list**
     composeTestRule
         .onNodeWithTag("sentFriendRequestItem#3", useUnmergedTree = true)
         .assertExists("Sent Request item for 3 does not exist")
@@ -734,19 +734,20 @@ class FriendsUITests {
     // Step 5: Trigger the initial profile fetch with sentFriendRequest
     userProfileViewModel.getUserProfile(testProfile.uid)
 
-      // Step 6: Check if the Sent Requests list is already expanded
-      val sentRequestsList = composeTestRule.onAllNodesWithTag("sentFriendRequestsList", useUnmergedTree = true)
-      if (sentRequestsList.fetchSemanticsNodes().isEmpty()) {
-          // If the list is not displayed, expand the Sent Friend Requests section
-          composeTestRule
-              .onNodeWithTag("toggleSentRequestsButton", useUnmergedTree = true)
-              .assertExists("Toggle Sent Requests button does not exist")
-              .assertIsEnabled()
-              .performClick()
+    // Step 6: Check if the Sent Requests list is already expanded
+    val sentRequestsList =
+        composeTestRule.onAllNodesWithTag("sentFriendRequestsList", useUnmergedTree = true)
+    if (sentRequestsList.fetchSemanticsNodes().isEmpty()) {
+      // If the list is not displayed, expand the Sent Friend Requests section
+      composeTestRule
+          .onNodeWithTag("toggleSentRequestsButton", useUnmergedTree = true)
+          .assertExists("Toggle Sent Requests button does not exist")
+          .assertIsEnabled()
+          .performClick()
 
-          // Wait for the UI to render the expanded list
-          composeTestRule.waitForIdle()
-      }
+      // Wait for the UI to render the expanded list
+      composeTestRule.waitForIdle()
+    }
 
     composeTestRule.waitForIdle()
 
