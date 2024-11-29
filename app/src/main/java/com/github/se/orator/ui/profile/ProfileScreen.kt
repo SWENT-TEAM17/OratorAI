@@ -62,7 +62,6 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
@@ -83,16 +82,13 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
       topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.inverseSurface,
-            elevation = AppDimensions.appBarElevation,
             title = {
               Text(
                   modifier = Modifier.testTag("profile_title"),
                   text = "Profile",
-                  fontWeight = FontWeight.Bold,
-                  style = AppTypography.appBarTitleStyle)
+                  color = MaterialTheme.colorScheme.onSurface)
             },
+            backgroundColor = MaterialTheme.colorScheme.surface,
             actions = {
               IconButton(
                   onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
@@ -101,7 +97,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                         Icons.Outlined.Settings,
                         contentDescription = "Settings",
                         modifier =
-                            Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"))
+                            Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                   }
             },
             navigationIcon = {
@@ -119,7 +116,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                         Icons.AutoMirrored.Filled.Logout,
                         contentDescription = "Sign out",
                         modifier =
-                            Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"))
+                            Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"),
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
             })
       },
@@ -128,7 +126,9 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.PROFILE)
-      }) { innerPadding ->
+      },
+      backgroundColor = MaterialTheme.colorScheme.background)
+  { innerPadding ->
         Column(
             modifier =
                 Modifier.fillMaxSize().padding(innerPadding).padding(AppDimensions.paddingMedium),
@@ -144,6 +144,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                       Card(
                           modifier =
                               Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
+                          backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                           elevation = AppDimensions.elevationSmall) {}
 
                       // Profile Picture with overlapping positioning
@@ -165,13 +166,14 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                           // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
                           shape = AppShapes.circleShape,
                           colors =
-                              ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
+                              ButtonDefaults.buttonColors(
+                                  backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
                           contentPadding = PaddingValues(0.dp)) {
                             Icon(
                                 Icons.Outlined.Edit,
                                 contentDescription = "Edit button",
                                 modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                                tint = AppColors.surfaceColor)
+                                tint = MaterialTheme.colorScheme.primary)
                           }
 
                       Column(
@@ -188,7 +190,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                       text = profile.name,
                                       fontSize = 20.sp,
                                       fontWeight = FontWeight.Bold,
-                                      modifier = Modifier.testTag("profile_name"))
+                                      modifier = Modifier.testTag("profile_name"),
+                                      color = MaterialTheme.colorScheme.primary)
 
                                   // Current Streak aligned to the end with fire icon
                                   Row(
@@ -330,7 +333,8 @@ fun CardSection(
               .height(AppDimensions.cardSectionHeight)
               .clickable { onClick() }
               .testTag("cardSection"),
-      elevation = AppDimensions.elevationSmall) {
+      elevation = AppDimensions.elevationSmall,
+      backgroundColor = MaterialTheme.colorScheme.surfaceVariant) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(AppDimensions.paddingSmallMedium)) {
@@ -343,7 +347,8 @@ fun CardSection(
                   text = title,
                   fontSize = 18.sp,
                   fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("titleText"))
+                  modifier = Modifier.testTag("titleText"),
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
       }
 }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TextButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +39,6 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppTypography
@@ -60,14 +60,15 @@ fun MainScreen(navigationActions: NavigationActions) {
                       .testTag("mainScreenText1"),
               text = "Find your",
               style = AppTypography.largeTitleStyle, // Apply custom style for title
-          )
+              color = MaterialTheme.colorScheme.secondary)
 
           Text(
               modifier =
                   Modifier.padding(start = AppDimensions.paddingXXLarge).testTag("mainScreenText2"),
               text = "practice mode",
               style = AppTypography.largeTitleStyle, // Apply custom style for subtitle
-              fontWeight = FontWeight.Bold)
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.primary)
 
           ButtonRow(navigationActions)
 
@@ -108,7 +109,10 @@ fun ButtonRow(navigationActions: NavigationActions) {
 @Composable
 fun SectionButton(text: String, onClick: () -> Unit) {
   TextButton(onClick = onClick, modifier = Modifier.testTag("button")) {
-    Text(text = text, color = AppColors.textColor, fontSize = AppFontSizes.buttonText)
+    Text(
+        text = text,
+        color = MaterialTheme.colorScheme.secondary,
+        fontSize = AppFontSizes.buttonText)
   }
 }
 
@@ -171,7 +175,9 @@ fun ModeCard(text: String, painter: Painter, visible: Boolean, onCardClick: () -
                     .padding(horizontal = AppDimensions.cardHorizontalPadding)
                     .padding(top = AppDimensions.paddingMedium)
                     .clickable { onCardClick() },
-            colors = CardDefaults.cardColors(containerColor = AppColors.cardBackgroundColor)) {
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer)) {
               Column(modifier = Modifier.fillMaxWidth()) {
                 // Top image
                 Image(
@@ -187,7 +193,8 @@ fun ModeCard(text: String, painter: Painter, visible: Boolean, onCardClick: () -
                     fontWeight = FontWeight.Bold,
                     modifier =
                         Modifier.padding(AppDimensions.paddingMedium)
-                            .align(Alignment.CenterHorizontally))
+                            .align(Alignment.CenterHorizontally),
+                    color = MaterialTheme.colorScheme.primary)
               }
             }
       }

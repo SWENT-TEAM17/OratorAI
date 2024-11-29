@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -34,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,7 +56,6 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.profile.ProfilePictureDialog
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
 
@@ -95,15 +96,26 @@ fun AddFriendsScreen(
     Scaffold(
         topBar = {
           TopAppBar(
-              title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
+              title = {
+                Text(
+                    "Add a Friend",
+                    modifier = Modifier.testTag("addFriendTitle"),
+                    color = MaterialTheme.colorScheme.onSurface)
+              },
               navigationIcon = {
                 IconButton(
                     onClick = { navigationActions.goBack() },
                     modifier = Modifier.testTag("addFriendBackButton")) {
-                      Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                      Icon(
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = MaterialTheme.colorScheme.onSurface)
                     }
               },
-          )
+              colors =
+                  TopAppBarDefaults.topAppBarColors(
+                      containerColor = MaterialTheme.colorScheme.surface,
+                  ))
           Divider()
         },
         bottomBar = {
@@ -130,7 +142,10 @@ fun AddFriendsScreen(
                             .height(AppDimensions.mediumHeight)
                             .focusRequester(focusRequester)
                             .testTag("addFriendSearchField"),
-                    label = { Text("Username", modifier = Modifier.testTag("searchFieldLabel")) },
+                    label = {
+                      androidx.compose.material.Text(
+                          "Username", modifier = Modifier.testTag("searchFieldLabel"))
+                    },
                     leadingIcon = {
                       Icon(
                           Icons.Default.Search,
@@ -149,6 +164,17 @@ fun AddFriendsScreen(
                             }
                       }
                     },
+                    colors =
+                        TextFieldDefaults.outlinedTextFieldColors(
+                            backgroundColor = MaterialTheme.colorScheme.surface,
+                            textColor = MaterialTheme.colorScheme.onSurface,
+                            focusedBorderColor = MaterialTheme.colorScheme.outline,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            leadingIconColor = MaterialTheme.colorScheme.primary,
+                        ),
                     singleLine = true,
                     keyboardActions = KeyboardActions.Default)
                 // Display search results if there is a query
@@ -213,7 +239,7 @@ fun UserItem(
                         context, "${user.name} has been added as a friend", Toast.LENGTH_SHORT)
                     .show()
               },
-      color = AppColors.LightPurpleGrey,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
       shadowElevation = AppDimensions.elevationSmall) {
         Row(
             modifier =
@@ -229,12 +255,13 @@ fun UserItem(
                 Text(
                     text = user.name,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = AppDimensions.smallPadding))
+                    modifier = Modifier.padding(bottom = AppDimensions.smallPadding),
+                    color = MaterialTheme.colorScheme.primary)
                 // Display user bio, with ellipsis if it exceeds one line
                 Text(
                     text = user.bio ?: "No bio available",
                     style = MaterialTheme.typography.bodySmall,
-                    color = AppColors.secondaryTextColor,
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis)
               }

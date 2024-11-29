@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.ui.navigation.NavigationActions
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensionsObject
 import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.createAppDimensions
@@ -56,7 +55,7 @@ fun SpeakingPracticeModule(
               Text(
                   text = screenTitle,
                   style = AppTypography.appBarTitleStyle.copy(fontWeight = FontWeight.Bold),
-                  color = AppColors.textColor,
+                  color = MaterialTheme.colorScheme.onSurface,
                   modifier = Modifier.testTag("screenTitle"))
             },
             navigationIcon = {
@@ -67,17 +66,19 @@ fun SpeakingPracticeModule(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         modifier = Modifier.size(dimensions.iconSizeSmall),
-                        tint = AppColors.textColor)
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
             },
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = AppColors.surfaceColor,
-                    titleContentColor = AppColors.textColor))
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface))
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-          Divider()
+          HorizontalDivider(
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+          )
           Column(
               modifier =
                   Modifier.fillMaxSize()
@@ -91,29 +92,35 @@ fun SpeakingPracticeModule(
                     text = headerText,
                     style =
                         AppTypography.mediumTitleStyle.copy(
-                            fontWeight = FontWeight.Bold, color = AppColors.textColor),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary),
                     modifier =
                         Modifier.padding(vertical = dimensions.paddingMedium).testTag("titleText"))
 
                 // Dynamically generated input fields based on the provided data
                 inputs.forEach { input ->
-                  OutlinedTextField(
+                  androidx.compose.material.OutlinedTextField(
                       value = input.value,
                       onValueChange = input.onValueChange,
-                      label = { Text(input.label, color = AppColors.textColor) },
-                      placeholder = { Text(input.placeholder, color = AppColors.textColor) },
+                      label = { androidx.compose.material.Text(input.label) },
+                      placeholder = { androidx.compose.material.Text(input.placeholder) },
                       modifier =
                           Modifier.fillMaxWidth()
                               .height(
                                   input.height.dp) // Assuming 'height' is defined in InputFieldData
                               .testTag(input.testTag),
                       colors =
-                          TextFieldDefaults.outlinedTextFieldColors(
-                              focusedBorderColor = AppColors.primaryColor,
-                              unfocusedBorderColor = AppColors.textColor,
-                              cursorColor = AppColors.primaryColor,
-                              focusedLabelColor = AppColors.primaryColor,
-                              unfocusedLabelColor = AppColors.textColor))
+                          androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
+                              backgroundColor = MaterialTheme.colorScheme.surface,
+                              textColor = MaterialTheme.colorScheme.onSurface,
+                              focusedBorderColor = MaterialTheme.colorScheme.outline,
+                              unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                              cursorColor = MaterialTheme.colorScheme.primary,
+                              focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                              unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                              placeholderColor =
+                                  MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                          ))
                 }
 
                 // Spacer to add space before the button
@@ -135,14 +142,16 @@ fun SpeakingPracticeModule(
                             .padding(top = dimensions.paddingMedium)
                             .border(
                                 width = dimensions.borderStrokeWidth,
-                                color = AppColors.buttonBorderColor,
+                                color = MaterialTheme.colorScheme.outline,
                                 shape = MaterialTheme.shapes.medium)
                             .testTag("getStartedButton"),
                     colors =
                         ButtonDefaults.buttonColors(
-                            containerColor = AppColors.buttonContentColor,
-                            contentColor = AppColors.buttonContentColor)) {
-                      Text("Get Started", modifier = Modifier.testTag("getStartedText"))
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+                      Text(
+                          "Get Started",
+                          modifier = Modifier.testTag("getStartedText"),
+                          color = MaterialTheme.colorScheme.primary)
                     }
               }
         }

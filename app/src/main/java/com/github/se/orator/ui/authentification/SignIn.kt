@@ -130,7 +130,8 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
                   Text(
                       text = "Welcome !",
                       style = AppTypography.mediumTitleStyle,
-                      modifier = Modifier.testTag("welcomeText"))
+                      modifier = Modifier.testTag("welcomeText"),
+                      color = MaterialTheme.colorScheme.primary)
                 }
 
             Spacer(modifier = Modifier.weight(1f)) // Spacer to center content
@@ -181,19 +182,21 @@ fun LoadingScreen() {
         Text(
             text = "Reach your goals",
             style = AppTypography.mediumTitleStyle,
-            modifier = Modifier.testTag("loadingText"))
+            modifier = Modifier.testTag("loadingText"),
+            color = MaterialTheme.colorScheme.primary)
 
         Spacer(modifier = Modifier.height(dimensions.paddingSmall))
 
         Text(
             text = "Become the best speaker",
             style = AppTypography.smallTitleStyle,
-            modifier = Modifier.testTag("loadingText"))
+            modifier = Modifier.testTag("loadingText"),
+            color = MaterialTheme.colorScheme.secondary)
 
         Spacer(modifier = Modifier.height(dimensions.paddingLarge))
 
         CircularProgressIndicator(
-            color = AppColors.loadingIndicatorColor,
+            color = MaterialTheme.colorScheme.onBackground,
             strokeWidth = dimensions.strokeWidth,
             modifier = Modifier.size(dimensions.loadingIndicatorSize).testTag("loadingIndicator"))
 
@@ -202,7 +205,8 @@ fun LoadingScreen() {
         Text(
             text = "Loading...",
             style = AppTypography.loadingTextStyle,
-            modifier = Modifier.testTag("loadingText"))
+            modifier = Modifier.testTag("loadingText"),
+            color = MaterialTheme.colorScheme.tertiary)
       }
 }
 
@@ -217,7 +221,9 @@ fun LoadingScreen() {
 fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObject) {
   Button(
       onClick = onSignInClick,
-      colors = ButtonDefaults.buttonColors(containerColor = AppColors.buttonBackgroundColor),
+      colors =
+          ButtonDefaults.buttonColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
       shape = RoundedCornerShape(50),
       border = BorderStroke(dimensions.borderStrokeWidth, AppColors.buttonBorderColor),
       modifier =
@@ -239,7 +245,8 @@ fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObjec
               Text(
                   text = "Sign in with Google",
                   style = AppTypography.buttonTextStyle,
-                  modifier = Modifier.testTag("signInWithGoogleText"))
+                  modifier = Modifier.testTag("signInWithGoogleText"),
+                  color = MaterialTheme.colorScheme.secondary)
             }
       }
 }
