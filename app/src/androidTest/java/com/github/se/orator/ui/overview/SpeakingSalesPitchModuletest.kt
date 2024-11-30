@@ -1,12 +1,7 @@
 package com.github.se.orator.ui.overview
 
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
@@ -18,10 +13,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 
-class SpeakingSalesPitchModuletest {
-  @get:Rule val composeTestRule = createComposeRule()
+class SpeakingSalesPitchModuleTest {
+
+  @get:Rule
+  val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var apiLinkViewModel: ApiLinkViewModel
@@ -29,46 +27,95 @@ class SpeakingSalesPitchModuletest {
 
   @Before
   fun setUp() {
+    // Mock NavigationActions and ChatGPTService
     navigationActions = mock(NavigationActions::class.java)
     val chatGPTService = mock(ChatGPTService::class.java)
-    apiLinkViewModel = ApiLinkViewModel()
 
+    // Initialize ApiLinkViewModel and ChatViewModel
+    apiLinkViewModel = ApiLinkViewModel()
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.SPEAKING_JOB_INTERVIEW)
+
+    // Mock currentRoute() to return the Sales Pitch screen
+    `when`(navigationActions.currentRoute()).thenReturn(Screen.SPEAKING_SALES_PITCH)
+
+    // Set the composable content for testing
     composeTestRule.setContent {
       SpeakingSalesPitchModule(
-          navigationActions = navigationActions, chatViewModel, apiLinkViewModel)
+        navigationActions = navigationActions,
+        chatViewModel = chatViewModel,
+        apiLinkViewModel = apiLinkViewModel
+      )
     }
   }
 
   @Test
   fun testInputFieldsDisplayed() {
+    // Verify that all input fields are displayed
     composeTestRule.onNodeWithTag("productTypeInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("targetAudienceInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("salesGoalInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("keySellingPointsInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("anticipatedChallengesInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("negotiationFocusInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackTypeInput").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Public Speaking").assertIsDisplayed()
+
+    // Verify header and other UI elements
+    composeTestRule.onNodeWithText("Master your sales pitch and negotiation skills").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("content").assertIsDisplayed()
     composeTestRule.onNodeWithTag("titleText").assertIsDisplayed()
+
+    // Verify back button and its functionality
     composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("back_button").performClick()
     verify(navigationActions).goBack()
   }
 
   @Test
-  fun testInputFields() {
-    composeTestRule.onNodeWithTag("productTypeInput").performTextInput("marketing")
-    composeTestRule.onNodeWithTag("targetAudienceInput").performTextInput("investors")
-    composeTestRule.onNodeWithTag("feedbackTypeInput").performTextInput("delivery")
-    composeTestRule.onNodeWithTag("keySellingPointsInput").performTextInput("price")
+  fun testInputFieldsInteraction() {
+    // Input text into productTypeInput
+    composeTestRule.onNodeWithTag("productTypeInput").performTextInput("Marketing Services")
+    composeTestRule.onNodeWithTag("productTypeInput").assertTextContains("Marketing Services")
 
-    composeTestRule.onNodeWithTag("productTypeInput").assertTextContains("marketing")
-    composeTestRule.onNodeWithTag("targetAudienceInput").assertTextContains("investors")
-    composeTestRule.onNodeWithTag("feedbackTypeInput").assertTextContains("delivery")
-    composeTestRule.onNodeWithTag("keySellingPointsInput").assertTextContains("price")
+    // Input text into targetAudienceInput
+    composeTestRule.onNodeWithTag("targetAudienceInput").performTextInput("Investors")
+    composeTestRule.onNodeWithTag("targetAudienceInput").assertTextContains("Investors")
+
+    // Select an option from salesGoalInput dropdown
+    composeTestRule.onNodeWithTag("salesGoalInput").performClick()
+    composeTestRule.onNodeWithText("Close the deal").performClick() // Replace with a valid option
+    composeTestRule.onNodeWithTag("salesGoalInput").assertTextContains("Close the deal")
+
+    // Input text into keySellingPointsInput
+    composeTestRule.onNodeWithTag("keySellingPointsInput").performTextInput("Price, Quality, Innovation")
+    composeTestRule.onNodeWithTag("keySellingPointsInput").assertTextContains("Price, Quality, Innovation")
+
+    // Input text into anticipatedChallengesInput
+    composeTestRule.onNodeWithTag("anticipatedChallengesInput").performTextInput("Budget constraints, Competition")
+    composeTestRule.onNodeWithTag("anticipatedChallengesInput").assertTextContains("Budget constraints, Competition")
+
+    // Select an option from negotiationFocusInput dropdown
+    composeTestRule.onNodeWithTag("negotiationFocusInput").performClick()
+    composeTestRule.onNodeWithText("Handling Objections").performClick() // Replace with a valid option
+    composeTestRule.onNodeWithTag("negotiationFocusInput").assertTextContains("Handling Objections")
+
+    // Select an option from feedbackTypeInput dropdown
+    composeTestRule.onNodeWithTag("feedbackTypeInput").performClick()
+    composeTestRule.onNodeWithText("Persuasive Language").performClick() // Replace with a valid option
+    composeTestRule.onNodeWithTag("feedbackTypeInput").assertTextContains("Persuasive Language")
+
+    // Close the soft keyboard
     Espresso.closeSoftKeyboard()
+
+    // Click on the Get Started button
     composeTestRule.onNodeWithTag("getStartedButton").performClick()
-    // verify(apiLinkViewModel).updatePracticeContext(any())
     composeTestRule.onNodeWithTag("getStartedButton").assertExists()
+
+    // Optionally, verify that the ViewModel's context was updated
+    // This requires spying on the ViewModel or using other verification techniques
+    // Example (if using Mockito's spy):
+    // val spyApiLinkViewModel = spy(apiLinkViewModel)
+    // verify(spyApiLinkViewModel).updatePracticeContext(any())
   }
 }

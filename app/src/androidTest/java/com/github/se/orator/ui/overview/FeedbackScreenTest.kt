@@ -95,12 +95,14 @@ class FeedbackScreenTest {
 
     apiLinkViewModel = ApiLinkViewModel()
 
-    val practiceContext =
-        InterviewContext(
-            interviewType = "Technical",
-            role = "Software Engineer",
-            company = "Tech Corp",
-            focusAreas = listOf("Algorithms", "Data Structures"))
+      val practiceContext = InterviewContext(
+          targetPosition = "Software Engineer",          // Updated field
+          companyName = "Tech Corp",                      // Updated field
+          interviewType = "Technical",
+          experienceLevel = "Mid-Level",                  // New field
+          jobDescription = "Develop and maintain software applications.", // New field
+          focusArea = "Algorithms"                        // Changed from list to single String
+      )
     apiLinkViewModel.updatePracticeContext(practiceContext)
   }
 
