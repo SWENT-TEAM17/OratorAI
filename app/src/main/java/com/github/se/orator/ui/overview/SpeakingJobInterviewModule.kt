@@ -1,11 +1,8 @@
 package com.github.se.orator.ui.overview
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speaking.InterviewContext
@@ -13,8 +10,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
 /**
- * The SpeakingJobInterviewModule composable is a composable screen that displays the job interview
- * module.
+ * The SpeakingJobInterviewModule composable displays the job interview module.
  *
  * @param navigationActions The navigation actions that can be performed.
  */
@@ -27,46 +23,73 @@ fun SpeakingJobInterviewModule(
 ) {
   var targetPosition by remember { mutableStateOf("") }
   var companyName by remember { mutableStateOf("") }
-  var skills by remember { mutableStateOf("") }
-  var feedbackType by remember { mutableStateOf("") }
+  var interviewType by remember { mutableStateOf("") }
+  var experienceLevel by remember { mutableStateOf("") }
+  var jobDescription by remember { mutableStateOf("") }
+  var focusArea by remember { mutableStateOf("") }
 
   val inputFields =
       listOf(
           InputFieldData(
               value = targetPosition,
-              onValueChange = { newValue: String ->
-                targetPosition = newValue
-              }, // Explicitly specify String for newValue
-              label = "What is your target job position?",
-              placeholder = "e.g Senior executive",
-              testTag = "levelInput"),
+              onValueChange = { targetPosition = it },
+              question = "What is your target job position?",
+              placeholder = "e.g., Senior Executive",
+              testTag = "targetPositionInput"),
           InputFieldData(
               value = companyName,
-              onValueChange = { newValue: String ->
-                companyName = newValue
-              }, // Explicitly specify String
-              label = "Which company are you applying to?",
-              placeholder = "e.g McKinsey",
-              testTag = "jobInput",
-              height = 200),
+              onValueChange = { companyName = it },
+              question = "Which company are you applying to?",
+              placeholder = "e.g., McKinsey",
+              testTag = "companyNameInput"),
           InputFieldData(
-              value = skills,
-              onValueChange = { newValue: String ->
-                skills = newValue
-              }, // Explicitly specify String
-              label = "What skills or qualifications do you want to highlight?",
-              placeholder = "e.g Problem solving",
-              height = 85,
-              testTag = "skillsInput"),
+              value = interviewType,
+              onValueChange = { interviewType = it },
+              question = "What type of interview are you preparing for?",
+              placeholder = "Select interview type",
+              testTag = "interviewTypeInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf(
+                      "Phone Interview",
+                      "Video Interview",
+                      "In-Person Interview",
+                      "Panel Interview",
+                      "Group Interview",
+                      "Assessment Center")),
           InputFieldData(
-              value = feedbackType,
-              onValueChange = { newValue: String ->
-                feedbackType = newValue
-              }, // Explicitly specify String
-              label = "Do you want feedback on persuasive language, volume, or delivery?",
-              placeholder = "e.g Persuasive language",
-              height = 85,
-              testTag = "experienceInput"))
+              value = experienceLevel,
+              onValueChange = { experienceLevel = it },
+              question = "What is your experience level in this field?",
+              placeholder = "Select experience level",
+              testTag = "experienceLevelInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf("Entry-Level", "Mid-Level", "Senior-Level", "Executive-Level")),
+          InputFieldData(
+              value = jobDescription,
+              onValueChange = { jobDescription = it },
+              question = "Please provide the job description:",
+              placeholder = "Paste the job description here",
+              testTag = "jobDescriptionInput",
+              isScrollable = true,
+              height = 200.dp),
+          InputFieldData(
+              value = focusArea,
+              onValueChange = { focusArea = it },
+              question = "What do you want to focus on the most?",
+              placeholder = "Select focus area",
+              testTag = "focusAreaInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf(
+                      "Behavioral Questions",
+                      "Technical Questions",
+                      "Situational Questions",
+                      "Competency-Based Questions",
+                      "Case Studies",
+                      "Company-Specific Questions")),
+      )
 
   SpeakingPracticeModule(
       navigationActions = navigationActions,
@@ -77,13 +100,15 @@ fun SpeakingJobInterviewModule(
         // Collect the inputs and create an InterviewContext object
         val interviewContext =
             InterviewContext(
-                interviewType = "job interview",
-                role = targetPosition,
-                company = companyName,
-                focusAreas = skills.split(",").map { it.trim() })
+                targetPosition = targetPosition,
+                companyName = companyName,
+                interviewType = interviewType,
+                experienceLevel = experienceLevel,
+                jobDescription = jobDescription,
+                focusArea = focusArea,
+            )
 
         apiLinkViewModel.updatePracticeContext(interviewContext)
-
         chatViewModel.initializeConversation()
 
         // Navigate to ChatScreen with the collected data

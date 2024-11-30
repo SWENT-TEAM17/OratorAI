@@ -15,15 +15,18 @@ sealed class PracticeContext : Serializable
  * takes place.
  *
  * @param interviewType The type of interview.
- * @param role The role for which the interview is being conducted.
- * @param company The company at which the interview is being conducted.
+ * @param role The role being applied for.
+ * @param company The company being applied to.
+ * @param jobDescription The description of the job.
  * @param focusAreas The focus areas for the interview.
  */
 data class InterviewContext(
+    val targetPosition: String,
+    val companyName: String,
     val interviewType: String,
-    val role: String,
-    val company: String,
-    val focusAreas: List<String>
+    val experienceLevel: String,
+    val jobDescription: String,
+    val focusArea: String,
 ) : PracticeContext()
 
 /**
@@ -36,8 +39,15 @@ data class InterviewContext(
  */
 data class PublicSpeakingContext(
     val occasion: String,
+    val purpose: String,
+    val audienceSize: String,
     val audienceDemographic: String,
-    val mainPoints: List<String>
+    val presentationStyle: String,
+    val mainPoints: List<String>,
+    val experienceLevel: String,
+    val anticipatedChallenges: List<String>,
+    val focusArea: String,
+    val feedbackType: String
 ) : PracticeContext()
 
 /**
@@ -51,5 +61,9 @@ data class PublicSpeakingContext(
 data class SalesPitchContext(
     val product: String,
     val targetAudience: String,
-    val keyFeatures: List<String>
+    val salesGoal: String,
+    val keyFeatures: List<String>,
+    val anticipatedChallenges: List<String>,
+    val negotiationFocus: String,
+    val feedbackType: String
 ) : PracticeContext()

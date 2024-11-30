@@ -1,24 +1,38 @@
 package com.github.se.orator.ui.overview
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.ImeAction
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppDimensionsObject
 import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.createAppDimensions
+import kotlin.math.roundToInt
 
 /**
  * The SpeakingPracticeModule composable displays the speaking practice module screen.
@@ -97,23 +111,113 @@ fun SpeakingPracticeModule(
 
                 // Dynamically generated input fields based on the provided data
                 inputs.forEach { input ->
-                  OutlinedTextField(
-                      value = input.value,
-                      onValueChange = input.onValueChange,
-                      label = { Text(input.label, color = AppColors.textColor) },
-                      placeholder = { Text(input.placeholder, color = AppColors.textColor) },
-                      modifier =
-                          Modifier.fillMaxWidth()
-                              .height(
-                                  input.height.dp) // Assuming 'height' is defined in InputFieldData
-                              .testTag(input.testTag),
-                      colors =
-                          TextFieldDefaults.outlinedTextFieldColors(
-                              focusedBorderColor = AppColors.primaryColor,
-                              unfocusedBorderColor = AppColors.textColor,
-                              cursorColor = AppColors.primaryColor,
-                              focusedLabelColor = AppColors.primaryColor,
-                              unfocusedLabelColor = AppColors.textColor))
+                  if (input.isDropdown) {
+                    // Handle dropdown input
+                    FocusAreaDropdown(
+                        selectedFocusArea = input.value,
+                        onFocusAreaSelected = input.onValueChange,
+                        question = input.question,
+                        placeholder = input.placeholder,
+                        testTag = input.testTag,
+                        dropdownItems = input.dropdownItems)
+                  } else {
+                    // Display question as Text
+                    Text(
+                        text = input.question,
+                        style = AppTypography.smallTitleStyle.copy(fontWeight = FontWeight.Bold),
+                        color = AppColors.textColor,
+                        modifier =
+                            Modifier.padding(vertical = AppDimensions.paddingSmall)
+                                .testTag("${input.testTag}-Question"))
+
+                    if (input.isScrollable) {
+                      // Use a scrollable TextField
+                      val scrollState = rememberScrollState()
+                      var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                      val density = LocalDensity.current
+                      val heightPx = with(density) { input.height.toPx() }
+
+                      LaunchedEffect(input.value, textLayoutResult) {
+                        val layoutResult = textLayoutResult ?: return@LaunchedEffect
+
+                        // Get the cursor position
+                        val cursorRect = layoutResult.getCursorRect(input.value.length)
+                        val cursorOffset = cursorRect.topLeft.y
+
+                        val visibleAreaStart = scrollState.value.toFloat()
+                        val visibleAreaEnd = scrollState.value.toFloat() + heightPx
+
+                        if (cursorOffset < visibleAreaStart) {
+                          // Cursor is above visible area, scroll up
+                          scrollState.scrollTo(cursorOffset.roundToInt())
+                        } else if (cursorOffset + cursorRect.height > visibleAreaEnd) {
+                          // Cursor is below visible area, scroll down
+                          val scrollTo = (cursorOffset + cursorRect.height - heightPx).roundToInt()
+                          scrollState.scrollTo(scrollTo)
+                        }
+                      }
+
+                      Box(
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .height(input.height)
+                                  .border(
+                                      width = AppDimensions.borderStrokeWidth,
+                                      color = AppColors.textColor,
+                                      shape = MaterialTheme.shapes.small)
+                                  .background(AppColors.surfaceColor)
+                                  .verticalScroll(scrollState)
+                                  .testTag("${input.testTag}-TextFieldBox")) {
+                            BasicTextField(
+                                value = input.value,
+                                onValueChange = input.onValueChange,
+                                modifier =
+                                    Modifier.fillMaxSize().padding(AppDimensions.paddingSmall),
+                                textStyle =
+                                    LocalTextStyle.current.copy(color = AppColors.textColor),
+                                cursorBrush = SolidColor(AppColors.textColor),
+                                onTextLayout = { layoutResult -> textLayoutResult = layoutResult },
+                                decorationBox = { innerTextField ->
+                                  Box(modifier = Modifier.fillMaxSize()) {
+                                    if (input.value.isEmpty()) {
+                                      Text(
+                                          text = input.placeholder,
+                                          style =
+                                              LocalTextStyle.current.copy(
+                                                  color = AppColors.placeholderColor),
+                                          modifier = Modifier.padding(AppDimensions.paddingSmall))
+                                    }
+                                    innerTextField()
+                                  }
+                                },
+                                singleLine = false)
+                          }
+                    } else {
+                      // Display regular TextField
+                      TextField(
+                          value = input.value,
+                          onValueChange = input.onValueChange,
+                          placeholder = {
+                            Text(text = input.placeholder, color = AppColors.textColor)
+                          },
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .height(input.height)
+                                  .border(
+                                      width = AppDimensions.borderStrokeWidth,
+                                      color = Color.Black,
+                                      shape = MaterialTheme.shapes.small)
+                                  .testTag("${input.testTag}-TextField"),
+                          colors =
+                              TextFieldDefaults.textFieldColors(
+                                  containerColor = AppColors.surfaceColor,
+                                  cursorColor = AppColors.textColor,
+                                  focusedIndicatorColor = Color.Transparent,
+                                  unfocusedIndicatorColor = Color.Transparent),
+                          keyboardOptions =
+                              KeyboardOptions.Default.copy(imeAction = ImeAction.Next))
+                    }
+                  }
                 }
 
                 // Spacer to add space before the button
@@ -147,4 +251,75 @@ fun SpeakingPracticeModule(
               }
         }
       })
+}
+
+/**
+ * The FocusAreaDropdown composable displays a dropdown for selecting a focus area.
+ *
+ * @param selectedFocusArea The selected focus area.
+ * @param onFocusAreaSelected The callback to be invoked when a focus area is selected.
+ * @param question The question to be displayed above the dropdown.
+ * @param placeholder The placeholder text to be displayed in the dropdown.
+ * @param testTag The test tag for the dropdown.
+ * @param dropdownItems The items to be displayed in the dropdown.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FocusAreaDropdown(
+    selectedFocusArea: String,
+    onFocusAreaSelected: (String) -> Unit,
+    question: String,
+    placeholder: String,
+    testTag: String,
+    dropdownItems: List<String>
+) {
+  var expanded by remember { mutableStateOf(false) }
+
+  // Display the question as Text
+  Text(
+      text = question,
+      style = AppTypography.smallTitleStyle.copy(fontWeight = FontWeight.Bold),
+      color = AppColors.textColor,
+      modifier =
+          Modifier.padding(vertical = AppDimensions.paddingSmall).testTag("$testTag-Question"))
+
+  ExposedDropdownMenuBox(
+      expanded = expanded,
+      onExpandedChange = { expanded = !expanded },
+      modifier = Modifier.testTag("$testTag-DropdownBox")) {
+        TextField(
+            value = selectedFocusArea,
+            onValueChange = {},
+            readOnly = true,
+            placeholder = { Text(text = placeholder, color = AppColors.textColor) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier =
+                Modifier.menuAnchor()
+                    .fillMaxWidth()
+                    .border(
+                        width = AppDimensions.borderStrokeWidth,
+                        color = AppColors.textColor,
+                        shape = MaterialTheme.shapes.small)
+                    .testTag("$testTag-DropdownField"),
+            colors =
+                TextFieldDefaults.textFieldColors(
+                    containerColor = AppColors.surfaceColor,
+                    cursorColor = AppColors.textColor,
+                    focusedIndicatorColor = Color.Transparent, // Remove default underline
+                    unfocusedIndicatorColor = Color.Transparent // Remove default underline
+                    ))
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.testTag("$testTag-DropdownMenu")) {
+              dropdownItems.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(text = item) },
+                    onClick = {
+                      onFocusAreaSelected(item)
+                      expanded = false
+                    })
+              }
+            }
+      }
 }

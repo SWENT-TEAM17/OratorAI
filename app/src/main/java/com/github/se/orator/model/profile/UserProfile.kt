@@ -42,20 +42,20 @@ enum class SessionType(
     val failureMessage: String
 ) {
   SPEECH(
-      positiveResponse = "would win the competition",
-      negativeResponse = "would not win the competition",
-      successMessage = "Great job! You would win the competition.",
-      failureMessage = "You might need to improve to win the competition."),
+      positiveResponse = "you were effective",
+      negativeResponse = "you were not effective",
+      successMessage = "Great job! Your speech was effective.",
+      failureMessage = "You might need to improve to achieve your speech's purpose."),
   INTERVIEW(
       positiveResponse = "would recommend hiring",
       negativeResponse = "would not recommend hiring",
       successMessage = "Congratulations! You would be hired.",
       failureMessage = "Unfortunately, you would not be hired."),
   NEGOTIATION(
-      positiveResponse = "successfully convinced",
-      negativeResponse = "did not convince",
-      successMessage = "Success! You have convinced the client.",
-      failureMessage = "You did not convince the client this time.")
+      positiveResponse = "achieved your sales goal",
+      negativeResponse = "did not achieve your sales goal",
+      successMessage = "Success! You achieved your sales goal.",
+      failureMessage = "You did not achieve your sales goal this time.")
 }
 
 /**
