@@ -13,13 +13,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 
 class SpeakingSalesPitchModuleTest {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var apiLinkViewModel: ApiLinkViewModel
@@ -41,10 +39,9 @@ class SpeakingSalesPitchModuleTest {
     // Set the composable content for testing
     composeTestRule.setContent {
       SpeakingSalesPitchModule(
-        navigationActions = navigationActions,
-        chatViewModel = chatViewModel,
-        apiLinkViewModel = apiLinkViewModel
-      )
+          navigationActions = navigationActions,
+          chatViewModel = chatViewModel,
+          apiLinkViewModel = apiLinkViewModel)
     }
   }
 
@@ -60,7 +57,9 @@ class SpeakingSalesPitchModuleTest {
     composeTestRule.onNodeWithTag("feedbackTypeInput").assertIsDisplayed()
 
     // Verify header and other UI elements
-    composeTestRule.onNodeWithText("Master your sales pitch and negotiation skills").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText("Master your sales pitch and negotiation skills")
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("content").assertIsDisplayed()
@@ -88,21 +87,33 @@ class SpeakingSalesPitchModuleTest {
     composeTestRule.onNodeWithTag("salesGoalInput").assertTextContains("Close the deal")
 
     // Input text into keySellingPointsInput
-    composeTestRule.onNodeWithTag("keySellingPointsInput").performTextInput("Price, Quality, Innovation")
-    composeTestRule.onNodeWithTag("keySellingPointsInput").assertTextContains("Price, Quality, Innovation")
+    composeTestRule
+        .onNodeWithTag("keySellingPointsInput")
+        .performTextInput("Price, Quality, Innovation")
+    composeTestRule
+        .onNodeWithTag("keySellingPointsInput")
+        .assertTextContains("Price, Quality, Innovation")
 
     // Input text into anticipatedChallengesInput
-    composeTestRule.onNodeWithTag("anticipatedChallengesInput").performTextInput("Budget constraints, Competition")
-    composeTestRule.onNodeWithTag("anticipatedChallengesInput").assertTextContains("Budget constraints, Competition")
+    composeTestRule
+        .onNodeWithTag("anticipatedChallengesInput")
+        .performTextInput("Budget constraints, Competition")
+    composeTestRule
+        .onNodeWithTag("anticipatedChallengesInput")
+        .assertTextContains("Budget constraints, Competition")
 
     // Select an option from negotiationFocusInput dropdown
     composeTestRule.onNodeWithTag("negotiationFocusInput").performClick()
-    composeTestRule.onNodeWithText("Handling Objections").performClick() // Replace with a valid option
+    composeTestRule
+        .onNodeWithText("Handling Objections")
+        .performClick() // Replace with a valid option
     composeTestRule.onNodeWithTag("negotiationFocusInput").assertTextContains("Handling Objections")
 
     // Select an option from feedbackTypeInput dropdown
     composeTestRule.onNodeWithTag("feedbackTypeInput").performClick()
-    composeTestRule.onNodeWithText("Persuasive Language").performClick() // Replace with a valid option
+    composeTestRule
+        .onNodeWithText("Persuasive Language")
+        .performClick() // Replace with a valid option
     composeTestRule.onNodeWithTag("feedbackTypeInput").assertTextContains("Persuasive Language")
 
     // Close the soft keyboard

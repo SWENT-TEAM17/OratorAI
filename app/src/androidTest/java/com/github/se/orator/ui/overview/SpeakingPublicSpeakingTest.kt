@@ -13,13 +13,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 
 class SpeakingPublicSpeakingTest {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var apiLinkViewModel: ApiLinkViewModel
@@ -41,10 +39,9 @@ class SpeakingPublicSpeakingTest {
     // Set the composable content for testing
     composeTestRule.setContent {
       SpeakingPublicSpeakingModule(
-        navigationActions = navigationActions,
-        chatViewModel = chatViewModel,
-        apiLinkViewModel = apiLinkViewModel
-      )
+          navigationActions = navigationActions,
+          chatViewModel = chatViewModel,
+          apiLinkViewModel = apiLinkViewModel)
     }
   }
 
@@ -89,7 +86,9 @@ class SpeakingPublicSpeakingTest {
 
     // Select an option from audienceSizeInput dropdown
     composeTestRule.onNodeWithTag("audienceSizeInput").performClick()
-    composeTestRule.onNodeWithText("Medium group (20-50)").performClick() // Replace with a valid option
+    composeTestRule
+        .onNodeWithText("Medium group (20-50)")
+        .performClick() // Replace with a valid option
     composeTestRule.onNodeWithTag("audienceSizeInput").assertTextContains("Medium group (20-50)")
 
     // Input text into demographicInput
@@ -102,8 +101,12 @@ class SpeakingPublicSpeakingTest {
     composeTestRule.onNodeWithTag("presentationStyleInput").assertTextContains("Interactive")
 
     // Input text into mainPointsInput
-    composeTestRule.onNodeWithTag("mainPointsInput").performTextInput("Innovation, Leadership, Teamwork")
-    composeTestRule.onNodeWithTag("mainPointsInput").assertTextContains("Innovation, Leadership, Teamwork")
+    composeTestRule
+        .onNodeWithTag("mainPointsInput")
+        .performTextInput("Innovation, Leadership, Teamwork")
+    composeTestRule
+        .onNodeWithTag("mainPointsInput")
+        .assertTextContains("Innovation, Leadership, Teamwork")
 
     // Select an option from visualAidsInput dropdown
     composeTestRule.onNodeWithTag("visualAidsInput").performClick()
@@ -116,8 +119,12 @@ class SpeakingPublicSpeakingTest {
     composeTestRule.onNodeWithTag("experienceLevelInput").assertTextContains("Intermediate")
 
     // Input text into anticipatedChallengesInput
-    composeTestRule.onNodeWithTag("anticipatedChallengesInput").performTextInput("Nervousness, Audience engagement")
-    composeTestRule.onNodeWithTag("anticipatedChallengesInput").assertTextContains("Nervousness, Audience engagement")
+    composeTestRule
+        .onNodeWithTag("anticipatedChallengesInput")
+        .performTextInput("Nervousness, Audience engagement")
+    composeTestRule
+        .onNodeWithTag("anticipatedChallengesInput")
+        .assertTextContains("Nervousness, Audience engagement")
 
     // Select an option from focusAreaInput dropdown
     composeTestRule.onNodeWithTag("focusAreaInput").performClick()

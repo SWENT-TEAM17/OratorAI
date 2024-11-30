@@ -13,13 +13,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 
 class SpeakingJobInterviewModuleTest {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var apiLinkViewModel: ApiLinkViewModel
@@ -41,10 +39,9 @@ class SpeakingJobInterviewModuleTest {
     // Set the composable content for testing
     composeTestRule.setContent {
       SpeakingJobInterviewModule(
-        navigationActions = navigationActions,
-        chatViewModel = chatViewModel,
-        apiLinkViewModel = apiLinkViewModel
-      )
+          navigationActions = navigationActions,
+          chatViewModel = chatViewModel,
+          apiLinkViewModel = apiLinkViewModel)
     }
   }
 
@@ -93,12 +90,18 @@ class SpeakingJobInterviewModuleTest {
     composeTestRule.onNodeWithTag("experienceLevelInput").assertTextContains("Mid-Level")
 
     // Input text into jobDescriptionInput (scrollable TextField)
-    composeTestRule.onNodeWithTag("jobDescriptionInput").performTextInput("Develop and maintain software applications.")
-    composeTestRule.onNodeWithTag("jobDescriptionInput").assertTextContains("Develop and maintain software applications.")
+    composeTestRule
+        .onNodeWithTag("jobDescriptionInput")
+        .performTextInput("Develop and maintain software applications.")
+    composeTestRule
+        .onNodeWithTag("jobDescriptionInput")
+        .assertTextContains("Develop and maintain software applications.")
 
     // Select an option from focusAreaInput dropdown
     composeTestRule.onNodeWithTag("focusAreaInput").performClick()
-    composeTestRule.onNodeWithText("Technical Questions").performClick() // Replace with a valid option
+    composeTestRule
+        .onNodeWithText("Technical Questions")
+        .performClick() // Replace with a valid option
     composeTestRule.onNodeWithTag("focusAreaInput").assertTextContains("Technical Questions")
 
     // Close the soft keyboard
