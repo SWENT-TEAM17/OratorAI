@@ -41,6 +41,7 @@ import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
@@ -302,14 +303,14 @@ fun FriendItem(
                                 imageVector =
                                     Icons.Filled.Whatshot, // Using Whatshot as the fire icon
                                 contentDescription = "Active Streak",
-                                tint = AppColors.amber,
+                                tint = COLOR_AMBER,
                                 modifier = Modifier.size(AppDimensions.iconSizeSmall))
                             Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                             Text(
                                 text =
                                     "$displayedStreak day${if (displayedStreak > 1) "s" else ""} streak",
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = AppColors.amber,
+                                color = COLOR_AMBER,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier =

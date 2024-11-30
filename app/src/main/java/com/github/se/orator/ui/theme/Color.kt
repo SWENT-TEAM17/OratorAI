@@ -3,6 +3,11 @@ package com.github.se.orator.ui.theme
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Special color for the streaks icon.
+ */
+val COLOR_AMBER = Color(0xFFFFA726)
+
 object AppColors {
   // Original Colors
   val Purple80 = Color(0xFFD0BCFF)

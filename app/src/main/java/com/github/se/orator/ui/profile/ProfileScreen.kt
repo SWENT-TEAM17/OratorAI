@@ -65,6 +65,7 @@ import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
+import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -207,14 +208,14 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                         Icon(
                                             imageVector = Icons.Filled.Whatshot, // Fire icon
                                             contentDescription = "Active Streak",
-                                            tint = AppColors.amber,
+                                            tint = COLOR_AMBER,
                                             modifier = Modifier.size(AppDimensions.iconSizeSmall))
                                         Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                                         Text(
                                             text = "${profile.currentStreak}",
                                             fontSize = 20.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = AppColors.amber,
+                                            color = COLOR_AMBER,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                             modifier = Modifier.testTag("current_streak_text"))
