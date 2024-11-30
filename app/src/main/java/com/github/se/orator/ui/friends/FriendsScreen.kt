@@ -195,7 +195,8 @@ fun ViewFriendsScreen(
                               Text(
                                   "No user found",
                                   style = MaterialTheme.typography.bodyLarge,
-                                  modifier = Modifier.testTag("noUserFoundText"))
+                                  modifier = Modifier.testTag("noUserFoundText"),
+                                  color = MaterialTheme.colorScheme.onBackground)
                             }
                       } else {
                         // Display the list of friends if any match the search query
