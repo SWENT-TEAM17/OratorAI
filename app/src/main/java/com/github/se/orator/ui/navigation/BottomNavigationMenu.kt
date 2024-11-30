@@ -38,12 +38,12 @@ fun BottomNavigationMenu(
           BottomNavigationItem(
               icon = {
                 if (tab.route == selectedItem) {
-                  Icon(tab.coloredIcon, contentDescription = null)
+                  Icon(tab.coloredIcon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 } else {
                   Icon(tab.outlinedIcon, contentDescription = null)
                 }
               },
-              label = { Text(tab.textId) },
+              label = { Text(tab.textId, color = MaterialTheme.colorScheme.onSurface) },
               selected = tab.route == selectedItem,
               onClick = { onTabSelect(tab) },
               modifier = Modifier.clip(AppShapes.bottomNavigationItemShape).testTag(tab.textId))
