@@ -40,6 +40,9 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
     val yValuesTalkTimeSec = listOf(10f, 20f, 15f, 25f, 30f, 10f, 5f, 40f, 35f, 20f)
     val yValuesTalkTimePerc = listOf(20f, 20f, 15f, 25f, 30f, 10f, 15f, 35f, 30f, 25f)
 
+    //val yValuesTalkTimeSec = profileViewModel.recentData.toList().map {data -> data.talkTimeSeconds}
+    //val yValuesTalkTimePerc = profileViewModel.recentData.map {data -> data.talkTimePercentage}
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         content = { padding ->
