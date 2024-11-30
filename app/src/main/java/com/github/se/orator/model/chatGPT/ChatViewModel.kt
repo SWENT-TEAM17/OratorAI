@@ -8,11 +8,9 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
-import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
-import com.github.se.orator.ui.network.SessionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -20,9 +18,7 @@ import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val chatGPTService: ChatGPTService,
-    private val apiLinkViewModel: ApiLinkViewModel,
-    private val sessionType: SessionType = SessionType.PRACTICE,
-    private val speechBattle: SpeechBattle? = null
+    private val apiLinkViewModel: ApiLinkViewModel
 ) : ViewModel() {
 
   private var isConversationInitialized = false
@@ -304,4 +300,33 @@ class ChatViewModel(
   //            }
   //        }
   //    }
+
+  // todo: make it say that it's in a battle vs other user
+  // MAKE IT USE THE CONTEXT ASWELL TO START GENERATING QUESTIONS
+  fun initializeBattleConversation(battleId: String, friendUid: String) {
+    if (isConversationInitialized) return
+    isConversationInitialized = true
+
+    _collectedAnalysisData.value = emptyList() // Reset the analysis data history
+    val practiceContextAsValue =
+        (apiLinkViewModel.practiceContext.value ?: return) as InterviewContext
+
+    val systemMessageContent =
+        """
+                    You are engaged in a battle against $friendUid a ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.role} at ${practiceContextAsValue.company}. 
+                    Focus on the following areas: ${practiceContextAsValue.focusAreas.joinToString(", ")}. 
+                    Ask questions one at a time and wait for the user's response before proceeding. 
+                    Do not provide feedback until the end.
+                """
+            .trimIndent()
+
+    val systemMessage = Message(role = "system", content = systemMessageContent)
+
+    val userStartMessage =
+        Message(role = "user", content = "I'm ready to begin the battle session.")
+
+    _chatMessages.value = listOf(systemMessage, userStartMessage)
+
+    getNextGPTResponse()
+  }
 }

@@ -1,39 +1,225 @@
 package com.github.se.orator.model.speechBattle
 
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.InterviewContext
-import com.github.se.orator.model.speaking.PracticeContext
-import com.github.se.orator.model.speechBattle.BattleStatus
-import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.network.Message
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
-fun createBattleRequest(
-    friendUid: String,
-    interviewContext: InterviewContext,
-    navigationActions: NavigationActions,
-    userProfileViewModel: UserProfileViewModel
-) {
-    // Generate a unique battle ID
-    //val battleId = generateUniqueBattleId()
+/**
+ * ViewModel for managing speech battles.
+ *
+ * @property userProfileViewModel ViewModel for user profile data.
+ * @property navigationActions Navigation actions for navigating between screens.
+ * @property apiLinkViewModel ViewModel for API link data.
+ */
+class BattleViewModel(
+  private val userProfileViewModel: UserProfileViewModel,
+  private val navigationActions: NavigationActions,
+  private val apiLinkViewModel: ApiLinkViewModel
+) : ViewModel() {
 
-    // Get the current user's ID (challenger)
-    val challengerUid = userProfileViewModel.userProfile.value!!.uid
+  private val battleRepository = BattleRepositoryFirestore()
 
-    // Create the SpeechBattle object
-    val speechBattle = SpeechBattle(
-        battleId = "1",
+  private val _pendingBattles = MutableLiveData<List<SpeechBattle>>()
+  val pendingBattles: LiveData<List<SpeechBattle>> = _pendingBattles
+
+  /**
+   * Creates a battle request between the current user and a friend.
+   *
+   * @param friendUid The UID of the friend to battle with.
+   * @param context The context of the interview for the battle.
+   * @return The ID of the created battle, or null if the user profile is not available.
+   */
+  fun createBattleRequest(friendUid: String, context: InterviewContext): String? {
+    val battleId = battleRepository.generateUniqueBattleId()
+
+    val challengerUid = userProfileViewModel.userProfile.value?.uid ?: return null
+
+    val speechBattle =
+      SpeechBattle(
+        battleId = battleId,
         challenger = challengerUid,
         opponent = friendUid,
         status = BattleStatus.PENDING,
-        context = interviewContext
-    )
+        context = context)
 
-    // Store the battle request in the database
-    storeBattleRequest(speechBattle)
+    battleRepository.storeBattleRequest(speechBattle) { success ->
+      if (!success) {
+        Log.e("BattleViewModel", "Failed to store battle request")
+        return@storeBattleRequest
+      }
+    }
 
-    // Navigate to the BattleRequestSentScreen
-    navigationActions.navigateToBattleRequestSentScreen(friendUid)
+    apiLinkViewModel.updatePracticeContext(context)
+
+    return battleId
+  }
+
+  /** Listens for pending battles for the current user. */
+  fun listenForPendingBattles() {
+    val currentUserUid = userProfileViewModel.userProfile.value?.uid ?: return
+    battleRepository.listenForPendingBattles(currentUserUid) { battles ->
+      _pendingBattles.value = battles
+    }
+  }
+
+  /**
+   * Accepts a battle request.
+   *
+   * @param battleId The ID of the battle to accept.
+   */
+  fun acceptBattle(battleId: String) {
+    val currentUserUid = userProfileViewModel.userProfile.value?.uid ?: return
+
+    // Use getFriendUid to determine the friend's UID
+    getOpponentUid(battleId, currentUserUid) { friendUid ->
+      if (friendUid != null) {
+        // Update the battle status to IN_PROGRESS
+        battleRepository.updateBattleStatus(battleId, BattleStatus.IN_PROGRESS) { success ->
+          if (success) {
+            // Fetch the battle details to update the context
+            getBattleById(battleId) { battle ->
+              if (battle != null) {
+                // Set the practice context for the battle
+                apiLinkViewModel.updatePracticeContext(battle.context)
+
+                // Navigate to the battle chat screen with the battleId and userId
+                navigationActions.navigateToBattleScreen(battleId, currentUserUid)
+
+                Log.d("BattleViewModel", "Battle accepted successfully. Friend UID: $friendUid")
+              } else {
+                Log.e(
+                  "BattleViewModel", "Failed to retrieve battle details for battleId: $battleId")
+              }
+            }
+          } else {
+            Log.e("BattleViewModel", "Failed to update battle status to IN_PROGRESS.")
+          }
+        }
+      } else {
+        Log.e("BattleViewModel", "Failed to determine friend UID for battleId: $battleId")
+      }
+    }
+  }
+
+  /**
+   * Declines a battle request.
+   *
+   * @param battleId The ID of the battle to decline.
+   */
+  fun declineBattle(battleId: String) {
+    battleRepository.updateBattleStatus(battleId, BattleStatus.CANCELLED) { success ->
+      if (success) {
+        // Battle declined successfully
+      } else {
+        Log.e("BattleViewModel", "Failed to decline battle")
+      }
+    }
+  }
+
+  /**
+   * Retrieves a SpeechBattle by its ID.
+   *
+   * @param battleId The ID of the battle.
+   * @param callback A callback function to handle the retrieved SpeechBattle.
+   */
+  fun getBattleById(battleId: String, callback: (SpeechBattle?) -> Unit) {
+    battleRepository.getBattleById(battleId, callback)
+  }
+
+  /** Fetches pending battles for the current user. */
+  fun fetchPendingBattlesForUser() {
+    val currentUserUid = userProfileViewModel.userProfile.value?.uid ?: return
+    battleRepository.getPendingBattlesForUser(
+      currentUserUid,
+      callback = { battles -> _pendingBattles.value = battles },
+      onFailure = { exception ->
+        Log.e("BattleViewModel", "Error fetching pending battles", exception)
+      })
+  }
+
+  /**
+   * Gets the status of a battle as a Flow.
+   *
+   * @param battleId The ID of the battle.
+   * @return A Flow emitting the BattleStatus.
+   */
+  fun getBattleStatus(battleId: String): Flow<BattleStatus?> = callbackFlow {
+    val listener =
+      battleRepository.listenToBattleUpdates(battleId) { battle ->
+        if (battle != null) {
+          Log.d("BattleViewModel", "Battle status updated: ${battle.status}")
+          trySend(battle.status)
+        } else {
+          Log.d("BattleViewModel", "No battle found or error occurred")
+          trySend(null)
+        }
+      }
+
+    awaitClose { listener.remove() }
+  }
+
+  /**
+   * Marks the user's battle as completed.
+   *
+   * @param battleId The ID of the battle.
+   * @param userId The ID of the user.
+   * @param messages The list of messages exchanged in the battle.
+   */
+  fun markUserBattleCompleted(battleId: String, userId: String, messages: List<Message>) {
+    battleRepository.updateUserBattleData(battleId, userId, messages) { success ->
+      if (success) {
+        // Check if both users have completed
+        battleRepository.getBattleById(battleId) { battle ->
+          if (battle != null && battle.challengerCompleted && battle.opponentCompleted) {
+            evaluateBattle(battle)
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Evaluates the result of a completed battle.
+   *
+   * @param battle The completed SpeechBattle.
+   */
+  private fun evaluateBattle(battle: SpeechBattle) {
+    // TODO
+    battleRepository.updateBattleResult(battle.battleId, "123", "abc")
+  }
+
+  /**
+   * Retrieves the opponent's UID for a given battle.
+   *
+   * @param battleId The ID of the battle.
+   * @param userId The ID of the current user.
+   * @param callback A callback function to handle the friend's UID.
+   */
+  fun getOpponentUid(battleId: String, userId: String, callback: (String?) -> Unit) {
+    getBattleById(battleId) { battle ->
+      if (battle != null) {
+        val friendUid =
+          if (battle.challenger == userId) {
+            battle.opponent
+          } else if (battle.opponent == userId) {
+            battle.challenger
+          } else {
+            null
+          }
+        callback(friendUid)
+      } else {
+        Log.e("BattleViewModel", "Battle not found for ID: $battleId")
+        callback(null)
+      }
+    }
+  }
 }
-
-
-

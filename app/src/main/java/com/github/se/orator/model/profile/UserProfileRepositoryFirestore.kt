@@ -2,9 +2,9 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
+import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.SpeechBattle
-import com.github.se.orator.ui.network.Message
 import com.github.se.orator.utils.formatDate
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
@@ -229,8 +229,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       val statisticsMap = document.get("statistics") as? Map<*, *>
       val statistics =
           statisticsMap?.let {
-            val sessionsGivenMap = it["sessionsGiven"] as? Map<String, Number>
-            val successfulSessionsMap = it["successfulSessions"] as? Map<String, Number>
+            val sessionsGivenMap = it["sessionsGiven"] as? Map<String, Long>
+            val successfulSessionsMap = it["successfulSessions"] as? Map<String, Long>
 
             val sessionsGiven =
                 sessionsGivenMap?.mapValues { (_, value) -> value.toInt() } ?: emptyMap()
@@ -241,19 +241,26 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
 
             val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
             val battleStats =
-                battleStatsList?.map { battle ->
-                  SpeechBattle(
-                      battleId = battle["battleId"] as? String ?: "",
-                      challenger = battle["challenger"] as? String ?: "",
-                      opponent = battle["opponent"] as? String ?: "",
-                      status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
-                      initialMessages =
-                          (battle["initialMessages"] as? List<Map<String, Any>>)?.map { message ->
-                            Message(
-                                role = message["role"] as? String ?: "system",
-                                content = message["content"] as? String ?: "")
-                          } ?: emptyList(),
-                      winner = battle["winner"] as? String ?: "")
+                battleStatsList?.mapNotNull { battle ->
+                  try {
+                    SpeechBattle(
+                        battleId = battle["battleId"] as? String ?: "",
+                        challenger = battle["challenger"] as? String ?: "",
+                        opponent = battle["opponent"] as? String ?: "",
+                        status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
+                        context =
+                            InterviewContext(
+                                interviewType = battle["interviewType"] as? String ?: "",
+                                role = battle["role"] as? String ?: "",
+                                company = battle["company"] as? String ?: "",
+                                focusAreas =
+                                    (battle["focusAreas"] as? List<*>)?.map { it.toString() }
+                                        ?: emptyList()),
+                        winner = battle["winner"] as? String ?: "")
+                  } catch (e: Exception) {
+                    Log.e("UserProfileRepository", "Error parsing battleStats", e)
+                    null
+                  }
                 } ?: emptyList()
 
             UserStatistics(
