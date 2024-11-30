@@ -86,7 +86,8 @@ fun ViewFriendsScreen(
               Text(
                   "Actions",
                   modifier = Modifier.testTag("viewFriendsDrawerTitle"),
-                  style = MaterialTheme.typography.titleMedium)
+                  style = MaterialTheme.typography.titleMedium,
+                  color = MaterialTheme.colorScheme.primary)
               Spacer(modifier = Modifier.height(AppDimensions.heightMedium))
               TextButton(
                   modifier = Modifier.testTag("viewFriendsAddFriendButton"),
@@ -96,7 +97,8 @@ fun ViewFriendsScreen(
                       navigationActions.navigateTo(Screen.ADD_FRIENDS)
                     }
                   }) {
-                    Text("➕ Add a friend")
+                    Text("➕ Add a friend",
+                        color = MaterialTheme.colorScheme.onSurface)
                   }
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
               TextButton(
@@ -107,7 +109,8 @@ fun ViewFriendsScreen(
                       navigationActions.navigateTo(Screen.LEADERBOARD)
                     }
                   }) {
-                    Text("⭐ Leaderboard")
+                    Text("⭐ Leaderboard",
+                        color = MaterialTheme.colorScheme.onSurface)
                   }
             }
           }
@@ -324,7 +327,7 @@ fun FriendItem(
                           text =
                               "Last login ${daysSinceLastLogin} day${if (daysSinceLastLogin > 1) "s" else ""} ago",
                           style = MaterialTheme.typography.bodyLarge,
-                          color = Color.Gray,
+                          color = MaterialTheme.colorScheme.secondary,
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis,
                           modifier = Modifier.testTag("friendLastLogin#${friend.uid}"))
