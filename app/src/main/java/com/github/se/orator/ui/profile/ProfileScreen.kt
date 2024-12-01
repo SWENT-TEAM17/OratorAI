@@ -229,7 +229,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                     if (profile.bio.isNullOrBlank()) "Write your bio here"
                                     else profile.bio,
                                 modifier =
-                                    Modifier.padding(horizontal = AppDimensions.paddingMedium))
+                                    Modifier.padding(horizontal = AppDimensions.paddingMedium),
+                                color = MaterialTheme.colorScheme.onSurface)
                           }
                     }
 
