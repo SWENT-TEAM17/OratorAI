@@ -38,9 +38,15 @@ fun BottomNavigationMenu(
           BottomNavigationItem(
               icon = {
                 if (tab.route == selectedItem) {
-                  Icon(tab.coloredIcon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                  Icon(
+                      tab.coloredIcon,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.primary)
                 } else {
-                  Icon(tab.outlinedIcon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                  Icon(
+                      tab.outlinedIcon,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.onSurface)
                 }
               },
               label = { Text(tab.textId, color = MaterialTheme.colorScheme.onSurface) },

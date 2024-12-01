@@ -97,8 +97,7 @@ fun ViewFriendsScreen(
                       navigationActions.navigateTo(Screen.ADD_FRIENDS)
                     }
                   }) {
-                    Text("➕ Add a friend",
-                        color = MaterialTheme.colorScheme.onSurface)
+                    Text("➕ Add a friend", color = MaterialTheme.colorScheme.onSurface)
                   }
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
               TextButton(
@@ -109,8 +108,7 @@ fun ViewFriendsScreen(
                       navigationActions.navigateTo(Screen.LEADERBOARD)
                     }
                   }) {
-                    Text("⭐ Leaderboard",
-                        color = MaterialTheme.colorScheme.onSurface)
+                    Text("⭐ Leaderboard", color = MaterialTheme.colorScheme.onSurface)
                   }
             }
           }

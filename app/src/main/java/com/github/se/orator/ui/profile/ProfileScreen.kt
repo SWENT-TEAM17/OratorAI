@@ -128,8 +128,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.PROFILE)
       },
-      backgroundColor = MaterialTheme.colorScheme.background)
-  { innerPadding ->
+      backgroundColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier =
                 Modifier.fillMaxSize().padding(innerPadding).padding(AppDimensions.paddingMedium),
