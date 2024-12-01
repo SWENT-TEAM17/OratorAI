@@ -102,12 +102,5 @@ interface UserProfileRepository {
   fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit)
-
-  /**
-   * Retrieve offline recordings stored locally.
-   *
-   * @return A list of File objects representing offline recordings.
-   */
-  /// fun getOfflineRecordings(): List<File>
-
+  
 }
