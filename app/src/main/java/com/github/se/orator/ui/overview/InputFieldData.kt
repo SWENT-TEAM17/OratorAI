@@ -4,8 +4,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * The InputFieldData data class represents the data required to render an input field in the
- * overview screen.
+ * Data class representing an input field in the Speaking Job Interview module.
  *
  * @param value The value of the input field.
  * @param onValueChange The callback to be invoked when the value of the input field changes.
@@ -14,6 +13,8 @@ import androidx.compose.ui.unit.dp
  * @param testTag The test tag for the input field.
  * @param isDropdown Whether the input field is a dropdown.
  * @param dropdownItems The items to be displayed in the dropdown.
+ * @param isScrollable Whether the input field is scrollable.
+ * @param height The height of the input field.
  */
 data class InputFieldData(
     val value: String,

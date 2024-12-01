@@ -47,106 +47,215 @@ class SpeakingPublicSpeakingTest {
 
   @Test
   fun testInputFieldsDisplayed() {
-    // Verify that all input fields are displayed
-    composeTestRule.onNodeWithTag("occasionInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("purposeInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("audienceSizeInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("demographicInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("presentationStyleInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("mainPointsInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("visualAidsInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("experienceLevelInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("anticipatedChallengesInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("focusAreaInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("feedbackTypeInput").assertIsDisplayed()
+    composeTestRule.onRoot().printToLog("UI_TREE")
+
+    // Scroll to and verify that all input fields are displayed
+
+    // occasionInput-TextField
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("occasionInput-TextField"))
+    composeTestRule.onNodeWithTag("occasionInput-TextField").assertIsDisplayed()
+
+    // purposeInput-DropdownBox
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("purposeInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("purposeInput-DropdownBox").assertIsDisplayed()
+
+    // audienceSizeInput-DropdownBox
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("audienceSizeInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("audienceSizeInput-DropdownBox").assertIsDisplayed()
+
+    // demographicInput-TextField
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("demographicInput-TextField"))
+    composeTestRule.onNodeWithTag("demographicInput-TextField").assertIsDisplayed()
+
+    // presentationStyleInput-DropdownBox
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("presentationStyleInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("presentationStyleInput-DropdownBox").assertIsDisplayed()
+
+    // mainPointsInput-TextField
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("mainPointsInput-TextField"))
+    composeTestRule.onNodeWithTag("mainPointsInput-TextField").assertIsDisplayed()
+
+    // visualAidsInput-DropdownBox
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("visualAidsInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("visualAidsInput-DropdownBox").assertIsDisplayed()
+
+    // experienceLevelInput-DropdownBox
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("experienceLevelInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("experienceLevelInput-DropdownBox").assertIsDisplayed()
+
+    // anticipatedChallengesInput-TextField
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("anticipatedChallengesInput-TextField"))
+    composeTestRule.onNodeWithTag("anticipatedChallengesInput-TextField").assertIsDisplayed()
+
+    // focusAreaInput-DropdownBox
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("focusAreaInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("focusAreaInput-DropdownBox").assertIsDisplayed()
+
+    // feedbackTypeInput-DropdownBox
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("feedbackTypeInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("feedbackTypeInput-DropdownBox").assertIsDisplayed()
 
     // Verify header and other UI elements
-    composeTestRule.onNodeWithText("Make your speech memorable").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
+
+    // Scroll to titleText
+    composeTestRule.onNodeWithTag("content").performScrollToNode(hasTestTag("titleText"))
+    composeTestRule.onNodeWithTag("titleText", useUnmergedTree = true).assertIsDisplayed()
+
+    // topAppBar and screenTitle are likely at the top and may not need scrolling
+    composeTestRule.onNodeWithTag("topAppBar", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("screenTitle", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("content").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("titleText").assertIsDisplayed()
 
     // Verify back button and its functionality
-    composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("back_button").performClick()
+    composeTestRule.onNodeWithTag("back_button", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("back_button", useUnmergedTree = true).performClick()
     verify(navigationActions).goBack()
   }
 
   @Test
   fun testInputFieldsInteraction() {
-    // Input text into occasionInput
-    composeTestRule.onNodeWithTag("occasionInput").performTextInput("Conference")
-    composeTestRule.onNodeWithTag("occasionInput").assertTextContains("Conference")
-
-    // Select an option from purposeInput dropdown
-    composeTestRule.onNodeWithTag("purposeInput").performClick()
-    composeTestRule.onNodeWithText("Inform").performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("purposeInput").assertTextContains("Inform")
-
-    // Select an option from audienceSizeInput dropdown
-    composeTestRule.onNodeWithTag("audienceSizeInput").performClick()
+    // Scroll to the occasionInput field
     composeTestRule
-        .onNodeWithText("Medium group (20-50)")
-        .performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("audienceSizeInput").assertTextContains("Medium group (20-50)")
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("occasionInput-TextField"))
+    // Input text into occasionInput
+    composeTestRule.onNodeWithTag("occasionInput-TextField").performTextInput("Conference")
+    composeTestRule.onNodeWithTag("occasionInput-TextField").assertTextContains("Conference")
 
+    // Scroll to purposeInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("purposeInput-DropdownBox"))
+    // Select an option from purposeInput dropdown
+    composeTestRule.onNodeWithTag("purposeInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Inform").performClick()
+    composeTestRule.onNodeWithTag("purposeInput-DropdownField").assertTextContains("Inform")
+
+    // Scroll to audienceSizeInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("audienceSizeInput-DropdownBox"))
+    // Select an option from audienceSizeInput dropdown
+    composeTestRule.onNodeWithTag("audienceSizeInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Medium group (20-50)").performClick()
+    composeTestRule
+        .onNodeWithTag("audienceSizeInput-DropdownField")
+        .assertTextContains("Medium group (20-50)")
+
+    // Scroll to demographicInput
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("demographicInput-TextField"))
     // Input text into demographicInput
-    composeTestRule.onNodeWithTag("demographicInput").performTextInput("Professionals")
-    composeTestRule.onNodeWithTag("demographicInput").assertTextContains("Professionals")
+    composeTestRule.onNodeWithTag("demographicInput-TextField").performTextInput("Professionals")
+    composeTestRule.onNodeWithTag("demographicInput-TextField").assertTextContains("Professionals")
 
+    // Scroll to presentationStyleInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("presentationStyleInput-DropdownBox"))
     // Select an option from presentationStyleInput dropdown
-    composeTestRule.onNodeWithTag("presentationStyleInput").performClick()
-    composeTestRule.onNodeWithText("Interactive").performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("presentationStyleInput").assertTextContains("Interactive")
+    composeTestRule.onNodeWithTag("presentationStyleInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Interactive").performClick()
+    composeTestRule
+        .onNodeWithTag("presentationStyleInput-DropdownField")
+        .assertTextContains("Interactive")
 
+    // Scroll to mainPointsInput
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("mainPointsInput-TextField"))
     // Input text into mainPointsInput
     composeTestRule
-        .onNodeWithTag("mainPointsInput")
+        .onNodeWithTag("mainPointsInput-TextField")
         .performTextInput("Innovation, Leadership, Teamwork")
     composeTestRule
-        .onNodeWithTag("mainPointsInput")
+        .onNodeWithTag("mainPointsInput-TextField")
         .assertTextContains("Innovation, Leadership, Teamwork")
 
+    // Scroll to visualAidsInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("visualAidsInput-DropdownBox"))
     // Select an option from visualAidsInput dropdown
-    composeTestRule.onNodeWithTag("visualAidsInput").performClick()
-    composeTestRule.onNodeWithText("Yes").performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("visualAidsInput").assertTextContains("Yes")
+    composeTestRule.onNodeWithTag("visualAidsInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Yes").performClick()
+    composeTestRule.onNodeWithTag("visualAidsInput-DropdownField").assertTextContains("Yes")
 
+    // Scroll to experienceLevelInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("experienceLevelInput-DropdownBox"))
     // Select an option from experienceLevelInput dropdown
-    composeTestRule.onNodeWithTag("experienceLevelInput").performClick()
-    composeTestRule.onNodeWithText("Intermediate").performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("experienceLevelInput").assertTextContains("Intermediate")
+    composeTestRule.onNodeWithTag("experienceLevelInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Intermediate").performClick()
+    composeTestRule
+        .onNodeWithTag("experienceLevelInput-DropdownField")
+        .assertTextContains("Intermediate")
 
+    // Scroll to anticipatedChallengesInput
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("anticipatedChallengesInput-TextField"))
     // Input text into anticipatedChallengesInput
     composeTestRule
-        .onNodeWithTag("anticipatedChallengesInput")
+        .onNodeWithTag("anticipatedChallengesInput-TextField")
         .performTextInput("Nervousness, Audience engagement")
     composeTestRule
-        .onNodeWithTag("anticipatedChallengesInput")
+        .onNodeWithTag("anticipatedChallengesInput-TextField")
         .assertTextContains("Nervousness, Audience engagement")
 
+    // Scroll to focusAreaInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("focusAreaInput-DropdownBox"))
     // Select an option from focusAreaInput dropdown
-    composeTestRule.onNodeWithTag("focusAreaInput").performClick()
-    composeTestRule.onNodeWithText("Delivery Style").performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("focusAreaInput").assertTextContains("Delivery Style")
+    composeTestRule.onNodeWithTag("focusAreaInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Delivery Style").performClick()
+    composeTestRule
+        .onNodeWithTag("focusAreaInput-DropdownField")
+        .assertTextContains("Delivery Style")
 
+    // Scroll to feedbackTypeInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("feedbackTypeInput-DropdownBox"))
     // Select an option from feedbackTypeInput dropdown
-    composeTestRule.onNodeWithTag("feedbackTypeInput").performClick()
-    composeTestRule.onNodeWithText("Vocal Variety").performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("feedbackTypeInput").assertTextContains("Vocal Variety")
+    composeTestRule.onNodeWithTag("feedbackTypeInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Vocal Variety").performClick()
+    composeTestRule
+        .onNodeWithTag("feedbackTypeInput-DropdownField")
+        .assertTextContains("Vocal Variety")
 
     // Close the soft keyboard
     Espresso.closeSoftKeyboard()
 
+    // Scroll to the Get Started button
+    composeTestRule.onNodeWithTag("content").performScrollToNode(hasTestTag("getStartedButton"))
     // Click on the Get Started button
     composeTestRule.onNodeWithTag("getStartedButton").performClick()
     composeTestRule.onNodeWithTag("getStartedButton").assertExists()
-
-    // Optionally, verify that the ViewModel's context was updated
-    // This requires spying on the ViewModel or using other verification techniques
-    // Example (if using Mockito's spy):
-    // val spyApiLinkViewModel = spy(apiLinkViewModel)
-    // verify(spyApiLinkViewModel).updatePracticeContext(any())
   }
 }

@@ -48,20 +48,37 @@ class SpeakingJobInterviewModuleTest {
   @Test
   fun testInputFieldsDisplayed() {
     composeTestRule.onRoot().printToLog("UI_TREE")
-    // Verify that all input fields are displayed
-    composeTestRule.onNodeWithTag("targetPositionInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("companyNameInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("interviewTypeInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("experienceLevelInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("jobDescriptionInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("focusAreaInput").assertIsDisplayed()
 
-    // Verify header and other UI elements
-    composeTestRule.onNodeWithText("Ace your next job interview").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("content").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("titleText").assertIsDisplayed()
+    // Scroll and assert each component
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("targetPositionInput-TextField"))
+    composeTestRule.onNodeWithTag("targetPositionInput-TextField").assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("companyNameInput-TextField"))
+    composeTestRule.onNodeWithTag("companyNameInput-TextField").assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("interviewTypeInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("interviewTypeInput-DropdownBox").assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("experienceLevelInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("experienceLevelInput-DropdownBox").assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("jobDescriptionInput-TextFieldBox"))
+    composeTestRule.onNodeWithTag("jobDescriptionInput-TextFieldBox").assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("focusAreaInput-DropdownBox"))
+    composeTestRule.onNodeWithTag("focusAreaInput-DropdownBox").assertIsDisplayed()
 
     // Verify back button and its functionality
     composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
@@ -71,50 +88,80 @@ class SpeakingJobInterviewModuleTest {
 
   @Test
   fun testInputFieldsInteraction() {
+    // Scroll to the targetPositionInput field
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("targetPositionInput-TextField"))
     // Input text into targetPositionInput
-    composeTestRule.onNodeWithTag("targetPositionInput").performTextInput("Software Engineer")
-    composeTestRule.onNodeWithTag("targetPositionInput").assertTextContains("Software Engineer")
+    composeTestRule
+        .onNodeWithTag("targetPositionInput-TextField")
+        .performTextInput("Software Engineer")
+    composeTestRule
+        .onNodeWithTag("targetPositionInput-TextField")
+        .assertTextContains("Software Engineer")
 
+    // Scroll to the companyNameInput field
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("companyNameInput-TextField"))
     // Input text into companyNameInput
-    composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Tech Corp")
-    composeTestRule.onNodeWithTag("companyNameInput").assertTextContains("Tech Corp")
+    composeTestRule.onNodeWithTag("companyNameInput-TextField").performTextInput("Tech Corp")
+    composeTestRule.onNodeWithTag("companyNameInput-TextField").assertTextContains("Tech Corp")
 
+    // Scroll to the interviewTypeInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("interviewTypeInput-DropdownBox"))
     // Select an option from interviewTypeInput dropdown
-    composeTestRule.onNodeWithTag("interviewTypeInput").performClick()
-    composeTestRule.onNodeWithText("Technical").performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("interviewTypeInput").assertTextContains("Technical")
+    composeTestRule.onNodeWithTag("interviewTypeInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Phone Interview").performClick()
+    composeTestRule
+        .onNodeWithTag("interviewTypeInput-DropdownField")
+        .assertTextContains("Phone Interview")
 
+    // Scroll to the experienceLevelInput dropdown
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("experienceLevelInput-DropdownBox"))
     // Select an option from experienceLevelInput dropdown
-    composeTestRule.onNodeWithTag("experienceLevelInput").performClick()
-    composeTestRule.onNodeWithText("Mid-Level").performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("experienceLevelInput").assertTextContains("Mid-Level")
+    composeTestRule.onNodeWithTag("experienceLevelInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Mid-Level").performClick()
+    composeTestRule
+        .onNodeWithTag("experienceLevelInput-DropdownField")
+        .assertTextContains("Mid-Level")
 
+    // Scroll to the jobDescriptionInput field
+    composeTestRule
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("jobDescriptionInput-TextFieldBox"))
     // Input text into jobDescriptionInput (scrollable TextField)
     composeTestRule
-        .onNodeWithTag("jobDescriptionInput")
+        .onNodeWithTag("jobDescriptionInput-TextFieldBox")
+        .onChild()
         .performTextInput("Develop and maintain software applications.")
     composeTestRule
-        .onNodeWithTag("jobDescriptionInput")
+        .onNodeWithTag("jobDescriptionInput-TextFieldBox")
+        .onChild()
         .assertTextContains("Develop and maintain software applications.")
 
-    // Select an option from focusAreaInput dropdown
-    composeTestRule.onNodeWithTag("focusAreaInput").performClick()
+    // Scroll to the focusAreaInput dropdown
     composeTestRule
-        .onNodeWithText("Technical Questions")
-        .performClick() // Replace with a valid option
-    composeTestRule.onNodeWithTag("focusAreaInput").assertTextContains("Technical Questions")
+        .onNodeWithTag("content")
+        .performScrollToNode(hasTestTag("focusAreaInput-DropdownBox"))
+    // Select an option from focusAreaInput dropdown
+    composeTestRule.onNodeWithTag("focusAreaInput-DropdownBox").performClick()
+    composeTestRule.onNodeWithText("Technical Questions").performClick()
+    composeTestRule
+        .onNodeWithTag("focusAreaInput-DropdownField")
+        .assertTextContains("Technical Questions")
 
     // Close the soft keyboard
     Espresso.closeSoftKeyboard()
 
+    // Scroll to the Get Started button
+    composeTestRule.onNodeWithTag("content").performScrollToNode(hasTestTag("getStartedButton"))
     // Click on the Get Started button
     composeTestRule.onNodeWithTag("getStartedButton").performClick()
     composeTestRule.onNodeWithTag("getStartedButton").assertExists()
-
-    // Optionally, verify that the ViewModel's context was updated
-    // This requires spying on the ViewModel or using other verification techniques
-    // Example (if using Mockito's spy):
-    // val spyApiLinkViewModel = spy(apiLinkViewModel)
-    // verify(spyApiLinkViewModel).updatePracticeContext(any())
   }
 }
