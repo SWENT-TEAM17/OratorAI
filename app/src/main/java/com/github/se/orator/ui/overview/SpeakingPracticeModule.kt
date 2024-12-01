@@ -5,9 +5,21 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -99,18 +111,18 @@ fun SpeakingPracticeModule(
 
                 // Dynamically generated input fields based on the provided data
                 inputs.forEach { input ->
-                  androidx.compose.material.OutlinedTextField(
+                  OutlinedTextField(
                       value = input.value,
                       onValueChange = input.onValueChange,
-                      label = { androidx.compose.material.Text(input.label) },
-                      placeholder = { androidx.compose.material.Text(input.placeholder) },
+                      label = { Text(input.label) },
+                      placeholder = { Text(input.placeholder) },
                       modifier =
                           Modifier.fillMaxWidth()
                               .height(
                                   input.height.dp) // Assuming 'height' is defined in InputFieldData
                               .testTag(input.testTag),
                       colors =
-                          androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
+                          TextFieldDefaults.outlinedTextFieldColors(
                               backgroundColor = MaterialTheme.colorScheme.surface,
                               textColor = MaterialTheme.colorScheme.onSurface,
                               focusedBorderColor = MaterialTheme.colorScheme.outline,
