@@ -106,7 +106,9 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   Scaffold(
       topBar = {
-      /** Displays the top app bar with the profile title, settings button, and sign-out button. */
+        /**
+         * Displays the top app bar with the profile title, settings button, and sign-out button.
+         */
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
             backgroundColor = MaterialTheme.colorScheme.surface,
@@ -236,9 +238,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                       verticalAlignment = Alignment.CenterVertically,
                                       modifier =
                                           Modifier.align(Alignment.CenterEnd)
-                                              .offset(
-                                                  x =
-                                                      -AppDimensions.paddingLarge)
+                                              .offset(x = -AppDimensions.paddingLarge)
                                               .testTag("current_streak")) {
                                         Icon(
                                             imageVector = Icons.Filled.Whatshot, // Fire icon
