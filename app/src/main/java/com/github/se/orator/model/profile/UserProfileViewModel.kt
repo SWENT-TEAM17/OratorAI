@@ -451,8 +451,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
             Log.d("UserProfileViewModel", "Friend ${friend.name} removed successfully.")
 
             // Update the sent requests list by removing the friend
-            val updatedFriends =
-                userProfile_.value?.friends?.toMutableList()?.apply { remove(friend.uid) }
+            val updatedFriends = userProfile_.value?.recReq?.minus(friend.uid)
             if (updatedFriends != null) {
               // Update the userProfile state
               val updatedProfile = userProfile_.value!!.copy(friends = updatedFriends)

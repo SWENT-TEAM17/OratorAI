@@ -11,6 +11,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import java.util.Date
 
@@ -410,10 +411,39 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
   }
 
   /**
+   * Helper function to perform Firestore transactions with user documents.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the other user involved.
+   * @param transactionBlock The block of code to execute within the transaction.
+   * @param onSuccess Callback invoked on successful transaction.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  private fun performUserTransaction(
+      currentUid: String,
+      friendUid: String,
+      transactionBlock: (Transaction, DocumentSnapshot, DocumentSnapshot) -> Unit,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val currentUserRef = db.collection(collectionPath).document(currentUid)
+    val friendUserRef = db.collection(collectionPath).document(friendUid)
+
+    db.runTransaction { transaction ->
+          val currentUserSnapshot = transaction.get(currentUserRef)
+          val friendUserSnapshot = transaction.get(friendUserRef)
+
+          transactionBlock(transaction, currentUserSnapshot, friendUserSnapshot)
+        }
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
+  /**
    * Sends a friend request from the current user to another user.
    *
-   * @param currentUid The UID of the user sending the request.
-   * @param friendUid The UID of the user receiving the request.
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user to send the friend request to.
    * @param onSuccess Callback invoked on successful operation.
    * @param onFailure Callback invoked with an [Exception] on failure.
    */
@@ -423,44 +453,27 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    // Reference to the current user's document
-    val currentUserRef = db.collection(collectionPath).document(currentUid)
-    // Reference to the friend user's document
-    val friendUserRef = db.collection(collectionPath).document(friendUid)
-
-    // Run a Firestore transaction to ensure atomicity
-    db.runTransaction { transaction ->
-          // Get the current user's snapshot
-          val currentUserSnapshot = transaction.get(currentUserRef)
-          // Get the friend user's snapshot
-          val friendUserSnapshot = transaction.get(friendUserRef)
-
-          // Retrieve the current user's sent requests
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
           val currentSentReq = currentUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
-          // Retrieve the friend user's received requests
           val friendRecReq = friendUserSnapshot.get("recReq") as? List<String> ?: emptyList()
 
-          // Check if the friend request has already been sent
           if (currentSentReq.contains(friendUid)) {
             throw Exception("Friend request already sent.")
           }
-          // Update the current user's sent requests
-          val updatedSentReq = currentSentReq + friendUid
-          transaction.update(currentUserRef, "sentReq", updatedSentReq)
 
-          // Update the friend user's received requests
+          val updatedSentReq = currentSentReq + friendUid
+          transaction.update(currentUserSnapshot.reference, "sentReq", updatedSentReq)
+
           val updatedRecReq = friendRecReq + currentUid
-          transaction.update(friendUserRef, "recReq", updatedRecReq)
-        }
-        .addOnSuccessListener {
-          // Invoke the success callback if the transaction succeeds
-          onSuccess()
-        }
-        .addOnFailureListener { exception ->
-          // Invoke the failure callback if the transaction fails
-          onFailure(exception)
-        }
+          transaction.update(friendUserSnapshot.reference, "recReq", updatedRecReq)
+        },
+        onSuccess,
+        onFailure)
   }
+
   /**
    * Accepts a friend request, establishing a friendship between two users.
    *
@@ -475,59 +488,37 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    // References to both user documents
-    val currentUserRef = db.collection(collectionPath).document(currentUid)
-    val friendUserRef = db.collection(collectionPath).document(friendUid)
-
-    // Run a Firestore transaction to ensure atomicity
-    db.runTransaction { transaction ->
-          // Get snapshots of both users
-          val currentUserSnapshot = transaction.get(currentUserRef)
-          val friendUserSnapshot = transaction.get(friendUserRef)
-
-          // Retrieve current user's friends and received requests
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
           val currentFriends = currentUserSnapshot.get("friends") as? List<String> ?: emptyList()
           val currentRecReq = currentUserSnapshot.get("recReq") as? List<String> ?: emptyList()
-
-          // Retrieve friend's sent requests
           val friendSentReq = friendUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
-
-          // Retrieve friend's friends
           val friendFriends = friendUserSnapshot.get("friends") as? List<String> ?: emptyList()
 
-          // Check if there's a pending friend request
           if (!currentRecReq.contains(friendUid)) {
             throw Exception("No friend request from this user to accept.")
           }
 
           if (!friendSentReq.contains(currentUid)) {
-            throw Exception("No sent friend request from distant user to this user.")
+            throw Exception("No sent friend request from this user to this user.")
           }
 
-          // Update current user's friends list
           val updatedCurrentFriends = currentFriends + friendUid
-          transaction.update(currentUserRef, "friends", updatedCurrentFriends)
+          transaction.update(currentUserSnapshot.reference, "friends", updatedCurrentFriends)
 
-          // Remove friendUid from current user's received requests
           val updatedCurrentRecReq = currentRecReq - friendUid
-          transaction.update(currentUserRef, "recReq", updatedCurrentRecReq)
+          transaction.update(currentUserSnapshot.reference, "recReq", updatedCurrentRecReq)
 
-          // Remove currentUid from friend's sent requests
           val updatedFriendSentReq = friendSentReq - currentUid
-          transaction.update(friendUserRef, "sentReq", updatedFriendSentReq)
+          transaction.update(friendUserSnapshot.reference, "sentReq", updatedFriendSentReq)
 
-          // add currentUid to friend's friends list
           val updatedFriendFriends = friendFriends + currentUid
-          transaction.update(friendUserRef, "friends", updatedFriendFriends)
-        }
-        .addOnSuccessListener {
-          // Invoke the success callback if the transaction succeeds
-          onSuccess()
-        }
-        .addOnFailureListener { exception ->
-          // Invoke the failure callback if the transaction fails
-          onFailure(exception)
-        }
+          transaction.update(friendUserSnapshot.reference, "friends", updatedFriendFriends)
+        },
+        onSuccess,
+        onFailure)
   }
 
   /**
@@ -544,23 +535,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    // References to both user documents
-    val currentUserRef = db.collection(collectionPath).document(currentUid)
-    val friendUserRef = db.collection(collectionPath).document(friendUid)
-
-    // Run a Firestore transaction to ensure atomicity
-    db.runTransaction { transaction ->
-          // Get snapshots of both users
-          val currentUserSnapshot = transaction.get(currentUserRef)
-          val friendUserSnapshot = transaction.get(friendUserRef)
-
-          // Retrieve current user's received requests
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
           val currentRecReq = currentUserSnapshot.get("recReq") as? List<String> ?: emptyList()
-
-          // Retrieve friend's sent requests
           val friendSentReq = friendUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
 
-          // Check if there's a pending friend request
           if (!currentRecReq.contains(friendUid)) {
             throw Exception("No friend request from this user to decline.")
           }
@@ -569,25 +550,18 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             throw Exception("No sent friend request from current user to this user.")
           }
 
-          // Remove friendUid from current user's received requests
           val updatedCurrentRecReq = currentRecReq - friendUid
-          transaction.update(currentUserRef, "recReq", updatedCurrentRecReq)
+          transaction.update(currentUserSnapshot.reference, "recReq", updatedCurrentRecReq)
 
-          // Remove currentUid from friend's sent requests
           val updatedFriendSentReq = friendSentReq - currentUid
-          transaction.update(friendUserRef, "sentReq", updatedFriendSentReq)
-        }
-        .addOnSuccessListener {
-          // Invoke the success callback if the transaction succeeds
-          onSuccess()
-        }
-        .addOnFailureListener { exception ->
-          // Invoke the failure callback if the transaction fails
-          onFailure(exception)
-        }
+          transaction.update(friendUserSnapshot.reference, "sentReq", updatedFriendSentReq)
+        },
+        onSuccess,
+        onFailure)
   }
+
   /**
-   * Cancel a previously sent friend request.
+   * Cancels a previously sent friend request.
    *
    * This function removes the `friendUid` from the current user's `sentReq` list and removes the
    * `currentUid` from the friend's `recReq` list, effectively canceling the friend request.
@@ -603,50 +577,36 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    // References to both user documents in Firestore
-    val currentUserRef = db.collection(collectionPath).document(currentUid)
-    val friendUserRef = db.collection(collectionPath).document(friendUid)
-
-    // Run a Firestore transaction to ensure atomicity
-    db.runTransaction { transaction ->
-          // Retrieve snapshots of both users
-          val currentUserSnapshot = transaction.get(currentUserRef)
-          val friendUserSnapshot = transaction.get(friendUserRef)
-
-          // Retrieve current user's sent friend requests
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
           val currentSentReq = currentUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
-
-          // Retrieve friend's received friend requests
           val friendRecReq = friendUserSnapshot.get("recReq") as? List<String> ?: emptyList()
 
-          // Check if the current user has actually sent a friend request to the friend
           if (!currentSentReq.contains(friendUid)) {
             throw Exception("No sent friend request to cancel.")
           }
 
-          // Check if the friend has the current user in their received requests
           if (!friendRecReq.contains(currentUid)) {
             throw Exception("Friend does not have you in their received requests.")
           }
 
-          // Remove `friendUid` from current user's `sentReq` list
           val updatedSentReq = currentSentReq - friendUid
-          transaction.update(currentUserRef, "sentReq", updatedSentReq)
+          transaction.update(currentUserSnapshot.reference, "sentReq", updatedSentReq)
 
-          // Remove `currentUid` from friend's `recReq` list
           val updatedRecReq = friendRecReq - currentUid
-          transaction.update(friendUserRef, "recReq", updatedRecReq)
-        }
-        .addOnSuccessListener {
-          // Invoke the success callback if the transaction succeeds
+          transaction.update(friendUserSnapshot.reference, "recReq", updatedRecReq)
+        },
+        {
+          // Additional logging can be handled here if needed
           Log.d("UserProfileRepositoryFirestore", "Friend request canceled successfully.")
           onSuccess()
-        }
-        .addOnFailureListener { exception ->
-          // Log the error and invoke the failure callback if the transaction fails
+        },
+        { exception ->
           Log.e("UserProfileRepositoryFirestore", "Failed to cancel friend request.", exception)
           onFailure(exception)
-        }
+        })
   }
 
   /**
@@ -663,45 +623,26 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    // References to both user documents
-    val currentUserRef = db.collection(collectionPath).document(currentUid)
-    val friendUserRef = db.collection(collectionPath).document(friendUid)
-
-    // Run a Firestore transaction to ensure atomicity
-    db.runTransaction { transaction ->
-          // Get snapshots of both users
-          val currentUserSnapshot = transaction.get(currentUserRef)
-          val friendUserSnapshot = transaction.get(friendUserRef)
-
-          // Retrieve current user's friends
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
           val currentFriends = currentUserSnapshot.get("friends") as? List<String> ?: emptyList()
-
-          // Retrieve friend's friends
           val friendFriends = friendUserSnapshot.get("friends") as? List<String> ?: emptyList()
 
-          // Check if they are friends
           if (!currentFriends.contains(friendUid)) {
             throw Exception("Users are not friends.")
           }
 
-          // Remove friendUid from current user's friends
           val updatedCurrentFriends = currentFriends - friendUid
-          transaction.update(currentUserRef, "friends", updatedCurrentFriends)
+          transaction.update(currentUserSnapshot.reference, "friends", updatedCurrentFriends)
 
-          // Remove currentUid from friend's friends
           val updatedFriendFriends = friendFriends - currentUid
-          transaction.update(friendUserRef, "friends", updatedFriendFriends)
-        }
-        .addOnSuccessListener {
-          // Invoke the success callback if the transaction succeeds
-          onSuccess()
-        }
-        .addOnFailureListener { exception ->
-          // Invoke the failure callback if the transaction fails
-          onFailure(exception)
-        }
+          transaction.update(friendUserSnapshot.reference, "friends", updatedFriendFriends)
+        },
+        onSuccess,
+        onFailure)
   }
-
   /**
    * Updates the login streak for a user based on their last login date.
    *
