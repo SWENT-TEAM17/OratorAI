@@ -180,25 +180,25 @@ interface UserProfileRepository {
   /**
    * Get friends' profiles based on their UIDs.
    *
-   * @param friendUids List of UIDs of the friends.
-   * @param onSuccess Callback to be invoked with the list of friends' profiles.
+   * @param recReqUIds List of UIDs of the received friend requests.
+   * @param onSuccess Callback to be invoked with the list of received friend requests profiles.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
   fun getRecReqProfiles(
-      friendUids: List<String>,
+      recReqUIds: List<String>,
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   )
 
   /**
-   * Get friends' profiles based on their UIDs.
+   * Get sent requests profiles based on their UIDs.
    *
-   * @param friendUids List of UIDs of the friends.
-   * @param onSuccess Callback to be invoked with the list of friends' profiles.
+   * @param sentReqProfiles List of UIDs of the sent friend requests.
+   * @param onSuccess Callback to be invoked with the list of sent requests profiles.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
   fun getSentReqProfiles(
-      friendUids: List<String>,
+      sentReqProfiles: List<String>,
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   )

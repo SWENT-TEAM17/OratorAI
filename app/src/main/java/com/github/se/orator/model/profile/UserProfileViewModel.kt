@@ -155,11 +155,11 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   /**
    * Fetches the friends' profiles based on the UIDs stored in the user's profile.
    *
-   * @param friendUids List of UIDs of the friends to be retrieved.
+   * @param recReqUIds List of UIDs of the friends to be retrieved.
    */
-  private fun fetchRecReqProfiles(friendUids: List<String>) {
+  private fun fetchRecReqProfiles(recReqUIds: List<String>) {
     repository.getRecReqProfiles(
-        friendUids = friendUids,
+        recReqUIds = recReqUIds,
         onSuccess = { profiles -> recReqProfiles_.value = profiles },
         onFailure = {
           // Handle error
@@ -173,7 +173,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    */
   private fun fetchSentReqProfiles(friendUids: List<String>) {
     repository.getSentReqProfiles(
-        friendUids = friendUids,
+        sentReqProfiles = friendUids,
         onSuccess = { profiles -> sentReqProfiles_.value = profiles },
         onFailure = {
           // Handle error
@@ -211,16 +211,14 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
             Log.d("UserProfileViewModel", "Friend request accepted from ${friend.name}")
 
             // Update local state for friends
-            val updatedFriendsList =
-                userProfile_.value?.friends?.toMutableList()?.apply { add(friend.uid) }
+            val updatedFriendsList = userProfile_.value?.friends?.plus(friend.uid)
             if (updatedFriendsList != null) {
               val updatedProfile = userProfile_.value!!.copy(friends = updatedFriendsList)
               userProfile_.value = updatedProfile
               friendsProfiles_.value += friend
 
               // Remove from received requests
-              val updatedRecReq =
-                  userProfile_.value?.recReq?.toMutableList()?.apply { remove(friend.uid) }
+              val updatedRecReq = userProfile_.value?.recReq?.minus(friend.uid)
               if (updatedRecReq != null) {
                 val updatedProfileRecReq = userProfile_.value!!.copy(recReq = updatedRecReq)
                 userProfile_.value = updatedProfileRecReq
@@ -253,8 +251,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
             Log.d("UserProfileViewModel", "Friend request declined from ${friend.name}")
 
             // Update local state by removing the declined request
-            val updatedRecReq =
-                userProfile_.value?.recReq?.toMutableList()?.apply { remove(friend.uid) }
+            val updatedRecReq = userProfile_.value?.recReq?.minus(friend.uid)
             if (updatedRecReq != null) {
               val updatedProfile = userProfile_.value!!.copy(recReq = updatedRecReq)
               userProfile_.value = updatedProfile
@@ -291,8 +288,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
               Log.d("UserProfileViewModel", "Friend request sent to ${friend.name}")
 
               // Update local state for sent requests
-              val updatedSentReq =
-                  userProfile_.value?.sentReq?.toMutableList()?.apply { add(friend.uid) }
+              val updatedSentReq = userProfile_.value?.sentReq?.plus(friend.uid)
               if (updatedSentReq != null) {
                 val updatedProfile = userProfile_.value!!.copy(sentReq = updatedSentReq)
                 userProfile_.value = updatedProfile
@@ -325,8 +321,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
             Log.d("UserProfileViewModel", "Friend request to ${friend.name} canceled successfully.")
 
             // Update the sent requests list by removing the friend
-            val updatedSentReq =
-                userProfile_.value?.sentReq?.toMutableList()?.apply { remove(friend.uid) }
+            val updatedSentReq = userProfile_.value?.sentReq?.minus(friend.uid)
             if (updatedSentReq != null) {
               // Update the userProfile state
               val updatedProfile = userProfile_.value!!.copy(sentReq = updatedSentReq)

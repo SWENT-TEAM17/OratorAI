@@ -39,7 +39,6 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.profile.ProfilePictureDialog
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.ProjectTheme
 
@@ -245,7 +244,7 @@ fun SentFriendRequestItem(sentRequest: UserProfile, userProfileViewModel: UserPr
               .padding(horizontal = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .testTag("sentFriendRequestItem#${sentRequest.uid}"),
-      color = AppColors.LightPurpleGrey,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
         Row(
@@ -270,7 +269,7 @@ fun SentFriendRequestItem(sentRequest: UserProfile, userProfileViewModel: UserPr
                     Text(
                         text = sentRequest.bio ?: "No bio available",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AppColors.secondaryTextColor,
+                        color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.testTag("sentFriendRequestBio#${sentRequest.uid}"))
@@ -327,7 +326,7 @@ fun UserItem(
               .padding(horizontal = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .testTag("userItem#${user.uid}"),
-      color = AppColors.LightPurpleGrey,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
       shadowElevation = AppDimensions.elevationSmall) {
         Row(
             modifier =
@@ -352,7 +351,7 @@ fun UserItem(
                     Text(
                         text = user.bio ?: "No bio available",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AppColors.secondaryTextColor,
+                        color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.testTag("userBio#${user.uid}"))
@@ -376,7 +375,7 @@ fun UserItem(
                     Icon(
                         imageVector = Icons.Default.PersonAdd,
                         contentDescription = "Send Friend Request",
-                        tint = AppColors.primaryColor,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.testTag("sendFriendRequestIcon#${user.uid}"))
                   }
             }

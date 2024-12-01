@@ -354,58 +354,60 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
    * Get profiles the user received requests from based on the UIDs stored in the user's profile.
    *
    * @param recReqUIds List of UIDs of the users the user received requests from to be retrieved.
-   * @param onSuccess Callback to be invoked with the list of friends' profiles.
+   * @param onSuccess Callback to be invoked with the list of received friend requests profiles.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
   override fun getRecReqProfiles(
-      friendUids: List<String>,
+      recReqUIds: List<String>,
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (friendUids.isEmpty()) {
+    if (recReqUIds.isEmpty()) {
       onSuccess(emptyList()) // Return an empty list if no friends
       return
     }
 
     db.collection(collectionPath)
-        .whereIn("uid", friendUids)
+        .whereIn("uid", recReqUIds)
         .get()
         .addOnSuccessListener { querySnapshot ->
-          val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
-          onSuccess(friends)
+          val recReq = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(recReq)
         }
         .addOnFailureListener { exception ->
-          Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
+          Log.e(
+              "UserProfileRepository",
+              "Error fetching received friend requests profiles",
+              exception)
           onFailure(exception)
         }
   }
-
   /**
-   * Get profiles the user received requests from based on the UIDs stored in the user's profile.
+   * Get sent requests profiles based on their UIDs.
    *
-   * @param recReqUIds List of UIDs of the users the user received requests from to be retrieved.
-   * @param onSuccess Callback to be invoked with the list of friends' profiles.
+   * @param sentReqProfiles List of UIDs of the sent friend requests.
+   * @param onSuccess Callback to be invoked with the list of sent requests profiles.
    * @param onFailure Callback to be invoked on failure with the exception.
    */
   override fun getSentReqProfiles(
-      friendUids: List<String>,
+      sentReqProfiles: List<String>,
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (friendUids.isEmpty()) {
+    if (sentReqProfiles.isEmpty()) {
       onSuccess(emptyList()) // Return an empty list if no friends
       return
     }
 
     db.collection(collectionPath)
-        .whereIn("uid", friendUids)
+        .whereIn("uid", sentReqProfiles)
         .get()
         .addOnSuccessListener { querySnapshot ->
-          val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
-          onSuccess(friends)
+          val sentProfiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(sentProfiles)
         }
         .addOnFailureListener { exception ->
-          Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
+          Log.e("UserProfileRepository", "Error fetching sent friend requests profiles", exception)
           onFailure(exception)
         }
   }
@@ -445,12 +447,6 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           if (currentSentReq.contains(friendUid)) {
             throw Exception("Friend request already sent.")
           }
-
-          // Optionally, check if the friend has already sent a request to the current user
-          if (friendRecReq.contains(currentUid)) {
-            throw Exception("The user has already sent you a friend request.")
-          }
-
           // Update the current user's sent requests
           val updatedSentReq = currentSentReq + friendUid
           transaction.update(currentUserRef, "sentReq", updatedSentReq)
@@ -508,7 +504,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           }
 
           if (!friendSentReq.contains(currentUid)) {
-            throw Exception("No sent friend request from current user to this user.")
+            throw Exception("No sent friend request from distant user to this user.")
           }
 
           // Update current user's friends list

@@ -332,7 +332,7 @@ fun FriendItem(
                   horizontal = AppDimensions.smallPadding, vertical = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
               .testTag("viewFriendsItem#${friend.uid}"),
-      color = AppColors.LightPurpleGrey,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
         Row(
@@ -354,7 +354,7 @@ fun FriendItem(
                     Text(
                         text = friend.bio ?: "No bio available",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AppColors.secondaryTextColor,
+                        color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.testTag("friendBio#${friend.uid}"))
@@ -390,7 +390,7 @@ fun FriendItem(
                           text =
                               "Last login ${daysSinceLastLogin} day${if (daysSinceLastLogin > 1) "s" else ""} ago",
                           style = MaterialTheme.typography.bodyLarge,
-                          color = Color.Gray,
+                          color = MaterialTheme.colorScheme.secondary,
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis,
                           modifier = Modifier.testTag("friendLastLogin#${friend.uid}"))
@@ -493,7 +493,7 @@ fun FriendRequestItem(friendRequest: UserProfile, userProfileViewModel: UserProf
               .padding(horizontal = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .testTag("friendRequestItem#${friendRequest.uid}"),
-      color = AppColors.LightPurpleGrey,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
       shadowElevation = AppDimensions.elevationSmall) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
@@ -515,7 +515,7 @@ fun FriendRequestItem(friendRequest: UserProfile, userProfileViewModel: UserProf
                 Text(
                     text = friendRequest.bio ?: "No bio available",
                     style = MaterialTheme.typography.bodySmall,
-                    color = AppColors.secondaryTextColor,
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.testTag("friendRequestBio#${friendRequest.uid}"))
