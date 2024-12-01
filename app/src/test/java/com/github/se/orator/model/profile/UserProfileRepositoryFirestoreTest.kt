@@ -12,8 +12,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
-import com.google.firebase.storage.FirebaseStorage
-import java.util.*
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
@@ -45,7 +43,6 @@ class UserProfileRepositoryFirestoreTest {
   @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
   private lateinit var repository: UserProfileRepositoryFirestore
-  @Mock private lateinit var mockStorage: FirebaseStorage
   @Mock private lateinit var mockTransaction: Transaction
 
   private val testUserProfile =
@@ -56,6 +53,17 @@ class UserProfileRepositoryFirestoreTest {
           statistics = UserStatistics(),
           friends = listOf("friend1", "friend2"),
           bio = "Test bio")
+
+  val currentUid = "currentUserUid"
+  val friendUid = "friendUserUid"
+
+  // Mock references
+  val currentUserRef = mock(DocumentReference::class.java)
+  val friendUserRef = mock(DocumentReference::class.java)
+
+  // Mock user snapshots
+  val currentUserSnapshot = mock(DocumentSnapshot::class.java)
+  val friendUserSnapshot = mock(DocumentSnapshot::class.java)
 
   @Before
   fun setUp() {
@@ -71,6 +79,10 @@ class UserProfileRepositoryFirestoreTest {
     whenever(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     whenever(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+
+    // Set up the collection and document references
+    `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
+    `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
   }
 
   /**
@@ -376,20 +388,6 @@ class UserProfileRepositoryFirestoreTest {
   /** Test that sendFriendRequest successfully sends a friend request. */
   @Test
   fun sendFriendRequest_whenSuccessful_callsOnSuccess() {
-    val currentUid = "currentUserUid"
-    val friendUid = "friendUserUid"
-
-    // Mock references
-    val currentUserRef = mock(DocumentReference::class.java)
-    val friendUserRef = mock(DocumentReference::class.java)
-
-    // Set up the collection and document references
-    `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
-    `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
-
-    // Mock user snapshots
-    val currentUserSnapshot = mock(DocumentSnapshot::class.java)
-    val friendUserSnapshot = mock(DocumentSnapshot::class.java)
 
     // Set up the current sent requests and friend received requests
     `when`(currentUserSnapshot.get("sentReq")).thenReturn(emptyList<String>())
@@ -433,12 +431,6 @@ class UserProfileRepositoryFirestoreTest {
   /** Test that acceptFriendRequest successfully accepts a friend request. */
   @Test
   fun acceptFriendRequest_whenSuccessful_callsOnSuccess() {
-    val currentUid = "currentUserUid"
-    val friendUid = "friendUserUid"
-
-    // Mock references
-    val currentUserRef = mock(DocumentReference::class.java)
-    val friendUserRef = mock(DocumentReference::class.java)
 
     // Set up the collection and document references
     `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
@@ -494,12 +486,6 @@ class UserProfileRepositoryFirestoreTest {
   /** Test that declineFriendRequest successfully declines a friend request. */
   @Test
   fun declineFriendRequest_whenSuccessful_callsOnSuccess() {
-    val currentUid = "currentUserUid"
-    val friendUid = "friendUserUid"
-
-    // Mock references
-    val currentUserRef = mock(DocumentReference::class.java)
-    val friendUserRef = mock(DocumentReference::class.java)
 
     // Set up the collection and document references
     `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
@@ -551,12 +537,6 @@ class UserProfileRepositoryFirestoreTest {
   /** Test that cancelFriendRequest successfully cancels a sent friend request. */
   @Test
   fun cancelFriendRequest_whenSuccessful_callsOnSuccess() {
-    val currentUid = "currentUserUid"
-    val friendUid = "friendUserUid"
-
-    // Mock references
-    val currentUserRef = mock(DocumentReference::class.java)
-    val friendUserRef = mock(DocumentReference::class.java)
 
     // Set up the collection and document references
     `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
@@ -608,12 +588,6 @@ class UserProfileRepositoryFirestoreTest {
   /** Test deleteFriend successfully deletes a friend. */
   @Test
   fun deleteFriend_whenSuccessful_callsOnSuccess() {
-    val currentUid = "currentUserUid"
-    val friendUid = "friendUserUid"
-
-    // Mock references
-    val currentUserRef = mock(DocumentReference::class.java)
-    val friendUserRef = mock(DocumentReference::class.java)
 
     // Set up the collection and document references
     whenever(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
