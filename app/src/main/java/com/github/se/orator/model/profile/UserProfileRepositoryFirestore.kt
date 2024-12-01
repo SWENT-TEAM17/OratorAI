@@ -321,6 +321,38 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
   }
 
   /**
+   * Helper function to fetch user profiles based on a list of UIDs.
+   *
+   * @param uids List of UIDs to fetch profiles for.
+   * @param errorMessage Custom error message for logging.
+   * @param onSuccess Callback invoked with the list of fetched profiles.
+   * @param onFailure Callback invoked with an exception if the operation fails.
+   */
+  private fun fetchUserProfilesByUids(
+      uids: List<String>,
+      errorMessage: String,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (uids.isEmpty()) {
+      onSuccess(emptyList()) // Return an empty list if no UIDs are provided
+      return
+    }
+
+    db.collection(collectionPath)
+        .whereIn("uid", uids)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val profiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(profiles)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", errorMessage, exception)
+          onFailure(exception)
+        }
+  }
+
+  /**
    * Get friends' profiles based on the UIDs stored in the user's profile.
    *
    * @param friendUids List of UIDs of the friends to be retrieved.
@@ -332,22 +364,11 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (friendUids.isEmpty()) {
-      onSuccess(emptyList()) // Return an empty list if no friends
-      return
-    }
-
-    db.collection(collectionPath)
-        .whereIn("uid", friendUids)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
-          onSuccess(friends)
-        }
-        .addOnFailureListener { exception ->
-          Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
-          onFailure(exception)
-        }
+    fetchUserProfilesByUids(
+        uids = friendUids,
+        errorMessage = "Error fetching friends profiles",
+        onSuccess = onSuccess,
+        onFailure = onFailure)
   }
 
   /**
@@ -362,26 +383,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (recReqUIds.isEmpty()) {
-      onSuccess(emptyList()) // Return an empty list if no friends
-      return
-    }
-
-    db.collection(collectionPath)
-        .whereIn("uid", recReqUIds)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val recReq = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
-          onSuccess(recReq)
-        }
-        .addOnFailureListener { exception ->
-          Log.e(
-              "UserProfileRepository",
-              "Error fetching received friend requests profiles",
-              exception)
-          onFailure(exception)
-        }
+    fetchUserProfilesByUids(
+        uids = recReqUIds,
+        errorMessage = "Error fetching received friend requests profiles",
+        onSuccess = onSuccess,
+        onFailure = onFailure)
   }
+
   /**
    * Get sent requests profiles based on their UIDs.
    *
@@ -394,22 +402,11 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (sentReqProfiles.isEmpty()) {
-      onSuccess(emptyList()) // Return an empty list if no friends
-      return
-    }
-
-    db.collection(collectionPath)
-        .whereIn("uid", sentReqProfiles)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val sentProfiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
-          onSuccess(sentProfiles)
-        }
-        .addOnFailureListener { exception ->
-          Log.e("UserProfileRepository", "Error fetching sent friend requests profiles", exception)
-          onFailure(exception)
-        }
+    fetchUserProfilesByUids(
+        uids = sentReqProfiles,
+        errorMessage = "Error fetching sent friend requests profiles",
+        onSuccess = onSuccess,
+        onFailure = onFailure)
   }
 
   /**
