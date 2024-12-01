@@ -10,12 +10,16 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+val COLOR_AMBER = Color(0xFFFFA726)
+
 data class AppDimensionsObject(
+
     // Padding
     val paddingExtraSmall: Dp,
     val paddingSmall: Dp,
@@ -93,6 +97,7 @@ data class AppDimensionsObject(
 )
 
 object AppDimensions {
+  val shadowDimension = 4.dp
   val paddingSmall = 8.dp
   val paddingMedium = 16.dp
   val paddingLarge = 24.dp
@@ -138,6 +143,7 @@ object AppDimensions {
   val dividerThickness = 3.dp // Added for HorizontalDivider thickness
   val paddingTopSmall = 5.dp // Added for padding top=5.dp in Text
   val statusBarPadding = 10.dp
+  val backgroundPadding = 10.dp // Added for padding of 10.dp
   val iconSizeLarge = 35.dp
   val buttonSize = 80.dp
   val visualizerHeight = 100.dp

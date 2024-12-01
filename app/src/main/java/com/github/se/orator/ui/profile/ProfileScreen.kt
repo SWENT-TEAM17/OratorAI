@@ -52,8 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -74,12 +72,18 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
+import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * Displays the Profile screen, including user information, stats, and offline recordings.
+ *
+ * @param navigationActions Provides navigation functions for the app.
+ * @param profileViewModel The ViewModel providing user profile data and actions.
+ */
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
   val colors = MaterialTheme.colorScheme
@@ -102,6 +106,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   Scaffold(
       topBar = {
+      /** Displays the top app bar with the profile title, settings button, and sign-out button. */
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
             backgroundColor = MaterialTheme.colorScheme.surface,
@@ -155,6 +160,10 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 Modifier.fillMaxSize().padding(innerPadding).padding(AppDimensions.paddingMedium),
             horizontalAlignment = Alignment.CenterHorizontally) {
               userProfile?.let { profile ->
+                /**
+                 * Displays user profile information, including profile picture, name, streak, and
+                 * bio.
+                 */
                 Box(
                     modifier =
                         Modifier.fillMaxWidth()
@@ -167,10 +176,15 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                               Modifier.fillMaxWidth(0.95f)
                                   .height(AppDimensions.profileCardHeight)
                                   .shadow(
-                                      4.dp, shape = RoundedCornerShape(size = 10.dp), clip = false)
+                                      AppDimensions.shadowDimension,
+                                      shape =
+                                          RoundedCornerShape(size = AppDimensions.statusBarPadding),
+                                      clip = false)
                                   .background(
                                       MaterialTheme.colorScheme.onSecondary,
-                                      shape = RoundedCornerShape(size = 10.dp)),
+                                      shape =
+                                          RoundedCornerShape(
+                                              size = AppDimensions.statusBarPadding)),
                           elevation = AppDimensions.elevationSmall) {}
 
                       // Profile Picture with overlapping positioning
@@ -191,8 +205,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                   .offset(y = (-20).dp),
                           // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
                           shape = AppShapes.circleShape,
-                          colors =
-                              ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
+                          colors = ButtonDefaults.buttonColors(backgroundColor = colors.onSurface),
                           contentPadding = PaddingValues(0.dp)) {
                             Icon(
                                 imageVector = Icons.Outlined.Edit,
@@ -225,21 +238,19 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                           Modifier.align(Alignment.CenterEnd)
                                               .offset(
                                                   x =
-                                                      -AppDimensions
-                                                          .paddingLarge) // Push a little to the
-                                              // left
+                                                      -AppDimensions.paddingLarge)
                                               .testTag("current_streak")) {
                                         Icon(
                                             imageVector = Icons.Filled.Whatshot, // Fire icon
                                             contentDescription = "Active Streak",
-                                            tint = AppColors.amber,
+                                            tint = COLOR_AMBER,
                                             modifier = Modifier.size(AppDimensions.iconSizeSmall))
                                         Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                                         Text(
                                             text = "${profile.currentStreak}",
                                             fontSize = 20.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = AppColors.amber,
+                                            color = COLOR_AMBER,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                             modifier = Modifier.testTag("current_streak_text"))
@@ -275,52 +286,62 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                     visible = isStatsVisible,
                     enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-                    modifier = Modifier.fillMaxSize() // You can adjust the modifier as needed
-                    ) {
-                      // This will be the content of your stats screen or graph
+                    modifier =
+                        Modifier.fillMaxSize() // You can adjust the modifier as needed
+                            .testTag("animated_visibility_section")) {
+                      // This will be the content of the stats screen or graph
                       Box(
                           modifier =
                               Modifier.fillMaxWidth()
                                   .fillMaxHeight()
-                                  .background(Color.White) // Adjust this to match your design
-                                  .padding(16.dp)) {
-                            // Example content for the stats screen (you can replace this with your
-                            // graph)
+                                  .background(colors.onPrimary)
+                                  .padding(AppDimensions.paddingMedium)) {
+                            // Example content for the stats screen
+                            // TODO : Replace this with graph screens worked on in #168
                             Text("Graph or Stats content goes here")
                           }
                     }
               }
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
-              Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+              Column(
+                  modifier =
+                      Modifier.fillMaxSize()
+                          .padding(innerPadding)
+                          .padding(AppDimensions.paddingMedium)
+                          .testTag(("offline_recordings_column"))) {
 
-                // Title for Offline Recordings
-                Text(
-                    text = "My Offline Recordings",
-                    style =
-                        TextStyle(
-                            fontSize = 18.sp,
-                            fontFamily = FontFamily(Font(R.font.poppins_black)),
-                            color = colors.onSurface),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(vertical = 8.dp))
+                    // Title for Offline Recordings
+                    Text(
+                        text = "My Offline Recordings",
+                        style =
+                            TextStyle(
+                                fontSize = 18.sp,
+                                fontFamily = FontFamily(Font(R.font.poppins_black)),
+                                color = colors.onSurface),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier =
+                            Modifier.padding(vertical = AppDimensions.paddingSmall)
+                                .testTag("offline_recordings_title"))
 
-                // Display saved recordings
-                if (savedRecordings.isNotEmpty()) {
-                  savedRecordings.forEach { audioFile ->
-                    AudioRecordingPlaceholder(
-                        fileName = audioFile.name,
-                        onPlayClicked = { audioRecorder.playAudio(audioFile) })
+                    // Display saved recordings
+                    if (savedRecordings.isNotEmpty()) {
+                      savedRecordings.forEach { audioFile ->
+                        AudioRecordingPlaceholder(
+                            fileName = audioFile.name,
+                            onPlayClicked = { audioRecorder.playAudio(audioFile) })
+                      }
+                    } else {
+                      Text(
+                          text = "No offline recordings available",
+                          style = MaterialTheme.typography.bodySmall,
+                          color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                          modifier =
+                              Modifier.padding(AppDimensions.paddingSmall)
+                                  .testTag("no_recordings_text"))
+                    }
                   }
-                } else {
-                  Text(
-                      text = "No offline recordings available",
-                      style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                      modifier = Modifier.padding(8.dp))
-                }
-              }
             }
             ?: run {
               Text(
@@ -337,6 +358,13 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
   }
 }
 
+/**
+ * Displays the stats section with current streak and total speaking time.
+ *
+ * @param streak The current streak count.
+ * @param totalSpeakingTime The total speaking time in string format.
+ * @param onStatsClick Callback triggered when the stats section is clicked.
+ */
 @Composable
 fun StatsSection(
     streak: Long, // The streak value from your data model
@@ -355,7 +383,7 @@ fun StatsSection(
                 fontFamily = FontFamily(Font(R.font.poppins_black)),
                 fontWeight = FontWeight.Bold,
                 color = colors.onBackground),
-        modifier = Modifier.padding(AppDimensions.paddingMedium))
+        modifier = Modifier.padding(AppDimensions.paddingMedium).testTag("statistics_section"))
 
     // Section 1: Streak
     Row(
@@ -367,14 +395,14 @@ fun StatsSection(
           Icon(
               imageVector = Icons.Filled.Whatshot,
               contentDescription = "Streak",
-              tint = AppColors.amber,
+              tint = COLOR_AMBER,
               modifier = Modifier.size(AppDimensions.iconSizeMedium))
           Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
           Text(
               text = "Current Streak: $streak",
               fontSize = 20.sp,
               fontWeight = FontWeight.Bold,
-              color = AppColors.amber,
+              color = COLOR_AMBER,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
         }
@@ -401,6 +429,12 @@ fun StatsSection(
   }
 }
 
+/**
+ * Placeholder for displaying offline audio recordings.
+ *
+ * @param fileName The name of the audio file.
+ * @param onPlayClicked Callback triggered when the play button is clicked.
+ */
 @Composable
 fun AudioRecordingPlaceholder(fileName: String, onPlayClicked: () -> Unit) {
 
@@ -409,18 +443,22 @@ fun AudioRecordingPlaceholder(fileName: String, onPlayClicked: () -> Unit) {
 
   Row(
       modifier =
-          Modifier.width(351.dp)
+          Modifier.width(AppDimensions.imageLargeXXL)
               .height(96.dp)
               .shadow(4.dp, shape = RoundedCornerShape(size = 10.dp), clip = false)
-              .background(colors.onSecondary, shape = RoundedCornerShape(size = 10.dp))
+              .background(
+                  colors.onSecondary,
+                  shape = RoundedCornerShape(size = AppDimensions.backgroundPadding))
               .clickable { onPlayClicked() }
-              .padding(horizontal = 16.dp, vertical = 8.dp)) {
+              .padding(
+                  horizontal = AppDimensions.paddingMedium,
+                  vertical = AppDimensions.paddingSmall)) {
         // Play Button Icon
         Icon(
             imageVector = Icons.Default.PlayArrow,
             contentDescription = "Play",
             modifier =
-                Modifier.size(36.dp)
+                Modifier.size(AppDimensions.iconSizeLarge)
                     .align(Alignment.CenterVertically)
                     .background(colors.errorContainer, shape = CircleShape))
         // Title of the Recording
@@ -441,6 +479,7 @@ fun AudioRecordingPlaceholder(fileName: String, onPlayClicked: () -> Unit) {
       }
 }
 
+/** Composable function to display the profile picture. */
 @Composable
 fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit, modifier: Modifier = Modifier) {
   val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
@@ -483,44 +522,4 @@ fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
                       .testTag("profile_picture_dialog"))
         }
   }
-}
-
-/**
- * Composable function to display a card section with an icon and title.
- *
- * @param title Title of the card section.
- * @param imageVector Icon of the card.
- * @param onClick Callback to handle click events.
- * @param modifier Modifier to be applied to the card.
- */
-@Composable
-fun CardSection(
-    title: String,
-    imageVector: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-  Card(
-      modifier =
-          modifier
-              .fillMaxWidth()
-              .height(AppDimensions.cardSectionHeight)
-              .clickable { onClick() }
-              .testTag("cardSection"),
-      elevation = AppDimensions.elevationSmall) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(AppDimensions.paddingSmallMedium)) {
-              Icon(
-                  imageVector,
-                  contentDescription = "Card icon",
-                  modifier = Modifier.size(AppDimensions.iconSizeMedium))
-              Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
-              Text(
-                  text = title,
-                  fontSize = 18.sp,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("titleText"))
-            }
-      }
 }
