@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -88,15 +89,26 @@ fun AddFriendsScreen(
     Scaffold(
         topBar = {
           TopAppBar(
-              title = { Text("Add a Friend", modifier = Modifier.testTag("addFriendTitle")) },
+              title = {
+                Text(
+                    "Add a Friend",
+                    modifier = Modifier.testTag("addFriendTitle"),
+                    color = MaterialTheme.colorScheme.onSurface)
+              },
               navigationIcon = {
                 IconButton(
                     onClick = { navigationActions.goBack() },
                     modifier = Modifier.testTag("addFriendBackButton")) {
-                      Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                      Icon(
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = MaterialTheme.colorScheme.onSurface)
                     }
               },
-          )
+              colors =
+                  TopAppBarDefaults.topAppBarColors(
+                      containerColor = MaterialTheme.colorScheme.surface,
+                  ))
           Divider()
         },
         bottomBar = {
@@ -144,6 +156,17 @@ fun AddFriendsScreen(
                               }
                         }
                       },
+                      colors =
+                          TextFieldDefaults.outlinedTextFieldColors(
+                              backgroundColor = MaterialTheme.colorScheme.surface,
+                              textColor = MaterialTheme.colorScheme.onSurface,
+                              focusedBorderColor = MaterialTheme.colorScheme.outline,
+                              unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                              cursorColor = MaterialTheme.colorScheme.primary,
+                              focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                              unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                              leadingIconColor = MaterialTheme.colorScheme.primary,
+                          ),
                       singleLine = true,
                       keyboardActions = KeyboardActions.Default)
                 }
@@ -347,7 +370,9 @@ fun UserItem(
                         style = MaterialTheme.typography.titleMedium,
                         modifier =
                             Modifier.padding(bottom = AppDimensions.smallPadding)
-                                .testTag("userName#${user.uid}"))
+                                .testTag("userName#${user.uid}"),
+                        color = MaterialTheme.colorScheme.primary)
+
                     Text(
                         text = user.bio ?: "No bio available",
                         style = MaterialTheme.typography.bodySmall,
