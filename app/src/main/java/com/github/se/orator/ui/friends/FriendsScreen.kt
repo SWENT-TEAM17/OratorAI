@@ -2,6 +2,9 @@ package com.github.se.orator.ui.friends
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -16,7 +19,11 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
@@ -29,6 +36,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -64,11 +73,16 @@ import com.github.se.orator.utils.parseDate
 import kotlinx.coroutines.launch
 
 /**
- * Composable function that displays the "View Friends" screen, showing a list of friends with a
- * search bar and options to navigate to other screens like "Add Friends" and "Leaderboard."
+ * Composable function that displays the "View Friends" screen.
  *
- * @param navigationActions Actions to handle navigation within the app.
- * @param userProfileViewModel ViewModel for managing user profile data and fetching friends.
+ * The screen includes:
+ * - A search bar to filter both the friends list and received friend requests.
+ * - An expandable section showing received friend requests with options to accept or decline.
+ * - A list of friends with options to view their details or remove them.
+ * - Navigation options to "Add Friends" and "Leaderboard."
+ *
+ * @param navigationActions Object to handle navigation within the app.
+ * @param userProfileViewModel ViewModel providing user data and friend management functionality.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,20 +90,29 @@ fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  // State variables for managing friends list and search functionality
+  // State variables
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
+  val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
   var searchQuery by remember { mutableStateOf("") }
   val filteredFriends =
       friendsProfiles.filter { friend -> friend.name.contains(searchQuery, ignoreCase = true) }
+  val filteredRecReq =
+      recReqProfiles.filter { recReq -> recReq.name.contains(searchQuery, ignoreCase = true) }
 
-  // State variables for managing UI components
+  // State variables for UI components
   val focusRequester = FocusRequester()
   val focusManager = LocalFocusManager.current
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
-  // State variable to manage the currently selected friend for enlarged profile picture
+  // State variable for selected friend
   var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
+
+  // State variable for Snackbar
+  val snackbarHostState = remember { SnackbarHostState() }
+
+  // New state variable for Friend Requests expansion
+  var isFriendRequestsExpanded by remember { mutableStateOf(true) }
 
   ProjectTheme {
     ModalNavigationDrawer(
@@ -129,6 +152,7 @@ fun ViewFriendsScreen(
           }
         }) {
           Scaffold(
+              snackbarHost = { SnackbarHost(snackbarHostState) },
               topBar = {
                 Column {
                   CenterAlignedTopAppBar(
@@ -165,90 +189,162 @@ fun ViewFriendsScreen(
                     tabList = LIST_TOP_LEVEL_DESTINATION,
                     selectedItem = Route.FRIENDS)
               }) { innerPadding ->
-                Column(
+                // Replace the Column with a LazyColumn
+                LazyColumn(
                     modifier =
                         Modifier.fillMaxSize()
                             .padding(innerPadding)
                             .padding(horizontal = AppDimensions.paddingMedium)
                             .clickable { focusManager.clearFocus() }) {
                       // Search bar for filtering friends
-                      Box(
-                          modifier =
-                              Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
-                            OutlinedTextField(
-                                value = searchQuery,
-                                onValueChange = { searchQuery = it },
-                                label = { Text("Search for a friend.") },
-                                leadingIcon = {
-                                  Icon(
-                                      imageVector = Icons.Default.Search,
-                                      contentDescription = "Search Icon")
-                                },
-                                modifier =
-                                    Modifier.wrapContentWidth()
-                                        .horizontalScroll(rememberScrollState())
-                                        .height(AppDimensions.mediumHeight)
-                                        .focusRequester(focusRequester)
-                                        .testTag("viewFriendsSearch"),
-                                colors =
-                                    TextFieldDefaults.outlinedTextFieldColors(
-                                        backgroundColor = MaterialTheme.colorScheme.surface,
-                                        textColor = MaterialTheme.colorScheme.onSurface,
-                                        focusedBorderColor = MaterialTheme.colorScheme.outline,
-                                        unfocusedBorderColor =
-                                            MaterialTheme.colorScheme.outlineVariant,
-                                        cursorColor = MaterialTheme.colorScheme.primary,
-                                        focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                                        unfocusedLabelColor =
-                                            MaterialTheme.colorScheme.onSurfaceVariant,
-                                        leadingIconColor = MaterialTheme.colorScheme.primary))
-                          }
+                      item {
+                        Box(
+                            modifier =
+                                Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
+                              OutlinedTextField(
+                                  value = searchQuery,
+                                  onValueChange = { searchQuery = it },
+                                  label = { Text("Search for a friend.") },
+                                  leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = "Search Icon")
+                                  },
+                                  modifier =
+                                      Modifier.fillMaxWidth(1f)
+                                          .horizontalScroll(rememberScrollState())
+                                          .height(AppDimensions.mediumHeight)
+                                          .focusRequester(focusRequester)
+                                          .testTag("viewFriendsSearch"),
+                                  colors =
+                                      TextFieldDefaults.outlinedTextFieldColors(
+                                          backgroundColor = MaterialTheme.colorScheme.surface,
+                                          textColor = MaterialTheme.colorScheme.onSurface,
+                                          focusedBorderColor = MaterialTheme.colorScheme.outline,
+                                          unfocusedBorderColor =
+                                              MaterialTheme.colorScheme.outlineVariant,
+                                          cursorColor = MaterialTheme.colorScheme.primary,
+                                          focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                          unfocusedLabelColor =
+                                              MaterialTheme.colorScheme.onSurfaceVariant,
+                                          leadingIconColor = MaterialTheme.colorScheme.primary))
+                            }
+                      }
+
+                      // Spacer
+                      item { Spacer(modifier = Modifier.height(AppDimensions.paddingMedium)) }
+
+                      // Expandable Section: Received Friend Requests
+                      if (filteredRecReq.isNotEmpty()) {
+                        // Header with Toggle Button
+                        item {
+                          Row(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .clickable {
+                                        isFriendRequestsExpanded = !isFriendRequestsExpanded
+                                      }
+                                      .padding(vertical = AppDimensions.smallPadding),
+                              verticalAlignment = Alignment.CenterVertically,
+                              horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(
+                                    text = "Friend Requests",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.weight(1f).testTag("friendRequestsHeader"))
+                                IconButton(
+                                    onClick = {
+                                      isFriendRequestsExpanded = !isFriendRequestsExpanded
+                                    },
+                                    modifier = Modifier.testTag("toggleFriendRequestsButton")) {
+                                      Icon(
+                                          imageVector =
+                                              if (isFriendRequestsExpanded) Icons.Default.ExpandLess
+                                              else Icons.Default.ExpandMore,
+                                          contentDescription =
+                                              if (isFriendRequestsExpanded)
+                                                  "Collapse Friend Requests"
+                                              else "Expand Friend Requests")
+                                    }
+                              }
+                        }
+
+                        // Friend Requests List with AnimatedVisibility
+                        item {
+                          AnimatedVisibility(
+                              visible = isFriendRequestsExpanded,
+                              enter = expandVertically(),
+                              exit = shrinkVertically()) {
+                                Column {
+                                  Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+                                  // Friend Requests Items
+                                  for (friendRequest in filteredRecReq) {
+                                    FriendRequestItem(
+                                        friendRequest = friendRequest,
+                                        userProfileViewModel = userProfileViewModel)
+                                    Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+                                  }
+                                  Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                                }
+                              }
+                        }
+                      }
+
+                      // Section for Friends List
+                      item {
+                        Text(
+                            text = "Your Friends",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier =
+                                Modifier.padding(bottom = AppDimensions.smallPadding)
+                                    .testTag("viewFriendsList"))
+                      }
 
                       // Display message if no friends match the search query
                       if (filteredFriends.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize().testTag("noUserFound"),
-                            contentAlignment = Alignment.Center) {
-                              Text(
-                                  "No user found",
-                                  style = MaterialTheme.typography.bodyLarge,
-                                  modifier = Modifier.testTag("noUserFoundText"),
-                                  color = MaterialTheme.colorScheme.onBackground)
-                            }
+                        item {
+                          Box(
+                              modifier = Modifier.fillMaxSize().testTag("noFriendsFound"),
+                              contentAlignment = Alignment.Center) {
+                                Text(
+                                    "No friends found.",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.testTag("noFriendsFoundText"),
+                                    color = MaterialTheme.colorScheme.onBackground)
+                              }
+                        }
                       } else {
                         // Display the list of friends if any match the search query
-                        LazyColumn(
-                            modifier = Modifier.testTag("viewFriendsList"),
-                            contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                            verticalArrangement =
-                                Arrangement.spacedBy(AppDimensions.paddingSmall)) {
-                              items(filteredFriends) { friend ->
-                                FriendItem(
-                                    friend = friend,
-                                    userProfileViewModel = userProfileViewModel,
-                                    onProfilePictureClick = { selectedFriend = it })
-                              }
-                            }
-                      }
-
-                      // Dialog to display the enlarged profile picture
-                      if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
-                        ProfilePictureDialog(
-                            profilePictureUrl = selectedFriend!!.profilePic!!,
-                            onDismiss = { selectedFriend = null })
+                        items(filteredFriends) { friend ->
+                          FriendItem(
+                              friend = friend,
+                              userProfileViewModel = userProfileViewModel,
+                              onProfilePictureClick = { selectedFriend = it })
+                        }
                       }
                     }
+
+                // Dialog to display the enlarged profile picture
+                if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
+                  ProfilePictureDialog(
+                      profilePictureUrl = selectedFriend!!.profilePic!!,
+                      onDismiss = { selectedFriend = null })
+                }
               }
         }
   }
 }
 
 /**
- * Composable function that represents a single friend item in the list. Displays the friend's
- * profile picture, name, and bio.
+ * Composable function that represents a single friend item in the list.
+ *
+ * It displays:
+ * - The friend's profile picture, name, and bio.
+ * - The friend's login streak or the last login date.
+ * - An option to remove the friend from the user's friend list.
  *
  * @param friend The [UserProfile] object representing the friend being displayed.
- * @param onProfilePictureClick Callback when the profile picture is clicked.
+ * @param userProfileViewModel The [UserProfileViewModel] that handles friend deletion.
+ * @param onProfilePictureClick Callback triggered when the friend's profile picture is clicked.
  */
 @Composable
 fun FriendItem(
@@ -278,7 +374,8 @@ fun FriendItem(
   Surface(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(horizontal = AppDimensions.smallPadding)
+              .padding(
+                  horizontal = AppDimensions.smallPadding, vertical = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
               .testTag("viewFriendsItem#${friend.uid}"),
       color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -367,14 +464,19 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit) {
       contentDescription = "Profile Picture",
       contentScale = ContentScale.Crop,
       modifier =
-          Modifier.size(AppDimensions.buttonHeight).clip(CircleShape).clickable(onClick = onClick))
+          Modifier.size(AppDimensions.buttonHeight)
+              .clip(CircleShape)
+              .clickable(onClick = onClick)
+              .testTag("profilePicture"))
 }
 
 /**
- * Button triggering the removing of a friend in the user's friend list.
+ * Composable function for the button to remove a friend from the user's friend list.
+ * - Displays a delete icon.
+ * - Shows a Toast message on successful removal of the friend.
  *
- * @param friend The friend to be removed.
- * @param userProfileViewModel The view model for the user's profile.
+ * @param friend The [UserProfile] of the friend to be removed.
+ * @param userProfileViewModel The [UserProfileViewModel] that handles friend deletion logic.
  */
 @Composable
 fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileViewModel) {
@@ -397,10 +499,12 @@ fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileVie
 
 /**
  * Computes the current streak of a friend based on their last login date and current streak.
+ * - A streak continues if the last login was on the same day or the following day.
+ * - A broken streak resets to 0.
  *
  * @param lastLoginDateString The last login date as a string in "yyyy-MM-dd" format. Can be null.
  * @param currentStreak The current streak value.
- * @return The streak to be displayed: either currentStreak or 0.
+ * @return The streak to be displayed: the `currentStreak` if active, otherwise 0.
  */
 fun currentFriendStreak(lastLoginDateString: String?, currentStreak: Long): Long {
   if (!lastLoginDateString.isNullOrEmpty()) {
@@ -414,4 +518,76 @@ fun currentFriendStreak(lastLoginDateString: String?, currentStreak: Long): Long
     }
   }
   return -1L // No last login date recorded
+}
+/**
+ * Composable function that represents a single friend request item in the list.
+ *
+ * It displays:
+ * - The requester's profile picture, name, and bio.
+ * - Buttons to accept or decline the friend request.
+ * - Handles user interactions and updates the state through the ViewModel.
+ *
+ * @param friendRequest The [UserProfile] object representing the user who sent the request.
+ * @param userProfileViewModel The [UserProfileViewModel] that handles accepting or declining the
+ *   request.
+ */
+@Composable
+fun FriendRequestItem(friendRequest: UserProfile, userProfileViewModel: UserProfileViewModel) {
+  Surface(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = AppDimensions.smallPadding)
+              .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
+              .testTag("friendRequestItem#${friendRequest.uid}"),
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
+      shadowElevation = AppDimensions.elevationSmall) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
+            verticalAlignment = Alignment.CenterVertically) {
+              // Friend's Profile Picture
+              ProfilePicture(
+                  profilePictureUrl = friendRequest.profilePic,
+                  onClick = { /* Optionally, show enlarged picture */})
+              Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+              Column(modifier = Modifier.weight(1f)) {
+                // Friend's Name
+                Text(
+                    text = friendRequest.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier =
+                        Modifier.padding(bottom = AppDimensions.smallPadding)
+                            .testTag("friendRequestName#${friendRequest.uid}"))
+                // Friend's Bio
+                Text(
+                    text = friendRequest.bio ?: "No bio available",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("friendRequestBio#${friendRequest.uid}"))
+              }
+              // Accept Friend Request Button
+              IconButton(
+                  onClick = { userProfileViewModel.acceptFriend(friendRequest) },
+                  modifier =
+                      Modifier.size(AppDimensions.iconSizeMedium)
+                          .testTag("acceptFriendButton#${friendRequest.uid}")) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Accept Friend Request",
+                        tint = Color.Green)
+                  }
+              // Decline Friend Request Button
+              IconButton(
+                  onClick = { userProfileViewModel.declineFriendRequest(friendRequest) },
+                  modifier =
+                      Modifier.size(AppDimensions.iconSizeMedium)
+                          .testTag("declineFriendButton#${friendRequest.uid}")) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Decline Friend Request",
+                        tint = Color.Red)
+                  }
+            }
+      }
 }
