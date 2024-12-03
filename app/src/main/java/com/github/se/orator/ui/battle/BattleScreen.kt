@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.overview.InputFieldData
 import com.github.se.orator.ui.overview.SpeakingPracticeModule
@@ -20,7 +22,8 @@ import com.github.se.orator.ui.overview.SpeakingPracticeModule
 fun BattleScreen(
     friendUid: String,
     userProfileViewModel: UserProfileViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    battleViewModel: BattleViewModel
 ) {
 
   val friendName = userProfileViewModel.getName(friendUid)
@@ -77,8 +80,21 @@ fun BattleScreen(
         // Simulate sending battle request
         // TODO: Implement actual battle request logic
 
+        // Collect the inputs and create an InterviewContext object
+        val interviewContext =
+            InterviewContext(
+                interviewType = "job interview",
+                role = targetPosition,
+                company = companyName,
+                focusAreas = skills.split(",").map { it.trim() })
+
+        // Create the battle speech instance
+        val battleId = battleViewModel.createBattleRequest(friendUid, interviewContext)
+
         // Navigate to the BattleRequestSentScreen
-        navigationActions.navigateToBattleRequestSentScreen(friendUid)
+        if (battleId != null) {
+          navigationActions.navigateToBattleRequestSentScreen(friendUid, battleId)
+        }
       },
       buttonName = "Send Battle Request")
 }

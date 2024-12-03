@@ -1,15 +1,21 @@
 package com.github.se.orator.ui.battle
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speechBattle.BattleStatus
+import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
@@ -25,17 +31,36 @@ import com.github.se.orator.ui.theme.AppDimensions
 @Composable
 fun BattleRequestSentScreen(
     friendUid: String,
+    battleId: String,
     userProfileViewModel: UserProfileViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    battleViewModel: BattleViewModel
 ) {
+  // Get the friend's name
   val friendName = userProfileViewModel.getName(friendUid)
+
+  // State to observe the battle status
+  val battleStatus by battleViewModel.getBattleStatus(battleId).collectAsState(initial = null)
+
+  // LaunchedEffect to monitor the battle status and redirect when it's updated to IN_PROGRESS
+  LaunchedEffect(battleStatus) {
+    if (battleStatus == BattleStatus.IN_PROGRESS) {
+      Log.d("BattleRequestSentScreen", "Battle in progress")
+      // Navigate to the battle screen
+      navigationActions.navigateToBattleScreen(battleId, friendUid)
+    }
+  }
+
   Scaffold(
       topBar = {
         TopAppBar(
             title = { Text("Battle Request Sent") },
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.testTag("backButton"))
               }
             })
       },
@@ -53,7 +78,9 @@ fun BattleRequestSentScreen(
                       "Interview Battle request has been successfully sent to $friendName.\nWaiting for $friendName to accept the battle.",
                   style = MaterialTheme.typography.bodyLarge,
                   textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(bottom = AppDimensions.paddingMedium))
+                  modifier =
+                      Modifier.padding(bottom = AppDimensions.paddingMedium)
+                          .testTag("battleRequestSentText"))
 
               CircularProgressIndicator(
                   color = AppColors.loadingIndicatorColor,

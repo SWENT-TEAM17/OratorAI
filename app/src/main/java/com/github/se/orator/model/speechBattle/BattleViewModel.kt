@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -21,13 +22,15 @@ import kotlinx.coroutines.flow.callbackFlow
  * @property apiLinkViewModel ViewModel for API link data.
  */
 class BattleViewModel(
-  private val userProfileViewModel: UserProfileViewModel,
-  private val navigationActions: NavigationActions,
-  private val apiLinkViewModel: ApiLinkViewModel
+    private val userProfileViewModel: UserProfileViewModel,
+    private val navigationActions: NavigationActions,
+    private val apiLinkViewModel: ApiLinkViewModel,
+    private val chatViewModel: ChatViewModel
 ) : ViewModel() {
 
   private val battleRepository = BattleRepositoryFirestore()
 
+  // List of all the incoming battles
   private val _pendingBattles = MutableLiveData<List<SpeechBattle>>()
   val pendingBattles: LiveData<List<SpeechBattle>> = _pendingBattles
 
@@ -44,12 +47,12 @@ class BattleViewModel(
     val challengerUid = userProfileViewModel.userProfile.value?.uid ?: return null
 
     val speechBattle =
-      SpeechBattle(
-        battleId = battleId,
-        challenger = challengerUid,
-        opponent = friendUid,
-        status = BattleStatus.PENDING,
-        context = context)
+        SpeechBattle(
+            battleId = battleId,
+            challenger = challengerUid,
+            opponent = friendUid,
+            status = BattleStatus.PENDING,
+            context = context)
 
     battleRepository.storeBattleRequest(speechBattle) { success ->
       if (!success) {
@@ -97,7 +100,7 @@ class BattleViewModel(
                 Log.d("BattleViewModel", "Battle accepted successfully. Friend UID: $friendUid")
               } else {
                 Log.e(
-                  "BattleViewModel", "Failed to retrieve battle details for battleId: $battleId")
+                    "BattleViewModel", "Failed to retrieve battle details for battleId: $battleId")
               }
             }
           } else {
@@ -139,11 +142,11 @@ class BattleViewModel(
   fun fetchPendingBattlesForUser() {
     val currentUserUid = userProfileViewModel.userProfile.value?.uid ?: return
     battleRepository.getPendingBattlesForUser(
-      currentUserUid,
-      callback = { battles -> _pendingBattles.value = battles },
-      onFailure = { exception ->
-        Log.e("BattleViewModel", "Error fetching pending battles", exception)
-      })
+        currentUserUid,
+        callback = { battles -> _pendingBattles.value = battles },
+        onFailure = { exception ->
+          Log.e("BattleViewModel", "Error fetching pending battles", exception)
+        })
   }
 
   /**
@@ -154,15 +157,15 @@ class BattleViewModel(
    */
   fun getBattleStatus(battleId: String): Flow<BattleStatus?> = callbackFlow {
     val listener =
-      battleRepository.listenToBattleUpdates(battleId) { battle ->
-        if (battle != null) {
-          Log.d("BattleViewModel", "Battle status updated: ${battle.status}")
-          trySend(battle.status)
-        } else {
-          Log.d("BattleViewModel", "No battle found or error occurred")
-          trySend(null)
+        battleRepository.listenToBattleUpdates(battleId) { battle ->
+          if (battle != null) {
+            Log.d("BattleViewModel", "Battle status updated: ${battle.status}")
+            trySend(battle.status)
+          } else {
+            Log.d("BattleViewModel", "No battle found or error occurred")
+            trySend(null)
+          }
         }
-      }
 
     awaitClose { listener.remove() }
   }
@@ -177,15 +180,38 @@ class BattleViewModel(
   fun markUserBattleCompleted(battleId: String, userId: String, messages: List<Message>) {
     battleRepository.updateUserBattleData(battleId, userId, messages) { success ->
       if (success) {
-        // Check if both users have completed
         battleRepository.getBattleById(battleId) { battle ->
-          if (battle != null && battle.challengerCompleted && battle.opponentCompleted) {
-            evaluateBattle(battle)
+          if (battle != null) {
+            val isChallenger = userId == battle.challenger
+            val otherUserCompleted = if (isChallenger) {
+              battle.opponentCompleted
+            } else {
+              battle.challengerCompleted
+            }
+
+            if (otherUserCompleted) {
+              // Both users are now completed. Update status to COMPLETED.
+              battleRepository.updateBattleStatus(battleId, BattleStatus.COMPLETED) { statusSuccess ->
+                if (statusSuccess) {
+                  navigationActions.navigateToEvaluationScreen(battleId)
+                } else {
+                  Log.e("BattleViewModel", "Failed to update BattleStatus to COMPLETED.")
+                }
+              }
+            } else {
+              // Navigate to the waiting screen while waiting for the other user
+              navigationActions.navigateToWaitingForCompletion(battleId)
+            }
+          } else {
+            Log.e("BattleViewModel", "Failed to retrieve battle for battleId: $battleId")
           }
         }
+      } else {
+        Log.e("BattleViewModel", "Failed to update user battle data for userId: $userId")
       }
     }
   }
+
 
   /**
    * Evaluates the result of a completed battle.
@@ -193,8 +219,11 @@ class BattleViewModel(
    * @param battle The completed SpeechBattle.
    */
   private fun evaluateBattle(battle: SpeechBattle) {
-    // TODO
-    battleRepository.updateBattleResult(battle.battleId, "123", "abc")
+    val challengerMessages = battle.challengerData
+    val opponentMessages = battle.opponentData
+
+    chatViewModel.performEvaluation(
+        battle.battleId, battle, challengerMessages, opponentMessages, this, navigationActions)
   }
 
   /**
@@ -208,13 +237,13 @@ class BattleViewModel(
     getBattleById(battleId) { battle ->
       if (battle != null) {
         val friendUid =
-          if (battle.challenger == userId) {
-            battle.opponent
-          } else if (battle.opponent == userId) {
-            battle.challenger
-          } else {
-            null
-          }
+            if (battle.challenger == userId) {
+              battle.opponent
+            } else if (battle.opponent == userId) {
+              battle.challenger
+            } else {
+              null
+            }
         callback(friendUid)
       } else {
         Log.e("BattleViewModel", "Battle not found for ID: $battleId")
@@ -222,4 +251,34 @@ class BattleViewModel(
       }
     }
   }
+
+  /**
+   * Updates the result of a battle.
+   *
+   * @param battleId The ID of the battle.
+   * @param winnerUid The UID of the winner.
+   * @param evaluationText The evaluation text from ChatGPT.
+   */
+  fun updateBattleResult(battleId: String, winnerUid: String, evaluationText: String) {
+    battleRepository.updateBattleResult(battleId, winnerUid, evaluationText) { success ->
+      if (success) {
+        Log.d("BattleViewModel", "Battle result updated successfully.")
+        // Optionally notify observers via LiveData or StateFlow
+      } else {
+        Log.e("BattleViewModel", "Failed to update battle result.")
+      }
+    }
+  }
+
+  fun getBattleByIdFlow(battleId: String): Flow<SpeechBattle?> = callbackFlow {
+    val listener = battleRepository.listenToBattleUpdates(battleId) { battle ->
+      trySend(battle)
+    }
+    awaitClose { listener.remove() }
+  }
+
+  fun updateBattleStatus(battleId: String, status: BattleStatus, callback: (Boolean) -> Unit) {
+    battleRepository.updateBattleStatus(battleId, status, callback)
+  }
+
 }

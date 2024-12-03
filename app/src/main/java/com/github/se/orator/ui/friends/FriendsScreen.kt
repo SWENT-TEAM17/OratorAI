@@ -14,10 +14,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,10 +31,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speechBattle.BattleViewModel
+import com.github.se.orator.model.speechBattle.BattleViewModelFactory
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -53,12 +60,20 @@ import kotlinx.coroutines.launch
  *
  * @param navigationActions Actions to handle navigation within the app.
  * @param userProfileViewModel ViewModel for managing user profile data and fetching friends.
+ * @param battleViewModel ViewModel for managing battles. Defaults to a local instance.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewFriendsScreen(
     navigationActions: NavigationActions,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    apiLinkViewModel: ApiLinkViewModel,
+    chatViewModel: ChatViewModel,
+    battleViewModel: BattleViewModel =
+        viewModel(
+            factory =
+                BattleViewModelFactory(
+                    userProfileViewModel, navigationActions, apiLinkViewModel, chatViewModel))
 ) {
   // State variables for managing friends list and search functionality
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
@@ -74,6 +89,16 @@ fun ViewFriendsScreen(
 
   // State variable to manage the currently selected friend for enlarged profile picture
   var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
+
+  // Fetch pending battles when the screen is composed
+  LaunchedEffect(Unit) { battleViewModel.fetchPendingBattlesForUser() }
+
+  // Collect the pending battles as state
+  val pendingBattles by battleViewModel.pendingBattles.observeAsState(emptyList())
+
+  // Create a HashMap of challengerUID to battleID for quick lookup
+  val challengerBattleMap =
+      remember(pendingBattles) { pendingBattles.associateBy({ it.challenger }, { it.battleId }) }
 
   ProjectTheme {
     ModalNavigationDrawer(
@@ -182,12 +207,25 @@ fun ViewFriendsScreen(
                             verticalArrangement =
                                 Arrangement.spacedBy(AppDimensions.paddingSmall)) {
                               items(filteredFriends) { friend ->
+                                val hasPendingBattle = friend.uid in challengerBattleMap.keys
                                 FriendItem(
                                     friend = friend,
+                                    hasPendingBattle = hasPendingBattle,
                                     userProfileViewModel = userProfileViewModel,
                                     onProfilePictureClick = { selectedFriend = it },
                                     onClick = { selectedFriend ->
-                                      navigationActions.navigateToBattleScreen(selectedFriend.uid)
+                                      if (hasPendingBattle) {
+                                        // Accept battle and then Navigate to battle screen
+                                        battleViewModel.acceptBattle(
+                                            challengerBattleMap[friend.uid]!!)
+                                        // navigationActions.navigateToAcceptBattleScreen(selectedFriend.uid)
+                                        Log.d(
+                                            "ViewFriendsScreen", "Navigate to accept battle screen")
+                                      } else {
+                                        // Navigate to create battle screen
+                                        navigationActions.navigateToSendBattleScreen(
+                                            selectedFriend.uid)
+                                      }
                                     })
                               }
                             }
@@ -207,9 +245,10 @@ fun ViewFriendsScreen(
 
 /**
  * Composable function that represents a single friend item in the list. Displays the friend's
- * profile picture, name, and bio.
+ * profile picture, name, and bio. Shows a battle icon if there's a pending battle.
  *
  * @param friend The [UserProfile] object representing the friend being displayed.
+ * @param hasPendingBattle A boolean indicating if the friend has challenged the user.
  * @param userProfileViewModel ViewModel for managing user profile data.
  * @param onProfilePictureClick Callback when the profile picture is clicked.
  * @param onClick Callback when the entire item is clicked.
@@ -217,6 +256,7 @@ fun ViewFriendsScreen(
 @Composable
 fun FriendItem(
     friend: UserProfile,
+    hasPendingBattle: Boolean,
     userProfileViewModel: UserProfileViewModel,
     onProfilePictureClick: (UserProfile) -> Unit,
     onClick: (UserProfile) -> Unit
@@ -258,7 +298,7 @@ fun FriendItem(
                   onClick = { onProfilePictureClick(friend) })
               Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
               Column(
-                  modifier = Modifier.weight(1f), // Expand to push DeleteFriendButton to the end
+                  modifier = Modifier.weight(1f), // Expand to push icons to the end
                   verticalArrangement = Arrangement.Center) {
                     Text(
                         text = friend.name,
@@ -311,6 +351,15 @@ fun FriendItem(
                           modifier = Modifier.testTag("friendLastLogin#${friend.uid}"))
                     }
                   }
+              if (hasPendingBattle) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Pending Battle",
+                    tint = Color.Red,
+                    modifier =
+                        Modifier.size(AppDimensions.iconSizeMedium)
+                            .padding(end = AppDimensions.smallPadding))
+              }
               DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
             }
       }
