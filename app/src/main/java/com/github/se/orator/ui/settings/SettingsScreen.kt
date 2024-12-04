@@ -46,7 +46,7 @@ import com.github.se.orator.ui.theme.AppFontSizes
 data class SettingBar(
     val text: String,
     val testTag: String,
-    val function: (AppThemeViewModel) -> Unit,
+    val function: (AppThemeViewModel?) -> Unit,
     val icon: ImageVector,
     val iconDescription: String
 )
@@ -76,7 +76,7 @@ val listOfSettings =
             "Theme (click to switch)",
             "theme",
             { themeVM ->
-              themeVM.switchTheme()
+              themeVM?.switchTheme()
               Log.d("hello", "theme")
             },
             Icons.Outlined.DarkMode,
@@ -103,7 +103,7 @@ val listOfSettings =
 
 // reusable function that is called to add a section to settings
 @Composable
-fun TextButtonFun(settingBar: SettingBar, switchTheme: AppThemeViewModel) {
+fun TextButtonFun(settingBar: SettingBar, switchTheme: AppThemeViewModel? = null) {
   TextButton(
       onClick = { settingBar.function(switchTheme) },
       modifier = Modifier.fillMaxWidth().testTag(settingBar.testTag),
@@ -136,7 +136,7 @@ fun TextButtonFun(settingBar: SettingBar, switchTheme: AppThemeViewModel) {
 fun SettingsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel,
-    themeViewModel: AppThemeViewModel
+    themeViewModel: AppThemeViewModel? = null
 ) {
   Scaffold(
       topBar = {
