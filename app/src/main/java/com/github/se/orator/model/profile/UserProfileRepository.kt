@@ -213,6 +213,17 @@ interface UserProfileRepository {
   fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   /**
+   * Calculates the mean (average) of the elements in a given queue.
+   *
+   * This function takes a queue of numerical values (represented as an `ArrayDeque<Double>`) and
+   * returns the mean of its elements. If the queue is empty, the function returns 0.
+   *
+   * @param values An `ArrayDeque<Double>` containing the metrics values.
+   * @return The mean of the values or 0 if it is empty
+   */
+  fun getMetricMean(values: List<Double>): Double
+
+  /**
    * Updates the login streak for a user based on their last login date.
    *
    * @param uid The UID of the user.
