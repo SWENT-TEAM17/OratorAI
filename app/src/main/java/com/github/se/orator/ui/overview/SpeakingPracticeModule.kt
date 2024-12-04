@@ -92,7 +92,6 @@ fun SpeakingPracticeModule(
           HorizontalDivider(
               color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
           )
-          Divider()
           Column(
               modifier =
                   Modifier.fillMaxSize()
