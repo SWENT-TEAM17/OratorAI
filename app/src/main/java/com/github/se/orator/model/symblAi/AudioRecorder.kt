@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -16,7 +15,7 @@ import java.io.FileOutputStream
 
 class AudioRecorder(
     private val context: Context,
-    private val isOffline: Boolean, // Pass offline state from ViewModel or activity
+    private val isOffline: Boolean = false, // Pass offline state from ViewModel or activity
     private val sampleRate: Int = 16000,
     private val channelConfig: Int = AudioFormat.CHANNEL_IN_MONO,
     private val audioFormat: Int = AudioFormat.ENCODING_PCM_16BIT
@@ -53,7 +52,6 @@ class AudioRecorder(
     val saveDir = if (isOffline) context.filesDir else context.cacheDir
     audioFile =
         File(saveDir, "audio_record_${System.currentTimeMillis()}.wav") // Recording in WAV format
-    Log.d("AudioRecorder", "Recording audio file to: $saveDir")
     audioRecord?.startRecording()
     isRecordingAudio = true
 

@@ -21,7 +21,7 @@ class AudioRecorderTest {
   @Before
   fun setUp() {
     context = mock()
-    audioRecorder = AudioRecorder(context, isOffline = false)
+    audioRecorder = AudioRecorder(context)
   }
 
   @Test
