@@ -1,4 +1,4 @@
-package com.github.se.orator.model
+package com.github.se.orator.model.theme
 
 import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +38,7 @@ class AppThemeViewModel(private val context: Context) {
    *
    * @param isDark `true` if the new theme need to be the dark theme.
    */
-  private fun saveTheme(isDark: Boolean) {
+  fun saveTheme(isDark: Boolean) {
     val preference = context.getSharedPreferences("isDark", Context.MODE_PRIVATE)
     if (isDark != this.isDark.value) {
       preference.edit().putBoolean(IS_DARK_NAME, isDark).apply()

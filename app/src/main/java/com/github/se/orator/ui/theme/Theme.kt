@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import com.github.se.orator.model.AppThemeViewModel
+import com.github.se.orator.model.theme.AppThemeViewModel
 
 data class AppDimensionsObject(
     // Padding

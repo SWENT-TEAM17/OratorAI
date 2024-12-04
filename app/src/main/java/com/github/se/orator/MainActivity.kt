@@ -26,12 +26,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.github.se.orator.model.AppThemeViewModel
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
+import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.network.OfflineViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
