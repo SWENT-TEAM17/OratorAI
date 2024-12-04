@@ -30,6 +30,7 @@ import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
+import com.github.se.orator.model.speechBattle.BattleViewModelFactory
 import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
@@ -139,12 +140,15 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
       SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
-  val battleViewModel =
-      BattleViewModel(
-          userProfileViewModel = userProfileViewModel,
-          navigationActions = navigationActions,
-          apiLinkViewModel = apiLinkViewModel,
-          chatViewModel = chatViewModel)
+    // Initialize BattleViewModel using the factory
+    val battleViewModel: BattleViewModel = viewModel(
+        factory = BattleViewModelFactory(
+            userProfileViewModel = userProfileViewModel,
+            navigationActions = navigationActions,
+            apiLinkViewModel = apiLinkViewModel,
+            chatViewModel = chatViewModel
+        )
+    )
 
   // Scaffold composable to provide basic layout structure for the app
   Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {

@@ -23,13 +23,12 @@ import kotlinx.coroutines.flow.callbackFlow
  * @property apiLinkViewModel ViewModel for API link data.
  */
 class BattleViewModel(
+    internal val battleRepository: BattleRepositoryFirestore,
     private val userProfileViewModel: UserProfileViewModel,
     private val navigationActions: NavigationActions,
     private val apiLinkViewModel: ApiLinkViewModel,
     private val chatViewModel: ChatViewModel
 ) : ViewModel() {
-
-  private val battleRepository = BattleRepositoryFirestore(FirebaseFirestore.getInstance())
 
   // List of all the incoming battles
   private val _pendingBattles = MutableLiveData<List<SpeechBattle>>()
