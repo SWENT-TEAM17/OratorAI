@@ -121,34 +121,32 @@ class BattleRepositoryFirestore {
 
   /** Converts a Firestore DocumentSnapshot to a SpeechBattle object. */
   private fun documentToSpeechBattle(document: DocumentSnapshot): SpeechBattle? {
-      val data = document.data ?: return null
-      val battleId = data["battleId"] as? String ?: return null
-      val challenger = data["challenger"] as? String ?: return null
-      val opponent = data["opponent"] as? String ?: return null
-      val statusString = data["status"] as? String ?: return null
-      val status = BattleStatus.valueOf(statusString)
-      val winner = data["winner"] as? String ?: ""
-      val interviewContextMap = data["interviewContext"] as? Map<String, Any> ?: return null
-      val interviewContext = mapToInterviewContext(interviewContextMap) ?: return null
+    val data = document.data ?: return null
+    val battleId = data["battleId"] as? String ?: return null
+    val challenger = data["challenger"] as? String ?: return null
+    val opponent = data["opponent"] as? String ?: return null
+    val statusString = data["status"] as? String ?: return null
+    val status = BattleStatus.valueOf(statusString)
+    val winner = data["winner"] as? String ?: ""
+    val interviewContextMap = data["interviewContext"] as? Map<String, Any> ?: return null
+    val interviewContext = mapToInterviewContext(interviewContextMap) ?: return null
 
-      // Extract the challengerCompleted and opponentCompleted fields
-      val challengerCompleted = data["challengerCompleted"] as? Boolean ?: false
-      val opponentCompleted = data["opponentCompleted"] as? Boolean ?: false
+    // Extract the challengerCompleted and opponentCompleted fields
+    val challengerCompleted = data["challengerCompleted"] as? Boolean ?: false
+    val opponentCompleted = data["opponentCompleted"] as? Boolean ?: false
 
-      return SpeechBattle(
-          battleId = battleId,
-          challenger = challenger,
-          opponent = opponent,
-          status = status,
-          context = interviewContext,
-          winner = winner,
-          challengerCompleted = challengerCompleted,
-          opponentCompleted = opponentCompleted
-      )
+    return SpeechBattle(
+        battleId = battleId,
+        challenger = challenger,
+        opponent = opponent,
+        status = status,
+        context = interviewContext,
+        winner = winner,
+        challengerCompleted = challengerCompleted,
+        opponentCompleted = opponentCompleted)
   }
 
-
-    /** Serializes an InterviewContext to a Map. */
+  /** Serializes an InterviewContext to a Map. */
   private fun interviewContextToMap(interviewContext: InterviewContext): Map<String, Any> {
     return mapOf(
         "interviewType" to interviewContext.interviewType,
@@ -223,67 +221,68 @@ class BattleRepositoryFirestore {
       messages: List<Message>,
       callback: (Boolean) -> Unit
   ) {
-      val battleRef = db.collection("battles").document(battleId)
+    val battleRef = db.collection("battles").document(battleId)
 
-      battleRef.get()
-          .addOnSuccessListener { document ->
-              if (document.exists()) {
-                  val updates = mutableMapOf<String, Any>()
+    battleRef
+        .get()
+        .addOnSuccessListener { document ->
+          if (document.exists()) {
+            val updates = mutableMapOf<String, Any>()
 
-                  // Fetch existing data
-                  val currentData = document.data ?: emptyMap<String, Any>()
-                  val challenger = currentData["challenger"] as? String
-                  val opponent = currentData["opponent"] as? String
+            // Fetch existing data
+            val currentData = document.data ?: emptyMap<String, Any>()
+            val challenger = currentData["challenger"] as? String
+            val opponent = currentData["opponent"] as? String
 
-                  Log.d("BattleRepository", "Challenger: $challenger, Opponent: $opponent, UserId: $userId")
+            Log.d(
+                "BattleRepository", "Challenger: $challenger, Opponent: $opponent, UserId: $userId")
 
-                  // Determine if the user is the challenger or opponent
-                  when (userId) {
-                      challenger -> {
-                          val existingMessages =
-                              (currentData["challengerData"] as? List<Map<String, String>>).orEmpty()
-                          val newMessages = existingMessages + messages.map { it.toMap() }
-                          updates["challengerData"] = newMessages
-                          updates["challengerCompleted"] = true
-                      }
-                      opponent -> {
-                          val existingMessages =
-                              (currentData["opponentData"] as? List<Map<String, String>>).orEmpty()
-                          val newMessages = existingMessages + messages.map { it.toMap() }
-                          updates["opponentData"] = newMessages
-                          updates["opponentCompleted"] = true
-                      }
-                      else -> {
-                          Log.e("BattleRepository", "User ID does not match challenger or opponent.")
-                          callback(false)
-                          return@addOnSuccessListener
-                      }
-                  }
-
-                  // Perform the update in Firestore
-                  battleRef.update(updates)
-                      .addOnSuccessListener {
-                          Log.d("BattleRepository", "User battle data updated successfully.")
-                          callback(true)
-                      }
-                      .addOnFailureListener { e ->
-                          Log.e("BattleRepository", "Error updating battle data", e)
-                          callback(false)
-                      }
-              } else {
-                  Log.e("BattleRepository", "Battle document not found.")
-                  callback(false)
+            // Determine if the user is the challenger or opponent
+            when (userId) {
+              challenger -> {
+                val existingMessages =
+                    (currentData["challengerData"] as? List<Map<String, String>>).orEmpty()
+                val newMessages = existingMessages + messages.map { it.toMap() }
+                updates["challengerData"] = newMessages
+                updates["challengerCompleted"] = true
               }
+              opponent -> {
+                val existingMessages =
+                    (currentData["opponentData"] as? List<Map<String, String>>).orEmpty()
+                val newMessages = existingMessages + messages.map { it.toMap() }
+                updates["opponentData"] = newMessages
+                updates["opponentCompleted"] = true
+              }
+              else -> {
+                Log.e("BattleRepository", "User ID does not match challenger or opponent.")
+                callback(false)
+                return@addOnSuccessListener
+              }
+            }
+
+            // Perform the update in Firestore
+            battleRef
+                .update(updates)
+                .addOnSuccessListener {
+                  Log.d("BattleRepository", "User battle data updated successfully.")
+                  callback(true)
+                }
+                .addOnFailureListener { e ->
+                  Log.e("BattleRepository", "Error updating battle data", e)
+                  callback(false)
+                }
+          } else {
+            Log.e("BattleRepository", "Battle document not found.")
+            callback(false)
           }
-          .addOnFailureListener { e ->
-              Log.e("BattleRepository", "Error fetching battle document.", e)
-              callback(false)
-          }
+        }
+        .addOnFailureListener { e ->
+          Log.e("BattleRepository", "Error fetching battle document.", e)
+          callback(false)
+        }
   }
 
-
-
-    /**
+  /**
    * Converts a Message object into a Map for Firestore storage.
    *
    * @return A Map representation of the Message object.

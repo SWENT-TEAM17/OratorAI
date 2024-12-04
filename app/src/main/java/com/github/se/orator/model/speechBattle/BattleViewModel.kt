@@ -183,15 +183,17 @@ class BattleViewModel(
         battleRepository.getBattleById(battleId) { battle ->
           if (battle != null) {
             val isChallenger = userId == battle.challenger
-            val otherUserCompleted = if (isChallenger) {
-              battle.opponentCompleted
-            } else {
-              battle.challengerCompleted
-            }
+            val otherUserCompleted =
+                if (isChallenger) {
+                  battle.opponentCompleted
+                } else {
+                  battle.challengerCompleted
+                }
 
             if (otherUserCompleted) {
               // Both users are now completed. Update status to COMPLETED.
-              battleRepository.updateBattleStatus(battleId, BattleStatus.COMPLETED) { statusSuccess ->
+              battleRepository.updateBattleStatus(battleId, BattleStatus.COMPLETED) { statusSuccess
+                ->
                 if (statusSuccess) {
                   navigationActions.navigateToEvaluationScreen(battleId)
                 } else {
@@ -211,7 +213,6 @@ class BattleViewModel(
       }
     }
   }
-
 
   /**
    * Evaluates the result of a completed battle.
@@ -271,14 +272,11 @@ class BattleViewModel(
   }
 
   fun getBattleByIdFlow(battleId: String): Flow<SpeechBattle?> = callbackFlow {
-    val listener = battleRepository.listenToBattleUpdates(battleId) { battle ->
-      trySend(battle)
-    }
+    val listener = battleRepository.listenToBattleUpdates(battleId) { battle -> trySend(battle) }
     awaitClose { listener.remove() }
   }
 
   fun updateBattleStatus(battleId: String, status: BattleStatus, callback: (Boolean) -> Unit) {
     battleRepository.updateBattleStatus(battleId, status, callback)
   }
-
 }
