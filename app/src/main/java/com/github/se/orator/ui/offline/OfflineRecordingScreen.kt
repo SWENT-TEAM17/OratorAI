@@ -47,11 +47,12 @@ import java.io.File
 @SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
 @Composable
 fun OfflineRecordingScreen(
-    context: Context,
     navigationActions: NavigationActions,
     question: String,
-    viewModel: SpeakingViewModel = viewModel()
+    viewModel: SpeakingViewModel = viewModel(),
+    permissionGranted: MutableState<Boolean> = remember { mutableStateOf(false) } // Makes for easier testing
 ) {
+    val context = LocalContext.current
     val analysisState = remember { MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)} //viewModel.analysisState.collectAsState()
     val collState = analysisState.collectAsState()
     //val analysisData by viewModel.analysisData.collectAsState()
@@ -64,7 +65,6 @@ fun OfflineRecordingScreen(
 //    }
 
     var audioFile: File? = null // Keep this!! It should not be greyed out (bug?)
-    val permissionGranted = remember { mutableStateOf(false) }
     val permissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
                 isGranted -> permissionGranted.value = isGranted
@@ -103,7 +103,7 @@ fun OfflineRecordingScreen(
                 Modifier.size(AppDimensions.iconSizeSmall)
                     .clickable { navigationActions.goBack() }
                     .padding(AppDimensions.paddingExtraSmall)
-                    .testTag("BackButton"),
+                    .testTag("back_button"),
                 tint = colors.primary)
         }
 
@@ -125,7 +125,7 @@ fun OfflineRecordingScreen(
                     viewModel,
                     collState,
                     permissionGranted,
-                    LocalContext.current,
+                    context,
                     funRec = {
                         // what to do when user begins to record a file
                         if (analysisState.value == SpeakingRepository.AnalysisState.IDLE || analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
@@ -140,7 +140,7 @@ fun OfflineRecordingScreen(
                             File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3").also{
                                 Log.d("aall", "\"${viewModel.interviewPromptNb.value}.mp3\"")
                                 recorder.stopRecording()
-                            }
+                            } 
                             analysisState.value = SpeakingRepository.AnalysisState.FINISHED
                         }
                     }

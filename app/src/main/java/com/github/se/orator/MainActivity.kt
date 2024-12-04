@@ -151,13 +151,13 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             OfflinePracticeQuestionsScreen(navigationActions)
           }
           composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
-            RecordingReviewScreen(LocalContext.current, navigationActions, speakingViewModel)
+            RecordingReviewScreen(navigationActions, speakingViewModel)
           }
       composable(Screen.OFFLINE_RECORDING_PROFILE) {
-        OfflineRecordingsProfileScreen(LocalContext.current, navigationActions, speakingViewModel)
+        OfflineRecordingsProfileScreen(navigationActions, speakingViewModel)
       }
       composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-        OfflineInterviewModule(LocalContext.current, navigationActions, speakingViewModel)
+        OfflineInterviewModule(navigationActions, speakingViewModel)
       }
 
           composable(
@@ -165,7 +165,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
               arguments = listOf(navArgument("question") { type = NavType.StringType })) {
                   backStackEntry ->
                 val question = backStackEntry.arguments?.getString("question") ?: ""
-                OfflineRecordingScreen(LocalContext.current, navigationActions, question, speakingViewModel)
+                OfflineRecordingScreen(navigationActions, question, speakingViewModel)
               }
 
           // Online/auth flow

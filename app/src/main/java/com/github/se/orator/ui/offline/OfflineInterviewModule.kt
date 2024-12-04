@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
@@ -57,7 +58,6 @@ fun generateRandomString(length: Int = 8): String {
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun OfflineInterviewModule(
-    context: Context,
     navigationActions: NavigationActions,
     speakingViewModel: SpeakingViewModel
 ) {
@@ -65,6 +65,7 @@ fun OfflineInterviewModule(
     var jobPosition by remember { mutableStateOf("") }
     val ID = generateRandomString()
 
+    val context = LocalContext.current
     val dimensions: AppDimensionsObject = createAppDimensions()
 
     val inputFields =
@@ -85,7 +86,7 @@ fun OfflineInterviewModule(
                 label = "What job position are you applying for?",
                 placeholder = "e.g Hardware engineer",
                 height = 85,
-                testTag = "skillsInput"))
+                testTag = "jobInput"))
 
 
     Column(
@@ -105,7 +106,7 @@ fun OfflineInterviewModule(
                 modifier =
                 Modifier.fillMaxWidth()
                     .height(
-                        input.height.dp) // Assuming 'height' is defined in InputFieldData
+                        input.height.dp)
                     .testTag(input.testTag),
                 colors =
                 TextFieldDefaults.outlinedTextFieldColors(
@@ -133,7 +134,7 @@ fun OfflineInterviewModule(
             modifier =
             Modifier.fillMaxWidth(0.8f)
                 .padding(AppDimensions.paddingSmall)
-                .testTag("DoneButton").align(Alignment.CenterHorizontally),
+                .testTag("doneButton").align(Alignment.CenterHorizontally),
 
             colors = ButtonDefaults.buttonColors(containerColor = colors.primary)) {
             Text(

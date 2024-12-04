@@ -49,6 +49,7 @@ class SpeakingViewModel(
     _analysisData.value = null
   }
 
+
   fun getTranscript(audioFile: File) {
     repository.getTranscript(
       audioFile,

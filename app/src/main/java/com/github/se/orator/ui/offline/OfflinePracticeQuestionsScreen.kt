@@ -51,14 +51,14 @@ fun OfflinePracticeQuestionsScreen(navigationActions: NavigationActions) {
               // Back button icon, navigates back to Offline screen
               Icon(
                   imageVector = Icons.Filled.ArrowBack,
-                  contentDescription = "Back", // Accessibility description
+                  contentDescription = "back", // Accessibility description
                   modifier =
                       Modifier.size(AppDimensions.iconSizeSmall)
                           .clickable {
                             navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
                           } // Go back to Offline screen
                           .padding(AppDimensions.paddingExtraSmall)
-                          .testTag("BackButton"), // Test tag for the back button
+                          .testTag("back_button"), // Test tag for the back button
                   tint = colors.primary // Primary color from the theme for the icon
                   )
 

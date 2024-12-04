@@ -10,9 +10,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
@@ -26,10 +28,10 @@ import java.io.File
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun RecordingReviewScreen(
-    context: Context,
     navigationActions: NavigationActions,
     speakingViewModel: SpeakingViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val recorder by lazy {
         AudioRecorder(context = context)
     }
@@ -49,6 +51,7 @@ fun RecordingReviewScreen(
       horizontalAlignment = Alignment.CenterHorizontally) {
 
       Button(
+          modifier = Modifier.testTag("hear_recording_button"),
           onClick = {
               player.playFile(audioFile)
           }
@@ -57,6 +60,7 @@ fun RecordingReviewScreen(
       }
 
         Button(
+            modifier = Modifier.testTag("stop_recording_button"),
             onClick = {
                 player.stop()
             }

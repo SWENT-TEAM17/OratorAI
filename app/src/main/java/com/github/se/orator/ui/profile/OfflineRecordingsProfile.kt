@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -36,7 +37,10 @@ import com.github.se.orator.ui.theme.AppTypography
 import loadPromptsFromFile
 
 @Composable
-fun PromptCard(prompt: Map<String, String>, index: Int, navigationActions: NavigationActions, speakingViewModel: SpeakingViewModel, promptID: String) {
+fun PromptCard(prompt: Map<String, String>,
+               index: Int, navigationActions: NavigationActions,
+               speakingViewModel: SpeakingViewModel,
+               promptID: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -104,12 +108,12 @@ fun PromptCardsSection(context: Context, navigationActions: NavigationActions, s
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OfflineRecordingsProfileScreen(
-    context: Context,
     navigationActions: NavigationActions,
     speakingViewModel: SpeakingViewModel
 ) {
+    val context = LocalContext.current
     TopAppBar(
-        title = { Text("Settings", modifier = Modifier.testTag("SettingsText")) },
+        title = { Text("Previous sessions", modifier = Modifier.testTag("previous_sessions_test")) },
         navigationIcon = {
             IconButton(
                 onClick = { navigationActions.goBack() },
