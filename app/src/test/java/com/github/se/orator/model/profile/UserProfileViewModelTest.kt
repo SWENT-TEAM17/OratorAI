@@ -2,9 +2,7 @@ package com.github.se.orator.model.profile
 
 import android.content.Context
 import android.net.Uri
-import java.io.File
 import java.io.FilenameFilter
-import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.*
