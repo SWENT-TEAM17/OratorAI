@@ -168,6 +168,7 @@ object AppDimensions {
   val shadowElevation = 5.dp // Elevation/shadow for buttons
   // Specific Spacing Needs
   val spacerHeightDefault = 32.dp // Spacer height for default spacing in between elements
+    val jobDescriptionInputFieldHeight = 200.dp // Height of the job description input field
 }
 
 object AppShapes {
