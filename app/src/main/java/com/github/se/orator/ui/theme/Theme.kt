@@ -209,7 +209,11 @@ object AppDimensions {
   val visualizerHeight: Dp
     @Composable get() = (screenHeight() * 0.15f).coerceIn(80.dp, 120.dp)
 
-  // Heights and Widths
+    val jobDescriptionInputFieldHeight: Dp
+        @Composable get() = (screenHeight() * 0.15f).coerceIn(180.dp, 240.dp)
+
+
+    // Heights and Widths
   val mediumHeight: Dp
     @Composable get() = (screenHeight() * 0.08f).coerceIn(50.dp, 64.dp)
 
@@ -231,6 +235,7 @@ object AppDimensions {
 
   val mediumText: TextUnit
     @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.04f).coerceIn(14f, 16f)).sp
+
 
   // Other Dimensions
   val full: Float = 1f

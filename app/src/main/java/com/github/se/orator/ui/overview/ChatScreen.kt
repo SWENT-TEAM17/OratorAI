@@ -74,6 +74,7 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                   onClick = {
                     navigationActions.goBack()
                     chatViewModel.resetPracticeContext()
+                    chatViewModel.endConversation()
                   },
                   modifier = Modifier.testTag("back_button")) {
                     Icon(

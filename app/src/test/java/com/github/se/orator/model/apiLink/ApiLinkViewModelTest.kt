@@ -10,7 +10,7 @@ class ApiLinkViewModelTest {
   private lateinit var apiLinkViewModel: ApiLinkViewModel
 
   private val analysisData = AnalysisData("test", 0, 0.0, 0.0)
-  private val practiceContext = InterviewContext("test", "test", "test", listOf("test"))
+  private val practiceContext = InterviewContext("test", "test", "test", "test", "test", "test")
 
   @Before
   fun setUp() {

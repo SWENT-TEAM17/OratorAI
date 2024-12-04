@@ -643,13 +643,34 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         onSuccess,
         onFailure)
   }
+
   /**
-   * Updates the login streak for a user based on their last login date.
+   * Calculates the mean (average) of the elements in a given list.
    *
-   * @param uid The UID of the user.
-   * @param onSuccess Callback invoked on successful operation.
-   * @param onFailure Callback invoked on failure.
+   * This function takes a list of numerical values (`List<Double>`) and returns the mean of its
+   * elements. If the list is empty or contains only invalid numbers (e.g., NaN, Infinity), the
+   * function returns 0.0. If the list contains any NaN or infinite values, an
+   * IllegalArgumentException is thrown to alert the caller.
+   *
+   * @param values A `List<Double>` containing the numerical values. Defaults to an empty list if
+   *   not provided.
+   * @return The mean of the values, or 0.0 if the list is empty or contains only invalid numbers.
+   * @throws IllegalArgumentException If the list contains NaN or infinite values.
    */
+  override fun getMetricMean(values: List<Double>): Double {
+    // Check if the list is empty to avoid division by zero
+    if (values.isEmpty()) return 0.0
+
+    // Check for invalid values (NaN or infinite)
+    if (values.any { it.isNaN() || it.isInfinite() }) {
+      throw IllegalArgumentException("Input contains NaN or infinite values")
+    }
+
+    // Sum the elements and divide by the size of the list
+    val sum = values.sum()
+    return sum / values.size
+  }
+
   override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
     val userRef = db.collection(collectionPath).document(uid)
     db.runTransaction { transaction ->
