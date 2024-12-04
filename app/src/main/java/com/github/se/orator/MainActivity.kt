@@ -123,7 +123,11 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean, themeViewModel: AppThemeViewModel) {
+fun OratorApp(
+    chatGPTService: ChatGPTService,
+    isOffline: Boolean,
+    themeViewModel: AppThemeViewModel
+) {
   // Create NavController for navigation within the app
   val navController = rememberNavController()
   // Initialize NavigationActions to handle navigation events
@@ -211,7 +215,9 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean, themeViewModel
             composable(Screen.ADD_FRIENDS) {
               AddFriendsScreen(navigationActions, userProfileViewModel)
             }
-            composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel, themeViewModel) }
+            composable(Screen.SETTINGS) {
+              SettingsScreen(navigationActions, userProfileViewModel, themeViewModel)
+            }
           }
         }
 

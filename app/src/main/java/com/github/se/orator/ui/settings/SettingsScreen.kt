@@ -41,7 +41,6 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
-import kotlinx.coroutines.flow.MutableStateFlow
 
 // class for all that is needed about a section for settings
 data class SettingBar(
@@ -73,9 +72,15 @@ val listOfSettings =
             { Log.d("hello", "permissions") },
             Icons.Outlined.Lock,
             "lock icon"),
-        SettingBar("Theme", "theme", { themeVM ->
-            themeVM.switchTheme()
-            Log.d("hello", "theme") }, Icons.Outlined.DarkMode, "theme"),
+        SettingBar(
+            "Theme",
+            "theme",
+            { themeVM ->
+              themeVM.switchTheme()
+              Log.d("hello", "theme")
+            },
+            Icons.Outlined.DarkMode,
+            "theme"),
         SettingBar(
             "Invite Friends",
             "invite_friends",

@@ -276,8 +276,8 @@ fun ProjectTheme(
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
-    themeViewModel.loadTheme(isSystemInDarkTheme())
-    val theme by themeViewModel.isDark.collectAsState()
+  themeViewModel.loadTheme(isSystemInDarkTheme())
+  val theme by themeViewModel.isDark.collectAsState()
 
   val colorScheme = if (theme) darkScheme else lightScheme
   val view = LocalView.current
