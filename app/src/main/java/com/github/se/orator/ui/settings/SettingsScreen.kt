@@ -36,16 +36,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.github.se.orator.model.AppThemeViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import kotlinx.coroutines.flow.MutableStateFlow
 
 // class for all that is needed about a section for settings
 data class SettingBar(
     val text: String,
     val testTag: String,
-    val function: () -> Unit,
+    val function: (AppThemeViewModel) -> Unit,
     val icon: ImageVector,
     val iconDescription: String
 )
@@ -71,7 +73,9 @@ val listOfSettings =
             { Log.d("hello", "permissions") },
             Icons.Outlined.Lock,
             "lock icon"),
-        SettingBar("Theme", "theme", { Log.d("hello", "theme") }, Icons.Outlined.DarkMode, "theme"),
+        SettingBar("Theme", "theme", { themeVM ->
+            themeVM.switchTheme()
+            Log.d("hello", "theme") }, Icons.Outlined.DarkMode, "theme"),
         SettingBar(
             "Invite Friends",
             "invite_friends",
@@ -94,9 +98,9 @@ val listOfSettings =
 
 // reusable function that is called to add a section to settings
 @Composable
-fun TextButtonFun(settingBar: SettingBar) {
+fun TextButtonFun(settingBar: SettingBar, switchTheme: AppThemeViewModel) {
   TextButton(
-      onClick = { settingBar.function() },
+      onClick = { settingBar.function(switchTheme) },
       modifier = Modifier.fillMaxWidth().testTag(settingBar.testTag),
       contentPadding = PaddingValues(0.dp) // Remove default padding
       ) {
@@ -126,7 +130,8 @@ fun TextButtonFun(settingBar: SettingBar) {
 @Composable
 fun SettingsScreen(
     navigationActions: NavigationActions,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    themeViewModel: AppThemeViewModel
 ) {
   Scaffold(
       topBar = {
@@ -162,7 +167,7 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxSize().padding(padding).testTag("settingsScreen"),
             verticalArrangement = Arrangement.spacedBy(AppDimensions.spacerWidthMedium)) {
               for (setting in listOfSettings) {
-                TextButtonFun(setting)
+                TextButtonFun(setting, themeViewModel)
                 HorizontalDivider(thickness = AppDimensions.dividerThickness)
               }
             }
