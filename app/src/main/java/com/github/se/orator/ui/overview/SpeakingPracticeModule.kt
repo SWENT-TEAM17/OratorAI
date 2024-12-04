@@ -27,9 +27,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.ui.navigation.NavigationActions
-import com.github.se.orator.ui.theme.AppDimensionsObject
+import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
-import com.github.se.orator.ui.theme.createAppDimensions
 
 /**
  * The SpeakingPracticeModule composable displays the speaking practice module screen.
@@ -51,8 +50,7 @@ fun SpeakingPracticeModule(
 ) {
   val context = LocalContext.current
 
-  // Obtain responsive dimensions using the factory
-  val dimensions: AppDimensionsObject = createAppDimensions()
+  // Obtain responsive AppDimensions using the factory
 
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
@@ -61,7 +59,7 @@ fun SpeakingPracticeModule(
         TopAppBar(
             modifier =
                 Modifier.fillMaxWidth()
-                    .padding(top = dimensions.statusBarPadding)
+                    .padding(top = AppDimensions.statusBarPadding)
                     .testTag("topAppBar"),
             title = {
               Text(
@@ -77,7 +75,7 @@ fun SpeakingPracticeModule(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        modifier = Modifier.size(dimensions.iconSizeSmall),
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
                         tint = MaterialTheme.colorScheme.onSurface)
                   }
             },
@@ -94,11 +92,11 @@ fun SpeakingPracticeModule(
           Column(
               modifier =
                   Modifier.fillMaxSize()
-                      .padding(horizontal = dimensions.paddingMedium)
-                      .padding(top = dimensions.paddingSmall)
+                      .padding(horizontal = AppDimensions.paddingMedium)
+                      .padding(top = AppDimensions.paddingSmall)
                       .verticalScroll(rememberScrollState())
                       .testTag("content"),
-              verticalArrangement = Arrangement.spacedBy(dimensions.paddingSmall)) {
+              verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall)) {
                 // Header text with consistent styling
                 Text(
                     text = headerText,
@@ -107,7 +105,8 @@ fun SpeakingPracticeModule(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary),
                     modifier =
-                        Modifier.padding(vertical = dimensions.paddingMedium).testTag("titleText"))
+                        Modifier.padding(vertical = AppDimensions.paddingMedium)
+                            .testTag("titleText"))
 
                 // Dynamically generated input fields based on the provided data
                 inputs.forEach { input ->
@@ -136,7 +135,7 @@ fun SpeakingPracticeModule(
                 }
 
                 // Spacer to add space before the button
-                Spacer(modifier = Modifier.height(dimensions.paddingLarge))
+                Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
                 // Get Started Button with consistent styling
                 Button(
@@ -151,9 +150,9 @@ fun SpeakingPracticeModule(
                     },
                     modifier =
                         Modifier.fillMaxWidth()
-                            .padding(top = dimensions.paddingMedium)
+                            .padding(top = AppDimensions.paddingMedium)
                             .border(
-                                width = dimensions.borderStrokeWidth,
+                                width = AppDimensions.borderStrokeWidth,
                                 color = MaterialTheme.colorScheme.outline,
                                 shape = MaterialTheme.shapes.medium)
                             .testTag("getStartedButton"),

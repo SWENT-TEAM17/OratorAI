@@ -179,7 +179,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                       Column(
                           horizontalAlignment = Alignment.CenterHorizontally,
                           modifier = Modifier.align(Alignment.TopCenter)) {
-                            Spacer(modifier = Modifier.height(AppDimensions.MediumSpacerHeight))
+                            Spacer(modifier = Modifier.height(AppDimensions.mediumSpacerHeight))
 
                             // Box to hold username and streak
                             Box(
@@ -221,7 +221,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                       }
                                 }
 
-                            Spacer(modifier = Modifier.height(AppDimensions.SmallSpacerHeight))
+                            Spacer(modifier = Modifier.height(AppDimensions.smallSpacerHeight))
 
                             Text(
                                 text =

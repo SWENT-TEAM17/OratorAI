@@ -15,159 +15,225 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
-data class AppDimensionsObject(
-    // Padding
-    val paddingExtraSmall: Dp,
-    val paddingSmall: Dp,
-    val paddingSmallMedium: Dp,
-    val paddingMedium: Dp,
-    val paddingLarge: Dp,
-    val paddingExtraLarge: Dp,
-    val paddingXXLarge: Dp,
-    val paddingXXXLarge: Dp,
-    val paddingTopSmall: Dp,
-    val statusBarPadding: Dp,
-
-    // Spacer Dimensions
-    val spacerWidthMedium: Dp,
-    val spacerHeightLarge: Dp,
-    val largeSpacerHeight: Dp,
-
-    // Button Heights
-    val buttonHeight: Dp,
-    val buttonHeightLarge: Dp,
-
-    // Logo Dimensions
-    val logoSize: Dp,
-    val logoTextWidth: Dp,
-    val logoTextHeight: Dp,
-    val googleLogoSize: Dp,
-
-    // Fixed Dimensions
-    val strokeWidth: Dp,
-    val borderStrokeWidth: Dp,
-    val dividerThickness: Dp,
-    val appBarElevation: Dp,
-    val elevationSmall: Dp,
-
-    // Loading Indicator
-    val loadingIndicatorSize: Dp,
-
-    // Corner Radii
-    val roundedCornerRadius: Dp,
-    val cornerRadiusSmall: Dp,
-
-    // Icon Sizes
-    val iconSize: Dp,
-    val iconSizeSmall: Dp,
-    val iconSizeMedium: Dp,
-    val iconSizeLarge: Dp,
-
-    // Drawer Padding
-    val drawerPadding: Dp,
-
-    // Card Dimensions
-    val cardHorizontalPadding: Dp,
-    val cardCornerRadius: Dp,
-    val cardImageHeight: Dp,
-    val cardSectionHeight: Dp,
-
-    // Spacing
-    val spacingXLarge: Dp,
-
-    // Navigation
-    val bottomNavigationHeight: Dp,
-
-    // Input Fields
-    val inputFieldHeight: Dp,
-    val bioFieldHeight: Dp,
-
-    // Profile Picture
-    val profilePictureDialogSize: Dp,
-    val profilePictureSize: Dp,
-
-    // Font Size
-    val largeTitleFontSize: Dp,
-    val mediumTitleFontSize: Dp,
-    val buttonTextSize: Dp,
-)
-
 object AppDimensions {
-  val paddingSmall = 8.dp
-  val paddingMedium = 16.dp
-  val paddingLarge = 24.dp
-  val paddingExtraLarge = 32.dp
-  val largeSpacerHeight = 100.dp
-  val mediumHeight = 64.dp
-  val MediumSpacerHeight = 50.dp
-  val SmallSpacerHeight = 15.dp
-  val buttonHeight = 48.dp
-  val logoSize = 250.dp
-  val logoTextWidth = 276.dp
-  val logoTextHeight = 141.dp
-  val googleLogoSize = 30.dp
-  val strokeWidth = 8.dp
-  val borderStrokeWidth = 1.dp
-  val loadingIndicatorSize = 64.dp
-  val roundedCornerRadius = 12.dp
-  val spacerWidthMedium = 16.dp
-  val spacerHeightLarge = 24.dp
-  val spacerHeightMedium = 8.dp
-  val iconSize = 100.dp
-  val drawerPadding = 16.dp
-  val cardHorizontalPadding = 30.dp
-  val cardCornerRadius = 16.dp
-  val cardImageHeight = 160.dp
-  val paddingXXLarge = 42.dp // Corresponds to 42.dp
-  val paddingXXXLarge = 64.dp // Corresponds to 64.dp
-  val spacingXLarge = 40.dp // Corresponds to 40.dp spacing in ButtonRow
-  val bottomNavigationHeight = 60.dp // Corresponds to the height of BottomNavigation
-  val paddingExtraSmall = 4.dp
-  val paddingSmallMedium = 12.dp // Added for padding of 12.dp
-  val iconSizeSmall = 32.dp // Added for icon size 32.dp
-  val iconSizeMedium = 24.dp // Added for medium-sized icons
-  val cornerRadiusSmall = 8.dp // Added for corner radius of 8.dp
-  val appBarElevation = 0.dp // Added for elevation of AppBar
-  val elevationSmall = 4.dp // For AppBar elevation
-  val inputFieldHeight = 56.dp // Existing or newly added for input fields
-  val bioFieldHeight = 150.dp // Added for bio input field height
-  val buttonHeightLarge = 50.dp // Added for Save changes button height
-  val profilePictureDialogSize = 200.dp // Added for ProfilePictureDialog size
-  val cardSectionHeight = 100.dp // Added for CardSection height
-  val profilePictureSize = 100.dp // Added for profile picture size
-  val dividerThickness = 3.dp // Added for HorizontalDivider thickness
-  val paddingTopSmall = 5.dp // Added for padding top=5.dp in Text
-  val statusBarPadding = 10.dp
-  val iconSizeLarge = 35.dp
-  val buttonSize = 80.dp
-  val visualizerHeight = 100.dp
-  val iconSizeMic = 48.dp
-  val heightMedium = 24.dp
-  val paddingMediumSmall = 20.dp
-  val smallWidth = 12.dp
-  val smallPadding = 4.dp
-  val mediumText = 16.sp
-  val full = 1f
-  val imageLargeXXL = 350.dp
-  val smallTitleFontSize = 20.dp
-  val mediumTitleFontSize = 30.dp
-  val profileBoxHeight = 200.dp
-  val profileCardHeight = 140.dp
 
-  /// Offline Mode layout definition
-  val buttonWidthMin = 200.dp // Minimum width for buttons
-  val buttonWidthMax = 300.dp // Maximum width for buttons
-  val buttonHeightRounded = 50.dp // Height for rounded buttons
-  val shadowElevation = 5.dp // Elevation/shadow for buttons
-  // Specific Spacing Needs
-  val spacerHeightDefault = 32.dp // Spacer height for default spacing in between elements
+  // Helper functions to get screen dimensions
+  @Composable private fun screenWidth() = LocalConfiguration.current.screenWidthDp.dp
+
+  @Composable private fun screenHeight() = LocalConfiguration.current.screenHeightDp.dp
+
+  // Padding
+  val paddingSmall: Dp
+    @Composable get() = (screenWidth() * 0.02f).coerceIn(4.dp, 8.dp)
+
+  val paddingMedium: Dp
+    @Composable get() = (screenWidth() * 0.04f).coerceIn(8.dp, 16.dp)
+
+  val paddingLarge: Dp
+    @Composable get() = (screenWidth() * 0.06f).coerceIn(12.dp, 24.dp)
+
+  val paddingExtraLarge: Dp
+    @Composable get() = (screenWidth() * 0.08f).coerceIn(16.dp, 32.dp)
+
+  val paddingXXLarge: Dp
+    @Composable get() = (screenWidth() * 0.1f).coerceIn(24.dp, 42.dp)
+
+  val paddingXXXLarge: Dp
+    @Composable get() = (screenWidth() * 0.15f).coerceIn(32.dp, 64.dp)
+
+  val paddingExtraSmall: Dp
+    @Composable get() = (screenWidth() * 0.01f).coerceIn(2.dp, 4.dp)
+
+  val paddingSmallMedium: Dp
+    @Composable get() = (screenWidth() * 0.03f).coerceIn(6.dp, 12.dp)
+
+  val paddingMediumSmall: Dp
+    @Composable get() = (screenWidth() * 0.05f).coerceIn(10.dp, 20.dp)
+
+  val paddingTopSmall: Dp
+    @Composable get() = (screenHeight() * 0.005f).coerceIn(2.dp, 5.dp)
+
+  val statusBarPadding: Dp
+    @Composable get() = (screenHeight() * 0.015f).coerceIn(6.dp, 10.dp)
+
+  val smallPadding: Dp
+    @Composable get() = paddingExtraSmall
+
+  // Spacer Dimensions
+  val largeSpacerHeight: Dp
+    @Composable get() = (screenHeight() * 0.1f).coerceIn(50.dp, 100.dp)
+
+  val mediumSpacerHeight: Dp
+    @Composable get() = (screenHeight() * 0.07f).coerceIn(35.dp, 70.dp)
+
+  val smallSpacerHeight: Dp
+    @Composable get() = (screenHeight() * 0.02f).coerceIn(10.dp, 20.dp)
+
+  val spacerWidthMedium: Dp
+    @Composable get() = (screenWidth() * 0.04f).coerceIn(8.dp, 16.dp)
+
+  val spacerHeightLarge: Dp
+    @Composable get() = (screenHeight() * 0.03f).coerceIn(12.dp, 24.dp)
+
+  val spacerHeightMedium: Dp
+    @Composable get() = (screenHeight() * 0.015f).coerceIn(6.dp, 12.dp)
+
+  val spacerHeightDefault: Dp
+    @Composable get() = (screenHeight() * 0.04f).coerceIn(16.dp, 32.dp)
+
+  // Button Heights and Sizes
+  val buttonHeight: Dp
+    @Composable get() = (screenHeight() * 0.06f).coerceIn(40.dp, 60.dp)
+
+  val buttonHeightLarge: Dp
+    @Composable get() = (screenHeight() * 0.07f).coerceIn(45.dp, 70.dp)
+
+  val buttonHeightRounded: Dp
+    @Composable get() = buttonHeightLarge
+
+  val buttonSize: Dp
+    @Composable get() = (screenWidth() * 0.2f).coerceIn(60.dp, 100.dp)
+
+  val buttonWidthMin: Dp
+    @Composable get() = (screenWidth() * 0.5f).coerceIn(150.dp, 200.dp)
+
+  val buttonWidthMax: Dp
+    @Composable get() = (screenWidth() * 0.7f).coerceIn(250.dp, 300.dp)
+
+  // Logo Dimensions
+  val logoSize: Dp
+    @Composable get() = (screenWidth() * 0.4f).coerceIn(100.dp, 250.dp)
+
+  val logoTextWidth: Dp
+    @Composable get() = (screenWidth() * 0.6f).coerceIn(150.dp, 276.dp)
+
+  val logoTextHeight: Dp
+    @Composable get() = (screenHeight() * 0.15f).coerceIn(70.dp, 141.dp)
+
+  val googleLogoSize: Dp
+    @Composable get() = (screenWidth() * 0.08f).coerceIn(24.dp, 30.dp)
+
+  val imageLargeXXL: Dp
+    @Composable get() = (screenWidth() * 0.8f).coerceIn(200.dp, 350.dp)
+
+  // Fixed Dimensions
+  val strokeWidth: Dp = 8.dp
+  val borderStrokeWidth: Dp = 1.dp
+  val dividerThickness: Dp = 3.dp
+  val appBarElevation: Dp = 0.dp
+  val elevationSmall: Dp = 4.dp
+  val shadowElevation: Dp = 5.dp
+
+  // Loading Indicator
+  val loadingIndicatorSize: Dp
+    @Composable get() = (screenWidth() * 0.1f).coerceIn(40.dp, 64.dp)
+
+  // Corner Radii
+  val roundedCornerRadius: Dp
+    @Composable get() = (screenWidth() * 0.03f).coerceIn(8.dp, 16.dp)
+
+  val cornerRadiusSmall: Dp
+    @Composable get() = (screenWidth() * 0.02f).coerceIn(4.dp, 8.dp)
+
+  // Icon Sizes
+  val iconSize: Dp
+    @Composable get() = (screenWidth() * 0.15f).coerceIn(60.dp, 100.dp)
+
+  val iconSizeSmall: Dp
+    @Composable get() = (screenWidth() * 0.08f).coerceIn(24.dp, 32.dp)
+
+  val iconSizeMedium: Dp
+    @Composable get() = (screenWidth() * 0.06f).coerceIn(20.dp, 24.dp)
+
+  val iconSizeLarge: Dp
+    @Composable get() = (screenWidth() * 0.1f).coerceIn(30.dp, 35.dp)
+
+  val iconSizeMic: Dp
+    @Composable get() = (screenWidth() * 0.12f).coerceIn(36.dp, 48.dp)
+
+  // Drawer Padding
+  val drawerPadding: Dp
+    @Composable get() = spacerWidthMedium
+
+  // Card Dimensions
+  val cardHorizontalPadding: Dp
+    @Composable get() = (screenWidth() * 0.05f).coerceIn(16.dp, 30.dp)
+
+  val cardCornerRadius: Dp
+    @Composable get() = roundedCornerRadius
+
+  val cardImageHeight: Dp
+    @Composable get() = (screenWidth() * 0.3f).coerceIn(120.dp, 160.dp)
+
+  val cardSectionHeight: Dp
+    @Composable get() = (screenHeight() * 0.15f).coerceIn(80.dp, 100.dp)
+
+  // Spacing
+  val spacingXLarge: Dp
+    @Composable get() = (screenWidth() * 0.1f).coerceIn(32.dp, 40.dp)
+
+  // Navigation
+  val bottomNavigationHeight: Dp
+    @Composable get() = (screenHeight() * 0.08f).coerceIn(50.dp, 60.dp)
+
+  // Input Fields
+  val inputFieldHeight: Dp
+    @Composable get() = (screenHeight() * 0.07f).coerceIn(50.dp, 60.dp)
+
+  val bioFieldHeight: Dp
+    @Composable get() = (screenHeight() * 0.2f).coerceIn(100.dp, 150.dp)
+
+  // Profile Picture
+  val profilePictureDialogSize: Dp
+    @Composable get() = (screenWidth() * 0.5f).coerceIn(150.dp, 200.dp)
+
+  val profilePictureSize: Dp
+    @Composable get() = (screenWidth() * 0.2f).coerceIn(80.dp, 100.dp)
+
+  val profileBoxHeight: Dp
+    @Composable get() = (screenHeight() * 0.25f).coerceIn(150.dp, 200.dp)
+
+  val profileCardHeight: Dp
+    @Composable get() = (screenHeight() * 0.18f).coerceIn(100.dp, 140.dp)
+
+  // Visualizer Height
+  val visualizerHeight: Dp
+    @Composable get() = (screenHeight() * 0.15f).coerceIn(80.dp, 120.dp)
+
+  // Heights and Widths
+  val mediumHeight: Dp
+    @Composable get() = (screenHeight() * 0.08f).coerceIn(50.dp, 64.dp)
+
+  val heightMedium: Dp
+    @Composable get() = (screenHeight() * 0.04f).coerceIn(20.dp, 24.dp)
+
+  val smallWidth: Dp
+    @Composable get() = (screenWidth() * 0.03f).coerceIn(8.dp, 12.dp)
+
+  // Font Sizes
+  val largeTitleFontSize: TextUnit
+    @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.08f).coerceIn(24f, 30f)).sp
+
+  val mediumTitleFontSize: TextUnit
+    @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.06f).coerceIn(20f, 24f)).sp
+
+  val smallTitleFontSize: TextUnit
+    @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.05f).coerceIn(16f, 20f)).sp
+
+  val mediumText: TextUnit
+    @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.04f).coerceIn(14f, 16f)).sp
+
+  // Other Dimensions
+  val full: Float = 1f
 }
 
 object AppShapes {
