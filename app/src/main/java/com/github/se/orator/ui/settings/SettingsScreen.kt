@@ -73,7 +73,7 @@ val listOfSettings =
             Icons.Outlined.Lock,
             "lock icon"),
         SettingBar(
-            "Theme",
+            "Theme (click to switch)",
             "theme",
             { themeVM ->
               themeVM.switchTheme()
