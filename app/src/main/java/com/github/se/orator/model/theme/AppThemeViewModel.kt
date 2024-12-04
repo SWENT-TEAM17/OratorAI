@@ -17,8 +17,6 @@ class AppThemeViewModel(private val context: Context) {
   /** StateFlow holding the value `true` if the app is in dark mode, `false` otherwise. */
   val isDark = _isDark.asStateFlow()
 
-  // private val preference: SharedPreferences = context.getSharedPreferences("isDark",
-  // Context.MODE_PRIVATE)
   private var deviceThemeIsDarkTheme = false
 
   /**
