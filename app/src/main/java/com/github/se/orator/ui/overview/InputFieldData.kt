@@ -1,11 +1,7 @@
 package com.github.se.orator.ui.overview
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.AppDimensionsObject
-import com.github.se.orator.ui.theme.createAppDimensions
 
 /**
  * Data class representing an input field in the Speaking Job Interview module.

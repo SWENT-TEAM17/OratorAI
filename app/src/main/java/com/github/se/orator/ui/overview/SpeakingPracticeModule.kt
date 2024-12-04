@@ -89,9 +89,9 @@ fun SpeakingPracticeModule(
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-            )
+          HorizontalDivider(
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+          )
           Divider()
           Column(
               modifier =
@@ -221,8 +221,11 @@ fun SpeakingPracticeModule(
                                   cursorColor = MaterialTheme.colorScheme.primary,
                                   focusedLabelColor = MaterialTheme.colorScheme.onSurface,
                                   unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                  focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                  unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),),
+                                  focusedPlaceholderColor =
+                                      MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                  unfocusedPlaceholderColor =
+                                      MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                              ),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Next))
                     }

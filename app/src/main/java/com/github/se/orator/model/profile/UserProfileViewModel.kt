@@ -479,40 +479,42 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
   }
 
-    /**
-     * Adds an AnalysisData object to the queue while ensuring the queue maintains a maximum size of 10 elements.
-     *
-     * This function adds the given data to the end of the queue. If the queue already contains 10 elements,
-     * the oldest element (at the front of the queue) is removed before adding the new metric.
-     * It also validates the AnalysisData object before adding it to ensure data integrity.
-     *
-     * @param queue The MutableStateFlow containing the ArrayDeque of AnalysisData.
-     * @param value The new AnalysisData object to be added to the queue.
-     * @return The updated ArrayDeque with the new value if valid, otherwise the original queue.
-     */
-    private fun addData(
-        queue: MutableStateFlow<ArrayDeque<AnalysisData>>,
-        value: AnalysisData
-    ): ArrayDeque<AnalysisData> {
-        // Validate the AnalysisData object
-        if (!value.isValid()) {
-            Log.e("addData", "Attempted to add invalid AnalysisData: $value")
-            return queue.value // Return the original queue without adding invalid data
-        }
-
-        // Add data to the queue while maintaining a maximum size of 10
-        val updatedQueue = queue.value.apply {
-            if (size >= 10) {
-                removeFirst() // Remove the oldest element if the queue is full
-            }
-            addLast(value) // Add the new data to the end of the queue
-        }
-
-        // Update the MutableStateFlow with the new queue
-        queue.value = updatedQueue
-
-        return updatedQueue
+  /**
+   * Adds an AnalysisData object to the queue while ensuring the queue maintains a maximum size of
+   * 10 elements.
+   *
+   * This function adds the given data to the end of the queue. If the queue already contains 10
+   * elements, the oldest element (at the front of the queue) is removed before adding the new
+   * metric. It also validates the AnalysisData object before adding it to ensure data integrity.
+   *
+   * @param queue The MutableStateFlow containing the ArrayDeque of AnalysisData.
+   * @param value The new AnalysisData object to be added to the queue.
+   * @return The updated ArrayDeque with the new value if valid, otherwise the original queue.
+   */
+  private fun addData(
+      queue: MutableStateFlow<ArrayDeque<AnalysisData>>,
+      value: AnalysisData
+  ): ArrayDeque<AnalysisData> {
+    // Validate the AnalysisData object
+    if (!value.isValid()) {
+      Log.e("addData", "Attempted to add invalid AnalysisData: $value")
+      return queue.value // Return the original queue without adding invalid data
     }
+
+    // Add data to the queue while maintaining a maximum size of 10
+    val updatedQueue =
+        queue.value.apply {
+          if (size >= 10) {
+            removeFirst() // Remove the oldest element if the queue is full
+          }
+          addLast(value) // Add the new data to the end of the queue
+        }
+
+    // Update the MutableStateFlow with the new queue
+    queue.value = updatedQueue
+
+    return updatedQueue
+  }
 
   /**
    * Adds the latest analysis data to its respective queue and update the profile to save the
