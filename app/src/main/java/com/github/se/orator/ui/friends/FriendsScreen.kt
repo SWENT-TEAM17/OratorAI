@@ -11,12 +11,28 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
-import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,8 +55,8 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.profile.ProfilePictureDialog
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
@@ -85,7 +101,8 @@ fun ViewFriendsScreen(
               Text(
                   "Actions",
                   modifier = Modifier.testTag("viewFriendsDrawerTitle"),
-                  style = MaterialTheme.typography.titleMedium)
+                  style = MaterialTheme.typography.titleMedium,
+                  color = MaterialTheme.colorScheme.primary)
               Spacer(modifier = Modifier.height(AppDimensions.heightMedium))
               TextButton(
                   modifier = Modifier.testTag("viewFriendsAddFriendButton"),
@@ -95,7 +112,7 @@ fun ViewFriendsScreen(
                       navigationActions.navigateTo(Screen.ADD_FRIENDS)
                     }
                   }) {
-                    Text("➕ Add a friend")
+                    Text("➕ Add a friend", color = MaterialTheme.colorScheme.onSurface)
                   }
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
               TextButton(
@@ -106,7 +123,7 @@ fun ViewFriendsScreen(
                       navigationActions.navigateTo(Screen.LEADERBOARD)
                     }
                   }) {
-                    Text("⭐ Leaderboard")
+                    Text("⭐ Leaderboard", color = MaterialTheme.colorScheme.onSurface)
                   }
             }
           }
@@ -115,14 +132,25 @@ fun ViewFriendsScreen(
               topBar = {
                 Column {
                   CenterAlignedTopAppBar(
-                      title = { Text("My Friends", modifier = Modifier.testTag("myFriendsTitle")) },
+                      title = {
+                        Text(
+                            "My Friends",
+                            modifier = Modifier.testTag("myFriendsTitle"),
+                            color = MaterialTheme.colorScheme.onSurface)
+                      },
                       navigationIcon = {
                         IconButton(
                             onClick = { scope.launch { drawerState.open() } },
                             modifier = Modifier.testTag("viewFriendsMenuButton")) {
-                              Icon(Icons.Default.Menu, contentDescription = "Menu")
+                              Icon(
+                                  Icons.Default.Menu,
+                                  contentDescription = "Menu",
+                                  tint = MaterialTheme.colorScheme.onSurface)
                             }
-                      })
+                      },
+                      colors =
+                          TopAppBarDefaults.topAppBarColors(
+                              containerColor = MaterialTheme.colorScheme.surface))
                   HorizontalDivider() // Adds a separation line below the TopAppBar
                 }
               },
@@ -161,7 +189,19 @@ fun ViewFriendsScreen(
                                         .horizontalScroll(rememberScrollState())
                                         .height(AppDimensions.mediumHeight)
                                         .focusRequester(focusRequester)
-                                        .testTag("viewFriendsSearch"))
+                                        .testTag("viewFriendsSearch"),
+                                colors =
+                                    TextFieldDefaults.outlinedTextFieldColors(
+                                        backgroundColor = MaterialTheme.colorScheme.surface,
+                                        textColor = MaterialTheme.colorScheme.onSurface,
+                                        focusedBorderColor = MaterialTheme.colorScheme.outline,
+                                        unfocusedBorderColor =
+                                            MaterialTheme.colorScheme.outlineVariant,
+                                        cursorColor = MaterialTheme.colorScheme.primary,
+                                        focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                        unfocusedLabelColor =
+                                            MaterialTheme.colorScheme.onSurfaceVariant,
+                                        leadingIconColor = MaterialTheme.colorScheme.primary))
                           }
 
                       // Display message if no friends match the search query
@@ -172,7 +212,8 @@ fun ViewFriendsScreen(
                               Text(
                                   "No user found",
                                   style = MaterialTheme.typography.bodyLarge,
-                                  modifier = Modifier.testTag("noUserFoundText"))
+                                  modifier = Modifier.testTag("noUserFoundText"),
+                                  color = MaterialTheme.colorScheme.onBackground)
                             }
                       } else {
                         // Display the list of friends if any match the search query
@@ -240,7 +281,7 @@ fun FriendItem(
               .padding(horizontal = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
               .testTag("viewFriendsItem#${friend.uid}"),
-      color = AppColors.LightPurpleGrey,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
         Row(
@@ -258,11 +299,12 @@ fun FriendItem(
                         style = MaterialTheme.typography.titleMedium,
                         modifier =
                             Modifier.padding(bottom = AppDimensions.smallPadding)
-                                .testTag("friendName#${friend.uid}"))
+                                .testTag("friendName#${friend.uid}"),
+                        color = MaterialTheme.colorScheme.primary)
                     Text(
                         text = friend.bio ?: "No bio available",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AppColors.secondaryTextColor,
+                        color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.testTag("friendBio#${friend.uid}"))
@@ -277,14 +319,14 @@ fun FriendItem(
                                 imageVector =
                                     Icons.Filled.Whatshot, // Using Whatshot as the fire icon
                                 contentDescription = "Active Streak",
-                                tint = AppColors.amber,
+                                tint = COLOR_AMBER,
                                 modifier = Modifier.size(AppDimensions.iconSizeSmall))
                             Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                             Text(
                                 text =
                                     "$displayedStreak day${if (displayedStreak > 1) "s" else ""} streak",
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = AppColors.amber,
+                                color = COLOR_AMBER,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier =
@@ -298,7 +340,7 @@ fun FriendItem(
                           text =
                               "Last login ${daysSinceLastLogin} day${if (daysSinceLastLogin > 1) "s" else ""} ago",
                           style = MaterialTheme.typography.bodyLarge,
-                          color = Color.Gray,
+                          color = MaterialTheme.colorScheme.secondary,
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis,
                           modifier = Modifier.testTag("friendLastLogin#${friend.uid}"))

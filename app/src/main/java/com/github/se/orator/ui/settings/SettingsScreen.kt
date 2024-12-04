@@ -24,14 +24,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -114,6 +115,7 @@ fun TextButtonFun(settingBar: SettingBar) {
                           start = AppDimensions.paddingSmallMedium,
                           top = AppDimensions.paddingTopSmall),
                   text = settingBar.text,
+                  color = MaterialTheme.colorScheme.onBackground,
                   fontSize = AppFontSizes.titleLarge)
             }
       }
@@ -129,7 +131,12 @@ fun SettingsScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Settings", modifier = Modifier.testTag("SettingsText")) },
+            title = {
+              Text(
+                  "Settings",
+                  color = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.testTag("SettingsText"))
+            },
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -138,9 +145,17 @@ fun SettingsScreen(
                         Icons.Outlined.ArrowBackIosNew,
                         contentDescription = "Back button",
                         modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                        tint = Color.Black)
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
-            })
+            },
+            colors =
+                TopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ))
       },
       content = { padding ->
         Column(
