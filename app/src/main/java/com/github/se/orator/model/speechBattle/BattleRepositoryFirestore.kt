@@ -8,9 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import java.util.UUID
 
-class BattleRepositoryFirestore {
-
-  private val db = FirebaseFirestore.getInstance()
+class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
 
   /** Generates a unique battle ID. */
   fun generateUniqueBattleId(): String {
