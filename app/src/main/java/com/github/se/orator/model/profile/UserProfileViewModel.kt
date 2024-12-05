@@ -36,6 +36,12 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
 
+    private val pendingBattles_ = MutableStateFlow<Map<String, String>>(emptyMap())
+    val pendingBattles: StateFlow<Map<String, String>> = pendingBattles_.asStateFlow()
+
+    private val friendsWithPendingBattles_ = MutableStateFlow<List<Pair<UserProfile, String>>>(emptyList())
+    val friendsWithPendingBattles: StateFlow<List<Pair<UserProfile, String>>> = friendsWithPendingBattles_.asStateFlow()
+
   // Init block to fetch user profile automatically after authentication
   init {
     val uid = repository.getCurrentUserUid()

@@ -67,13 +67,7 @@ import kotlinx.coroutines.launch
 fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel,
-    apiLinkViewModel: ApiLinkViewModel,
-    chatViewModel: ChatViewModel,
-    battleViewModel: BattleViewModel =
-        viewModel(
-            factory =
-                BattleViewModelFactory(
-                    userProfileViewModel, navigationActions, apiLinkViewModel, chatViewModel))
+    battleViewModel: BattleViewModel
 ) {
   // State variables for managing friends list and search functionality
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()

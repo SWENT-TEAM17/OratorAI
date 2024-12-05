@@ -10,7 +10,6 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.Message
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
