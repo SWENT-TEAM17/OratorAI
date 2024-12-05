@@ -33,6 +33,8 @@ class ProfileScreenTest {
           age = 25,
           statistics = UserStatistics(),
           friends = listOf("friend1", "friend2"),
+          currentStreak = 10,
+          lastLoginDate = "2024-11-21",
           bio = "Test bio")
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -67,6 +69,8 @@ class ProfileScreenTest {
 
     // Verify the Edit Profile button is displayed
     composeTestRule.onNodeWithTag("edit_button").assertExists()
+    // Verify the streaks design is displayed
+    composeTestRule.onNodeWithTag("current_streak").assertExists()
 
     // Verify the Achievements section is displayed
     composeTestRule.onNodeWithTag("statistics_section").assertIsDisplayed()
@@ -92,6 +96,9 @@ class ProfileScreenTest {
 
     // Perform click on sign-out button
     composeTestRule.onNodeWithContentDescription("Sign out").performClick()
+
+    // Verify navigation to sign in screen
+    Mockito.verify(navigationActions).navigateTo(Screen.AUTH)
   }
 
   @Test

@@ -135,7 +135,8 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
   val apiLinkViewModel = ApiLinkViewModel()
   val speakingViewModel =
-      SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
+      SpeakingViewModel(
+          SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
   // Scaffold composable to provide basic layout structure for the app
@@ -180,20 +181,24 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           navigation(startDestination = Screen.HOME, route = Route.HOME) {
             composable(Screen.HOME) { MainScreen(navigationActions) }
             composable(Screen.SPEAKING_JOB_INTERVIEW) {
-              SpeakingJobInterviewModule(navigationActions, apiLinkViewModel)
+              SpeakingJobInterviewModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
             composable(Screen.SPEAKING_PUBLIC_SPEAKING) {
-              SpeakingPublicSpeakingModule(navigationActions, apiLinkViewModel)
+              SpeakingPublicSpeakingModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
             composable(Screen.SPEAKING_SALES_PITCH) {
-              SpeakingSalesPitchModule(navigationActions, apiLinkViewModel)
+              SpeakingSalesPitchModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
             composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel) }
             composable(Screen.CHAT_SCREEN) {
               ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
             }
             composable(Screen.FEEDBACK) {
-              FeedbackScreen(chatViewModel = chatViewModel, navigationActions = navigationActions)
+              FeedbackScreen(
+                  chatViewModel = chatViewModel,
+                  userProfileViewModel = userProfileViewModel,
+                  apiLinkViewModel = apiLinkViewModel,
+                  navigationActions = navigationActions)
             }
           }
 

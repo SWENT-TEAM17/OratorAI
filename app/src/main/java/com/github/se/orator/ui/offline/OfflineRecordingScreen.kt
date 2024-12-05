@@ -17,7 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -96,16 +96,16 @@ fun OfflineRecordingScreen(
                 .padding(vertical = AppDimensions.paddingMedium)
                 .testTag("BackButtonRow"),
             verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                contentDescription = "Back",
-                modifier =
-                Modifier.size(AppDimensions.iconSizeSmall)
-                    .clickable { navigationActions.goBack() }
-                    .padding(AppDimensions.paddingExtraSmall)
-                    .testTag("back_button"),
-                tint = colors.primary)
-        }
+              Icon(
+                  imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = "Back",
+                  modifier =
+                      Modifier.size(AppDimensions.iconSizeSmall)
+                          .clickable { navigationActions.goBack() }
+                          .padding(AppDimensions.paddingExtraSmall)
+                          .testTag("BackButton"),
+                  tint = colors.primary)
+            }
 
         // Microphone UI and its functionality
         Column(
@@ -140,7 +140,7 @@ fun OfflineRecordingScreen(
                             File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3").also{
                                 Log.d("aall", "\"${viewModel.interviewPromptNb.value}.mp3\"")
                                 recorder.stopRecording()
-                            } 
+                            }
                             analysisState.value = SpeakingRepository.AnalysisState.FINISHED
                         }
                     }

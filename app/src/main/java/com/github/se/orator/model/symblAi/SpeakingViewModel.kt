@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +13,8 @@ import java.io.File
 
 class SpeakingViewModel(
     private val repository: SpeakingRepository,
-    private val apiLinkViewModel: ApiLinkViewModel
+    private val apiLinkViewModel: ApiLinkViewModel,
+    private val userProfileViewModel: UserProfileViewModel
 ) : ViewModel() {
   /** The analysis data collected. It is not final as the user can still re-record another audio. */
   private val _offlineAnalysisData = MutableStateFlow<AnalysisData?>(null)
@@ -35,7 +37,6 @@ class SpeakingViewModel(
   /** True if the user is currently recording their speech, false otherwise. */
   val isRecording: StateFlow<Boolean> = _isRecording
 
-  val interviewPromptNb = MutableStateFlow("")
   /** To be called when the speaking screen is closed or the "Done" button is pressed. */
   fun endAndSave() {
     if (_isRecording.value) {
@@ -70,9 +71,12 @@ class SpeakingViewModel(
         _isRecording.value = false
       } else {
         repository.setupAnalysisResultsUsage(
-            onSuccess = { ad -> _analysisData.value = ad },
-            onFailure = { error -> _analysisError.value = error }
-        )
+            onSuccess = { ad ->
+              _analysisData.value = ad
+              userProfileViewModel.addNewestData(ad)
+              userProfileViewModel.updateMetricMean()
+            },
+            onFailure = { error -> _analysisError.value = error })
         repository.startRecording()
         _isRecording.value = true
       }

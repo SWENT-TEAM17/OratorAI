@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -50,15 +50,15 @@ fun OfflinePracticeQuestionsScreen(navigationActions: NavigationActions) {
             verticalAlignment = Alignment.CenterVertically) {
               // Back button icon, navigates back to Offline screen
               Icon(
-                  imageVector = Icons.Filled.ArrowBack,
-                  contentDescription = "back", // Accessibility description
+                  imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = "Back", // Accessibility description
                   modifier =
                       Modifier.size(AppDimensions.iconSizeSmall)
                           .clickable {
-                            navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
+                            navigationActions.navigateTo(Screen.OFFLINE)
                           } // Go back to Offline screen
                           .padding(AppDimensions.paddingExtraSmall)
-                          .testTag("back_button"), // Test tag for the back button
+                          .testTag("BackButton"), // Test tag for the back button
                   tint = colors.primary // Primary color from the theme for the icon
                   )
 

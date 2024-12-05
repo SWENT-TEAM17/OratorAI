@@ -19,7 +19,6 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.network.Message
-import com.github.se.orator.ui.theme.AppColors // Import AppColors
 import com.github.se.orator.ui.theme.AppDimensions // Import AppDimensions
 
 /**
@@ -53,10 +52,10 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
 
   // Initialize and dispose of the conversation when the composable enters or leaves the
   // composition.
-  DisposableEffect(Unit) {
-    chatViewModel.initializeConversation()
-    onDispose { chatViewModel.endConversation() }
-  }
+  //  DisposableEffect(Unit) {
+  //    chatViewModel.initializeConversation()
+  //    onDispose { chatViewModel.endConversation() }
+  //  }
 
   // Scaffold provides the basic visual layout structure.
   Scaffold(
@@ -67,24 +66,27 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
               Text(
                   text = "Chat Screen",
                   fontWeight = FontWeight.Bold,
-                  color = AppColors.textColor, // Use theme color for text
+                  color = MaterialTheme.colorScheme.onSurface, // Use theme color for text
                   modifier = Modifier.testTag("chat_screen_title"))
             },
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = {
+                    navigationActions.goBack()
+                    chatViewModel.resetPracticeContext()
+                    chatViewModel.endConversation()
+                  },
                   modifier = Modifier.testTag("back_button")) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                        tint = AppColors.textColor) // Use theme color for icon
+                        tint = MaterialTheme.colorScheme.onSurface) // Use theme color for icon
               }
             },
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = AppColors.surfaceColor, // Use theme surface color
-                    titleContentColor = AppColors.textColor), // Use theme text color
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer),
             modifier = Modifier.testTag("top_app_bar"))
       },
       content = { paddingValues ->
@@ -92,7 +94,7 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
             // Divider to separate the TopAppBar from the content.
             modifier =
                 Modifier.fillMaxSize().padding(paddingValues).testTag("chat_screen_column")) {
-              Divider(modifier = Modifier.testTag("divider"))
+              HorizontalDivider(modifier = Modifier.testTag("divider"))
               // Main content column containing the messages and buttons.
               Column(
                   modifier =
@@ -120,7 +122,7 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                               Modifier.align(Alignment.CenterHorizontally)
                                   .padding(AppDimensions.paddingSmall)
                                   .testTag("loading_indicator"),
-                          color = AppColors.loadingIndicatorColor) // Use theme color
+                          color = MaterialTheme.colorScheme.onBackground) // Use theme color
                     }
 
                     // Button to navigate to the "Speaking" screen to record a response.
@@ -131,18 +133,17 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                                 .padding(top = AppDimensions.paddingSmall)
                                 .border(
                                     width = AppDimensions.borderStrokeWidth,
-                                    color = AppColors.buttonBorderColor,
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                                     shape = MaterialTheme.shapes.medium)
                                 .testTag("record_response_button"),
                         enabled = !isLoading,
                         colors =
                             ButtonDefaults.buttonColors(
-                                containerColor = AppColors.buttonOverviewColor, // Use theme color
-                                contentColor = AppColors.textColor // Use theme color
-                                )) {
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                           Text(
                               text = "Record Response",
-                              modifier = Modifier.testTag("record_response_button_text"))
+                              modifier = Modifier.testTag("record_response_button_text"),
+                              color = MaterialTheme.colorScheme.primary)
                         }
 
                     // Button to navigate to the "Feedback" screen to request feedback.
@@ -156,19 +157,19 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                                         AppDimensions
                                             .borderStrokeWidth, // Use dimension for border width
                                     color =
-                                        AppColors.buttonBorderColor, // Use theme color for border
+                                        MaterialTheme.colorScheme.outline.copy(
+                                            alpha = 0.5f), // Use theme color for border
                                     shape =
                                         MaterialTheme.shapes
                                             .medium) // Or any other shape you prefer
                                 .testTag("request_feedback_button"),
                         colors =
                             ButtonDefaults.buttonColors(
-                                containerColor = AppColors.buttonOverviewColor, // Use theme color
-                                contentColor = AppColors.textColor // Use theme color
-                                )) {
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                           Text(
                               text = "Request Feedback",
-                              modifier = Modifier.testTag("request_feedback_button_text"))
+                              modifier = Modifier.testTag("request_feedback_button_text"),
+                              color = MaterialTheme.colorScheme.primary)
                         }
                   }
             }
@@ -189,9 +190,16 @@ fun ChatMessageItem(message: Message) {
   // Determine the background color based on the message role.
   val backgroundColor =
       if (message.role == "user") {
-        AppColors.userMessageBackgroundColor // Use theme color for user messages
+        MaterialTheme.colorScheme.primaryContainer // Use theme color for user messages
       } else {
-        AppColors.assistantMessageBackgroundColor // Use theme color for assistant messages
+        MaterialTheme.colorScheme.secondaryContainer // Use theme color for assistant messages
+      }
+
+  val textColor =
+      if (message.role == "user") {
+        MaterialTheme.colorScheme.onPrimaryContainer // Use theme color for user messages
+      } else {
+        MaterialTheme.colorScheme.onSecondaryContainer // Use theme color for assistant messages
       }
 
   // Determine the alignment based on the message role.
@@ -215,7 +223,7 @@ fun ChatMessageItem(message: Message) {
               // Display the message content.
               Text(
                   text = message.content,
-                  color = AppColors.textColor, // Use theme color for text
+                  color = textColor,
                   modifier = Modifier.testTag("message_text"))
             }
       }

@@ -39,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import com.github.se.orator.model.symblAi.SpeakingError
 import com.github.se.orator.model.symblAi.SpeakingRepository
@@ -61,6 +63,8 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
   // State variables
   val analysisState = viewModel.analysisState.collectAsState()
   val analysisData by viewModel.analysisData.collectAsState()
+
+  val textColor = MaterialTheme.colorScheme.onBackground
 
   // Permission handling
   val permissionGranted = remember { mutableStateOf(false) }
@@ -106,7 +110,7 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
                     else -> "Error : ${viewModel.analysisError.value}"
                   }
             }
-        Text(feedbackMessage, modifier = Modifier.testTag("mic_text"))
+        Text(feedbackMessage, modifier = Modifier.testTag("mic_text"), color = textColor)
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
@@ -118,11 +122,11 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
 
         // Display transcribed text
         if (analysisData != null) {
-          Text("Transcribed Text: ${analysisData!!.transcription}")
+          Text("Transcribed Text: ${analysisData!!.transcription}", color = textColor)
           Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
 
           // Display sentiment analysis result
-          Text("Sentiment Analysis: ${analysisData!!.sentimentScore}")
+          Text("Sentiment Analysis: ${analysisData!!.sentimentScore}", color = textColor)
           Spacer(
               modifier = Modifier.height(AppDimensions.paddingMedium).testTag("sentiment_analysis"))
         }
@@ -136,14 +140,41 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
               modifier = Modifier.testTag("back_button"),
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = Color.White,
+                      containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                       contentColor = MaterialTheme.colorScheme.primary),
               border =
                   BorderStroke(
                       width = AppDimensions.borderStrokeWidth,
-                      color = MaterialTheme.colorScheme.primary)) {
-                Text("Back")
+                      color = MaterialTheme.colorScheme.outline)) {
+                Text("Back", color = MaterialTheme.colorScheme.primary)
               }
         }
       }
 }
+
+///**
+// * A composable that visualizes audio amplitudes as a waveform.
+// *
+// * @param amplitudes A list of amplitude values to visualize.
+// */
+//@Composable
+//fun AudioVisualizer(amplitudes: List<Float>) {
+//  val color = MaterialTheme.colorScheme.onBackground
+//  Canvas(
+//      modifier =
+//          Modifier.fillMaxWidth()
+//              .height(AppDimensions.visualizerHeight)
+//              .testTag("audio_visualizer")) {
+//        val width = size.width
+//        val height = size.height
+//        val barWidth = width / amplitudes.size
+//        amplitudes.forEachIndexed { index, amplitude ->
+//          val barHeight = (amplitude / Short.MAX_VALUE) * height
+//          drawLine(
+//              color = color,
+//              start = Offset(x = index * barWidth, y = height / 2 - barHeight / 2),
+//              end = Offset(x = index * barWidth, y = height / 2 + barHeight / 2),
+//              strokeWidth = barWidth)
+//        }
+//      }
+//}

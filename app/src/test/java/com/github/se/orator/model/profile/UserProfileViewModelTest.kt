@@ -190,23 +190,8 @@ class UserProfileViewModelTest {
   }
 
   @Test
-  fun `deleteFriend should remove friend from friends list`() = runTest {
-    val friendProfile =
-        listOf(
-            UserProfile(
-                uid = "friend1", name = "Friend User", age = 24, statistics = UserStatistics()),
-            UserProfile(
-                uid = "friend2", name = "Friend User", age = 24, statistics = UserStatistics()))
-
-    `when`(repository.getFriendsProfiles(any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
-      onSuccess(friendProfile)
-      null
-    }
-
-    viewModel.getUserProfile(testUid)
-
-    Assert.assertTrue(viewModel.friendsProfiles.value.size == 2)
+  fun `updateLoginStreak should call repository to update streak`() = runTest {
+    `when`(repository.getCurrentUserUid()).thenReturn(testUid)
 
     doAnswer {
           val onSuccess = it.getArgument<() -> Unit>(1)
@@ -214,42 +199,15 @@ class UserProfileViewModelTest {
           null
         }
         .`when`(repository)
-        .updateUserProfile(any(), any(), any())
+        .updateLoginStreak(any(), any(), any())
 
-    viewModel.deleteFriend(friendProfile[0])
+    // Reset interactions to exclude calls from ViewModel initialization
+    clearInvocations(repository)
+
+    viewModel.updateLoginStreak()
     testDispatcher.scheduler.advanceUntilIdle()
 
-    val userProfile = viewModel.friendsProfiles.value
-    Assert.assertTrue(userProfile.size == 1)
-  }
-
-  @Test
-  fun `addFriend should add friend to friends list`() = runTest {
-    val friendProfile =
-        UserProfile(uid = "friend3", name = "Friend User", age = 24, statistics = UserStatistics())
-
-    `when`(repository.getFriendsProfiles(any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
-      onSuccess(listOf())
-      null
-    }
-
-    viewModel.getUserProfile(testUid)
-
-    Assert.assertTrue(viewModel.friendsProfiles.value.isEmpty())
-
-    doAnswer {
-          val onSuccess = it.getArgument<() -> Unit>(1)
-          onSuccess()
-          null
-        }
-        .`when`(repository)
-        .updateUserProfile(any(), any(), any())
-
-    viewModel.addFriend(friendProfile)
-    testDispatcher.scheduler.advanceUntilIdle()
-
-    val userProfile = viewModel.friendsProfiles.value
-    Assert.assertTrue(userProfile.size == 1)
+    verify(repository).updateLoginStreak(eq(testUid), any(), any())
+    verify(repository).getUserProfile(eq(testUid), any(), any())
   }
 }
