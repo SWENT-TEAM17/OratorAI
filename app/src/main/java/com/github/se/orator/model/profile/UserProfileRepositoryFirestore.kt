@@ -704,4 +704,17 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           onFailure()
         }
   }
+
+    fun getSuccessRatioForMode(userStatistics: UserStatistics, practiceMode: SessionType): Double {
+        if (userStatistics.successfulSessions.contains(practiceMode.toString())) {
+            val nbrSuccess = userStatistics.successfulSessions[practiceMode.toString()]
+            val totalNbrSessions = userStatistics.sessionsGiven[practiceMode.toString()]
+            if (nbrSuccess != null && totalNbrSessions != null) {
+                return (nbrSuccess / (nbrSuccess - totalNbrSessions)).toDouble()
+            }
+            return -1.0
+        } else {
+            return -1.0
+        }
+    }
 }
