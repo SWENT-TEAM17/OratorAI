@@ -164,7 +164,8 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
               arguments = listOf(navArgument("question") { type = NavType.StringType })) {
                   backStackEntry ->
                 val question = backStackEntry.arguments?.getString("question") ?: ""
-                OfflineRecordingScreen(LocalContext.current, navigationActions, question, speakingViewModel)
+                OfflineRecordingScreen(
+                    LocalContext.current, navigationActions, question, speakingViewModel)
               }
 
           // Online/auth flow

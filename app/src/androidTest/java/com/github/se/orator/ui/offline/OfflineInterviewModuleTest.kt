@@ -39,7 +39,8 @@ class OfflineInterviewModuleTest {
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
 
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
     composeTestRule.setContent { OfflineInterviewModule(navigationActions, speakingViewModel) }
   }
 

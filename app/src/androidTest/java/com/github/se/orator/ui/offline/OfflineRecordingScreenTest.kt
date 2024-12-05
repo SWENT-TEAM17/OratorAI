@@ -29,7 +29,6 @@ class OfflineRecordingScreenTest {
   private lateinit var userProfileViewModel: UserProfileViewModel
   private lateinit var userProfileRepository: UserProfileRepository
 
-
   @Before
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
@@ -39,14 +38,15 @@ class OfflineRecordingScreenTest {
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
 
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       OfflineRecordingScreen(
-          navigationActions =  navigationActions,
-          question =  "What are your greatest strengths?",
-          viewModel =  speakingViewModel,
-          permissionGranted =  testPermissionGranted)
+          navigationActions = navigationActions,
+          question = "What are your greatest strengths?",
+          viewModel = speakingViewModel,
+          permissionGranted = testPermissionGranted)
     }
   }
 

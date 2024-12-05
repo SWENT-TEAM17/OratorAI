@@ -32,7 +32,8 @@ class RecordingReviewScreen {
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
 
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent { RecordingReviewScreen(navigationActions, speakingViewModel) }
   }

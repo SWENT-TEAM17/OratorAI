@@ -33,7 +33,8 @@ class OfflineRecordingsProfileTest {
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
     apiLinkViewModel = ApiLinkViewModel()
 
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
   }
 
   @Test

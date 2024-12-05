@@ -138,7 +138,6 @@ fun OfflineRecordingScreen(
                                       "aall",
                                       " file saved to: \"${viewModel.interviewPromptNb.value}.mp3\"")
                                   recorder.stopRecording()
-
                                 }
                             analysisState.value = SpeakingRepository.AnalysisState.FINISHED
                           }
