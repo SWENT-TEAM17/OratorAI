@@ -86,4 +86,14 @@ class SettingsScreenTest {
     composeTestRule.onNodeWithTag("theme").performClick()
     assert(appThemeViewModel?.isDark?.value == true)
   }
+
+  @Test
+  fun noThemeViewModelDoesNotCauseACrash() {
+    composeTestRule.setContent {
+      SettingsScreen(
+          navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("theme").performClick()
+  }
 }
