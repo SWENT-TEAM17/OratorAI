@@ -20,48 +20,45 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
 class OfflineInterviewModuleTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    private lateinit var navigationActions: NavigationActions
-    private lateinit var speakingViewModel: SpeakingViewModel
-    private lateinit var speakingRepository: SpeakingRepository
-    private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var navigationActions: NavigationActions
+  private lateinit var speakingViewModel: SpeakingViewModel
+  private lateinit var speakingRepository: SpeakingRepository
+  private lateinit var apiLinkViewModel: ApiLinkViewModel
 
-    @Before
-    fun setUp() {
-        navigationActions = mock(NavigationActions::class.java)
-        speakingRepository = mock(SpeakingRepository::class.java)
-        apiLinkViewModel = ApiLinkViewModel()
+  @Before
+  fun setUp() {
+    navigationActions = mock(NavigationActions::class.java)
+    speakingRepository = mock(SpeakingRepository::class.java)
+    apiLinkViewModel = ApiLinkViewModel()
 
-        speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
-        composeTestRule.setContent {
-            OfflineInterviewModule(navigationActions, speakingViewModel)
-        }
-    }
+    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    composeTestRule.setContent { OfflineInterviewModule(navigationActions, speakingViewModel) }
+  }
 
-    @Test
-    fun testEverythingDisplayed() {
-        composeTestRule.onNodeWithTag("company").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("jobInput").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("content").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("doneButton").assertIsDisplayed()
+  @Test
+  fun testEverythingDisplayed() {
+    composeTestRule.onNodeWithTag("company").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("jobInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("content").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("doneButton").assertIsDisplayed()
 
-        composeTestRule.onNodeWithText("Go to questions screen").assertIsDisplayed()
-    }
+    composeTestRule.onNodeWithText("Go to questions screen").assertIsDisplayed()
+  }
 
-    @Test
-    fun inputJobAndCompany() {
-        composeTestRule.onNodeWithTag("company").performTextInput("Apple")
-        composeTestRule.onNodeWithTag("jobInput").performTextInput("Engineer")
+  @Test
+  fun inputJobAndCompany() {
+    composeTestRule.onNodeWithTag("company").performTextInput("Apple")
+    composeTestRule.onNodeWithTag("jobInput").performTextInput("Engineer")
 
-        composeTestRule.onNodeWithTag("company").assertTextContains("Apple")
-        composeTestRule.onNodeWithTag("jobInput").assertTextContains("Engineer")
-    }
+    composeTestRule.onNodeWithTag("company").assertTextContains("Apple")
+    composeTestRule.onNodeWithTag("jobInput").assertTextContains("Engineer")
+  }
 
-    @Test
-    fun testButtonFunctionality() {
-        composeTestRule.onNodeWithTag("doneButton").performClick()
-        verify(navigationActions).navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
-    }
+  @Test
+  fun testButtonFunctionality() {
+    composeTestRule.onNodeWithTag("doneButton").performClick()
+    verify(navigationActions).navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
+  }
 }

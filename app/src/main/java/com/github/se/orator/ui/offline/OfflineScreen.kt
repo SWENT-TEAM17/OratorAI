@@ -14,10 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
@@ -54,15 +52,14 @@ fun OfflineScreen(navigationActions: NavigationActions) {
                           .background(colors.primary.copy(alpha = 0.1f), CircleShape)
                           .padding(AppDimensions.paddingLarge)
                           .testTag("OfflineScreenIconContainer")) {
-                  Icon(
-                      Icons.Filled.WifiOff,
-                      contentDescription = "No connection",
-                      modifier =
-                      Modifier.size(AppDimensions.iconSize)
-                          .align(Alignment.Center)
-                          .testTag("NoConnectionIcon"),
-                      tint = colors.primary
-                  )
+                    Icon(
+                        Icons.Filled.WifiOff,
+                        contentDescription = "No connection",
+                        modifier =
+                            Modifier.size(AppDimensions.iconSize)
+                                .align(Alignment.Center)
+                                .testTag("NoConnectionIcon"),
+                        tint = colors.primary)
                   }
 
               Spacer(modifier = Modifier.height(AppDimensions.spacerHeightDefault))

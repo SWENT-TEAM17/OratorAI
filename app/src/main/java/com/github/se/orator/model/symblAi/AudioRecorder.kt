@@ -46,7 +46,7 @@ class AudioRecorder(
         AudioRecord(
             MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, bufferSize)
 
-    //audioFile = File(context.cacheDir, "audio_record.wav") // Recording in WAV format
+    // audioFile = File(context.cacheDir, "audio_record.wav") // Recording in WAV format
 
     audioRecord?.startRecording()
     isRecordingAudio = true

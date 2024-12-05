@@ -3,10 +3,10 @@ package com.github.se.orator.model.symblAi
 import android.content.Context
 import android.util.Log
 import com.github.se.orator.model.speaking.AnalysisData
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -26,9 +26,9 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
     audioRecorder.startRecording()
   }
 
-    override fun startRecordingToFile(audioFile: File) {
-        audioRecorder.startRecording(audioFile)
-    }
+  override fun startRecordingToFile(audioFile: File) {
+    audioRecorder.startRecording(audioFile)
+  }
 
   override fun stopRecording() {
     audioRecorder.stopRecording()
@@ -66,36 +66,38 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
     _analysisState.value = SpeakingRepository.AnalysisState.IDLE
   }
 
-    override fun getTranscript(audioFile: File, onSuccess: (AnalysisData) -> Unit, onFailure: (SpeakingError) -> Unit) {
-        Log.d("smiling", "again")
-//        setupAnalysisResultsUsage(onSuccess, onFailure)
-//
-//        symblApiClient.getTranscription(audioFile,
-//            onSuccess = { analysisData ->
-//                Log.d("SymblApiClient", "Transcription successful: ${analysisData.transcription}")
-//                onSuccess(analysisData)
-//            },
-//            onFailure = { error ->
-//                Log.e("SymblApiClient", "Transcription failed: $error")
-//                onFailure(error)
-//            })
-//    }
-        CoroutineScope(Dispatchers.IO).launch {
-            delay(5_000) // Delay for 10 seconds (10,000 milliseconds)
+  override fun getTranscript(
+      audioFile: File,
+      onSuccess: (AnalysisData) -> Unit,
+      onFailure: (SpeakingError) -> Unit
+  ) {
+    //        setupAnalysisResultsUsage(onSuccess, onFailure)
+    //
+    //        symblApiClient.getTranscription(audioFile,
+    //            onSuccess = { analysisData ->
+    //                Log.d("SymblApiClient", "Transcription successful:
+    // ${analysisData.transcription}")
+    //                onSuccess(analysisData)
+    //            },
+    //            onFailure = { error ->
+    //                Log.e("SymblApiClient", "Transcription failed: $error")
+    //                onFailure(error)
+    //            })
+    //    }
+    CoroutineScope(Dispatchers.IO).launch {
+      delay(5_000) // Delay for 10 seconds (10,000 milliseconds)
 
-            // Now proceed with transcription after the delay
-            symblApiClient.getTranscription(audioFile,
-                onSuccess = { analysisData ->
-                    Log.d(
-                        "SymblApiClient",
-                        "Transcription successful: ${analysisData.transcription}"
-                    )
-                    onSuccess(analysisData)
-                },
-                onFailure = { error ->
-                    Log.e("SymblApiClient", "Transcription failed: $error")
-                    onFailure(error)
-                })
-        }
+      // Now proceed with transcription after the delay
+      symblApiClient.getTranscription(
+          audioFile,
+          onSuccess = { analysisData ->
+            Log.d("SymblApiClient", "Transcription successful: ${analysisData.transcription}")
+            onSuccess(analysisData)
+          },
+          onFailure = { error ->
+            Log.e("SymblApiClient", "Transcription failed: $error")
+            onFailure(error)
+          })
     }
+  }
 }

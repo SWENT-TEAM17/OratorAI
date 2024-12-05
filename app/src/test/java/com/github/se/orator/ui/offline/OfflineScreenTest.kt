@@ -3,13 +3,11 @@ package com.github.se.orator.ui.offline
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.github.se.orator.ui.navigation.NavigationActions
-import com.github.se.orator.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -41,12 +39,12 @@ class OfflineScreenTest {
     composeTestRule.onNodeWithText("Practice Offline").assertIsDisplayed()
   }
 
-//  @Test
-//  fun testPracticeOfflineButtonNavigation() {
-//    composeTestRule.setContent { OfflineScreen(navigationActions = navigationActions) }
-//
-//    // Click on "Practice Offline" button and verify navigation action
-//    composeTestRule.onNodeWithText("Practice Offline").performClick()
-//    verify(navigationActions).navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
-//  }
+  //  @Test
+  //  fun testPracticeOfflineButtonNavigation() {
+  //    composeTestRule.setContent { OfflineScreen(navigationActions = navigationActions) }
+  //
+  //    // Click on "Practice Offline" button and verify navigation action
+  //    composeTestRule.onNodeWithText("Practice Offline").performClick()
+  //    verify(navigationActions).navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
+  //  }
 }
