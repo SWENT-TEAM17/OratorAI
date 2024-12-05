@@ -5,6 +5,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -59,10 +60,12 @@ import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.google.firebase.auth.FirebaseAuth
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
+  lateinit var textToSpeech: TextToSpeech
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
   private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
 
@@ -97,6 +100,14 @@ class MainActivity : ComponentActivity() {
       }
     }
 
+    textToSpeech =
+        TextToSpeech(this) { status ->
+          if (status == TextToSpeech.SUCCESS) {
+            textToSpeech.setSpeechRate(1.7f)
+            textToSpeech.language = Locale.UK
+          }
+        }
+
     enableEdgeToEdge()
     setContent {
       ProjectTheme {
@@ -105,7 +116,7 @@ class MainActivity : ComponentActivity() {
             ) {
               // Observe offline mode state
               val isOffline by offlineViewModel.isOffline.observeAsState(false)
-              OratorApp(chatGPTService, isOffline)
+              OratorApp(chatGPTService, isOffline, textToSpeech)
             }
       }
     }
@@ -120,7 +131,7 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
+fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean, textToSpeech: TextToSpeech) {
   // Create NavController for navigation within the app
   val navController = rememberNavController()
   // Initialize NavigationActions to handle navigation events
@@ -132,7 +143,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val speakingViewModel =
       SpeakingViewModel(
           SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel, userProfileViewModel)
-  val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+  val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
   // Scaffold composable to provide basic layout structure for the app
   Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {

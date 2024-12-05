@@ -1,5 +1,6 @@
 package com.github.se.orator.model.chatGPT
 
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val chatGPTService: ChatGPTService,
-    private val apiLinkViewModel: ApiLinkViewModel
+    private val apiLinkViewModel: ApiLinkViewModel,
+    private val textToSpeech: TextToSpeech? = null
 ) : ViewModel() {
 
   private var isConversationInitialized = false
@@ -158,6 +160,8 @@ class ChatViewModel(
 
         response.choices.firstOrNull()?.message?.let { responseMessage ->
           _chatMessages.value = _chatMessages.value + responseMessage
+
+          textToSpeech?.speak(responseMessage.toString(), TextToSpeech.QUEUE_FLUSH, null, "5x7CCx")
         }
       } catch (e: Exception) {
         handleError(e)
