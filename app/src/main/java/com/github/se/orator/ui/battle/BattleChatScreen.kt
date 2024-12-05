@@ -8,6 +8,7 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.overview.ChatButtonType
 import com.github.se.orator.ui.overview.ChatScreen
 
 /**
@@ -51,9 +52,8 @@ fun BattleChatScreen(
   ChatScreen(
       navigationActions = navigationActions,
       chatViewModel = chatViewModel,
-      feedbackButtonText = "Finish Battle",
-      onFeedbackButtonClick = {
-
+      chatButtonType = ChatButtonType.FINISH_BATTLE_BUTTON,
+      onChatButtonClick = {
         // Handle finishing the battle session
         battleViewModel.markUserBattleCompleted(battleId, userId, chatMessages)
       })

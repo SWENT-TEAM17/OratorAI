@@ -19,8 +19,28 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.network.Message
-import com.github.se.orator.ui.theme.AppColors // Import AppColors
-import com.github.se.orator.ui.theme.AppDimensions // Import AppDimensions
+import com.github.se.orator.ui.theme.AppColors
+import com.github.se.orator.ui.theme.AppDimensions
+
+/**
+ * Enum class representing the different types of buttons that can be displayed in the chat screen.
+ *
+ * @param testTag The test tag for the button.
+ * @param buttonText The text to display on the button.
+ */
+enum class ChatButtonType(
+    val testTag: String,
+    val buttonText: String
+) {
+    FEEDBACK_BUTTON(
+        testTag = "feedback_button",
+        buttonText = "Request Feedback",
+    ),
+    FINISH_BATTLE_BUTTON(
+        testTag = "finish_battle_button",
+        buttonText = "Finish Battle"
+    );
+}
 
 /**
  * Composable function that represents the Chat Screen.
@@ -37,8 +57,8 @@ import com.github.se.orator.ui.theme.AppDimensions // Import AppDimensions
 fun ChatScreen(
     navigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
-    feedbackButtonText: String = "Request Feedback",
-    onFeedbackButtonClick: () -> Unit = { navigationActions.navigateTo(Screen.FEEDBACK) }
+    chatButtonType: ChatButtonType = ChatButtonType.FEEDBACK_BUTTON,
+    onChatButtonClick: () -> Unit = { navigationActions.navigateTo(Screen.FEEDBACK) }
 ) {
   // Collect the list of chat messages from the view model as a state.
   val chatMessages by chatViewModel.chatMessages.collectAsState()
@@ -150,7 +170,7 @@ fun ChatScreen(
 
                     // Dynamic "Request Feedback" button with customizable text and action.
                     Button(
-                        onClick = { onFeedbackButtonClick() }, // Custom action for the button
+                        onClick = { onChatButtonClick() }, // Custom action for the button
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = AppDimensions.paddingSmall)
@@ -158,14 +178,14 @@ fun ChatScreen(
                                     width = AppDimensions.borderStrokeWidth,
                                     color = AppColors.buttonBorderColor,
                                     shape = MaterialTheme.shapes.medium)
-                                .testTag("feedback_button"),
+                                .testTag(chatButtonType.testTag),
                         colors =
                             ButtonDefaults.buttonColors(
                                 containerColor = AppColors.buttonOverviewColor, // Use theme color
                                 contentColor = AppColors.textColor // Use theme color
                                 )) {
                           Text(
-                              text = feedbackButtonText, // Custom text for the button
+                              text = chatButtonType.buttonText, // Custom text for the button
                               modifier = Modifier.testTag("feedback_button_text"))
                         }
                   }
@@ -215,3 +235,5 @@ fun ChatMessageItem(message: Message) {
             }
       }
 }
+
+
