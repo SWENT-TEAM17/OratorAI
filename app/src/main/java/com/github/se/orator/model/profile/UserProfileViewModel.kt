@@ -630,4 +630,28 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       Log.e("UserProfileViewModel", "Cannot update streak: User is not authenticated.")
     }
   }
+
+    fun getSuccessRatioForMode(userStatistics: UserStatistics, practiceMode: SessionType): Double {
+        if (userStatistics.successfulSessions.contains(practiceMode.toString())) {
+            val nbrSuccess = userStatistics.successfulSessions[practiceMode.toString()]
+            val totalNbrSessions = userStatistics.sessionsGiven[practiceMode.toString()]
+            if (nbrSuccess != null && totalNbrSessions != null) {
+                return (nbrSuccess / (nbrSuccess - totalNbrSessions)).toDouble()
+            }
+            return -1.0
+        } else {
+            return -1.0
+        }
+    }
+
+    fun getSuccessForMode(userStatistics: UserStatistics, practiceMode: SessionType): Int {
+      if (userStatistics.successfulSessions.contains(practiceMode.toString())) {
+        val nbrSuccess = userStatistics.successfulSessions[practiceMode.toString()]
+        if (nbrSuccess != null) {
+            return nbrSuccess
+        }
+        return -1
+      }
+      return -1
+    }
 }
