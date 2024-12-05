@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.profile.UserProfileRepository
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -19,14 +21,18 @@ class RecordingReviewScreen {
   private lateinit var speakingViewModel: SpeakingViewModel
   private lateinit var speakingRepository: SpeakingRepository
   private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var userProfileRepository: UserProfileRepository
 
   @Before
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
     speakingRepository = mock(SpeakingRepository::class.java)
     apiLinkViewModel = ApiLinkViewModel()
+    userProfileRepository = mock(UserProfileRepository::class.java)
+    userProfileViewModel = UserProfileViewModel(userProfileRepository)
 
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent { RecordingReviewScreen(navigationActions, speakingViewModel) }
   }

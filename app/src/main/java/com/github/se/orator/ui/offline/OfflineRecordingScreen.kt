@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
 @Composable
 fun OfflineRecordingScreen(
-    context: Context,
+    context: Context = LocalContext.current,
     navigationActions: NavigationActions,
     question: String,
     viewModel: SpeakingViewModel = viewModel(),

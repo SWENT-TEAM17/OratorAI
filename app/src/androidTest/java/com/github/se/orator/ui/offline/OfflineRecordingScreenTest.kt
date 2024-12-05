@@ -8,6 +8,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.profile.UserProfileRepository
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -24,6 +26,9 @@ class OfflineRecordingScreenTest {
   private lateinit var speakingRepository: SpeakingRepository
   private lateinit var apiLinkViewModel: ApiLinkViewModel
   private lateinit var testPermissionGranted: MutableState<Boolean>
+  private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var userProfileRepository: UserProfileRepository
+
 
   @Before
   fun setUp() {
@@ -31,21 +36,23 @@ class OfflineRecordingScreenTest {
     speakingRepository = mock(SpeakingRepository::class.java)
     apiLinkViewModel = ApiLinkViewModel()
     testPermissionGranted = mutableStateOf(false)
+    userProfileRepository = mock(UserProfileRepository::class.java)
+    userProfileViewModel = UserProfileViewModel(userProfileRepository)
 
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       OfflineRecordingScreen(
-          navigationActions,
-          "What are your greatest strengths?",
-          speakingViewModel,
-          testPermissionGranted)
+          navigationActions =  navigationActions,
+          question =  "What are your greatest strengths?",
+          viewModel =  speakingViewModel,
+          permissionGranted =  testPermissionGranted)
     }
   }
 
   @Test
   fun asserEverythingIsDisplayed() {
-    composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("RecordingColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("MicIconContainer").assertIsDisplayed()
     composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()

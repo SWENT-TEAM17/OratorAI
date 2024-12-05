@@ -27,7 +27,7 @@ class OfflinePracticeQuestionsScreenTest {
   @Test
   fun testEverythingIsDisplayed() {
     composeTestRule.onNodeWithTag("OfflinePracticeQuestionsScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("TitleText").assertIsDisplayed()
     composeTestRule.onNodeWithText("Choose your practice question").assertIsDisplayed()
 

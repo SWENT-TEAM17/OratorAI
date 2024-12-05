@@ -5,6 +5,8 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.profile.UserProfileRepository
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -16,6 +18,8 @@ import org.mockito.Mockito.mock
 class OfflineRecordingsProfileTest {
   @get:Rule val composeTestRule = createComposeRule()
 
+  private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var userProfileRepository: UserProfileRepository
   private lateinit var navigationActions: NavigationActions
   private lateinit var speakingViewModel: SpeakingViewModel
   private lateinit var speakingRepository: SpeakingRepository
@@ -25,9 +29,11 @@ class OfflineRecordingsProfileTest {
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
     speakingRepository = mock(SpeakingRepository::class.java)
+    userProfileRepository = mock(UserProfileRepository::class.java)
+    userProfileViewModel = UserProfileViewModel(userProfileRepository)
     apiLinkViewModel = ApiLinkViewModel()
 
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
   }
 
   @Test

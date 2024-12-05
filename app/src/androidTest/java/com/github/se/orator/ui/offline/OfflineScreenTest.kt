@@ -44,6 +44,6 @@ class OfflineScreenTest {
 
     // Click on "Practice Offline" button and verify navigation action
     composeTestRule.onNodeWithText("Practice Offline").performClick()
-    verify(navigationActions).navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
+    verify(navigationActions).navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
   }
 }
