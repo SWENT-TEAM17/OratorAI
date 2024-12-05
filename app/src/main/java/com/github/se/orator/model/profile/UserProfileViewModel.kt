@@ -636,7 +636,10 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
             val nbrSuccess = userStatistics.successfulSessions[practiceMode.toString()]
             val totalNbrSessions = userStatistics.sessionsGiven[practiceMode.toString()]
             if (nbrSuccess != null && totalNbrSessions != null) {
-                return (nbrSuccess / (nbrSuccess - totalNbrSessions)).toDouble()
+                val nbrFailures = nbrSuccess - totalNbrSessions
+                if (nbrFailures != 0) {
+                    return (nbrSuccess / nbrFailures).toDouble()
+                }
             }
             return -1.0
         } else {
