@@ -27,8 +27,8 @@ class AppThemeViewModel(private val context: Context) {
    */
   fun loadTheme(deviceThemeIsDarkTheme: Boolean) {
     val preference =
-        context.getSharedPreferences(
-            "isDark", Context.MODE_PRIVATE) // NOSONAR - This is not sensitive information
+        context.getSharedPreferences( // NOSONAR - This is not sensitive information
+            "isDark", Context.MODE_PRIVATE)
     _isDark.value = preference.getBoolean(IS_DARK_NAME, deviceThemeIsDarkTheme)
     this.deviceThemeIsDarkTheme = deviceThemeIsDarkTheme
   }
@@ -40,8 +40,8 @@ class AppThemeViewModel(private val context: Context) {
    */
   fun saveTheme(isDark: Boolean) {
     val preference =
-        context.getSharedPreferences(
-            "isDark", Context.MODE_PRIVATE) // NOSONAR - This is not sensitive information
+        context.getSharedPreferences( // NOSONAR - This is not sensitive information
+            "isDark", Context.MODE_PRIVATE)
     if (isDark != this.isDark.value) {
       preference.edit().putBoolean(IS_DARK_NAME, isDark).apply()
       _isDark.value = isDark
