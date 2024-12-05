@@ -70,7 +70,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun clickOnThemeButton() {
+  fun clickOnThemeButtonTriggersThemeSwitch() {
     var appThemeViewModel: AppThemeViewModel? = null
 
     composeTestRule.setContent {
