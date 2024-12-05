@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.github.se.orator.model.speaking.AnalysisData
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +45,10 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   // Loading state to indicate if the profile is being fetched
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
+
+  // Queue of the last ten analysis data
+  private val recentData_ = MutableStateFlow<ArrayDeque<AnalysisData>>(ArrayDeque())
+  val recentData: StateFlow<ArrayDeque<AnalysisData>> = recentData_.asStateFlow()
 
   // Init block to fetch user profile automatically after authentication
   init {
@@ -471,6 +476,102 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     } else {
       Log.e("UserProfileViewModel", "Cannot delete friend: User is not authenticated.")
       // Optionally, handle unauthenticated state here (e.g., prompt user to log in)
+    }
+  }
+
+  /**
+   * Adds an AnalysisData object to the queue while ensuring the queue maintains a maximum size of
+   * 10 elements.
+   *
+   * This function adds the given data to the end of the queue. If the queue already contains 10
+   * elements, the oldest element (at the front of the queue) is removed before adding the new
+   * metric. It also validates the AnalysisData object before adding it to ensure data integrity.
+   *
+   * @param queue The MutableStateFlow containing the ArrayDeque of AnalysisData.
+   * @param value The new AnalysisData object to be added to the queue.
+   * @return The updated ArrayDeque with the new value if valid, otherwise the original queue.
+   */
+  private fun addData(
+      queue: MutableStateFlow<ArrayDeque<AnalysisData>>,
+      value: AnalysisData
+  ): ArrayDeque<AnalysisData> {
+    // Validate the AnalysisData object
+    if (!value.isValid()) {
+      Log.e("addData", "Attempted to add invalid AnalysisData: $value")
+      return queue.value // Return the original queue without adding invalid data
+    }
+
+    // Add data to the queue while maintaining a maximum size of 10
+    val updatedQueue =
+        queue.value.apply {
+          if (size >= 10) {
+            removeFirst() // Remove the oldest element if the queue is full
+          }
+          addLast(value) // Add the new data to the end of the queue
+        }
+
+    // Update the MutableStateFlow with the new queue
+    queue.value = updatedQueue
+
+    return updatedQueue
+  }
+
+  /**
+   * Adds the latest analysis data to its respective queue and update the profile to save the
+   * updated queue
+   *
+   * @param value The new value to be added to the queue.
+   */
+  fun addNewestData(value: AnalysisData) {
+    val currentUserProfile = userProfile_.value
+    if (currentUserProfile != null) {
+      val currentStats = currentUserProfile.statistics
+      val updatedQueue = addData(recentData_, value)
+
+      // Create a new statistics object with the updated queue
+      val updatedStats = currentStats.copy(recentData = updatedQueue)
+
+      // Create a new profile object with the updated queue
+      val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
+
+      // Updates the user profile with the new one
+      updateUserProfile(updatedProfile)
+
+      userProfile_.value = updatedProfile
+    } else {
+      Log.e("UserProfileViewModel", "Failed to add new metric value: Current user profile is null.")
+    }
+  }
+
+  /**
+   * Calculates the means of the values of talk time seconds and percentage queues and update the
+   * profile with the new means
+   */
+  fun updateMetricMean() {
+    val currentUserProfile = userProfile_.value
+
+    if (currentUserProfile != null) {
+      val currentStats = currentUserProfile.statistics
+      // Calculate the mean of the values of the metric queues
+      val updatedTalkTimeSecMean =
+          repository.getMetricMean(recentData_.value.map { data -> data.talkTimeSeconds })
+      val updatedTalkTimePercMean =
+          repository.getMetricMean(recentData_.value.map { data -> data.talkTimePercentage })
+
+      // Create a new statistics object with the updated means
+      val updatedStats =
+          currentStats.copy(
+              talkTimeSecMean = updatedTalkTimeSecMean, talkTimePercMean = updatedTalkTimePercMean)
+
+      // Create a new profile object with the updated stats
+      val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
+
+      // Updates the user profile with the new one
+      updateUserProfile(updatedProfile)
+
+      userProfile_.value = updatedProfile
+    } else {
+      Log.e("UserProfileViewModel", "Failed to update metric means: Current user profile is null.")
     }
   }
 
