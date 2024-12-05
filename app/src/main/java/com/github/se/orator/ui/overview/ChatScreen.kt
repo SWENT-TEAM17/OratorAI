@@ -127,7 +127,10 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
 
                     // Button to navigate to the "Speaking" screen to record a response.
                     Button(
-                        onClick = { navigationActions.navigateTo(Screen.SPEAKING) },
+                        onClick = {
+                          chatViewModel.toggleTextToSpeech(false)
+                          navigationActions.navigateTo(Screen.SPEAKING)
+                        },
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = AppDimensions.paddingSmall)
@@ -148,7 +151,10 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
 
                     // Button to navigate to the "Feedback" screen to request feedback.
                     Button(
-                        onClick = { navigationActions.navigateTo(Screen.FEEDBACK) },
+                        onClick = {
+                          chatViewModel.toggleTextToSpeech(false)
+                          navigationActions.navigateTo(Screen.FEEDBACK)
+                        },
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = AppDimensions.paddingSmall)

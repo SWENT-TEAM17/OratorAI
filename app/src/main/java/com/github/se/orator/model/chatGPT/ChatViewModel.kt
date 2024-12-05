@@ -42,8 +42,34 @@ class ChatViewModel(
 
   data class DecisionResult(val message: String, val isSuccess: Boolean)
 
+  // boolean to check if the text to speech is allowed to run
+  // For example we wouldn't want the speech to keep going after exiting the chat screen
+  private val _isTextToSpeechActive = MutableStateFlow(true)
+  val isTextToSpeechActive = _isTextToSpeechActive.asStateFlow()
+
+  /**
+   * Function that checks actively whether the speech bot's permission to speak are active so that
+   * it can be cut-off mid-sentence
+   */
+  private fun observeTextToSpeechState() {
+    viewModelScope.launch {
+      _isTextToSpeechActive.collectLatest { isActive ->
+        if (!isActive) {
+          textToSpeech?.stop() // Stop the TextToSpeech engine
+          Log.d("ChatViewModel", "TextToSpeech stopped as the state turned to false.")
+          toggleTextToSpeech(true)
+        }
+      }
+    }
+  }
+
   init {
+    observeTextToSpeechState()
     observeAnalysisData()
+  }
+
+  fun toggleTextToSpeech(isActive: Boolean) {
+    _isTextToSpeechActive.value = isActive
   }
 
   fun initializeConversation() {
@@ -160,8 +186,11 @@ class ChatViewModel(
 
         response.choices.firstOrNull()?.message?.let { responseMessage ->
           _chatMessages.value = _chatMessages.value + responseMessage
-
-          textToSpeech?.speak(responseMessage.toString(), TextToSpeech.QUEUE_FLUSH, null, "5x7CCx")
+          textToSpeech?.speak(
+              responseMessage.toString().removePrefix("Message(role=assistant, content="),
+              TextToSpeech.QUEUE_FLUSH,
+              null,
+              "5x7CCx")
         }
       } catch (e: Exception) {
         handleError(e)
