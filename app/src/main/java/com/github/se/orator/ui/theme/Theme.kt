@@ -25,7 +25,7 @@ import androidx.core.view.WindowCompat
 
 object AppDimensions {
 
-  // Reference dimensions based on your design (e.g., Figma)
+    //Reference Dimensions
   private const val MODEL_WIDTH_DP = 448.0f // Base width in dp from design
   private const val MODEL_HEIGHT_DP = 923.0f // Base height in dp from design
 

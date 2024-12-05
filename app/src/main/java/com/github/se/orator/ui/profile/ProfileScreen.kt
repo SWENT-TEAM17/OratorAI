@@ -51,7 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
@@ -62,6 +61,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.COLOR_AMBER
@@ -189,7 +189,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                   // Username remains centered
                                   Text(
                                       text = profile.name,
-                                      fontSize = 20.sp,
+                                      fontSize = AppFontSizes.titleMedium,
                                       fontWeight = FontWeight.Bold,
                                       modifier = Modifier.testTag("profile_name"),
                                       color = MaterialTheme.colorScheme.primary)
@@ -213,7 +213,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                         Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                                         Text(
                                             text = "${profile.currentStreak}",
-                                            fontSize = 20.sp,
+                                            fontSize = AppFontSizes.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = COLOR_AMBER,
                                             maxLines = 1,
@@ -350,7 +350,7 @@ fun CardSection(
               Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
               Text(
                   text = title,
-                  fontSize = 18.sp,
+                  fontSize = AppFontSizes.bodyLarge,
                   fontWeight = FontWeight.Bold,
                   modifier = Modifier.testTag("titleText"),
                   color = MaterialTheme.colorScheme.onSurfaceVariant)
