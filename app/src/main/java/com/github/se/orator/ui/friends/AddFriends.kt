@@ -369,7 +369,7 @@ fun UserItem(
                         text = user.name,
                         style = MaterialTheme.typography.titleMedium,
                         modifier =
-                            Modifier.padding(bottom = AppDimensions.smallPadding)
+                            Modifier.padding(bottom = AppDimensions.mediumHeight)
                                 .testTag("userName#${user.uid}"),
                         color = MaterialTheme.colorScheme.primary)
 

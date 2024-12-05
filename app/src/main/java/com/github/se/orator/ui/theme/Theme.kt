@@ -13,6 +13,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
@@ -26,219 +27,235 @@ import androidx.core.view.WindowCompat
 
 object AppDimensions {
 
-  // Helper functions to get screen dimensions
-  @Composable private fun screenWidth() = LocalConfiguration.current.screenWidthDp.dp
+  // Reference dimensions based on your design (e.g., Figma)
+  private const val MODEL_WIDTH_DP = 448.0f // Base width in dp from design
+  private const val MODEL_HEIGHT_DP = 923.0f // Base height in dp from design
 
-  @Composable private fun screenHeight() = LocalConfiguration.current.screenHeightDp.dp
+  // Scale factors based on current screen dimensions
+  @Composable
+  private fun scaleFactorWidth(): Float {
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp.toFloat()
+    return remember(screenWidthDp) { screenWidthDp / MODEL_WIDTH_DP }
+  }
+
+  @Composable
+  private fun scaleFactorHeight(): Float {
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp.toFloat()
+    return remember(screenHeightDp) { screenHeightDp / MODEL_HEIGHT_DP }
+  }
 
   // Padding
   val paddingSmall: Dp
-    @Composable get() = (screenWidth() * 0.02f).coerceIn(4.dp, 8.dp)
+    @Composable get() = (scaleFactorWidth() * 8.0f).dp
 
   val paddingMedium: Dp
-    @Composable get() = (screenWidth() * 0.04f).coerceIn(8.dp, 16.dp)
+    @Composable get() = (scaleFactorWidth() * 16.0f).dp
 
   val paddingLarge: Dp
-    @Composable get() = (screenWidth() * 0.06f).coerceIn(12.dp, 24.dp)
+    @Composable get() = (scaleFactorWidth() * 24.0f).dp
 
   val paddingExtraLarge: Dp
-    @Composable get() = (screenWidth() * 0.08f).coerceIn(16.dp, 32.dp)
+    @Composable get() = (scaleFactorWidth() * 32.0f).dp
 
   val paddingXXLarge: Dp
-    @Composable get() = (screenWidth() * 0.1f).coerceIn(24.dp, 42.dp)
+    @Composable get() = (scaleFactorWidth() * 42.0f).dp
 
   val paddingXXXLarge: Dp
-    @Composable get() = (screenWidth() * 0.15f).coerceIn(32.dp, 64.dp)
+    @Composable get() = (scaleFactorWidth() * 64.0f).dp
 
   val paddingExtraSmall: Dp
-    @Composable get() = (screenWidth() * 0.01f).coerceIn(2.dp, 4.dp)
+    @Composable get() = (scaleFactorWidth() * 4.0f).dp
 
   val paddingSmallMedium: Dp
-    @Composable get() = (screenWidth() * 0.03f).coerceIn(6.dp, 12.dp)
+    @Composable get() = (scaleFactorWidth() * 12.0f).dp
 
   val paddingMediumSmall: Dp
-    @Composable get() = (screenWidth() * 0.05f).coerceIn(10.dp, 20.dp)
+    @Composable get() = (scaleFactorWidth() * 20.0f).dp
 
   val paddingTopSmall: Dp
-    @Composable get() = (screenHeight() * 0.005f).coerceIn(2.dp, 5.dp)
+    @Composable get() = (scaleFactorHeight() * 5.0f).dp
 
   val statusBarPadding: Dp
-    @Composable get() = (screenHeight() * 0.015f).coerceIn(6.dp, 10.dp)
+    @Composable get() = (scaleFactorHeight() * 10.0f).dp
 
   val smallPadding: Dp
     @Composable get() = paddingExtraSmall
 
   // Spacer Dimensions
   val largeSpacerHeight: Dp
-    @Composable get() = (screenHeight() * 0.1f).coerceIn(50.dp, 100.dp)
+    @Composable get() = (scaleFactorHeight() * 100.0f).dp
 
   val mediumSpacerHeight: Dp
-    @Composable get() = (screenHeight() * 0.07f).coerceIn(35.dp, 70.dp)
+    @Composable get() = (scaleFactorHeight() * 50.0f).dp
 
   val smallSpacerHeight: Dp
-    @Composable get() = (screenHeight() * 0.02f).coerceIn(10.dp, 20.dp)
+    @Composable get() = (scaleFactorHeight() * 15.0f).dp
 
   val spacerWidthMedium: Dp
-    @Composable get() = (screenWidth() * 0.04f).coerceIn(8.dp, 16.dp)
+    @Composable get() = (scaleFactorWidth() * 16.0f).dp
 
   val spacerHeightLarge: Dp
-    @Composable get() = (screenHeight() * 0.03f).coerceIn(12.dp, 24.dp)
+    @Composable get() = (scaleFactorHeight() * 30.0f).dp
 
   val spacerHeightMedium: Dp
-    @Composable get() = (screenHeight() * 0.015f).coerceIn(6.dp, 12.dp)
+    @Composable get() = (scaleFactorHeight() * 8.0f).dp
 
   val spacerHeightDefault: Dp
-    @Composable get() = (screenHeight() * 0.04f).coerceIn(16.dp, 32.dp)
+    @Composable get() = (scaleFactorHeight() * 32.0f).dp
 
   // Button Heights and Sizes
   val buttonHeight: Dp
-    @Composable get() = (screenHeight() * 0.06f).coerceIn(40.dp, 60.dp)
+    @Composable get() = (scaleFactorHeight() * 48.0f).dp
 
   val buttonHeightLarge: Dp
-    @Composable get() = (screenHeight() * 0.07f).coerceIn(45.dp, 70.dp)
+    @Composable get() = (scaleFactorHeight() * 50.0f).dp
 
   val buttonHeightRounded: Dp
     @Composable get() = buttonHeightLarge
 
   val buttonSize: Dp
-    @Composable get() = (screenWidth() * 0.2f).coerceIn(60.dp, 100.dp)
+    @Composable get() = (scaleFactorWidth() * 80.0f).dp
 
   val buttonWidthMin: Dp
-    @Composable get() = (screenWidth() * 0.5f).coerceIn(150.dp, 200.dp)
+    @Composable get() = (scaleFactorWidth() * 200.0f).dp
 
   val buttonWidthMax: Dp
-    @Composable get() = (screenWidth() * 0.7f).coerceIn(250.dp, 300.dp)
+    @Composable get() = (scaleFactorWidth() * 300.0f).dp
 
   // Logo Dimensions
   val logoSize: Dp
-    @Composable get() = (screenWidth() * 0.4f).coerceIn(100.dp, 250.dp)
+    @Composable get() = (scaleFactorWidth() * 250.0f).dp
 
   val logoTextWidth: Dp
-    @Composable get() = (screenWidth() * 0.6f).coerceIn(150.dp, 276.dp)
+    @Composable get() = (scaleFactorWidth() * 276.0f).dp
 
   val logoTextHeight: Dp
-    @Composable get() = (screenHeight() * 0.15f).coerceIn(70.dp, 141.dp)
+    @Composable get() = (scaleFactorHeight() * 141.0f).dp
 
   val googleLogoSize: Dp
-    @Composable get() = (screenWidth() * 0.08f).coerceIn(24.dp, 30.dp)
+    @Composable get() = (scaleFactorWidth() * 30.0f).dp
 
   val imageLargeXXL: Dp
-    @Composable get() = (screenWidth() * 0.8f).coerceIn(200.dp, 350.dp)
-
-  // Fixed Dimensions
-  val strokeWidth: Dp = 8.dp
-  val borderStrokeWidth: Dp = 1.dp
-  val dividerThickness: Dp = 3.dp
-  val appBarElevation: Dp = 0.dp
-  val elevationSmall: Dp = 4.dp
-  val shadowElevation: Dp = 5.dp
-
-  // Loading Indicator
-  val loadingIndicatorSize: Dp
-    @Composable get() = (screenWidth() * 0.1f).coerceIn(40.dp, 64.dp)
-
-  // Corner Radii
-  val roundedCornerRadius: Dp
-    @Composable get() = (screenWidth() * 0.03f).coerceIn(8.dp, 16.dp)
-
-  val cornerRadiusSmall: Dp
-    @Composable get() = (screenWidth() * 0.02f).coerceIn(4.dp, 8.dp)
+    @Composable get() = (scaleFactorWidth() * 350.0f).dp
 
   // Icon Sizes
   val iconSize: Dp
-    @Composable get() = (screenWidth() * 0.15f).coerceIn(60.dp, 100.dp)
+    @Composable get() = (scaleFactorWidth() * 100.0f).dp
 
   val iconSizeSmall: Dp
-    @Composable get() = (screenWidth() * 0.08f).coerceIn(24.dp, 32.dp)
+    @Composable get() = (scaleFactorWidth() * 32.0f).dp
 
   val iconSizeMedium: Dp
-    @Composable get() = (screenWidth() * 0.06f).coerceIn(20.dp, 24.dp)
+    @Composable get() = (scaleFactorWidth() * 24.0f).dp
 
   val iconSizeLarge: Dp
-    @Composable get() = (screenWidth() * 0.1f).coerceIn(30.dp, 35.dp)
+    @Composable get() = (scaleFactorWidth() * 35.0f).dp
 
   val iconSizeMic: Dp
-    @Composable get() = (screenWidth() * 0.12f).coerceIn(36.dp, 48.dp)
+    @Composable get() = (scaleFactorWidth() * 48.0f).dp
 
-  // Drawer Padding
-  val drawerPadding: Dp
-    @Composable get() = spacerWidthMedium
+  // Elevation and Stroke
+  val strokeWidth: Dp
+    @Composable get() = (scaleFactorWidth() * 8.0f).dp
 
-  // Card Dimensions
+  val borderStrokeWidth: Dp
+    @Composable get() = (scaleFactorWidth() * 1.0f).dp
+
+  val dividerThickness: Dp
+    @Composable get() = (scaleFactorWidth() * 3.0f).dp
+
+  val appBarElevation: Dp = 0.dp // Fixed value
+
+  val elevationSmall: Dp
+    @Composable get() = (scaleFactorWidth() * 4.0f).dp
+
+  val shadowElevation: Dp
+    @Composable get() = (scaleFactorWidth() * 5.0f).dp
+
+  // Corner Radii
+  val roundedCornerRadius: Dp
+    @Composable get() = (scaleFactorWidth() * 12.0f).dp
+
+  val cornerRadiusSmall: Dp
+    @Composable get() = (scaleFactorWidth() * 8.0f).dp
+
+  // Heights and Widths
+  val mediumHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 64.0f).dp
+
+  val heightMedium: Dp
+    @Composable get() = (scaleFactorHeight() * 24.0f).dp
+
+  val smallWidth: Dp
+    @Composable get() = (scaleFactorWidth() * 12.0f).dp
+
+  // Navigation
+  val bottomNavigationHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 60.0f).dp
+
+  // Input Fields
+  val inputFieldHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 56.0f).dp
+
+  val bioFieldHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 150.0f).dp
+
+  // Profile Picture and Cards
+  val profilePictureDialogSize: Dp
+    @Composable get() = (scaleFactorWidth() * 200.0f).dp
+
+  val profilePictureSize: Dp
+    @Composable get() = (scaleFactorWidth() * 100.0f).dp
+
+  val profileBoxHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 200.0f).dp
+
+  val profileCardHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 140.0f).dp
+
+  val cardSectionHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 100.0f).dp
+
   val cardHorizontalPadding: Dp
-    @Composable get() = (screenWidth() * 0.05f).coerceIn(16.dp, 30.dp)
+    @Composable get() = (scaleFactorWidth() * 30.0f).dp
 
   val cardCornerRadius: Dp
     @Composable get() = roundedCornerRadius
 
   val cardImageHeight: Dp
-    @Composable get() = (screenWidth() * 0.3f).coerceIn(120.dp, 160.dp)
-
-  val cardSectionHeight: Dp
-    @Composable get() = (screenHeight() * 0.15f).coerceIn(80.dp, 100.dp)
+    @Composable get() = (scaleFactorHeight() * 160.0f).dp
 
   // Spacing
   val spacingXLarge: Dp
-    @Composable get() = (screenWidth() * 0.1f).coerceIn(32.dp, 40.dp)
-
-  // Navigation
-  val bottomNavigationHeight: Dp
-    @Composable get() = (screenHeight() * 0.08f).coerceIn(50.dp, 60.dp)
-
-  // Input Fields
-  val inputFieldHeight: Dp
-    @Composable get() = (screenHeight() * 0.07f).coerceIn(50.dp, 60.dp)
-
-  val bioFieldHeight: Dp
-    @Composable get() = (screenHeight() * 0.2f).coerceIn(100.dp, 150.dp)
-
-  // Profile Picture
-  val profilePictureDialogSize: Dp
-    @Composable get() = (screenWidth() * 0.5f).coerceIn(150.dp, 200.dp)
-
-  val profilePictureSize: Dp
-    @Composable get() = (screenWidth() * 0.2f).coerceIn(80.dp, 100.dp)
-
-  val profileBoxHeight: Dp
-    @Composable get() = (screenHeight() * 0.25f).coerceIn(150.dp, 200.dp)
-
-  val profileCardHeight: Dp
-    @Composable get() = (screenHeight() * 0.18f).coerceIn(100.dp, 140.dp)
+    @Composable get() = (scaleFactorWidth() * 40.0f).dp
 
   // Visualizer Height
   val visualizerHeight: Dp
-    @Composable get() = (screenHeight() * 0.15f).coerceIn(80.dp, 120.dp)
+    @Composable get() = (scaleFactorHeight() * 100.0f).dp
 
-    val jobDescriptionInputFieldHeight: Dp
-        @Composable get() = (screenHeight() * 0.15f).coerceIn(180.dp, 240.dp)
+  val jobDescriptionInputFieldHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 200.0f).dp
 
+  // Drawer Padding
+  val drawerPadding: Dp
+    @Composable get() = spacerWidthMedium
 
-    // Heights and Widths
-  val mediumHeight: Dp
-    @Composable get() = (screenHeight() * 0.08f).coerceIn(50.dp, 64.dp)
-
-  val heightMedium: Dp
-    @Composable get() = (screenHeight() * 0.04f).coerceIn(20.dp, 24.dp)
-
-  val smallWidth: Dp
-    @Composable get() = (screenWidth() * 0.03f).coerceIn(8.dp, 12.dp)
+  // Loading Indicator
+  val loadingIndicatorSize: Dp
+    @Composable get() = (scaleFactorWidth() * 64.0f).dp
 
   // Font Sizes
-  val largeTitleFontSize: TextUnit
-    @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.08f).coerceIn(24f, 30f)).sp
-
-  val mediumTitleFontSize: TextUnit
-    @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.06f).coerceIn(20f, 24f)).sp
+  val mediumText: TextUnit
+    @Composable get() = (scaleFactorWidth() * 16.0f).sp
 
   val smallTitleFontSize: TextUnit
-    @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.05f).coerceIn(16f, 20f)).sp
+    @Composable get() = (scaleFactorWidth() * 20.0f).sp
 
-  val mediumText: TextUnit
-    @Composable get() = ((LocalConfiguration.current.screenWidthDp * 0.04f).coerceIn(14f, 16f)).sp
-
+  val mediumTitleFontSize: TextUnit
+    @Composable get() = (scaleFactorWidth() * 30.0f).sp
 
   // Other Dimensions
-  val full: Float = 1f
+  val full: Float = 1f // Assuming this is a constant and doesn't need scaling
 }
 
 object AppShapes {

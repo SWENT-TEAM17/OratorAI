@@ -213,6 +213,7 @@ fun LoadingScreen() {
  */
 @Composable
 fun GoogleSignInButton(onSignInClick: () -> Unit) {
+  Log.d("screen wi small", "paddingSmall: ${AppDimensions.paddingSmall.value} dp")
   Button(
       onClick = onSignInClick,
       colors =

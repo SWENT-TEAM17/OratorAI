@@ -1,7 +1,7 @@
 package com.github.se.orator.ui.overview
 
 import androidx.compose.ui.unit.Dp
-import com.github.se.orator.ui.theme.AppDimensions
+import androidx.compose.ui.unit.dp
 
 /**
  * Data class representing an input field in the Speaking Job Interview module.
@@ -25,5 +25,6 @@ data class InputFieldData(
     val isDropdown: Boolean = false,
     val dropdownItems: List<String> = emptyList(),
     val isScrollable: Boolean = false,
-    val height: Dp = AppDimensions.inputFieldHeight
+    val height: Dp = 70.dp
+    // AppDimensions.inputFieldHeight
 )

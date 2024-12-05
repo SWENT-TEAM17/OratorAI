@@ -50,7 +50,6 @@ fun SpeakingPracticeModule(
 ) {
   val context = LocalContext.current
 
-
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
