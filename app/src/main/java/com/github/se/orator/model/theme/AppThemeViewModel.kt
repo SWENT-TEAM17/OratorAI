@@ -26,7 +26,9 @@ class AppThemeViewModel(private val context: Context) {
    * @param deviceThemeIsDarkTheme The theme of the device.
    */
   fun loadTheme(deviceThemeIsDarkTheme: Boolean) {
-    val preference = context.getSharedPreferences("isDark", Context.MODE_PRIVATE)
+    val preference =
+        context.getSharedPreferences(
+            "isDark", Context.MODE_PRIVATE) // NOSONAR - This is not sensitive information
     _isDark.value = preference.getBoolean(IS_DARK_NAME, deviceThemeIsDarkTheme)
     this.deviceThemeIsDarkTheme = deviceThemeIsDarkTheme
   }
@@ -37,7 +39,9 @@ class AppThemeViewModel(private val context: Context) {
    * @param isDark `true` if the new theme need to be the dark theme.
    */
   fun saveTheme(isDark: Boolean) {
-    val preference = context.getSharedPreferences("isDark", Context.MODE_PRIVATE)
+    val preference =
+        context.getSharedPreferences(
+            "isDark", Context.MODE_PRIVATE) // NOSONAR - This is not sensitive information
     if (isDark != this.isDark.value) {
       preference.edit().putBoolean(IS_DARK_NAME, isDark).apply()
       _isDark.value = isDark
