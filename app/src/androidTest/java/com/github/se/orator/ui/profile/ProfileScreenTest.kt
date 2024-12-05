@@ -72,11 +72,14 @@ class ProfileScreenTest {
     // Verify the streaks design is displayed
     composeTestRule.onNodeWithTag("current_streak").assertExists()
 
-    // Verify the Achievements section is displayed
-    composeTestRule.onNodeWithTag("statistics_section").assertIsDisplayed()
+    // Verify the Stats section is displayed
+    composeTestRule.onNodeWithTag("statistics_section").assertExists()
 
-    // Verify the Previous Sessions section is displayed
-    composeTestRule.onNodeWithTag("previous_sessions_section").assertIsDisplayed()
+    // Verify the Offline Recordings section is displayed
+    composeTestRule.onNodeWithTag("offline_recordings_column").assertExists()
+
+    // Verify the title of Offline Recordings is displayed
+    composeTestRule.onNodeWithTag("offline_recordings_title").assertIsDisplayed()
   }
 
   @Test
@@ -121,5 +124,16 @@ class ProfileScreenTest {
 
     composeTestRule.onNodeWithTag("achievements_cardsection").isDisplayed()
     composeTestRule.onNodeWithTag("previous_sessions_cardsection").isDisplayed()
+  }
+
+  @Test
+  fun offlineRecordingsSectionIsDisplayed() {
+    composeTestRule.setContent { ProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Verify that the Offline Recordings section is displayed
+    composeTestRule.onNodeWithTag("offline_recordings_column").assertIsDisplayed()
+
+    // Verify the title of the Offline Recordings section
+    composeTestRule.onNodeWithTag("offline_recordings_title").assertIsDisplayed()
   }
 }

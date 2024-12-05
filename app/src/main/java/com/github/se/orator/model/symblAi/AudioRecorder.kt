@@ -7,7 +7,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
+import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -15,6 +17,7 @@ import java.io.FileOutputStream
 
 class AudioRecorder(
     private val context: Context,
+    private val isOffline: Boolean = false, // Pass offline state from ViewModel or activity
     private val sampleRate: Int = 16000,
     private val channelConfig: Int = AudioFormat.CHANNEL_IN_MONO,
     private val audioFormat: Int = AudioFormat.ENCODING_PCM_16BIT
@@ -23,6 +26,7 @@ class AudioRecorder(
   private var audioRecord: AudioRecord? = null
   private var isRecordingAudio = false
   private var audioFile: File? = null
+  private var mediaPlayer: MediaPlayer? = null
 
   // Listener to notify when recording is finished
   interface RecordingListener {
@@ -47,7 +51,10 @@ class AudioRecorder(
         AudioRecord(
             MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, bufferSize)
 
-    audioFile = File(context.cacheDir, "audio_record.wav") // Recording in WAV format
+    // Save file to the appropriate directory based on offline mode
+    val saveDir = if (isOffline) context.filesDir else context.cacheDir
+    audioFile =
+        File(saveDir, "audio_record_${System.currentTimeMillis()}.wav") // Recording in WAV format
 
     audioRecord?.startRecording()
     isRecordingAudio = true
@@ -133,5 +140,25 @@ class AudioRecorder(
   fun writeShort(header: ByteArray, offset: Int, value: Short) {
     header[offset] = (value.toInt() and 0xff).toByte()
     header[offset + 1] = ((value.toInt() shr 8) and 0xff).toByte()
+  }
+
+  // Play the audio file
+  fun playAudio(audioFile: File) {
+    if (!audioFile.exists()) {
+      Log.e("AudioRecorder", "Audio file does not exist: ${audioFile.path}")
+      return
+    }
+
+    // Stop any currently playing audio
+    mediaPlayer?.stop()
+    mediaPlayer?.release()
+
+    // Initialize MediaPlayer
+    mediaPlayer =
+        MediaPlayer().apply {
+          setDataSource(audioFile.absolutePath)
+          prepare()
+          start()
+        }
   }
 }

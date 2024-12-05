@@ -131,7 +131,9 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val apiLinkViewModel = ApiLinkViewModel()
   val speakingViewModel =
       SpeakingViewModel(
-          SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel, userProfileViewModel)
+          SpeakingRepositoryRecord(LocalContext.current, isOffline),
+          apiLinkViewModel,
+          userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
   // Scaffold composable to provide basic layout structure for the app
