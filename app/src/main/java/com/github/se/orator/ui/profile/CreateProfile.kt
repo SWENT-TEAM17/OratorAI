@@ -123,10 +123,9 @@ fun CreateAccountScreen(
                   contentAlignment = Alignment.Center,
                   modifier =
                       Modifier.size(
-                              AppDimensions
-                                  .slightlyLargerProfilePictureSize) // Slightly larger to
-                                                                     // accommodate the IconButton
-                                                                     // outside the
+                              AppDimensions.slightlyLargerProfilePictureSize) // Slightly larger to
+                          // accommodate the IconButton
+                          // outside the
                           // circle
                           .testTag("profile_picture_container")) {
                     // Circle with background image and profile picture

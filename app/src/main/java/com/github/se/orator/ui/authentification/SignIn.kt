@@ -239,7 +239,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
               Text(
                   text = "Sign in with Google",
                   style = AppTypography.buttonTextStyle,
-                  modifier = Modifier.testTag("signInWithGoogleText"),
+                  modifier = Modifier.testTag("signInWithGoogleText").wrapContentHeight(),
                   color = MaterialTheme.colorScheme.secondary)
             }
       }

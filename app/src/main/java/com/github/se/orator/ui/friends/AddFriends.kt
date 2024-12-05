@@ -134,7 +134,7 @@ fun AddFriendsScreen(
                       },
                       modifier =
                           Modifier.fillMaxWidth()
-                              .height(AppDimensions.mediumHeight)
+                              .wrapContentHeight()
                               .focusRequester(focusRequester)
                               .testTag("addFriendSearchField"),
                       label = { Text("Username", modifier = Modifier.testTag("searchFieldLabel")) },

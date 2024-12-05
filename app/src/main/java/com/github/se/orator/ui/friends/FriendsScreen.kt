@@ -211,7 +211,7 @@ fun ViewFriendsScreen(
                               modifier =
                                   Modifier.fillMaxWidth(1f)
                                       .horizontalScroll(rememberScrollState())
-                                      .height(AppDimensions.mediumHeight)
+                                      .wrapContentHeight()
                                       .focusRequester(focusRequester)
                                       .testTag("viewFriendsSearch"),
                               colors =
