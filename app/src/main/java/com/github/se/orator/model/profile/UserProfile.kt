@@ -1,5 +1,6 @@
 package com.github.se.orator.model.profile
 
+import com.github.se.orator.model.speaking.AnalysisData
 import com.google.firebase.Timestamp
 
 /**
@@ -23,6 +24,8 @@ data class UserProfile(
     // Temp list of all users for hardcoding
     val allUsers: List<String> = emptyList(),
     val friends: List<String> = emptyList(),
+    val sentReq: List<String> = emptyList(),
+    val recReq: List<String> = emptyList(),
     val bio: String? = null,
     val currentStreak: Long = 0L,
     val lastLoginDate: String? = "1970-10-10"
@@ -41,20 +44,20 @@ enum class SessionType(
     val failureMessage: String
 ) {
   SPEECH(
-      positiveResponse = "would win the competition",
-      negativeResponse = "would not win the competition",
-      successMessage = "Great job! You would win the competition.",
-      failureMessage = "You might need to improve to win the competition."),
+      positiveResponse = "you were effective",
+      negativeResponse = "you were not effective",
+      successMessage = "Great job! Your speech was effective.",
+      failureMessage = "You might need to improve to achieve your speech's purpose."),
   INTERVIEW(
       positiveResponse = "would recommend hiring",
       negativeResponse = "would not recommend hiring",
       successMessage = "Congratulations! You would be hired.",
       failureMessage = "Unfortunately, you would not be hired."),
   NEGOTIATION(
-      positiveResponse = "successfully convinced",
-      negativeResponse = "did not convince",
-      successMessage = "Success! You have convinced the client.",
-      failureMessage = "You did not convince the client this time.")
+      positiveResponse = "achieved your sales goal",
+      negativeResponse = "did not achieve your sales goal",
+      successMessage = "Success! You achieved your sales goal.",
+      failureMessage = "You did not achieve your sales goal this time.")
 }
 
 /**
@@ -69,7 +72,10 @@ data class UserStatistics(
     val sessionsGiven: Map<String, Int> = SessionType.values().associate { it.name to 0 },
     val successfulSessions: Map<String, Int> = SessionType.values().associate { it.name to 0 },
     val improvement: Float = 0.0f,
-    val previousRuns: List<SpeechStats> = emptyList()
+    val previousRuns: List<SpeechStats> = emptyList(),
+    val recentData: ArrayDeque<AnalysisData> = ArrayDeque(),
+    val talkTimeSecMean: Double = 0.0,
+    val talkTimePercMean: Double = 0.0
 )
 
 /**
