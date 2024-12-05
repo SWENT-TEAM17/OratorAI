@@ -178,7 +178,9 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
                       Column(
                           horizontalAlignment = Alignment.CenterHorizontally,
-                          modifier = Modifier.align(Alignment.TopCenter)) {
+                          modifier =
+                              Modifier.align(Alignment.TopCenter)
+                                  .padding(top = AppDimensions.paddingSmall)) {
                             Spacer(modifier = Modifier.height(AppDimensions.mediumSpacerHeight))
 
                             // Box to hold username and streak
@@ -229,7 +231,10 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                     else profile.bio,
                                 modifier =
                                     Modifier.padding(horizontal = AppDimensions.paddingMedium),
-                                color = MaterialTheme.colorScheme.onSurface)
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1, // Limit to one line
+                                overflow = TextOverflow.Ellipsis // Truncate with ellipsis
+                                )
                           }
                     }
 

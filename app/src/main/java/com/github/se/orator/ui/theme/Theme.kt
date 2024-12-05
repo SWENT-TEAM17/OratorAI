@@ -194,8 +194,7 @@ object AppDimensions {
     @Composable get() = (scaleFactorHeight() * 60.0f).dp
 
   // Input Fields
-  val inputFieldHeight: Dp
-    @Composable get() = (scaleFactorHeight() * 56.0f).dp
+  val inputFieldHeight = 56.0.dp
 
   val bioFieldHeight: Dp
     @Composable get() = (scaleFactorHeight() * 150.0f).dp

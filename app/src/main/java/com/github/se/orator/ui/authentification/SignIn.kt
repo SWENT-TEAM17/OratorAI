@@ -168,7 +168,7 @@ fun LoadingScreen() {
             modifier =
                 Modifier.fillMaxWidth(0.8f) // Limits the image width to 80% of the screen width
                     .aspectRatio(1f) // Maintains aspect ratio for better fit
-                    .wrapContentHeight() // Wraps height to content size
+                    .fillMaxHeight(0.8f) // Wraps height to content size
                     .testTag("loadingImage"))
 
         Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
@@ -213,7 +213,6 @@ fun LoadingScreen() {
  */
 @Composable
 fun GoogleSignInButton(onSignInClick: () -> Unit) {
-  Log.d("screen wi small", "paddingSmall: ${AppDimensions.paddingSmall.value} dp")
   Button(
       onClick = onSignInClick,
       colors =
