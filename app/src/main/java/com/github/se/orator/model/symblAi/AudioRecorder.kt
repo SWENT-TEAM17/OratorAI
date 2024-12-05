@@ -17,7 +17,7 @@ import java.io.FileOutputStream
 
 class AudioRecorder(
     private val context: Context,
-    private val isOffline: Boolean, // Pass offline state from ViewModel or activity
+    private val isOffline: Boolean = false, // Pass offline state from ViewModel or activity
     private val sampleRate: Int = 16000,
     private val channelConfig: Int = AudioFormat.CHANNEL_IN_MONO,
     private val audioFormat: Int = AudioFormat.ENCODING_PCM_16BIT

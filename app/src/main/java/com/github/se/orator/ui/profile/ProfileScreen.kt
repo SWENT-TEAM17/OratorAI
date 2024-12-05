@@ -97,7 +97,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   // State to control whether the profile picture dialog is open
   var isDialogOpen by remember { mutableStateOf(false) }
-  val audioRecorder = remember { AudioRecorder(context, isOffline = true) }
+  val audioRecorder = remember { AudioRecorder(context) }
 
   // Collect the profile data from the ViewModel
   val userProfile by profileViewModel.userProfile.collectAsState()
@@ -111,8 +111,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
          */
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.inverseSurface,
+            backgroundColor = colors.surface,
+            contentColor = colors.inverseSurface,
             elevation = AppDimensions.appBarElevation,
             title = {
               Text(
@@ -183,7 +183,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                           RoundedCornerShape(size = AppDimensions.statusBarPadding),
                                       clip = false)
                                   .background(
-                                      MaterialTheme.colorScheme.onSecondary,
+                                      colors.onSecondary,
                                       shape =
                                           RoundedCornerShape(
                                               size = AppDimensions.statusBarPadding)),
@@ -336,18 +336,12 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                       Text(
                           text = "No offline recordings available",
                           style = MaterialTheme.typography.bodySmall,
-                          color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                          color = colors.onSurface.copy(alpha = 0.6f),
                           modifier =
                               Modifier.padding(AppDimensions.paddingSmall)
                                   .testTag("no_recordings_text"))
                     }
                   }
-            }
-            ?: run {
-              Text(
-                  text = "Loading profile...",
-                  style = AppTypography.bodyLargeStyle,
-                  modifier = Modifier.testTag("loading_profile_text"))
             }
       }
 
