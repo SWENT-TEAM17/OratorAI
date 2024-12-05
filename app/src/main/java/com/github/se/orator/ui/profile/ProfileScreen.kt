@@ -111,15 +111,11 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
          */
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = colors.surface,
-            contentColor = colors.inverseSurface,
-            elevation = AppDimensions.appBarElevation,
             title = {
               Text(
                   modifier = Modifier.testTag("profile_title"),
                   text = "Profile",
-                  fontWeight = FontWeight.Bold,
-                  style = AppTypography.appBarTitleStyle)
+                  color = MaterialTheme.colorScheme.onSurface)
             },
             actions = {
               IconButton(
@@ -129,7 +125,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                         Icons.Outlined.Settings,
                         contentDescription = "Settings",
                         modifier =
-                            Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"))
+                            Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                   }
             },
             navigationIcon = {
@@ -147,7 +144,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                         Icons.AutoMirrored.Filled.Logout,
                         contentDescription = "Sign out",
                         modifier =
-                            Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"))
+                            Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"),
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
             })
       },
@@ -156,7 +154,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.PROFILE)
-      }) { innerPadding ->
+      },
+      backgroundColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier =
                 Modifier.fillMaxSize().padding(innerPadding).padding(AppDimensions.paddingMedium),
@@ -178,12 +177,12 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                               Modifier.fillMaxWidth(0.95f)
                                   .height(AppDimensions.profileCardHeight)
                                   .shadow(
-                                      AppDimensions.shadowDimension,
+                                      elevation = AppDimensions.elevationSmall,
                                       shape =
                                           RoundedCornerShape(size = AppDimensions.statusBarPadding),
                                       clip = false)
                                   .background(
-                                      colors.onSecondary,
+                                      colors.surfaceVariant,
                                       shape =
                                           RoundedCornerShape(
                                               size = AppDimensions.statusBarPadding)),
@@ -207,13 +206,15 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                   .offset(y = (-20).dp),
                           // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
                           shape = AppShapes.circleShape,
-                          colors = ButtonDefaults.buttonColors(backgroundColor = colors.onSurface),
+                          colors =
+                              ButtonDefaults.buttonColors(
+                                  backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
                           contentPadding = PaddingValues(0.dp)) {
                             Icon(
                                 imageVector = Icons.Outlined.Edit,
                                 contentDescription = "Edit button",
                                 modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                                tint = colors.errorContainer)
+                                tint = MaterialTheme.colorScheme.primary)
                           }
 
                       Column(
@@ -230,10 +231,10 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                       text = profile.name,
                                       fontSize = 20.sp,
                                       fontWeight = FontWeight.Bold,
-                                      modifier = Modifier.testTag("profile_name"))
+                                      modifier = Modifier.testTag("profile_name"),
+                                      color = MaterialTheme.colorScheme.primary)
 
                                   // Current Streak aligned to the end with fire icon
-                                  // TODO : remove this streak
                                   Row(
                                       verticalAlignment = Alignment.CenterVertically,
                                       modifier =
@@ -264,7 +265,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                     if (profile.bio.isNullOrBlank()) "Write your bio here"
                                     else profile.bio,
                                 modifier =
-                                    Modifier.padding(horizontal = AppDimensions.paddingMedium))
+                                    Modifier.padding(horizontal = AppDimensions.paddingMedium),
+                                color = MaterialTheme.colorScheme.onSurface)
                           }
                     }
 
@@ -442,7 +444,7 @@ fun AudioRecordingPlaceholder(fileName: String, onPlayClicked: () -> Unit) {
               .shadow(4.dp, shape = RoundedCornerShape(size = 10.dp), clip = false)
               .background(
                   colors.onSecondary,
-                  shape = RoundedCornerShape(size = AppDimensions.backgroundPadding))
+                  shape = RoundedCornerShape(size = AppDimensions.paddingMedium))
               .clickable { onPlayClicked() }
               .padding(
                   horizontal = AppDimensions.paddingMedium,

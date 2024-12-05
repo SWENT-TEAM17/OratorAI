@@ -62,7 +62,6 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-
   private lateinit var auth: FirebaseAuth
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
   private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
@@ -131,7 +130,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
   val apiLinkViewModel = ApiLinkViewModel()
   val speakingViewModel =
-      SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current, isOffline), apiLinkViewModel)
+      SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current, isOffline), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
   // Scaffold composable to provide basic layout structure for the app
