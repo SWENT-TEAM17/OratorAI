@@ -35,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
@@ -98,7 +97,7 @@ fun TextButtonFun(settingBar: SettingBar) {
   TextButton(
       onClick = { settingBar.function() },
       modifier = Modifier.fillMaxWidth().testTag(settingBar.testTag),
-      contentPadding = PaddingValues(0.dp) // Remove default padding
+      contentPadding = PaddingValues(AppDimensions.nullPadding) // Remove default padding
       ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),

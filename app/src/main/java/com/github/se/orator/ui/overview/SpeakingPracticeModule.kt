@@ -176,19 +176,24 @@ fun SpeakingPracticeModule(
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
                                 onTextLayout = { layoutResult -> textLayoutResult = layoutResult },
                                 decorationBox = { innerTextField ->
-                                  Box(modifier = Modifier.fillMaxSize()) {
-                                    if (input.value.isEmpty()) {
-                                      Text(
-                                          text = input.placeholder,
-                                          style =
-                                              LocalTextStyle.current.copy(
-                                                  color =
-                                                      MaterialTheme.colorScheme.onSurfaceVariant
-                                                          .copy(alpha = 0.5f)),
-                                          modifier = Modifier.padding(AppDimensions.paddingSmall))
-                                    }
-                                    innerTextField()
-                                  }
+                                  Box(
+                                      modifier =
+                                          Modifier.fillMaxSize()
+                                              .padding(
+                                                  AppDimensions.paddingSmall) // Apply padding here
+                                      ) {
+                                        if (input.value.isEmpty()) {
+                                          Text(
+                                              text = input.placeholder,
+                                              style =
+                                                  LocalTextStyle.current.copy(
+                                                      color =
+                                                          MaterialTheme.colorScheme.onSurfaceVariant
+                                                              .copy(alpha = 0.5f)),
+                                          )
+                                        }
+                                        innerTextField()
+                                      }
                                 },
                                 singleLine = false)
                           }

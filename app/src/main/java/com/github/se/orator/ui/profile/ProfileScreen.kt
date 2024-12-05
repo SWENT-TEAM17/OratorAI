@@ -51,7 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
@@ -162,13 +161,13 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                               Modifier.testTag("edit_button")
                                   .size(AppDimensions.spacingXLarge)
                                   .align(Alignment.TopEnd)
-                                  .offset(y = (-20).dp),
+                                  .offset(y = -AppDimensions.paddingMediumSmall),
                           // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
                           shape = AppShapes.circleShape,
                           colors =
                               ButtonDefaults.buttonColors(
                                   backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
-                          contentPadding = PaddingValues(0.dp)) {
+                          contentPadding = PaddingValues(AppDimensions.nullPadding)) {
                             Icon(
                                 Icons.Outlined.Edit,
                                 contentDescription = "Edit button",

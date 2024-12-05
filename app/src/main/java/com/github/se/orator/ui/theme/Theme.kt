@@ -20,9 +20,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
 object AppDimensions {
@@ -45,6 +43,7 @@ object AppDimensions {
   }
 
   // Padding
+  val nullPadding = 0.dp
   val paddingSmall: Dp
     @Composable get() = (scaleFactorWidth() * 8.0f).dp
 
@@ -206,6 +205,13 @@ object AppDimensions {
   val profilePictureSize: Dp
     @Composable get() = (scaleFactorWidth() * 100.0f).dp
 
+  val slightlyLargerProfilePictureSize: Dp
+    @Composable get() = (scaleFactorWidth() * 107.0f).dp
+  // Circle with background image and profile picture
+
+  val slightlyLowerProfilePictureSize: Dp
+    @Composable get() = (scaleFactorWidth() * 97.0f).dp
+
   val profileBoxHeight: Dp
     @Composable get() = (scaleFactorHeight() * 250.0f).dp
 
@@ -243,18 +249,8 @@ object AppDimensions {
   val loadingIndicatorSize: Dp
     @Composable get() = (scaleFactorWidth() * 64.0f).dp
 
-  // Font Sizes
-  val mediumText: TextUnit
-    @Composable get() = (scaleFactorWidth() * 16.0f).sp
-
-  val smallTitleFontSize: TextUnit
-    @Composable get() = (scaleFactorWidth() * 20.0f).sp
-
-  val mediumTitleFontSize: TextUnit
-    @Composable get() = (scaleFactorWidth() * 30.0f).sp
-
   // Other Dimensions
-  val full: Float = 1f // Assuming this is a constant and doesn't need scaling
+  const val full: Float = 1f // Assuming this is a constant and doesn't need scaling
 }
 
 object AppShapes {
