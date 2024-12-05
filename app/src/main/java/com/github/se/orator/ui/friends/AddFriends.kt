@@ -235,6 +235,7 @@ fun AddFriendsScreen(
                             onProfilePictureClick = { selectedUser ->
                               selectedProfilePicUser = selectedUser
                             })
+                      Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
                       }
                 }
               })
@@ -362,15 +363,15 @@ fun UserItem(
                   onClick = { onProfilePictureClick(user) },
               )
               Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-              Column(
-                  modifier = Modifier.weight(1f) // This modifier makes the column expand
-                  ) {
+            Column(
+                modifier = Modifier.weight(1f), // This modifier makes the column expand
+                verticalArrangement = Arrangement.Center) {
                     Text(
                         text = user.name,
                         style = MaterialTheme.typography.titleMedium,
                         modifier =
-                            Modifier.padding(bottom = AppDimensions.mediumHeight)
-                                .testTag("userName#${user.uid}"),
+                        Modifier.padding(bottom = AppDimensions.smallPadding)
+                            .testTag("userName#${user.uid}"),
                         color = MaterialTheme.colorScheme.primary)
 
                     Text(

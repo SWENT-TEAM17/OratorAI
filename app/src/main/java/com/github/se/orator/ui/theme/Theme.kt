@@ -208,7 +208,7 @@ object AppDimensions {
     @Composable get() = (scaleFactorWidth() * 100.0f).dp
 
   val profileBoxHeight: Dp
-    @Composable get() = (scaleFactorHeight() * 200.0f).dp
+    @Composable get() = (scaleFactorHeight() * 250.0f).dp
 
   val profileCardHeight: Dp
     @Composable get() = (scaleFactorHeight() * 140.0f).dp

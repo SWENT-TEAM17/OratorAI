@@ -200,7 +200,7 @@ fun ViewFriendsScreen(
                       item {
                         Box(
                             modifier =
-                                Modifier.padding(vertical = AppDimensions.paddingMediumSmall)) {
+                                Modifier.padding(vertical = AppDimensions.paddingSmall)) {
                               OutlinedTextField(
                                   value = searchQuery,
                                   onValueChange = { searchQuery = it },
