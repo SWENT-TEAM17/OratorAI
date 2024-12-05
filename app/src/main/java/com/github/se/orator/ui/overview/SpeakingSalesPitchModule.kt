@@ -1,11 +1,7 @@
 package com.github.se.orator.ui.overview
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speaking.SalesPitchContext
@@ -13,10 +9,11 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 
 /**
- * The SpeakingSalesPitchModule composable is a composable screen that displays the sales pitch
- * module.
+ * The SpeakingSalesPitchModule composable displays the sales pitch module.
  *
  * @param navigationActions The navigation actions that can be performed.
+ * @param chatViewModel The view model for chat.
+ * @param apiLinkViewModel The view model for API links.
  */
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -25,68 +22,125 @@ fun SpeakingSalesPitchModule(
     chatViewModel: ChatViewModel,
     apiLinkViewModel: ApiLinkViewModel
 ) {
+  // State variables to hold user inputs
   var productType by remember { mutableStateOf("") }
   var targetAudience by remember { mutableStateOf("") }
-  var feedbackType by remember { mutableStateOf("") }
+  var salesGoal by remember { mutableStateOf("") }
   var keySellingPoints by remember { mutableStateOf("") }
-  var feedbackLanguage by remember { mutableStateOf("") }
+  var anticipatedChallenges by remember { mutableStateOf("") }
+  var negotiationFocus by remember { mutableStateOf("") }
+  var feedbackType by remember { mutableStateOf("") }
 
+  // List of input fields for the Sales Pitch module
   val inputFields =
       listOf(
+          // Input field for the product or service being pitched
           InputFieldData(
               value = productType,
-              onValueChange = { newValue: String ->
-                productType = newValue
-              }, // Explicitly specify String
-              label = "What product or service are you pitching?",
-              placeholder = "e.g Marketing services",
+              onValueChange = { productType = it },
+              question = "What product or service are you pitching?",
+              placeholder = "e.g., Marketing services",
               testTag = "productTypeInput"),
+          // Input field for identifying the target audience of the pitch
           InputFieldData(
               value = targetAudience,
-              onValueChange = { newValue: String ->
-                targetAudience = newValue
-              }, // Explicitly specify String
-              label = "What is the target audience?",
-              placeholder = "e.g Investors",
-              testTag = "targetAudienceInput",
-              height = 200),
+              onValueChange = { targetAudience = it },
+              question = "Who is your target audience?",
+              placeholder = "e.g., Investors",
+              testTag = "targetAudienceInput"),
+          // Dropdown input field for selecting the primary goal of the sales pitch
           InputFieldData(
-              value = feedbackType,
-              onValueChange = { newValue: String ->
-                feedbackType = newValue
-              }, // Explicitly specify String
-              label = "Do you want feedback on persuasive language, volume or delivery?",
-              placeholder = "e.g Delivery",
-              height = 85,
-              testTag = "feedbackTypeInput"),
+              value = salesGoal,
+              onValueChange = { salesGoal = it },
+              question = "What is your primary goal for this sales pitch?",
+              placeholder = "Select sales goal",
+              testTag = "salesGoalInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf(
+                      "Close the deal",
+                      "Generate interest",
+                      "Build relationships",
+                      "Secure a follow-up meeting")),
+          // Input field for outlining key selling points to emphasize during the pitch
           InputFieldData(
               value = keySellingPoints,
-              onValueChange = { newValue: String ->
-                keySellingPoints = newValue
-              }, // Explicitly specify String
-              label = "What key selling points do you want to emphasize?",
-              placeholder = "e.g Price",
-              height = 85,
-              testTag = "keySellingPointsInput"))
+              onValueChange = { keySellingPoints = it },
+              question = "What key selling points do you want to emphasize?",
+              placeholder = "e.g., Price, Quality, Innovation",
+              testTag = "keySellingPointsInput"),
+          // Input field for anticipating potential challenges or objections from the audience
+          InputFieldData(
+              value = anticipatedChallenges,
+              onValueChange = { anticipatedChallenges = it },
+              question = "What challenges or objections do you anticipate from your audience?",
+              placeholder = "e.g., Budget constraints, Competition",
+              testTag = "anticipatedChallengesInput"),
+          // Dropdown input field for selecting specific negotiation skills to focus on
+          InputFieldData(
+              value = negotiationFocus,
+              onValueChange = { negotiationFocus = it },
+              question = "Which negotiation skills would you like to focus on?",
+              placeholder = "Select focus area",
+              testTag = "negotiationFocusInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf(
+                      "Handling Objections",
+                      "Price Negotiation",
+                      "Building Rapport",
+                      "Active Listening",
+                      "Closing Techniques",
+                      "Questioning Strategies")),
+          // Dropdown input field for specifying the aspect of the pitch the user wants feedback on
+          InputFieldData(
+              value = feedbackType,
+              onValueChange = { feedbackType = it },
+              question = "Which aspect would you like feedback on?",
+              placeholder = "Select feedback type",
+              testTag = "feedbackTypeInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf(
+                      "Persuasive Language",
+                      "Volume",
+                      "Delivery",
+                      "Confidence",
+                      "Clarity",
+                      "Body Language")))
 
+  /**
+   * The SpeakingPracticeModule composable function displays the Sales Pitch practice module.
+   *
+   * @param navigationActions The navigation actions to be performed.
+   * @param screenTitle The title of the screen.
+   * @param headerText The header text for the module.
+   * @param inputs The list of input fields for the user to fill out.
+   * @param onGetStarted The action to be performed when the user clicks on the Get Started button.
+   */
   SpeakingPracticeModule(
       navigationActions = navigationActions,
-      screenTitle = "Public Speaking",
-      headerText = "Make your speech memorable",
+      screenTitle = "Sales Pitch",
+      headerText = "Master your sales pitch and negotiation skills",
       inputs = inputFields,
       onClick = {
-        // Create a PublicSpeakingContext object with the user's inputs
+        // Create a SalesPitchContext object with the user's inputs
         val salesPitchContext =
             SalesPitchContext(
                 product = productType,
                 targetAudience = targetAudience,
-                keyFeatures = keySellingPoints.split(", "))
+                salesGoal = salesGoal,
+                keyFeatures = keySellingPoints.split(",").map { it.trim() },
+                anticipatedChallenges = anticipatedChallenges.split(",").map { it.trim() },
+                negotiationFocus = negotiationFocus,
+                feedbackType = feedbackType)
 
+        // Update the practice context in the API link view model
         apiLinkViewModel.updatePracticeContext(salesPitchContext)
-
+        // Initialize the chat conversation in the chat view model
         chatViewModel.initializeConversation()
 
-        // Navigate to ChatScreen, passing the context and feedbackLanguage
+        // Navigate to the ChatScreen with the collected data
         navigationActions.navigateTo(Screen.CHAT_SCREEN)
       })
 }

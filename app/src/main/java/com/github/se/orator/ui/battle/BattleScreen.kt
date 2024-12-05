@@ -9,6 +9,7 @@ import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.overview.InputFieldData
 import com.github.se.orator.ui.overview.SpeakingPracticeModule
+import com.github.se.orator.ui.theme.AppDimensions
 
 /**
  * The BattleScreen composable is a screen where the user can initiate a battle with a friend.
@@ -26,49 +27,76 @@ fun BattleScreen(
     battleViewModel: BattleViewModel
 ) {
 
-  val friendName = userProfileViewModel.getName(friendUid)
-  var targetPosition by remember { mutableStateOf("") }
-  var companyName by remember { mutableStateOf("") }
-  var skills by remember { mutableStateOf("") }
-  var feedbackType by remember { mutableStateOf("") }
+    val friendName = userProfileViewModel.getName(friendUid)
+    var targetPosition by remember { mutableStateOf("") }
+    var companyName by remember { mutableStateOf("") }
+    var interviewType by remember { mutableStateOf("") }
+    var experienceLevel by remember { mutableStateOf("") }
+    var jobDescription by remember { mutableStateOf("") }
+    var focusArea by remember { mutableStateOf("") }
 
-  val inputFields =
-      listOf(
-          InputFieldData(
-              value = targetPosition,
-              onValueChange = { newValue: String ->
-                targetPosition = newValue
-              }, // Explicitly specify String for newValue
-              label = "For which position are you challenging $friendName?",
-              placeholder = "e.g Senior executive",
-              testTag = "levelInput"),
-          InputFieldData(
-              value = companyName,
-              onValueChange = { newValue: String ->
-                companyName = newValue
-              }, // Explicitly specify String
-              label = "Which company are you applying to?",
-              placeholder = "e.g McKinsey",
-              testTag = "jobInput",
-              height = 200),
-          InputFieldData(
-              value = skills,
-              onValueChange = { newValue: String ->
-                skills = newValue
-              }, // Explicitly specify String
-              label = "What skills or qualifications do you want to highlight?",
-              placeholder = "e.g Problem solving",
-              height = 85,
-              testTag = "skillsInput"),
-          InputFieldData(
-              value = feedbackType,
-              onValueChange = { newValue: String ->
-                feedbackType = newValue
-              }, // Explicitly specify String
-              label = "Do you want feedback on persuasive language, volume, or delivery?",
-              placeholder = "e.g Persuasive language",
-              height = 85,
-              testTag = "experienceInput"))
+    val inputFields =
+        listOf(
+            InputFieldData(
+                value = targetPosition,
+                onValueChange = { targetPosition = it },
+                question = "What is your target job position?",
+                placeholder = "e.g., Senior Executive",
+                testTag = "targetPositionInput"),
+            InputFieldData(
+                value = companyName,
+                onValueChange = { companyName = it },
+                question = "Which company are you applying to?",
+                placeholder = "e.g., McKinsey",
+                testTag = "companyNameInput"),
+            InputFieldData(
+                value = interviewType,
+                onValueChange = { interviewType = it },
+                question = "What type of interview are you preparing for?",
+                placeholder = "Select interview type",
+                testTag = "interviewTypeInput",
+                isDropdown = true,
+                dropdownItems =
+                listOf(
+                    "Phone Interview",
+                    "Video Interview",
+                    "In-Person Interview",
+                    "Panel Interview",
+                    "Group Interview",
+                    "Assessment Center")),
+            InputFieldData(
+                value = experienceLevel,
+                onValueChange = { experienceLevel = it },
+                question = "What is your experience level in this field?",
+                placeholder = "Select experience level",
+                testTag = "experienceLevelInput",
+                isDropdown = true,
+                dropdownItems =
+                listOf("Entry-Level", "Mid-Level", "Senior-Level", "Executive-Level")),
+            InputFieldData(
+                value = jobDescription,
+                onValueChange = { jobDescription = it },
+                question = "Please provide the job description:",
+                placeholder = "Paste the job description here",
+                testTag = "jobDescriptionInput",
+                isScrollable = true,
+                height = AppDimensions.jobDescriptionInputFieldHeight),
+            InputFieldData(
+                value = focusArea,
+                onValueChange = { focusArea = it },
+                question = "What do you want to focus on the most?",
+                placeholder = "Select focus area",
+                testTag = "focusAreaInput",
+                isDropdown = true,
+                dropdownItems =
+                listOf(
+                    "Behavioral Questions",
+                    "Technical Questions",
+                    "Situational Questions",
+                    "Competency-Based Questions",
+                    "Case Studies",
+                    "Company-Specific Questions")),
+        )
 
   // Use the existing SpeakingPracticeModule for consistent UI
   SpeakingPracticeModule(
@@ -77,16 +105,17 @@ fun BattleScreen(
       headerText = "Challenge $friendName to an interview battle!",
       inputs = inputFields,
       onClick = {
-        // Simulate sending battle request
-        // TODO: Implement actual battle request logic
 
         // Collect the inputs and create an InterviewContext object
-        val interviewContext =
-            InterviewContext(
-                interviewType = "job interview",
-                role = targetPosition,
-                company = companyName,
-                focusAreas = skills.split(",").map { it.trim() })
+          val interviewContext =
+              InterviewContext(
+                  targetPosition = targetPosition,
+                  companyName = companyName,
+                  interviewType = interviewType,
+                  experienceLevel = experienceLevel,
+                  jobDescription = jobDescription,
+                  focusArea = focusArea,
+              )
 
         // Create the battle speech instance
         val battleId = battleViewModel.createBattleRequest(friendUid, interviewContext)

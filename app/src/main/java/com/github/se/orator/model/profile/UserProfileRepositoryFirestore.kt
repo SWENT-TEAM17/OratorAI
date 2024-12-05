@@ -10,9 +10,11 @@ import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
 import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import java.util.Date
 
@@ -124,7 +126,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         onFailure)
   }
 
-  // Delete a user profile
+  /**
+   * Deletes a user profile from Firestore.
+   *
+   * @param uid The UID of the user to delete.
+   * @param onSuccess Callback invoked on successful deletion.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
   override fun deleteUserProfile(
       uid: String,
       onSuccess: () -> Unit,
@@ -211,87 +219,112 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
-  /**
-   * Convert Firestore document to UserProfile object.
-   *
-   * @param document The Firestore document to be converted.
-   * @return The converted UserProfile object, or null if conversion fails.
-   */
-  private fun documentToUserProfile(document: DocumentSnapshot): UserProfile? {
-    return try {
-      val uid = document.id
-      val name = document.getString("name") ?: return null
-      val age = document.getLong("age")?.toInt() ?: return null
-      val lastLoginDate = document.getString("lastLoginDate") ?: "1970-10-10"
-      val currentStreak = document.getLong("currentStreak") ?: 0L
+    /**
+     * Convert Firestore document to UserProfile object.
+     *
+     * @param document The Firestore document to be converted.
+     * @return The converted UserProfile object, or null if conversion fails.
+     */
+    private fun documentToUserProfile(document: DocumentSnapshot): UserProfile? {
+        return try {
+            val uid = document.id
+            val name = document.getString("name") ?: return null
+            val age = document.getLong("age")?.toInt() ?: return null
+            val lastLoginDate = document.getString("lastLoginDate") ?: "1970-10-10"
+            val currentStreak = document.getLong("currentStreak") ?: 0L
 
-      // Retrieve 'statistics' map
-      val statisticsMap = document.get("statistics") as? Map<*, *>
-      val statistics =
-          statisticsMap?.let {
-            val sessionsGivenMap = it["sessionsGiven"] as? Map<String, Long>
-            val successfulSessionsMap = it["successfulSessions"] as? Map<String, Long>
+            // Retrieve 'statistics' map
+            val statisticsMap = document.get("statistics") as? Map<*, *>
+            val statistics = statisticsMap?.let {
+                val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
 
-            val sessionsGiven =
-                sessionsGivenMap?.mapValues { (_, value) -> value.toInt() } ?: emptyMap()
-            val successfulSessions =
-                successfulSessionsMap?.mapValues { (_, value) -> value.toInt() } ?: emptyMap()
-
-            val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
-
-            val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
-            val battleStats =
-                battleStatsList?.mapNotNull { battle ->
-                  try {
-                    SpeechBattle(
-                        battleId = battle["battleId"] as? String ?: "",
-                        challenger = battle["challenger"] as? String ?: "",
-                        opponent = battle["opponent"] as? String ?: "",
-                        status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
-                        context =
-                            InterviewContext(
-                                interviewType = battle["interviewType"] as? String ?: "",
-                                role = battle["role"] as? String ?: "",
-                                company = battle["company"] as? String ?: "",
-                                focusAreas =
-                                    (battle["focusAreas"] as? List<*>)?.map { it.toString() }
-                                        ?: emptyList()),
-                        winner = battle["winner"] as? String ?: "")
-                  } catch (e: Exception) {
-                    Log.e("UserProfileRepository", "Error parsing battleStats", e)
-                    null
-                  }
+                // Extract 'previousRuns' list and map each entry to 'SpeechStats'
+                val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
+                val previousRuns = previousRunsList?.map { run ->
+                    SpeechStats(
+                        title = run["title"] as? String ?: "",
+                        duration = (run["duration"] as? Number)?.toInt() ?: 0,
+                        date = run["date"] as? Timestamp ?: Timestamp.now(),
+                        accuracy = (run["accuracy"] as? Number)?.toFloat() ?: 0.0f,
+                        wordsPerMinute = (run["wordsPerMinute"] as? Number)?.toInt() ?: 0
+                    )
                 } ?: emptyList()
 
-            UserStatistics(
-                sessionsGiven = sessionsGiven,
-                successfulSessions = successfulSessions,
-                improvement = improvement,
-                battleStats = battleStats)
-          } ?: UserStatistics()
+                val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
+                val battleStats = battleStatsList?.mapNotNull { battle ->
+                    try {
+                        convertInterviewContext(battle["context"] as? Map<String, Any>)?.let { it1 ->
+                            SpeechBattle(
+                                battleId = battle["battleId"] as? String ?: "",
+                                challenger = battle["challenger"] as? String ?: "",
+                                opponent = battle["opponent"] as? String ?: "",
+                                status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
+                                context = it1,
+                                winner = battle["winner"] as? String ?: ""
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Log.e("UserProfileRepository", "Error parsing battleStats", e)
+                        null
+                    }
+                } ?: emptyList()
 
-      // Retrieve other fields
-      val friends = document.get("friends") as? List<String> ?: emptyList()
-      val profilePic = document.getString("profilePic")
-      val bio = document.getString("bio")
+                UserStatistics(
+                    sessionsGiven = emptyMap(),
+                    successfulSessions = emptyMap(),
+                    improvement = improvement,
+                    previousRuns = previousRuns,
+                    battleStats = battleStats
+                )
+            } ?: UserStatistics()
 
-      UserProfile(
-          uid = uid,
-          name = name,
-          age = age,
-          profilePic = profilePic,
-          statistics = statistics,
-          friends = friends,
-          bio = bio,
-          currentStreak = currentStreak,
-          lastLoginDate = lastLoginDate)
-    } catch (e: Exception) {
-      Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
-      null
+            // Retrieve other fields from the document
+            val friends = document.get("friends") as? List<String> ?: emptyList()
+            val recReq = document.get("recReq") as? List<String> ?: emptyList()
+            val sentReq = document.get("sentReq") as? List<String> ?: emptyList()
+            val profilePic = document.getString(FIELD_PROFILE_PIC)
+            val bio = document.getString("bio")
+
+            // Construct and return the 'UserProfile' object
+            UserProfile(
+                uid = uid,
+                name = name,
+                age = age,
+                statistics = statistics,
+                friends = friends,
+                recReq = recReq,
+                sentReq = sentReq,
+                profilePic = profilePic,
+                currentStreak = currentStreak,
+                lastLoginDate = lastLoginDate,
+                bio = bio
+            )
+        } catch (e: Exception) {
+            Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
+            null
+        }
     }
-  }
 
-  /**
+    /**
+     * Converts a map to an InterviewContext object.
+     *
+     * @param contextMap The map representation of an InterviewContext.
+     * @return The corresponding InterviewContext object, or null if conversion fails.
+     */
+     fun convertInterviewContext(contextMap: Map<String, Any>?): InterviewContext? {
+        return contextMap?.let {
+            InterviewContext(
+                targetPosition = it["targetPosition"] as? String ?: "",
+                companyName = it["companyName"] as? String ?: "",
+                interviewType = it["interviewType"] as? String ?: "",
+                experienceLevel = it["experienceLevel"] as? String ?: "",
+                jobDescription = it["jobDescription"] as? String ?: "",
+                focusArea = it["focusArea"] as? String ?: ""
+            )
+        }
+    }
+
+    /**
    * Helper function to perform Firestore operations.
    *
    * @param task The Firestore task to be performed.
@@ -316,6 +349,38 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
   }
 
   /**
+   * Helper function to fetch user profiles based on a list of UIDs.
+   *
+   * @param uids List of UIDs to fetch profiles for.
+   * @param errorMessage Custom error message for logging.
+   * @param onSuccess Callback invoked with the list of fetched profiles.
+   * @param onFailure Callback invoked with an exception if the operation fails.
+   */
+  private fun fetchUserProfilesByUids(
+      uids: List<String>,
+      errorMessage: String,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (uids.isEmpty()) {
+      onSuccess(emptyList()) // Return an empty list if no UIDs are provided
+      return
+    }
+
+    db.collection(collectionPath)
+        .whereIn("uid", uids)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val profiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+          onSuccess(profiles)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UserProfileRepository", errorMessage, exception)
+          onFailure(exception)
+        }
+  }
+
+  /**
    * Get friends' profiles based on the UIDs stored in the user's profile.
    *
    * @param friendUids List of UIDs of the friends to be retrieved.
@@ -327,22 +392,310 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       onSuccess: (List<UserProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (friendUids.isEmpty()) {
-      onSuccess(emptyList()) // Return an empty list if no friends
-      return
+    fetchUserProfilesByUids(
+        uids = friendUids,
+        errorMessage = "Error fetching friends profiles",
+        onSuccess = onSuccess,
+        onFailure = onFailure)
+  }
+
+  /**
+   * Get profiles the user received requests from based on the UIDs stored in the user's profile.
+   *
+   * @param recReqUIds List of UIDs of the users the user received requests from to be retrieved.
+   * @param onSuccess Callback to be invoked with the list of received friend requests profiles.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  override fun getRecReqProfiles(
+      recReqUIds: List<String>,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    fetchUserProfilesByUids(
+        uids = recReqUIds,
+        errorMessage = "Error fetching received friend requests profiles",
+        onSuccess = onSuccess,
+        onFailure = onFailure)
+  }
+
+  /**
+   * Get sent requests profiles based on their UIDs.
+   *
+   * @param sentReqProfiles List of UIDs of the sent friend requests.
+   * @param onSuccess Callback to be invoked with the list of sent requests profiles.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  override fun getSentReqProfiles(
+      sentReqProfiles: List<String>,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    fetchUserProfilesByUids(
+        uids = sentReqProfiles,
+        errorMessage = "Error fetching sent friend requests profiles",
+        onSuccess = onSuccess,
+        onFailure = onFailure)
+  }
+
+  /**
+   * Helper function to perform Firestore transactions with user documents.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the other user involved.
+   * @param transactionBlock The block of code to execute within the transaction.
+   * @param onSuccess Callback invoked on successful transaction.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  private fun performUserTransaction(
+      currentUid: String,
+      friendUid: String,
+      transactionBlock: (Transaction, DocumentSnapshot, DocumentSnapshot) -> Unit,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val currentUserRef = db.collection(collectionPath).document(currentUid)
+    val friendUserRef = db.collection(collectionPath).document(friendUid)
+
+    db.runTransaction { transaction ->
+          val currentUserSnapshot = transaction.get(currentUserRef)
+          val friendUserSnapshot = transaction.get(friendUserRef)
+
+          transactionBlock(transaction, currentUserSnapshot, friendUserSnapshot)
+        }
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
+  /**
+   * Sends a friend request from the current user to another user.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user to send the friend request to.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  override fun sendFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
+          val currentSentReq = currentUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+          val friendRecReq = friendUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+
+          if (currentSentReq.contains(friendUid)) {
+            throw Exception("Friend request already sent.")
+          }
+
+          val updatedSentReq = currentSentReq + friendUid
+          transaction.update(currentUserSnapshot.reference, "sentReq", updatedSentReq)
+
+          val updatedRecReq = friendRecReq + currentUid
+          transaction.update(friendUserSnapshot.reference, "recReq", updatedRecReq)
+        },
+        onSuccess,
+        onFailure)
+  }
+
+  /**
+   * Accepts a friend request, establishing a friendship between two users.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user who sent the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  override fun acceptFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
+          val currentFriends = currentUserSnapshot.get("friends") as? List<String> ?: emptyList()
+          val currentRecReq = currentUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+          val friendSentReq = friendUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+          val friendFriends = friendUserSnapshot.get("friends") as? List<String> ?: emptyList()
+
+          if (!currentRecReq.contains(friendUid)) {
+            throw Exception("No friend request from this user to accept.")
+          }
+
+          if (!friendSentReq.contains(currentUid)) {
+            throw Exception("No sent friend request from this user to this user.")
+          }
+
+          val updatedCurrentFriends = currentFriends + friendUid
+          transaction.update(currentUserSnapshot.reference, "friends", updatedCurrentFriends)
+
+          val updatedCurrentRecReq = currentRecReq - friendUid
+          transaction.update(currentUserSnapshot.reference, "recReq", updatedCurrentRecReq)
+
+          val updatedFriendSentReq = friendSentReq - currentUid
+          transaction.update(friendUserSnapshot.reference, "sentReq", updatedFriendSentReq)
+
+          val updatedFriendFriends = friendFriends + currentUid
+          transaction.update(friendUserSnapshot.reference, "friends", updatedFriendFriends)
+        },
+        onSuccess,
+        onFailure)
+  }
+
+  /**
+   * Declines a friend request from another user.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user who sent the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  override fun declineFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
+          val currentRecReq = currentUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+          val friendSentReq = friendUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+
+          if (!currentRecReq.contains(friendUid)) {
+            throw Exception("No friend request from this user to decline.")
+          }
+
+          if (!friendSentReq.contains(currentUid)) {
+            throw Exception("No sent friend request from current user to this user.")
+          }
+
+          val updatedCurrentRecReq = currentRecReq - friendUid
+          transaction.update(currentUserSnapshot.reference, "recReq", updatedCurrentRecReq)
+
+          val updatedFriendSentReq = friendSentReq - currentUid
+          transaction.update(friendUserSnapshot.reference, "sentReq", updatedFriendSentReq)
+        },
+        onSuccess,
+        onFailure)
+  }
+
+  /**
+   * Cancels a previously sent friend request.
+   *
+   * This function removes the `friendUid` from the current user's `sentReq` list and removes the
+   * `currentUid` from the friend's `recReq` list, effectively canceling the friend request.
+   *
+   * @param currentUid The UID of the current user who sent the friend request.
+   * @param friendUid The UID of the friend to whom the request was sent.
+   * @param onSuccess Callback to be invoked on successful cancellation.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  override fun cancelFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
+          val currentSentReq = currentUserSnapshot.get("sentReq") as? List<String> ?: emptyList()
+          val friendRecReq = friendUserSnapshot.get("recReq") as? List<String> ?: emptyList()
+
+          if (!currentSentReq.contains(friendUid)) {
+            throw Exception("No sent friend request to cancel.")
+          }
+
+          if (!friendRecReq.contains(currentUid)) {
+            throw Exception("Friend does not have you in their received requests.")
+          }
+
+          val updatedSentReq = currentSentReq - friendUid
+          transaction.update(currentUserSnapshot.reference, "sentReq", updatedSentReq)
+
+          val updatedRecReq = friendRecReq - currentUid
+          transaction.update(friendUserSnapshot.reference, "recReq", updatedRecReq)
+        },
+        {
+          // Additional logging can be handled here if needed
+          Log.d("UserProfileRepositoryFirestore", "Friend request canceled successfully.")
+          onSuccess()
+        },
+        { exception ->
+          Log.e("UserProfileRepositoryFirestore", "Failed to cancel friend request.", exception)
+          onFailure(exception)
+        })
+  }
+
+  /**
+   * Deletes an existing friendship between two users.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the friend to remove.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  override fun deleteFriend(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performUserTransaction(
+        currentUid,
+        friendUid,
+        { transaction, currentUserSnapshot, friendUserSnapshot ->
+          val currentFriends = currentUserSnapshot.get("friends") as? List<String> ?: emptyList()
+          val friendFriends = friendUserSnapshot.get("friends") as? List<String> ?: emptyList()
+
+          if (!currentFriends.contains(friendUid)) {
+            throw Exception("Users are not friends.")
+          }
+
+          val updatedCurrentFriends = currentFriends - friendUid
+          transaction.update(currentUserSnapshot.reference, "friends", updatedCurrentFriends)
+
+          val updatedFriendFriends = friendFriends - currentUid
+          transaction.update(friendUserSnapshot.reference, "friends", updatedFriendFriends)
+        },
+        onSuccess,
+        onFailure)
+  }
+
+  /**
+   * Calculates the mean (average) of the elements in a given list.
+   *
+   * This function takes a list of numerical values (`List<Double>`) and returns the mean of its
+   * elements. If the list is empty or contains only invalid numbers (e.g., NaN, Infinity), the
+   * function returns 0.0. If the list contains any NaN or infinite values, an
+   * IllegalArgumentException is thrown to alert the caller.
+   *
+   * @param values A `List<Double>` containing the numerical values. Defaults to an empty list if
+   *   not provided.
+   * @return The mean of the values, or 0.0 if the list is empty or contains only invalid numbers.
+   * @throws IllegalArgumentException If the list contains NaN or infinite values.
+   */
+  override fun getMetricMean(values: List<Double>): Double {
+    // Check if the list is empty to avoid division by zero
+    if (values.isEmpty()) return 0.0
+
+    // Check for invalid values (NaN or infinite)
+    if (values.any { it.isNaN() || it.isInfinite() }) {
+      throw IllegalArgumentException("Input contains NaN or infinite values")
     }
 
-    db.collection(collectionPath)
-        .whereIn("uid", friendUids)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val friends = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
-          onSuccess(friends)
-        }
-        .addOnFailureListener { exception ->
-          Log.e("UserProfileRepository", "Error fetching friends profiles", exception)
-          onFailure(exception)
-        }
+    // Sum the elements and divide by the size of the list
+    val sum = values.sum()
+    return sum / values.size
   }
 
   override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
