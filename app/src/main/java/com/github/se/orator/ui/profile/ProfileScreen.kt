@@ -74,7 +74,6 @@ import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
-import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.google.firebase.auth.FirebaseAuth
 
@@ -111,6 +110,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
          */
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+            backgroundColor = colors.surface,
             title = {
               Text(
                   modifier = Modifier.testTag("profile_title"),
