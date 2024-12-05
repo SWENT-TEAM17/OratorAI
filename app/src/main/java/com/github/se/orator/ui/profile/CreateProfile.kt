@@ -38,8 +38,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -48,6 +46,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
 
@@ -124,13 +123,17 @@ fun CreateAccountScreen(
                   contentAlignment = Alignment.Center,
                   modifier =
                       Modifier.size(
-                              107.dp) // Slightly larger to accommodate the IconButton outside the
+                              AppDimensions.slightlyLargerProfilePictureSize) // Slightly larger to
+                          // accommodate the IconButton
+                          // outside the
                           // circle
                           .testTag("profile_picture_container")) {
                     // Circle with background image and profile picture
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.size(97.dp).clip(CircleShape)) {
+                        modifier =
+                            Modifier.size(AppDimensions.slightlyLowerProfilePictureSize)
+                                .clip(CircleShape)) {
                           // Background Image
                           Image(
                               painter = painterResource(id = R.drawable.profile_background),
@@ -149,13 +152,13 @@ fun CreateAccountScreen(
                     IconButton(
                         onClick = { isDialogOpen = true },
                         modifier =
-                            Modifier.size(20.dp)
+                            Modifier.size(AppDimensions.paddingMediumSmall)
                                 .align(Alignment.BottomEnd)
                                 .testTag("upload_profile_picture")) {
                           Image(
                               painter = painterResource(id = R.drawable.camera),
                               contentDescription = "Upload profile picture",
-                              modifier = Modifier.size(20.dp))
+                              modifier = Modifier.size(AppDimensions.paddingMediumSmall))
                         }
                   }
 
@@ -164,7 +167,7 @@ fun CreateAccountScreen(
               Text(
                   modifier = Modifier.testTag("profile_picture_label"),
                   text = "Profile picture (optional)",
-                  fontSize = 14.sp, // Can be replaced with a theme variable if defined
+                  fontSize = AppFontSizes.bodySmall, // 14.sp
                   color = Color.Gray // Can be replaced with AppColors.secondaryTextColor
                   )
 
