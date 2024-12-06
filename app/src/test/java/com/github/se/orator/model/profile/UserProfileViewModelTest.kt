@@ -215,7 +215,8 @@ class UserProfileViewModelTest {
   @Test
   fun `addNewestData should add new data to recentData and update user profile`() = runTest {
     // Arrange
-    val newAnalysisData = AnalysisData(talkTimeSeconds = 100.0, talkTimePercentage = 50.0)
+    val newAnalysisData = AnalysisData(transcription = "a",fillerWordsCount =  0, averagePauseDuration = 0.0,
+        talkTimeSeconds = 100.0, talkTimePercentage = 50.0, pace = 0)
 
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
@@ -249,7 +250,8 @@ class UserProfileViewModelTest {
     // Prepopulate recentData with 10 items
     for (i in 1..10) {
       val analysisData =
-          AnalysisData(talkTimeSeconds = i.toDouble(), talkTimePercentage = i.toDouble())
+          AnalysisData(transcription = "a",fillerWordsCount =  0, averagePauseDuration = 0.0,
+              talkTimeSeconds = i.toDouble(), talkTimePercentage = i.toDouble(), pace = 0)
       viewModel.addNewestData(analysisData)
     }
     testDispatcher.scheduler.advanceUntilIdle()
@@ -259,7 +261,8 @@ class UserProfileViewModelTest {
     Assert.assertEquals(1.0, initialRecentData.first().talkTimeSeconds, 0.0)
 
     // Act
-    val newAnalysisData = AnalysisData(talkTimeSeconds = 11.0, talkTimePercentage = 11.0)
+    val newAnalysisData = AnalysisData(transcription = "a",fillerWordsCount =  0, averagePauseDuration = 0.0,
+        talkTimeSeconds = 11.0, talkTimePercentage = 11.0, pace = 0)
     viewModel.addNewestData(newAnalysisData)
     testDispatcher.scheduler.advanceUntilIdle()
 
@@ -291,7 +294,8 @@ class UserProfileViewModelTest {
     Assert.assertNull(viewModel.userProfile.first())
 
     // Act
-    val newAnalysisData = AnalysisData(talkTimeSeconds = 50.0, talkTimePercentage = 50.0)
+    val newAnalysisData = AnalysisData(transcription = "a",fillerWordsCount =  0, averagePauseDuration = 0.0,
+        talkTimeSeconds = 50.0, talkTimePercentage = 50.0, pace = 0)
     viewModel.addNewestData(newAnalysisData)
     testDispatcher.scheduler.advanceUntilIdle()
 
@@ -315,9 +319,12 @@ class UserProfileViewModelTest {
     // Add several AnalysisData items
     val analysisDataList =
         listOf(
-            AnalysisData(talkTimeSeconds = 10.0, talkTimePercentage = 20.0),
-            AnalysisData(talkTimeSeconds = 20.0, talkTimePercentage = 30.0),
-            AnalysisData(talkTimeSeconds = 30.0, talkTimePercentage = 40.0))
+            AnalysisData(transcription = "a",fillerWordsCount =  0, averagePauseDuration = 0.0,
+                talkTimeSeconds = 10.0, talkTimePercentage = 20.0, pace = 0),
+            AnalysisData(transcription = "a",fillerWordsCount =  0, averagePauseDuration = 0.0,
+                talkTimeSeconds = 20.0, talkTimePercentage = 30.0, pace = 0),
+            AnalysisData(transcription = "a",fillerWordsCount =  0, averagePauseDuration = 0.0,
+                talkTimeSeconds = 30.0, talkTimePercentage = 40.0, pace = 0))
 
     analysisDataList.forEach { data -> viewModel.addNewestData(data) }
 
