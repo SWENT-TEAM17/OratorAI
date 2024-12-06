@@ -24,18 +24,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
@@ -44,7 +45,7 @@ import com.github.se.orator.ui.theme.AppFontSizes
 data class SettingBar(
     val text: String,
     val testTag: String,
-    val function: () -> Unit,
+    val function: (AppThemeViewModel?) -> Unit,
     val icon: ImageVector,
     val iconDescription: String
 )
@@ -70,7 +71,15 @@ val listOfSettings =
             { Log.d("hello", "permissions") },
             Icons.Outlined.Lock,
             "lock icon"),
-        SettingBar("Theme", "theme", { Log.d("hello", "theme") }, Icons.Outlined.DarkMode, "theme"),
+        SettingBar(
+            "Theme (click to switch)",
+            "theme",
+            { themeVM ->
+              themeVM?.switchTheme()
+              Log.d("hello", "theme")
+            },
+            Icons.Outlined.DarkMode,
+            "theme"),
         SettingBar(
             "Invite Friends",
             "invite_friends",
@@ -93,11 +102,11 @@ val listOfSettings =
 
 // reusable function that is called to add a section to settings
 @Composable
-fun TextButtonFun(settingBar: SettingBar) {
+fun TextButtonFun(settingBar: SettingBar, switchTheme: AppThemeViewModel? = null) {
   TextButton(
-      onClick = { settingBar.function() },
+      onClick = { settingBar.function(switchTheme) },
       modifier = Modifier.fillMaxWidth().testTag(settingBar.testTag),
-      contentPadding = PaddingValues(0.dp) // Remove default padding
+      contentPadding = PaddingValues(AppDimensions.nullPadding) // Remove default padding
       ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
@@ -114,6 +123,7 @@ fun TextButtonFun(settingBar: SettingBar) {
                           start = AppDimensions.paddingSmallMedium,
                           top = AppDimensions.paddingTopSmall),
                   text = settingBar.text,
+                  color = MaterialTheme.colorScheme.onBackground,
                   fontSize = AppFontSizes.titleLarge)
             }
       }
@@ -124,12 +134,18 @@ fun TextButtonFun(settingBar: SettingBar) {
 @Composable
 fun SettingsScreen(
     navigationActions: NavigationActions,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    themeViewModel: AppThemeViewModel? = null
 ) {
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Settings", modifier = Modifier.testTag("SettingsText")) },
+            title = {
+              Text(
+                  "Settings",
+                  color = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.testTag("SettingsText"))
+            },
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -138,16 +154,24 @@ fun SettingsScreen(
                         Icons.Outlined.ArrowBackIosNew,
                         contentDescription = "Back button",
                         modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                        tint = Color.Black)
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
-            })
+            },
+            colors =
+                TopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ))
       },
       content = { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).testTag("settingsScreen"),
             verticalArrangement = Arrangement.spacedBy(AppDimensions.spacerWidthMedium)) {
               for (setting in listOfSettings) {
-                TextButtonFun(setting)
+                TextButtonFun(setting, themeViewModel)
                 HorizontalDivider(thickness = AppDimensions.dividerThickness)
               }
             }

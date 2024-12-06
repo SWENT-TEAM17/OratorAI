@@ -1,166 +1,257 @@
 package com.github.se.orator.ui.theme
 
-import android.os.Build
+import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
-data class AppDimensionsObject(
-    // Padding
-    val paddingExtraSmall: Dp,
-    val paddingSmall: Dp,
-    val paddingSmallMedium: Dp,
-    val paddingMedium: Dp,
-    val paddingLarge: Dp,
-    val paddingExtraLarge: Dp,
-    val paddingXXLarge: Dp,
-    val paddingXXXLarge: Dp,
-    val paddingTopSmall: Dp,
-    val statusBarPadding: Dp,
-
-    // Spacer Dimensions
-    val spacerWidthMedium: Dp,
-    val spacerHeightLarge: Dp,
-    val largeSpacerHeight: Dp,
-
-    // Button Heights
-    val buttonHeight: Dp,
-    val buttonHeightLarge: Dp,
-
-    // Logo Dimensions
-    val logoSize: Dp,
-    val logoTextWidth: Dp,
-    val logoTextHeight: Dp,
-    val googleLogoSize: Dp,
-
-    // Fixed Dimensions
-    val strokeWidth: Dp,
-    val borderStrokeWidth: Dp,
-    val dividerThickness: Dp,
-    val appBarElevation: Dp,
-    val elevationSmall: Dp,
-
-    // Loading Indicator
-    val loadingIndicatorSize: Dp,
-
-    // Corner Radii
-    val roundedCornerRadius: Dp,
-    val cornerRadiusSmall: Dp,
-
-    // Icon Sizes
-    val iconSize: Dp,
-    val iconSizeSmall: Dp,
-    val iconSizeMedium: Dp,
-    val iconSizeLarge: Dp,
-
-    // Drawer Padding
-    val drawerPadding: Dp,
-
-    // Card Dimensions
-    val cardHorizontalPadding: Dp,
-    val cardCornerRadius: Dp,
-    val cardImageHeight: Dp,
-    val cardSectionHeight: Dp,
-
-    // Spacing
-    val spacingXLarge: Dp,
-
-    // Navigation
-    val bottomNavigationHeight: Dp,
-
-    // Input Fields
-    val inputFieldHeight: Dp,
-    val bioFieldHeight: Dp,
-
-    // Profile Picture
-    val profilePictureDialogSize: Dp,
-    val profilePictureSize: Dp,
-
-    // Font Size
-    val largeTitleFontSize: Dp,
-    val mediumTitleFontSize: Dp,
-    val buttonTextSize: Dp,
-)
+import androidx.core.view.WindowCompat
+import com.github.se.orator.model.theme.AppThemeViewModel
 
 object AppDimensions {
-  val paddingSmall = 8.dp
-  val paddingMedium = 16.dp
-  val paddingLarge = 24.dp
-  val paddingExtraLarge = 32.dp
-  val largeSpacerHeight = 100.dp
-  val mediumHeight = 64.dp
-  val MediumSpacerHeight = 50.dp
-  val SmallSpacerHeight = 15.dp
-  val buttonHeight = 48.dp
-  val logoSize = 250.dp
-  val logoTextWidth = 276.dp
-  val logoTextHeight = 141.dp
-  val googleLogoSize = 30.dp
-  val strokeWidth = 8.dp
-  val borderStrokeWidth = 1.dp
-  val loadingIndicatorSize = 64.dp
-  val roundedCornerRadius = 12.dp
-  val spacerWidthMedium = 16.dp
-  val spacerHeightLarge = 24.dp
-  val spacerHeightMedium = 8.dp
-  val iconSize = 100.dp
-  val drawerPadding = 16.dp
-  val cardHorizontalPadding = 30.dp
-  val cardCornerRadius = 16.dp
-  val cardImageHeight = 160.dp
-  val paddingXXLarge = 42.dp // Corresponds to 42.dp
-  val paddingXXXLarge = 64.dp // Corresponds to 64.dp
-  val spacingXLarge = 40.dp // Corresponds to 40.dp spacing in ButtonRow
-  val bottomNavigationHeight = 60.dp // Corresponds to the height of BottomNavigation
-  val paddingExtraSmall = 4.dp
-  val paddingSmallMedium = 12.dp // Added for padding of 12.dp
-  val iconSizeSmall = 32.dp // Added for icon size 32.dp
-  val iconSizeMedium = 24.dp // Added for medium-sized icons
-  val cornerRadiusSmall = 8.dp // Added for corner radius of 8.dp
-  val appBarElevation = 0.dp // Added for elevation of AppBar
-  val elevationSmall = 4.dp // For AppBar elevation
-  val inputFieldHeight = 56.dp // Existing or newly added for input fields
-  val bioFieldHeight = 150.dp // Added for bio input field height
-  val buttonHeightLarge = 50.dp // Added for Save changes button height
-  val profilePictureDialogSize = 200.dp // Added for ProfilePictureDialog size
-  val cardSectionHeight = 100.dp // Added for CardSection height
-  val profilePictureSize = 100.dp // Added for profile picture size
-  val dividerThickness = 3.dp // Added for HorizontalDivider thickness
-  val paddingTopSmall = 5.dp // Added for padding top=5.dp in Text
-  val statusBarPadding = 10.dp
-  val iconSizeLarge = 35.dp
-  val buttonSize = 80.dp
-  val visualizerHeight = 100.dp
-  val iconSizeMic = 48.dp
-  val heightMedium = 24.dp
-  val paddingMediumSmall = 20.dp
-  val smallWidth = 12.dp
-  val smallPadding = 4.dp
-  val mediumText = 16.sp
-  val full = 1f
-  val imageLargeXXL = 350.dp
-  val smallTitleFontSize = 20.dp
-  val mediumTitleFontSize = 30.dp
-  val profileBoxHeight = 200.dp
-  val profileCardHeight = 140.dp
 
-  /// Offline Mode layout definition
-  val buttonWidthMin = 200.dp // Minimum width for buttons
-  val buttonWidthMax = 300.dp // Maximum width for buttons
-  val buttonHeightRounded = 50.dp // Height for rounded buttons
-  val shadowElevation = 5.dp // Elevation/shadow for buttons
-  // Specific Spacing Needs
-  val spacerHeightDefault = 32.dp // Spacer height for default spacing in between elements
+  // Reference Dimensions
+  private const val MODEL_WIDTH_DP = 448.0f // Base width in dp from design
+  private const val MODEL_HEIGHT_DP = 923.0f // Base height in dp from design
+
+  // Scale factors based on current screen dimensions
+  @Composable
+  private fun scaleFactorWidth(): Float {
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp.toFloat()
+    return remember(screenWidthDp) { screenWidthDp / MODEL_WIDTH_DP }
+  }
+
+  @Composable
+  private fun scaleFactorHeight(): Float {
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp.toFloat()
+    return remember(screenHeightDp) { screenHeightDp / MODEL_HEIGHT_DP }
+  }
+
+  // Padding
+  val nullPadding = 0.dp
+  val paddingSmall: Dp
+    @Composable get() = (scaleFactorWidth() * 8.0f).dp
+
+  val paddingMedium: Dp
+    @Composable get() = (scaleFactorWidth() * 16.0f).dp
+
+  val paddingLarge: Dp
+    @Composable get() = (scaleFactorWidth() * 24.0f).dp
+
+  val paddingExtraLarge: Dp
+    @Composable get() = (scaleFactorWidth() * 32.0f).dp
+
+  val paddingXXLarge: Dp
+    @Composable get() = (scaleFactorWidth() * 42.0f).dp
+
+  val paddingXXXLarge: Dp
+    @Composable get() = (scaleFactorWidth() * 64.0f).dp
+
+  val paddingExtraSmall: Dp
+    @Composable get() = (scaleFactorWidth() * 4.0f).dp
+
+  val paddingSmallMedium: Dp
+    @Composable get() = (scaleFactorWidth() * 12.0f).dp
+
+  val paddingMediumSmall: Dp
+    @Composable get() = (scaleFactorWidth() * 20.0f).dp
+
+  val paddingTopSmall: Dp
+    @Composable get() = (scaleFactorHeight() * 5.0f).dp
+
+  val statusBarPadding: Dp
+    @Composable get() = (scaleFactorHeight() * 10.0f).dp
+
+  val smallPadding: Dp
+    @Composable get() = paddingExtraSmall
+
+  // Spacer Dimensions
+  val largeSpacerHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 100.0f).dp
+
+  val mediumSpacerHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 50.0f).dp
+
+  val smallSpacerHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 15.0f).dp
+
+  val spacerWidthMedium: Dp
+    @Composable get() = (scaleFactorWidth() * 16.0f).dp
+
+  val spacerHeightLarge: Dp
+    @Composable get() = (scaleFactorHeight() * 30.0f).dp
+
+  val spacerHeightMedium: Dp
+    @Composable get() = (scaleFactorHeight() * 8.0f).dp
+
+  val spacerHeightDefault: Dp
+    @Composable get() = (scaleFactorHeight() * 32.0f).dp
+
+  // Button Heights and Sizes
+  val buttonHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 48.0f).dp
+
+  val buttonHeightLarge: Dp
+    @Composable get() = (scaleFactorHeight() * 50.0f).dp
+
+  val buttonHeightRounded: Dp
+    @Composable get() = buttonHeightLarge
+
+  val buttonSize: Dp
+    @Composable get() = (scaleFactorWidth() * 80.0f).dp
+
+  val buttonWidthMin: Dp
+    @Composable get() = (scaleFactorWidth() * 200.0f).dp
+
+  val buttonWidthMax: Dp
+    @Composable get() = (scaleFactorWidth() * 300.0f).dp
+
+  // Logo Dimensions
+  val logoSize: Dp
+    @Composable get() = (scaleFactorWidth() * 250.0f).dp
+
+  val logoTextWidth: Dp
+    @Composable get() = (scaleFactorWidth() * 276.0f).dp
+
+  val logoTextHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 141.0f).dp
+
+  val googleLogoSize: Dp
+    @Composable get() = (scaleFactorWidth() * 30.0f).dp
+
+  val imageLargeXXL: Dp
+    @Composable get() = (scaleFactorWidth() * 350.0f).dp
+
+  // Icon Sizes
+  val iconSize: Dp
+    @Composable get() = (scaleFactorWidth() * 100.0f).dp
+
+  val iconSizeSmall: Dp
+    @Composable get() = (scaleFactorWidth() * 32.0f).dp
+
+  val iconSizeMedium: Dp
+    @Composable get() = (scaleFactorWidth() * 24.0f).dp
+
+  val iconSizeLarge: Dp
+    @Composable get() = (scaleFactorWidth() * 35.0f).dp
+
+  val iconSizeMic: Dp
+    @Composable get() = (scaleFactorWidth() * 48.0f).dp
+
+  // Elevation and Stroke
+  val strokeWidth: Dp
+    @Composable get() = (scaleFactorWidth() * 8.0f).dp
+
+  val borderStrokeWidth: Dp
+    @Composable get() = (scaleFactorWidth() * 1.0f).dp
+
+  val dividerThickness: Dp
+    @Composable get() = (scaleFactorWidth() * 3.0f).dp
+
+  val appBarElevation: Dp = 0.dp // Fixed value
+
+  val elevationSmall: Dp
+    @Composable get() = (scaleFactorWidth() * 4.0f).dp
+
+  val shadowElevation: Dp
+    @Composable get() = (scaleFactorWidth() * 5.0f).dp
+
+  // Corner Radii
+  val roundedCornerRadius: Dp
+    @Composable get() = (scaleFactorWidth() * 12.0f).dp
+
+  val cornerRadiusSmall: Dp
+    @Composable get() = (scaleFactorWidth() * 8.0f).dp
+
+  // Heights and Widths
+  val mediumHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 64.0f).dp
+
+  val heightMedium: Dp
+    @Composable get() = (scaleFactorHeight() * 24.0f).dp
+
+  val smallWidth: Dp
+    @Composable get() = (scaleFactorWidth() * 12.0f).dp
+
+  // Navigation
+  val bottomNavigationHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 60.0f).dp
+
+  // Input Fields
+  val inputFieldHeight = 56.0.dp
+
+  val bioFieldHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 150.0f).dp
+
+  // Profile Picture and Cards
+  val profilePictureDialogSize: Dp
+    @Composable get() = (scaleFactorWidth() * 200.0f).dp
+
+  val profilePictureSize: Dp
+    @Composable get() = (scaleFactorWidth() * 100.0f).dp
+
+  val slightlyLargerProfilePictureSize: Dp
+    @Composable get() = (scaleFactorWidth() * 107.0f).dp
+  // Circle with background image and profile picture
+
+  val slightlyLowerProfilePictureSize: Dp
+    @Composable get() = (scaleFactorWidth() * 97.0f).dp
+
+  val profileBoxHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 250.0f).dp
+
+  val profileCardHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 140.0f).dp
+
+  val cardSectionHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 100.0f).dp
+
+  val cardHorizontalPadding: Dp
+    @Composable get() = (scaleFactorWidth() * 30.0f).dp
+
+  val cardCornerRadius: Dp
+    @Composable get() = roundedCornerRadius
+
+  val cardImageHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 160.0f).dp
+
+  // Spacing
+  val spacingXLarge: Dp
+    @Composable get() = (scaleFactorWidth() * 40.0f).dp
+
+  // Visualizer Height
+  val visualizerHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 100.0f).dp
+
+  val jobDescriptionInputFieldHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 200.0f).dp
+
+  // Drawer Padding
+  val drawerPadding: Dp
+    @Composable get() = spacerWidthMedium
+
+  // Loading Indicator
+  val loadingIndicatorSize: Dp
+    @Composable get() = (scaleFactorWidth() * 64.0f).dp
+
+  // Other Dimensions
+  const val full: Float = 1f // Assuming this is a constant and doesn't need scaling
 }
 
 object AppShapes {
@@ -171,28 +262,115 @@ object AppShapes {
   val circleShape = CircleShape // Added for circular buttons
 }
 
-private val DarkColorScheme =
-    darkColorScheme(primary = AppColors.primaryColor, surface = AppColors.surfaceColor)
+private val lightScheme =
+    lightColorScheme(
+        primary = primaryLight,
+        onPrimary = onPrimaryLight,
+        primaryContainer = primaryContainerLight,
+        onPrimaryContainer = onPrimaryContainerLight,
+        secondary = secondaryLight,
+        onSecondary = onSecondaryLight,
+        secondaryContainer = secondaryContainerLight,
+        onSecondaryContainer = onSecondaryContainerLight,
+        tertiary = tertiaryLight,
+        onTertiary = onTertiaryLight,
+        tertiaryContainer = tertiaryContainerLight,
+        onTertiaryContainer = onTertiaryContainerLight,
+        error = errorLight,
+        onError = onErrorLight,
+        errorContainer = errorContainerLight,
+        onErrorContainer = onErrorContainerLight,
+        background = backgroundLight,
+        onBackground = onBackgroundLight,
+        surface = surfaceLight,
+        onSurface = onSurfaceLight,
+        surfaceVariant = surfaceVariantLight,
+        onSurfaceVariant = onSurfaceVariantLight,
+        outline = outlineLight,
+        outlineVariant = outlineVariantLight,
+        scrim = scrimLight,
+        inverseSurface = inverseSurfaceLight,
+        inverseOnSurface = inverseOnSurfaceLight,
+        inversePrimary = inversePrimaryLight,
+        surfaceDim = surfaceDimLight,
+        surfaceBright = surfaceBrightLight,
+        surfaceContainerLowest = surfaceContainerLowestLight,
+        surfaceContainerLow = surfaceContainerLowLight,
+        surfaceContainer = surfaceContainerLight,
+        surfaceContainerHigh = surfaceContainerHighLight,
+        surfaceContainerHighest = surfaceContainerHighestLight,
+    )
 
-private val LightColorScheme =
-    lightColorScheme(primary = AppColors.primaryColor, surface = AppColors.surfaceColor)
+private val darkScheme =
+    darkColorScheme(
+        primary = primaryDark,
+        onPrimary = onPrimaryDark,
+        primaryContainer = primaryContainerDark,
+        onPrimaryContainer = onPrimaryContainerDark,
+        secondary = secondaryDark,
+        onSecondary = onSecondaryDark,
+        secondaryContainer = secondaryContainerDark,
+        onSecondaryContainer = onSecondaryContainerDark,
+        tertiary = tertiaryDark,
+        onTertiary = onTertiaryDark,
+        tertiaryContainer = tertiaryContainerDark,
+        onTertiaryContainer = onTertiaryContainerDark,
+        error = errorDark,
+        onError = onErrorDark,
+        errorContainer = errorContainerDark,
+        onErrorContainer = onErrorContainerDark,
+        background = backgroundDark,
+        onBackground = onBackgroundDark,
+        surface = surfaceDark,
+        onSurface = onSurfaceDark,
+        surfaceVariant = surfaceVariantDark,
+        onSurfaceVariant = onSurfaceVariantDark,
+        outline = outlineDark,
+        outlineVariant = outlineVariantDark,
+        scrim = scrimDark,
+        inverseSurface = inverseSurfaceDark,
+        inverseOnSurface = inverseOnSurfaceDark,
+        inversePrimary = inversePrimaryDark,
+        surfaceDim = surfaceDimDark,
+        surfaceBright = surfaceBrightDark,
+        surfaceContainerLowest = surfaceContainerLowestDark,
+        surfaceContainerLow = surfaceContainerLowDark,
+        surfaceContainer = surfaceContainerDark,
+        surfaceContainerHigh = surfaceContainerHighDark,
+        surfaceContainerHighest = surfaceContainerHighestDark,
+    )
 
+@Immutable
+data class ColorFamily(
+    val color: Color,
+    val onColor: Color,
+    val colorContainer: Color,
+    val onColorContainer: Color
+)
+
+val unspecified_scheme =
+    ColorFamily(Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified)
+
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ProjectTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeViewModel: AppThemeViewModel = AppThemeViewModel(LocalContext.current),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable() () -> Unit
 ) {
-  val colorScheme =
-      when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-          val context = LocalContext.current
-          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-      }
+  themeViewModel.loadTheme(isSystemInDarkTheme())
+  val theme by themeViewModel.isDark.collectAsState()
+
+  val colorScheme = if (theme) darkScheme else lightScheme
+  val view = LocalView.current
+  if (!view.isInEditMode) {
+    SideEffect {
+      val window = (view.context as Activity).window
+      window.statusBarColor = colorScheme.primary.toArgb()
+      WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = theme
+    }
+  }
 
   MaterialTheme(colorScheme = colorScheme, typography = CustomTypography, content = content)
 }

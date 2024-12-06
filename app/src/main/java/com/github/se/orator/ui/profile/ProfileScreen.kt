@@ -51,8 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
@@ -62,10 +60,11 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
+import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -83,16 +82,13 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
       topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            backgroundColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.inverseSurface,
-            elevation = AppDimensions.appBarElevation,
             title = {
               Text(
                   modifier = Modifier.testTag("profile_title"),
                   text = "Profile",
-                  fontWeight = FontWeight.Bold,
-                  style = AppTypography.appBarTitleStyle)
+                  color = MaterialTheme.colorScheme.onSurface)
             },
+            backgroundColor = MaterialTheme.colorScheme.surface,
             actions = {
               IconButton(
                   onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
@@ -101,7 +97,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                         Icons.Outlined.Settings,
                         contentDescription = "Settings",
                         modifier =
-                            Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"))
+                            Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                   }
             },
             navigationIcon = {
@@ -119,7 +116,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                         Icons.AutoMirrored.Filled.Logout,
                         contentDescription = "Sign out",
                         modifier =
-                            Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"))
+                            Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"),
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
             })
       },
@@ -128,7 +126,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.PROFILE)
-      }) { innerPadding ->
+      },
+      backgroundColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier =
                 Modifier.fillMaxSize().padding(innerPadding).padding(AppDimensions.paddingMedium),
@@ -144,6 +143,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                       Card(
                           modifier =
                               Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
+                          backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                           elevation = AppDimensions.elevationSmall) {}
 
                       // Profile Picture with overlapping positioning
@@ -161,23 +161,26 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                               Modifier.testTag("edit_button")
                                   .size(AppDimensions.spacingXLarge)
                                   .align(Alignment.TopEnd)
-                                  .offset(y = (-20).dp),
+                                  .offset(y = -AppDimensions.paddingMediumSmall),
                           // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
                           shape = AppShapes.circleShape,
                           colors =
-                              ButtonDefaults.buttonColors(backgroundColor = AppColors.surfaceColor),
-                          contentPadding = PaddingValues(0.dp)) {
+                              ButtonDefaults.buttonColors(
+                                  backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
+                          contentPadding = PaddingValues(AppDimensions.nullPadding)) {
                             Icon(
                                 Icons.Outlined.Edit,
                                 contentDescription = "Edit button",
                                 modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                                tint = AppColors.surfaceColor)
+                                tint = MaterialTheme.colorScheme.primary)
                           }
 
                       Column(
                           horizontalAlignment = Alignment.CenterHorizontally,
-                          modifier = Modifier.align(Alignment.TopCenter)) {
-                            Spacer(modifier = Modifier.height(AppDimensions.MediumSpacerHeight))
+                          modifier =
+                              Modifier.align(Alignment.TopCenter)
+                                  .padding(top = AppDimensions.paddingSmall)) {
+                            Spacer(modifier = Modifier.height(AppDimensions.mediumSpacerHeight))
 
                             // Box to hold username and streak
                             Box(
@@ -186,9 +189,10 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                   // Username remains centered
                                   Text(
                                       text = profile.name,
-                                      fontSize = 20.sp,
+                                      fontSize = AppFontSizes.titleMedium,
                                       fontWeight = FontWeight.Bold,
-                                      modifier = Modifier.testTag("profile_name"))
+                                      modifier = Modifier.testTag("profile_name"),
+                                      color = MaterialTheme.colorScheme.primary)
 
                                   // Current Streak aligned to the end with fire icon
                                   Row(
@@ -204,28 +208,32 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                         Icon(
                                             imageVector = Icons.Filled.Whatshot, // Fire icon
                                             contentDescription = "Active Streak",
-                                            tint = AppColors.amber,
+                                            tint = COLOR_AMBER,
                                             modifier = Modifier.size(AppDimensions.iconSizeSmall))
                                         Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                                         Text(
                                             text = "${profile.currentStreak}",
-                                            fontSize = 20.sp,
+                                            fontSize = AppFontSizes.titleMedium,
                                             fontWeight = FontWeight.Bold,
-                                            color = AppColors.amber,
+                                            color = COLOR_AMBER,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                             modifier = Modifier.testTag("current_streak_text"))
                                       }
                                 }
 
-                            Spacer(modifier = Modifier.height(AppDimensions.SmallSpacerHeight))
+                            Spacer(modifier = Modifier.height(AppDimensions.smallSpacerHeight))
 
                             Text(
                                 text =
                                     if (profile.bio.isNullOrBlank()) "Write your bio here"
                                     else profile.bio,
                                 modifier =
-                                    Modifier.padding(horizontal = AppDimensions.paddingMedium))
+                                    Modifier.padding(horizontal = AppDimensions.paddingMedium),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1, // Limit to one line
+                                overflow = TextOverflow.Ellipsis // Truncate with ellipsis
+                                )
                           }
                     }
 
@@ -330,7 +338,8 @@ fun CardSection(
               .height(AppDimensions.cardSectionHeight)
               .clickable { onClick() }
               .testTag("cardSection"),
-      elevation = AppDimensions.elevationSmall) {
+      elevation = AppDimensions.elevationSmall,
+      backgroundColor = MaterialTheme.colorScheme.surfaceVariant) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(AppDimensions.paddingSmallMedium)) {
@@ -341,9 +350,10 @@ fun CardSection(
               Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
               Text(
                   text = title,
-                  fontSize = 18.sp,
+                  fontSize = AppFontSizes.bodyLarge,
                   fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("titleText"))
+                  modifier = Modifier.testTag("titleText"),
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
       }
 }
