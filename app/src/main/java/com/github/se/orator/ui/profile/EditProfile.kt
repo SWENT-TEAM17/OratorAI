@@ -23,7 +23,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material3.MaterialTheme // Changed from material3 to material
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -33,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material3.MaterialTheme // Changed from material3 to material
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -135,7 +135,7 @@ fun EditProfileScreen(
                   text = "Edit Profile",
                   fontWeight = FontWeight.Bold,
                   color = MaterialTheme.colorScheme.onSurface,
-                  )
+              )
             },
             navigationIcon = {
               IconButton(
@@ -146,16 +146,16 @@ fun EditProfileScreen(
                         contentDescription = "Back arrow",
                         modifier = Modifier.size(AppDimensions.iconSizeMedium),
                         tint = MaterialTheme.colorScheme.onSurface)
-              }
+                  }
             },
             actions = {
               IconButton(
                   onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
                   modifier = Modifier.testTag("settings_button")) {
-                  Icon(
-                      Icons.Filled.Settings,
-                      contentDescription = "Logout icon",
-                      tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(
+                        Icons.Filled.Settings,
+                        contentDescription = "Logout icon",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                   }
             })
       },
@@ -253,8 +253,8 @@ fun EditProfileScreen(
                     if (updatedProfile != null) {
                       if (newProfilePicUri != null) {
                         // Upload the new profile picture
-                          userProfile?.let { it1 ->
-                              userProfileViewModel.uploadProfilePicture(it1.uid, newProfilePicUri!!)
+                        userProfile?.let { it1 ->
+                          userProfileViewModel.uploadProfilePicture(it1.uid, newProfilePicUri!!)
                         }
                       }
                       // Update the profile
@@ -268,7 +268,8 @@ fun EditProfileScreen(
                           .testTag("save_profile_button"),
                   shape = AppShapes.circleShape, // Replaced CircleShape,
                   colors =
-                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+                      ButtonDefaults.buttonColors(
+                          backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                     Text(
                         modifier = Modifier.testTag("save_profile_button_text"),
                         text = "Save changes",
@@ -335,8 +336,7 @@ fun ChoosePictureDialog(
         Text(
             "Select an option to update your profile picture.",
             modifier = Modifier.testTag("ProfilePictureButton"),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
       },
       backgroundColor = MaterialTheme.colorScheme.surface,
       buttons = {
@@ -350,22 +350,24 @@ fun ChoosePictureDialog(
                   onClick = { onTakePhoto() },
                   modifier = Modifier.testTag("PhotoOnTake"),
                   colors =
-                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {
+                      ButtonDefaults.buttonColors(
+                          backgroundColor = MaterialTheme.colorScheme.primary)) {
                     Text(
                         "Take Photo",
                         modifier = Modifier.testTag("TakePhotoText"),
-                        color = MaterialTheme.colorScheme.onPrimary)
+                        color = MaterialTheme.colorScheme.primary)
                   }
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 8.dp
               Button(
                   onClick = { onPickFromGallery() },
                   modifier = Modifier.testTag("PhotoOnPick"),
                   colors =
-                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {
+                      ButtonDefaults.buttonColors(
+                          backgroundColor = MaterialTheme.colorScheme.primary)) {
                     Text(
                         "Upload from Gallery",
                         modifier = Modifier.testTag("UploadGalleryText"),
-                        color = MaterialTheme.colorScheme.onPrimary)
+                        color = MaterialTheme.colorScheme.primary)
                   }
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 8.dp
               Button(
@@ -373,11 +375,11 @@ fun ChoosePictureDialog(
                   modifier = Modifier.testTag("PhotoOnDismiss"),
                   colors =
                       ButtonDefaults.buttonColors(
-                          backgroundColor = MaterialTheme.colorScheme.secondary)) {
+                          backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                     Text(
                         "Cancel",
                         modifier = Modifier.testTag("CancelText"),
-                        color = MaterialTheme.colorScheme.onSecondary)
+                        color = MaterialTheme.colorScheme.primary)
                   }
             }
       })
