@@ -1,6 +1,7 @@
 package com.github.se.orator.model.profile
 
 import android.net.Uri
+import com.github.se.orator.model.speaking.AnalysisData
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.*
@@ -209,5 +210,243 @@ class UserProfileViewModelTest {
 
     verify(repository).updateLoginStreak(eq(testUid), any(), any())
     verify(repository).getUserProfile(eq(testUid), any(), any())
+  }
+
+  @Test
+  fun `addNewestData should add new data to recentData and update user profile`() = runTest {
+    // Arrange
+    val newAnalysisData =
+        AnalysisData(
+            transcription = "a",
+            fillerWordsCount = 0,
+            averagePauseDuration = 0.0,
+            talkTimeSeconds = 100.0,
+            talkTimePercentage = 50.0,
+            pace = 0)
+
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+        }
+        .`when`(repository)
+        .updateUserProfile(any(), any(), any())
+
+    // Act
+    viewModel.addNewestData(newAnalysisData)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    val recentData = viewModel.recentData.first()
+    Assert.assertEquals(1, recentData.size)
+    Assert.assertEquals(newAnalysisData, recentData.last())
+
+    verify(repository).updateUserProfile(any(), any(), any())
+  }
+
+  @Test
+  fun `addNewestData should maintain a maximum size of 10 in recentData`() = runTest {
+    // Arrange
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+        }
+        .`when`(repository)
+        .updateUserProfile(any(), any(), any())
+
+    // Prepopulate recentData with 10 items
+    for (i in 1..10) {
+      val analysisData =
+          AnalysisData(
+              transcription = "a",
+              fillerWordsCount = 0,
+              averagePauseDuration = 0.0,
+              talkTimeSeconds = i.toDouble(),
+              talkTimePercentage = i.toDouble(),
+              pace = 0)
+      viewModel.addNewestData(analysisData)
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    val initialRecentData = viewModel.recentData.first()
+    Assert.assertEquals(10, initialRecentData.size)
+    Assert.assertEquals(1.0, initialRecentData.first().talkTimeSeconds, 0.0)
+
+    // Act
+    val newAnalysisData =
+        AnalysisData(
+            transcription = "a",
+            fillerWordsCount = 0,
+            averagePauseDuration = 0.0,
+            talkTimeSeconds = 11.0,
+            talkTimePercentage = 11.0,
+            pace = 0)
+    viewModel.addNewestData(newAnalysisData)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    val updatedRecentData = viewModel.recentData.first()
+    Assert.assertEquals(10, updatedRecentData.size)
+    Assert.assertEquals(2.0, updatedRecentData.first().talkTimeSeconds, 0.0)
+    Assert.assertEquals(newAnalysisData, updatedRecentData.last())
+
+    verify(repository, times(11)).updateUserProfile(any(), any(), any())
+  }
+
+  @Test
+  fun `addNewestData should not add data when userProfile is null`() = runTest {
+    // Arrange
+    // Mock the repository to return null for getUserProfile
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
+          onSuccess(null)
+        }
+        .`when`(repository)
+        .getUserProfile(any(), any(), any())
+
+    // Re-initialize viewModel to use the mocked getUserProfile
+    viewModel = UserProfileViewModel(repository)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Confirm that userProfile is null
+    Assert.assertNull(viewModel.userProfile.first())
+
+    // Act
+    val newAnalysisData =
+        AnalysisData(
+            transcription = "a",
+            fillerWordsCount = 0,
+            averagePauseDuration = 0.0,
+            talkTimeSeconds = 50.0,
+            talkTimePercentage = 50.0,
+            pace = 0)
+    viewModel.addNewestData(newAnalysisData)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    val recentData = viewModel.recentData.first()
+    Assert.assertTrue(recentData.isEmpty())
+
+    verify(repository, never()).updateUserProfile(any(), any(), any())
+  }
+
+  @Test
+  fun `updateMetricMean should calculate means and update user profile`() = runTest {
+    // Arrange
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+        }
+        .`when`(repository)
+        .updateUserProfile(any(), any(), any())
+
+    // Add several AnalysisData items
+    val analysisDataList =
+        listOf(
+            AnalysisData(
+                transcription = "a",
+                fillerWordsCount = 0,
+                averagePauseDuration = 0.0,
+                talkTimeSeconds = 10.0,
+                talkTimePercentage = 20.0,
+                pace = 0),
+            AnalysisData(
+                transcription = "a",
+                fillerWordsCount = 0,
+                averagePauseDuration = 0.0,
+                talkTimeSeconds = 20.0,
+                talkTimePercentage = 30.0,
+                pace = 0),
+            AnalysisData(
+                transcription = "a",
+                fillerWordsCount = 0,
+                averagePauseDuration = 0.0,
+                talkTimeSeconds = 30.0,
+                talkTimePercentage = 40.0,
+                pace = 0))
+
+    analysisDataList.forEach { data -> viewModel.addNewestData(data) }
+
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Mock getMetricMean to return the average
+    `when`(repository.getMetricMean(any())).thenAnswer { invocation ->
+      val list = invocation.getArgument<List<Double>>(0)
+      list.average()
+    }
+
+    // Clear previous interactions with the repository
+    clearInvocations(repository)
+    // Act
+    viewModel.updateMetricMean()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    val updatedUserProfile = viewModel.userProfile.first()
+    val expectedTalkTimeSecMean = analysisDataList.map { it.talkTimeSeconds }.average()
+    val expectedTalkTimePercMean = analysisDataList.map { it.talkTimePercentage }.average()
+
+    updatedUserProfile?.statistics?.talkTimeSecMean?.let {
+      Assert.assertEquals(expectedTalkTimeSecMean, it, 0.001)
+    }
+    updatedUserProfile?.statistics?.talkTimePercMean?.let {
+      Assert.assertEquals(expectedTalkTimePercMean, it, 0.001)
+    }
+
+    verify(repository).updateUserProfile(any(), any(), any())
+  }
+
+  @Test
+  fun `updateMetricMean should not update user profile when userProfile is null`() = runTest {
+    // Arrange
+    // Mock the repository to return null for getUserProfile
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
+          onSuccess(null)
+        }
+        .`when`(repository)
+        .getUserProfile(any(), any(), any())
+
+    // Re-initialize viewModel to use the mocked getUserProfile
+    viewModel = UserProfileViewModel(repository)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Confirm that userProfile is null
+    Assert.assertNull(viewModel.userProfile.first())
+
+    // Act
+    viewModel.updateMetricMean()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    verify(repository, never()).updateUserProfile(any(), any(), any())
+  }
+
+  @Test
+  fun `updateMetricMean should set means to zero when recentData is empty`() = runTest {
+    // Arrange
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+        }
+        .`when`(repository)
+        .updateUserProfile(any(), any(), any())
+
+    // Ensure recentData is empty
+    val recentData = viewModel.recentData.first()
+    Assert.assertTrue(recentData.isEmpty())
+
+    // Mock getMetricMean to return 0.0 when list is empty
+    `when`(repository.getMetricMean(any())).thenReturn(0.0)
+
+    // Act
+    viewModel.updateMetricMean()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    val updatedUserProfile = viewModel.userProfile.first()
+    updatedUserProfile?.statistics?.talkTimeSecMean?.let { Assert.assertEquals(0.0, it, 0.001) }
+    updatedUserProfile?.statistics?.talkTimePercMean?.let { Assert.assertEquals(0.0, it, 0.001) }
+
+    verify(repository).updateUserProfile(any(), any(), any())
   }
 }

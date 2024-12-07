@@ -32,6 +32,7 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
+import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.network.OfflineViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
@@ -68,6 +69,8 @@ class MainActivity : ComponentActivity() {
   lateinit var textToSpeech: TextToSpeech
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
   private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
+
+  private val themeViewModel: AppThemeViewModel = AppThemeViewModel(this)
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,13 +113,13 @@ class MainActivity : ComponentActivity() {
 
     enableEdgeToEdge()
     setContent {
-      ProjectTheme {
+      ProjectTheme(themeViewModel = themeViewModel) {
         Scaffold(
             modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold") // Tag for testing
             ) {
               // Observe offline mode state
               val isOffline by offlineViewModel.isOffline.observeAsState(false)
-              OratorApp(chatGPTService, isOffline, textToSpeech)
+              OratorApp(chatGPTService, isOffline, themeViewModel, textToSpeech)
             }
       }
     }
@@ -131,7 +134,12 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean, textToSpeech: TextToSpeech) {
+fun OratorApp(
+    chatGPTService: ChatGPTService,
+    isOffline: Boolean,
+    themeViewModel: AppThemeViewModel,
+    textToSpeech: TextToSpeech
+) {
   // Create NavController for navigation within the app
   val navController = rememberNavController()
   // Initialize NavigationActions to handle navigation events
@@ -220,7 +228,9 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean, textToSpeech: 
             composable(Screen.ADD_FRIENDS) {
               AddFriendsScreen(navigationActions, userProfileViewModel)
             }
-            composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+            composable(Screen.SETTINGS) {
+              SettingsScreen(navigationActions, userProfileViewModel, themeViewModel)
+            }
           }
         }
 
