@@ -73,6 +73,7 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
               IconButton(
                   onClick = {
                     navigationActions.goBack()
+                    chatViewModel.toggleTextToSpeech(false)
                     chatViewModel.resetPracticeContext()
                     chatViewModel.endConversation()
                   },
