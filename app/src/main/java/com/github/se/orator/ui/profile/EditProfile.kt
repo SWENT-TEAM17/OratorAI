@@ -23,7 +23,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme // Changed from material3 to material
+import androidx.compose.material3.MaterialTheme // Changed from material3 to material
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -88,8 +88,7 @@ fun EditProfileScreen(
         uri?.let { newProfilePicUri = it }
       }
 
-  // -----------------------------------------------------------
-  // Added camera-related variables and launchers here
+  // Camera-related variables and launchers here
 
   // Temporary variable to hold the pending image URI
   var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -123,21 +122,20 @@ fun EditProfileScreen(
           Toast.makeText(context, "Camera permission denied.", Toast.LENGTH_SHORT).show()
         }
       }
-  // -----------------------------------------------------------
 
   Scaffold(
       topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("edit_profile_app_bar"),
-            backgroundColor = MaterialTheme.colors.surface,
+            backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
             elevation = AppDimensions.elevationSmall,
             title = {
               Text(
                   modifier = Modifier.testTag("edit_profile_title"),
                   text = "Edit Profile",
                   fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colors.onSurface,
-              )
+                  color = MaterialTheme.colorScheme.onSurface,
+                  )
             },
             navigationIcon = {
               IconButton(
@@ -147,20 +145,17 @@ fun EditProfileScreen(
                         Icons.Outlined.ArrowBackIosNew,
                         contentDescription = "Back arrow",
                         modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                        tint = MaterialTheme.colors.onSurface)
-                  }
+                        tint = MaterialTheme.colorScheme.onSurface)
+              }
             },
             actions = {
               IconButton(
                   onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
                   modifier = Modifier.testTag("settings_button")) {
-                    Icon(
-                        Icons.Filled.Settings,
-                        contentDescription = "Settings",
-                        tint =
-                            MaterialTheme.colors.onSurface.copy(
-                                alpha = 0.7f) // replacing onSurfaceVariant
-                        )
+                  Icon(
+                      Icons.Filled.Settings,
+                      contentDescription = "Logout icon",
+                      tint = MaterialTheme.colorScheme.onSurfaceVariant)
                   }
             })
       },
@@ -170,11 +165,11 @@ fun EditProfileScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.PROFILE)
       },
-      backgroundColor = MaterialTheme.colors.background) { paddingValues ->
+      backgroundColor = MaterialTheme.colorScheme.background) {
         Column(
             modifier =
                 Modifier.fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(it)
                     .padding(AppDimensions.paddingMedium), // Replaced 16.dp
             horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -195,14 +190,14 @@ fun EditProfileScreen(
                     shape = AppShapes.circleShape,
                     colors =
                         ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colors.onSurface.copy(alpha = 0.1f)),
+                            backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
                     contentPadding = PaddingValues(0.dp)) {
                       Icon(
                           Icons.Outlined.PhotoCamera,
                           contentDescription = "Edit button",
                           modifier =
                               Modifier.size(AppDimensions.iconSizeMedium).testTag("edit_button"),
-                          tint = MaterialTheme.colors.primary)
+                          tint = MaterialTheme.colorScheme.primary)
                     }
               }
 
@@ -217,13 +212,13 @@ fun EditProfileScreen(
                   singleLine = true,
                   colors =
                       TextFieldDefaults.outlinedTextFieldColors(
-                          backgroundColor = MaterialTheme.colors.surface,
-                          textColor = MaterialTheme.colors.onSurface,
-                          focusedBorderColor = MaterialTheme.colors.primary,
-                          unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
-                          cursorColor = MaterialTheme.colors.primary,
-                          focusedLabelColor = MaterialTheme.colors.primary,
-                          unfocusedLabelColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)))
+                          backgroundColor = MaterialTheme.colorScheme.surface,
+                          textColor = MaterialTheme.colorScheme.onSurface,
+                          focusedBorderColor = MaterialTheme.colorScheme.outline,
+                          unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                          cursorColor = MaterialTheme.colorScheme.primary,
+                          focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                          unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
 
@@ -240,13 +235,13 @@ fun EditProfileScreen(
                   maxLines = 5,
                   colors =
                       TextFieldDefaults.outlinedTextFieldColors(
-                          backgroundColor = MaterialTheme.colors.surface,
-                          textColor = MaterialTheme.colors.onSurface,
-                          focusedBorderColor = MaterialTheme.colors.primary,
-                          unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
-                          cursorColor = MaterialTheme.colors.primary,
-                          focusedLabelColor = MaterialTheme.colors.primary,
-                          unfocusedLabelColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)))
+                          backgroundColor = MaterialTheme.colorScheme.surface,
+                          textColor = MaterialTheme.colorScheme.onSurface,
+                          focusedBorderColor = MaterialTheme.colorScheme.outline,
+                          unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                          cursorColor = MaterialTheme.colorScheme.primary,
+                          focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                          unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingLarge)) // Replaced 24.dp
 
@@ -258,9 +253,8 @@ fun EditProfileScreen(
                     if (updatedProfile != null) {
                       if (newProfilePicUri != null) {
                         // Upload the new profile picture
-                        userProfile?.let { nonNullUser ->
-                          userProfileViewModel.uploadProfilePicture(
-                              nonNullUser.uid, newProfilePicUri!!)
+                          userProfile?.let { it1 ->
+                              userProfileViewModel.uploadProfilePicture(it1.uid, newProfilePicUri!!)
                         }
                       }
                       // Update the profile
@@ -274,13 +268,13 @@ fun EditProfileScreen(
                           .testTag("save_profile_button"),
                   shape = AppShapes.circleShape, // Replaced CircleShape,
                   colors =
-                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)) {
+                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                     Text(
                         modifier = Modifier.testTag("save_profile_button_text"),
                         text = "Save changes",
                         fontWeight = FontWeight.Bold,
                         fontSize = AppFontSizes.bodyLarge, // Replaced 16.sp
-                        color = MaterialTheme.colors.onPrimary)
+                        color = MaterialTheme.colorScheme.onSurface)
                   }
             }
 
@@ -335,16 +329,16 @@ fun ChoosePictureDialog(
         Text(
             "Choose Profile Picture",
             modifier = Modifier.testTag("ProfilePictureTitle"),
-            color = MaterialTheme.colors.onSurface)
+            color = MaterialTheme.colorScheme.onSurface)
       },
       text = {
         Text(
             "Select an option to update your profile picture.",
             modifier = Modifier.testTag("ProfilePictureButton"),
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f) // replaced variant
+            color = MaterialTheme.colorScheme.onSurfaceVariant
             )
       },
-      backgroundColor = MaterialTheme.colors.surface,
+      backgroundColor = MaterialTheme.colorScheme.surface,
       buttons = {
         Column(
             modifier =
@@ -356,22 +350,22 @@ fun ChoosePictureDialog(
                   onClick = { onTakePhoto() },
                   modifier = Modifier.testTag("PhotoOnTake"),
                   colors =
-                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)) {
+                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {
                     Text(
                         "Take Photo",
                         modifier = Modifier.testTag("TakePhotoText"),
-                        color = MaterialTheme.colors.onPrimary)
+                        color = MaterialTheme.colorScheme.onPrimary)
                   }
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 8.dp
               Button(
                   onClick = { onPickFromGallery() },
                   modifier = Modifier.testTag("PhotoOnPick"),
                   colors =
-                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)) {
+                      ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {
                     Text(
                         "Upload from Gallery",
                         modifier = Modifier.testTag("UploadGalleryText"),
-                        color = MaterialTheme.colors.onPrimary)
+                        color = MaterialTheme.colorScheme.onPrimary)
                   }
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 8.dp
               Button(
@@ -379,18 +373,15 @@ fun ChoosePictureDialog(
                   modifier = Modifier.testTag("PhotoOnDismiss"),
                   colors =
                       ButtonDefaults.buttonColors(
-                          backgroundColor = MaterialTheme.colors.secondary)) {
+                          backgroundColor = MaterialTheme.colorScheme.secondary)) {
                     Text(
                         "Cancel",
                         modifier = Modifier.testTag("CancelText"),
-                        color = MaterialTheme.colors.onSecondary)
+                        color = MaterialTheme.colorScheme.onSecondary)
                   }
             }
       })
 }
-
-// -----------------------------------------------------------
-// Added these functions at the bottom without removing anything:
 
 /**
  * Helper function to launch the camera after creating a file URI.

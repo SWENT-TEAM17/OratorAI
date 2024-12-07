@@ -75,9 +75,6 @@ fun CreateAccountScreen(
   // State for tracking the upload status
   var isUploading by remember { mutableStateOf(false) }
 
-  // -----------------------------------------------------------
-  // Added camera-related variables and launchers here
-
   // Temporary variable to hold the pending image URI before confirmation
   var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -120,8 +117,6 @@ fun CreateAccountScreen(
           Toast.makeText(context, "Camera permission denied.", Toast.LENGTH_SHORT).show()
         }
       }
-
-  // -----------------------------------------------------------
 
   Scaffold(
       topBar = {
@@ -189,7 +184,7 @@ fun CreateAccountScreen(
                           )
                         }
 
-                    // Camera icon overlay, positioned outside the circle at the bottom end
+                    // Camera icon overlay, positioned outside the circle at the bottom left
                     IconButton(
                         onClick = { isDialogOpen = true },
                         modifier =
@@ -267,10 +262,7 @@ fun CreateAccountScreen(
                       navigationActions.navigateTo(TopLevelDestinations.HOME)
                     }
                   },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .testTag("save_profile_button")
-                          .height(AppDimensions.buttonHeightLarge),
+                  modifier = Modifier.fillMaxWidth().testTag("save_profile_button"),
                   shape = AppShapes.circleShape,
                   enabled = username.isNotBlank() && !isUploading,
                   colors =
