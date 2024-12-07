@@ -1,5 +1,6 @@
 package com.github.se.orator.model.chatGPT
 
+import android.speech.tts.TextToSpeech
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
@@ -244,5 +245,50 @@ class ChatViewModelTest {
     // Call the generateFeedback method
     assert(chatViewModel.generateFeedback() == chatResp.choices.firstOrNull()?.message?.content)
     verify(chatGPTService).getChatCompletion(any())
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun observeTextToSpeechStateStopsTextToSpeechWhenInactive() = runTest {
+    // Mock TextToSpeech instance
+    val mockTextToSpeech = mock(TextToSpeech::class.java)
+
+    // Create a ChatViewModel instance with the mocked ChatGPTService, ApiLinkViewModel, and
+    // TextToSpeech
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, mockTextToSpeech)
+
+    // Initially, ensure TextToSpeech is active
+    assert(chatViewModel.isTextToSpeechActive.value)
+
+    // Set TextToSpeech state to inactive
+    chatViewModel.toggleTextToSpeech(false)
+
+    // Advance the test dispatcher to process the state change
+    advanceUntilIdle()
+
+    // Verify that TextToSpeech stop() method was called
+    verify(mockTextToSpeech).stop()
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun toggleTextToSpeechStateUpdatesCorrectly() = runTest {
+    // Create a ChatViewModel instance with the mocked ChatGPTService and ApiLinkViewModel
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    // Initially, ensure TextToSpeech is active
+    assert(chatViewModel.isTextToSpeechActive.value)
+
+    // Toggle TextToSpeech state to inactive
+    chatViewModel.toggleTextToSpeech(false)
+
+    // Assert that the state is updated to inactive
+    assert(!chatViewModel.isTextToSpeechActive.value)
+
+    // Toggle TextToSpeech state back to active
+    chatViewModel.toggleTextToSpeech(true)
+
+    // Assert that the state is updated to active
+    assert(chatViewModel.isTextToSpeechActive.value)
   }
 }
