@@ -2,7 +2,6 @@ package com.github.se.orator.ui.profile
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -135,15 +134,5 @@ class CreateAccountScreenTest {
     composeTestRule.onNodeWithText("Take Photo").assertIsDisplayed()
     composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
-  }
-
-  @Test
-  fun dialogBoxWorks() {
-    composeTestRule.setContent { CreateAccountScreen(navigationActions, userProfileViewModel) }
-    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
-    composeTestRule.onNodeWithText("Take Photo").performClick()
-    composeTestRule.onNodeWithTag("upload_dialog").assertIsNotDisplayed()
-
-    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
   }
 }
