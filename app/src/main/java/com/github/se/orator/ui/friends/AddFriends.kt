@@ -134,7 +134,7 @@ fun AddFriendsScreen(
                       },
                       modifier =
                           Modifier.fillMaxWidth()
-                              .height(AppDimensions.mediumHeight)
+                              .wrapContentHeight()
                               .focusRequester(focusRequester)
                               .testTag("addFriendSearchField"),
                       label = { Text("Username", modifier = Modifier.testTag("searchFieldLabel")) },
@@ -235,6 +235,7 @@ fun AddFriendsScreen(
                             onProfilePictureClick = { selectedUser ->
                               selectedProfilePicUser = selectedUser
                             })
+                        Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
                       }
                 }
               })
@@ -363,8 +364,8 @@ fun UserItem(
               )
               Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
               Column(
-                  modifier = Modifier.weight(1f) // This modifier makes the column expand
-                  ) {
+                  modifier = Modifier.weight(1f), // This modifier makes the column expand
+                  verticalArrangement = Arrangement.Center) {
                     Text(
                         text = user.name,
                         style = MaterialTheme.typography.titleMedium,

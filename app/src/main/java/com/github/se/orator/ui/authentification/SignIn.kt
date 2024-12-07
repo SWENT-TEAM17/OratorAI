@@ -28,9 +28,8 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.theme.AppColors
-import com.github.se.orator.ui.theme.AppDimensionsObject
+import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
-import com.github.se.orator.ui.theme.createAppDimensions
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -55,9 +54,6 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
   var redirectToProfile by remember {
     mutableStateOf(false)
   } // To handle redirection after profile fetch
-
-  // Obtain responsive dimensions for layout styling
-  val dimensions: AppDimensionsObject = createAppDimensions()
 
   // Google Sign-In launcher that manages the sign-in process and handles authentication results
   val launcher =
@@ -105,7 +101,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
                   Modifier.fillMaxSize()
                       .padding(padding)
                       .verticalScroll(rememberScrollState()) // Enable vertical scrolling
-                      .padding(horizontal = dimensions.paddingMedium),
+                      .padding(horizontal = AppDimensions.paddingMedium),
               horizontalAlignment = Alignment.CenterHorizontally,
           ) {
             Spacer(modifier = Modifier.weight(1f)) // Spacer to center content
@@ -113,18 +109,18 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             // Centered Content: Logo, Title, and Welcome Text
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(dimensions.paddingMedium)) {
+                verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingMedium)) {
                   Image(
                       painter = painterResource(id = R.drawable.app_logo),
                       contentDescription = "App Logo",
-                      modifier = Modifier.size(dimensions.logoSize).testTag("appLogo"))
+                      modifier = Modifier.size(AppDimensions.logoSize).testTag("appLogo"))
 
                   Text(
                       text = "OratorAI",
                       style = AppTypography.largeTitleStyle.copy(brush = AppColors.primaryGradient),
                       modifier =
-                          Modifier.width(dimensions.logoTextWidth)
-                              .height(dimensions.logoTextHeight)
+                          Modifier.width(AppDimensions.logoTextWidth)
+                              .height(AppDimensions.logoTextHeight)
                               .testTag("appTitle"))
 
                   Text(
@@ -146,8 +142,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
                           .build()
                   val googleSignInClient = GoogleSignIn.getClient(context, gso)
                   launcher.launch(googleSignInClient.signInIntent)
-                },
-                dimensions = dimensions)
+                })
           }
         }
       })
@@ -160,11 +155,10 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
 @Composable
 fun LoadingScreen() {
   // Centering content and making it responsive to screen size
-  val dimensions: AppDimensionsObject = createAppDimensions()
   Column(
       modifier =
           Modifier.fillMaxSize()
-              .padding(top = dimensions.paddingXXLarge)
+              .padding(top = AppDimensions.paddingXXLarge)
               .wrapContentSize(Alignment.Center) // Centers the content on screen
               .testTag("loadingScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
@@ -174,10 +168,10 @@ fun LoadingScreen() {
             modifier =
                 Modifier.fillMaxWidth(0.8f) // Limits the image width to 80% of the screen width
                     .aspectRatio(1f) // Maintains aspect ratio for better fit
-                    .wrapContentHeight() // Wraps height to content size
+                    .fillMaxHeight(0.8f) // Wraps height to content size
                     .testTag("loadingImage"))
 
-        Spacer(modifier = Modifier.height(dimensions.paddingMedium))
+        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
         Text(
             text = "Reach your goals",
@@ -185,7 +179,7 @@ fun LoadingScreen() {
             modifier = Modifier.testTag("loadingText"),
             color = MaterialTheme.colorScheme.primary)
 
-        Spacer(modifier = Modifier.height(dimensions.paddingSmall))
+        Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
         Text(
             text = "Become the best speaker",
@@ -193,14 +187,15 @@ fun LoadingScreen() {
             modifier = Modifier.testTag("loadingText"),
             color = MaterialTheme.colorScheme.secondary)
 
-        Spacer(modifier = Modifier.height(dimensions.paddingLarge))
+        Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
         CircularProgressIndicator(
             color = MaterialTheme.colorScheme.onBackground,
-            strokeWidth = dimensions.strokeWidth,
-            modifier = Modifier.size(dimensions.loadingIndicatorSize).testTag("loadingIndicator"))
+            strokeWidth = AppDimensions.strokeWidth,
+            modifier =
+                Modifier.size(AppDimensions.loadingIndicatorSize).testTag("loadingIndicator"))
 
-        Spacer(modifier = Modifier.height(dimensions.paddingMedium))
+        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
         Text(
             text = "Loading...",
@@ -215,21 +210,20 @@ fun LoadingScreen() {
  * logo and sign-in text.
  *
  * @param onSignInClick Lambda to execute when the button is clicked.
- * @param dimensions The dimensions for styling the button.
  */
 @Composable
-fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObject) {
+fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
       onClick = onSignInClick,
       colors =
           ButtonDefaults.buttonColors(
               containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
       shape = RoundedCornerShape(50),
-      border = BorderStroke(dimensions.borderStrokeWidth, AppColors.buttonBorderColor),
+      border = BorderStroke(AppDimensions.borderStrokeWidth, AppColors.buttonBorderColor),
       modifier =
           Modifier.fillMaxWidth()
-              .padding(dimensions.paddingSmall)
-              .height(dimensions.buttonHeight)
+              .padding(AppDimensions.paddingSmall)
+              .height(AppDimensions.buttonHeight)
               .testTag("loginButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -239,13 +233,13 @@ fun GoogleSignInButton(onSignInClick: () -> Unit, dimensions: AppDimensionsObjec
                   painter = painterResource(id = R.drawable.google_logo),
                   contentDescription = "Google Logo",
                   modifier =
-                      Modifier.size(dimensions.googleLogoSize)
-                          .padding(end = dimensions.paddingSmall)
+                      Modifier.size(AppDimensions.googleLogoSize)
+                          .padding(end = AppDimensions.paddingSmall)
                           .testTag("googleLogo"))
               Text(
                   text = "Sign in with Google",
                   style = AppTypography.buttonTextStyle,
-                  modifier = Modifier.testTag("signInWithGoogleText"),
+                  modifier = Modifier.testTag("signInWithGoogleText").wrapContentHeight(),
                   color = MaterialTheme.colorScheme.secondary)
             }
       }

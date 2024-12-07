@@ -23,6 +23,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.ProjectTheme
 
 var currentPracticeMode = mutableStateOf(SessionType.SPEECH)
@@ -155,7 +156,7 @@ fun PracticeModeSelector() {
       contentAlignment = Alignment.Center) {
         Text(
             text = "Practice mode",
-            fontSize = AppDimensions.mediumText,
+            fontSize = AppFontSizes.subtitle, // 16.0sp
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("selectedMode"))
@@ -258,7 +259,7 @@ fun RankMetricSelector() {
       contentAlignment = Alignment.Center) {
         Text(
             text = "Rank metric",
-            fontSize = AppDimensions.mediumText,
+            fontSize = AppFontSizes.subtitle,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("selectedMetric"))
