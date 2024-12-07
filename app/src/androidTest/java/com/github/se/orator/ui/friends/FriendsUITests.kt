@@ -302,7 +302,7 @@ class FriendsUITests {
     // Check if the leaderboard screen elements are displayed
     composeTestRule.onNodeWithTag("leaderboardTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("leaderboardList").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("buttonRowLeaderboard")
+    composeTestRule.onNodeWithTag("buttonRowLeaderboard")
   }
 
   /** Tests that the leaderboard item elements are displayed correctly. */
@@ -337,26 +337,26 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("practiceModeSelector").assertTextEquals("Practice mode")
   }
 
-    /** Tests the Rank Metric Selector functionality. */
-    @Test
-    fun testRankMetricSelector() {
-        // Set up the content with the PracticeModeSelector composable
-        composeTestRule.setContent { RankMetricSelector() }
+  /** Tests the Rank Metric Selector functionality. */
+  @Test
+  fun testRankMetricSelector() {
+    // Set up the content with the PracticeModeSelector composable
+    composeTestRule.setContent { RankMetricSelector() }
 
-        // Open the dropdown menu
-        composeTestRule.onNodeWithTag("rankMetricSelector").performClick()
+    // Open the dropdown menu
+    composeTestRule.onNodeWithTag("rankMetricSelector").performClick()
 
-        // Verify the dropdown menu options are displayed
-        composeTestRule.onNodeWithTag("rankMetricOption1").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("rankMetricOption2").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("rankMetricOption3").assertIsDisplayed()
+    // Verify the dropdown menu options are displayed
+    composeTestRule.onNodeWithTag("rankMetricOption1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("rankMetricOption2").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("rankMetricOption3").assertIsDisplayed()
 
-        // Select "Practice mode 2"
-        composeTestRule.onNodeWithTag("rankMetricOption2").performClick()
+    // Select "Practice mode 2"
+    composeTestRule.onNodeWithTag("rankMetricOption2").performClick()
 
-        // Optionally, verify that the selected mode is reflected
-        composeTestRule.onNodeWithTag("rankMetricSelector").assertTextEquals("Rank metric")
-    }
+    // Optionally, verify that the selected mode is reflected
+    composeTestRule.onNodeWithTag("rankMetricSelector").assertTextEquals("Rank metric")
+  }
 
   /** Tests sending a friend request. */
   @Test

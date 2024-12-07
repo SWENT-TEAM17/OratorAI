@@ -1,6 +1,8 @@
 package com.github.se.orator.model.profile
 
 import android.net.Uri
+import com.github.se.orator.ui.friends.currentPracticeMode
+import com.github.se.orator.ui.friends.currentRankMetric
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.*
@@ -209,5 +211,108 @@ class UserProfileViewModelTest {
 
     verify(repository).updateLoginStreak(eq(testUid), any(), any())
     verify(repository).getUserProfile(eq(testUid), any(), any())
+  }
+
+  @Test
+  fun `leaderboard should sort by ratio for selected practice mode`() = runTest {
+    // Mock statistics for users
+    val userStats1 =
+        UserStatistics(
+            successfulSessions = mapOf("SPEECH" to 3), sessionsGiven = mapOf("SPEECH" to 5))
+    val userStats2 =
+        UserStatistics(
+            successfulSessions = mapOf("SPEECH" to 4), sessionsGiven = mapOf("SPEECH" to 6))
+    val user1 = UserProfile(uid = "user1", name = "User 1", statistics = userStats1, age = 25)
+    val user2 = UserProfile(uid = "user2", name = "User 2", statistics = userStats2, age = 25)
+
+    // Set up mocked repository
+    doAnswer {
+          val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+          onSuccess(listOf(user1, user2))
+          null
+        }
+        .`when`(repository)
+        .getFriendsProfiles(any(), any(), any())
+
+    // Fetch user profiles
+    viewModel.getUserProfile(testUid)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Set practice mode and rank metric
+    currentPracticeMode.value = SessionType.SPEECH
+    currentRankMetric.value = "Ratio"
+
+    // Wait for updates
+    val leaderboard = viewModel.friendsProfiles.first()
+    val sortedLeaderboard =
+        leaderboard.sortedByDescending {
+          viewModel.getSuccessRatioForMode(it.statistics, currentPracticeMode.value)
+        }
+
+    // Verify ranking
+    Assert.assertEquals("User 2", sortedLeaderboard[0].name)
+    Assert.assertEquals("User 1", sortedLeaderboard[1].name)
+  }
+
+  @Test
+  fun `leaderboard should sort by success for selected practice mode`() = runTest {
+    val userStats1 =
+        UserStatistics(
+            successfulSessions = mapOf("INTERVIEW" to 5), sessionsGiven = mapOf("INTERVIEW" to 10))
+    val userStats2 =
+        UserStatistics(
+            successfulSessions = mapOf("INTERVIEW" to 8), sessionsGiven = mapOf("INTERVIEW" to 12))
+    val user1 = UserProfile(uid = "user1", name = "User 1", statistics = userStats1, age = 25)
+    val user2 = UserProfile(uid = "user2", name = "User 2", statistics = userStats2, age = 25)
+
+    doAnswer {
+          val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+          onSuccess(listOf(user1, user2))
+          null
+        }
+        .`when`(repository)
+        .getFriendsProfiles(any(), any(), any())
+
+    viewModel.getUserProfile(testUid)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    currentPracticeMode.value = SessionType.INTERVIEW
+    currentRankMetric.value = "Success"
+
+    val leaderboard = viewModel.friendsProfiles.first()
+    val sortedLeaderboard =
+        leaderboard.sortedByDescending {
+          viewModel.getSuccessForMode(it.statistics, currentPracticeMode.value)
+        }
+
+    Assert.assertEquals("User 2", sortedLeaderboard[0].name)
+    Assert.assertEquals("User 1", sortedLeaderboard[1].name)
+  }
+
+  @Test
+  fun `leaderboard should sort by improvement for all practice modes`() = runTest {
+    val userStats1 = UserStatistics(improvement = 12.0f)
+    val userStats2 = UserStatistics(improvement = 20.0f)
+    val user1 = UserProfile(uid = "user1", name = "User 1", statistics = userStats1, age = 25)
+    val user2 = UserProfile(uid = "user2", name = "User 2", statistics = userStats2, age = 25)
+
+    doAnswer {
+          val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+          onSuccess(listOf(user1, user2))
+          null
+        }
+        .`when`(repository)
+        .getFriendsProfiles(any(), any(), any())
+
+    viewModel.getUserProfile(testUid)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    currentRankMetric.value = "Improvement"
+
+    val leaderboard = viewModel.friendsProfiles.first()
+    val sortedLeaderboard = leaderboard.sortedByDescending { it.statistics.improvement }
+
+    Assert.assertEquals("User 2", sortedLeaderboard[0].name)
+    Assert.assertEquals("User 1", sortedLeaderboard[1].name)
   }
 }
