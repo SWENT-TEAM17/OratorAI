@@ -137,8 +137,8 @@ class MainActivity : ComponentActivity() {
 fun OratorApp(
     chatGPTService: ChatGPTService,
     isOffline: Boolean,
-    themeViewModel: AppThemeViewModel,
-    textToSpeech: TextToSpeech
+    themeViewModel: AppThemeViewModel? = null,
+    textToSpeech: TextToSpeech? = null
 ) {
   // Create NavController for navigation within the app
   val navController = rememberNavController()
