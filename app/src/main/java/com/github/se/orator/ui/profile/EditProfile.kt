@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
@@ -55,6 +56,7 @@ import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
+import java.io.File
 
 /**
  * Composable function for editing the user profile.
@@ -408,5 +410,26 @@ private fun launchCamera(
     takePictureLauncher(uri)
   } else {
     Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
+  }
+}
+
+/**
+ * Creates a URI for the image file where the camera app will save the photo.
+ *
+ * @param context The current context.
+ * @return The URI of the created image file, or null if creation failed.
+ */
+fun createImageFileUri(context: Context): Uri? {
+  return try {
+    val imageFileName = "profile_picture_${System.currentTimeMillis()}.jpg"
+    val storageDir = File(context.filesDir, "images")
+    if (!storageDir.exists()) {
+      storageDir.mkdirs()
+    }
+    val imageFile = File(storageDir, imageFileName)
+    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
+  } catch (e: Exception) {
+    e.printStackTrace()
+    null
   }
 }

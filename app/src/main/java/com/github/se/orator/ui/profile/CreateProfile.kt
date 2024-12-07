@@ -1,6 +1,8 @@
 package com.github.se.orator.ui.profile
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -38,6 +40,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.core.content.ContextCompat
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -72,6 +75,12 @@ fun CreateAccountScreen(
   // State for tracking the upload status
   var isUploading by remember { mutableStateOf(false) }
 
+  // -----------------------------------------------------------
+  // Added camera-related variables and launchers here
+
+  // Temporary variable to hold the pending image URI before confirmation
+  var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
+
   val context = LocalContext.current
 
   // Launcher for picking an image from the gallery
@@ -81,6 +90,38 @@ fun CreateAccountScreen(
           profilePicUri = it // Update the profilePicUri to display the image
         }
       }
+
+  // Launcher to take a picture using the camera
+  val takePictureLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+          // Only set profilePicUri if capture was successful
+          pendingImageUri?.let { uri ->
+            profilePicUri = uri
+            pendingImageUri = null
+          }
+        } else {
+          Toast.makeText(context, "Failed to capture image.", Toast.LENGTH_SHORT).show()
+        }
+      }
+
+  // State to track if the user initiated a camera request
+  var isCameraRequested by remember { mutableStateOf(false) }
+
+  // Request camera permission launcher
+  val cameraPermissionLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted && isCameraRequested) {
+          isCameraRequested = false
+          // Launch camera with the pending URI
+          pendingImageUri?.let { uri -> takePictureLauncher.launch(uri) }
+        } else if (!granted && isCameraRequested) {
+          isCameraRequested = false
+          Toast.makeText(context, "Camera permission denied.", Toast.LENGTH_SHORT).show()
+        }
+      }
+
+  // -----------------------------------------------------------
 
   Scaffold(
       topBar = {
@@ -123,10 +164,10 @@ fun CreateAccountScreen(
                   contentAlignment = Alignment.Center,
                   modifier =
                       Modifier.size(
-                              AppDimensions.slightlyLargerProfilePictureSize) // Slightly larger to
-                          // accommodate the IconButton
-                          // outside the
-                          // circle
+                              AppDimensions
+                                  .slightlyLargerProfilePictureSize) // Slightly larger to
+                                                                     // accommodate the IconButton
+                                                                     // outside the circle
                           .testTag("profile_picture_container")) {
                     // Circle with background image and profile picture
                     Box(
@@ -148,7 +189,7 @@ fun CreateAccountScreen(
                           )
                         }
 
-                    // Camera icon overlay, positioned outside the circle at the bottom left
+                    // Camera icon overlay, positioned outside the circle at the bottom end
                     IconButton(
                         onClick = { isDialogOpen = true },
                         modifier =
@@ -226,7 +267,10 @@ fun CreateAccountScreen(
                       navigationActions.navigateTo(TopLevelDestinations.HOME)
                     }
                   },
-                  modifier = Modifier.fillMaxWidth().testTag("save_profile_button"),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .testTag("save_profile_button")
+                          .height(AppDimensions.buttonHeightLarge),
                   shape = AppShapes.circleShape,
                   enabled = username.isNotBlank() && !isUploading,
                   colors =
@@ -253,7 +297,7 @@ fun CreateAccountScreen(
                                 id =
                                     R.drawable
                                         .create_profile_speaker), // Replace with your drawable
-                        // image name
+                                                                  // image name
                         contentDescription = "Decorative bottom-left image",
                         modifier =
                             Modifier.height(AppDimensions.imageLargeXXL) // Adjust height as needed
@@ -270,7 +314,24 @@ fun CreateAccountScreen(
         onDismiss = { isDialogOpen = false },
         onTakePhoto = {
           isDialogOpen = false
-          Toast.makeText(context, "Taking a photo is not supported yet.", Toast.LENGTH_SHORT).show()
+          // Camera functionality below
+
+          // Check camera permission
+          if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+              PackageManager.PERMISSION_GRANTED) {
+            // Launch camera with pendingImageUri
+            val uri = createImageFileUri(context)
+            if (uri != null) {
+              pendingImageUri = uri
+              takePictureLauncher.launch(uri)
+            } else {
+              Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
+            }
+          } else {
+            // Request camera permission
+            isCameraRequested = true
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+          }
         },
         onPickFromGallery = {
           isDialogOpen = false
