@@ -2,6 +2,7 @@ package com.github.se.orator.ui.profile
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.rule.GrantPermissionRule
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -25,6 +27,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import android.Manifest
+
 
 class CreateAccountScreenTest {
 
@@ -33,6 +37,9 @@ class CreateAccountScreenTest {
   private lateinit var userProfileRepository: UserProfileRepository
 
   @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule
+  val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
+
 
   @Before
   fun setUp() {
@@ -134,5 +141,28 @@ class CreateAccountScreenTest {
     composeTestRule.onNodeWithText("Take Photo").assertIsDisplayed()
     composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
+  }
+
+  @Test
+  fun dialogBoxWorks() {
+    // Set the content of the test to the CreateAccountScreen
+    composeTestRule.setContent {
+      CreateAccountScreen(navigationActions, userProfileViewModel)
+    }
+
+    // Click on the profile picture upload button to open the dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
+
+    // Click on the "Take Photo" button within the dialog
+    composeTestRule.onNodeWithText("Take Photo").performClick()
+
+    // Assert that the dialog is no longer displayed
+    composeTestRule.onNodeWithTag("upload_dialog").assertDoesNotExist()
+
+    // Click again on the profile picture upload button to reopen the dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
+
+    // Assert that the dialog is displayed again
+    composeTestRule.onNodeWithTag("upload_dialog").assertIsDisplayed()
   }
 }
