@@ -3,6 +3,7 @@ package com.github.se.orator.ui.battle
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,9 +58,10 @@ fun BattleRequestSentScreen(
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
                 Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
+                    Icons.Outlined.ArrowBackIosNew,
                     contentDescription = "Back",
-                    modifier = Modifier.testTag("backButton"))
+                    modifier = Modifier.size(AppDimensions.iconSizeMedium).testTag("backButton"),
+                    tint = MaterialTheme.colorScheme.onSurface)
               }
             })
       },

@@ -3,6 +3,7 @@ package com.github.se.orator.ui.offline
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,7 +33,7 @@ fun RecordingReviewScreen(
             modifier = Modifier.fillMaxWidth().testTag("Back"),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                  imageVector = Icons.Outlined.ArrowBackIosNew,
                   contentDescription = "Back",
                   modifier =
                       Modifier.size(AppDimensions.iconSizeSmall)
