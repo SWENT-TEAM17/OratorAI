@@ -10,6 +10,9 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
+import com.github.se.orator.model.speechBattle.BattleViewModel
+import com.github.se.orator.model.speechBattle.SpeechBattle
+import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
@@ -177,6 +180,7 @@ class ChatViewModel(
     Start by setting a challenging scene and initiating the conversation. Ask initial questions that probe the candidate's understanding of the client’s needs and how their solution meets those needs. If the candidate’s answers are too easy or generic, persistently request deeper, more reasoned responses.
         """
                   .trimIndent()
+          // Add cases for other context types like SalesPitchContext
           else -> "You are assisting the user with their speaking practice."
         }
 
@@ -233,6 +237,37 @@ class ChatViewModel(
     isConversationInitialized = false
     apiLinkViewModel.clearAnalysisData() // because I don t want to reset before generating Feedback
   }
+
+  /*fun requestFeedback() {
+    val analysisSummary = generateAnalysisSummary(collectedAnalysisData)
+
+    val feedbackRequestMessage =
+        Message(
+            role = "user",
+            content =
+                """
+                The interview is now over. Please provide feedback on my performance, considering the following analysis of my responses:
+
+                $analysisSummary
+            """
+                    .trimIndent())
+
+    _chatMessages.value += feedbackRequestMessage
+
+    getNextGPTResponse()
+  }*/
+
+  //    fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
+  //        val userMessage = Message(
+  //            role = "user",
+  //            content = transcript
+  //        )
+  //        _chatMessages.value = _chatMessages.value + userMessage
+  //
+  //        collectedAnalysisData.add(analysisData)
+  //
+  //        getNextGPTResponse()
+  //    }
 
   private fun getAnalysisSummary(): String {
     return generateAnalysisSummary(_collectedAnalysisData.value)
@@ -424,6 +459,150 @@ The session is now over. According to the initial instructions, you can now brea
           sendUserResponse(it.transcription, it)
         }
       }
+    }
+  }
+
+  //    fun sendMessage(userMessage: String) {
+  //        val newMessage = Message(role = "user", content = userMessage)
+  //        _chatMessages.value = _chatMessages.value + newMessage
+  //
+  //        viewModelScope.launch {
+  //            try {
+  //                _isLoading.value = true
+  //
+  //                // Create a ChatRequest with the chat history
+  //                val request = ChatRequest(
+  //                    messages = _chatMessages.value
+  //                )
+  //
+  //                // Make the API call
+  //                val response = chatGPTService.getChatCompletion(request)
+  //
+  //                // Add the assistant's response to the chat history
+  //                response.choices.firstOrNull()?.message?.let { responseMessage ->
+  //                    _chatMessages.value = _chatMessages.value + responseMessage
+  //                }
+  //            } catch (e: HttpException) {
+  //                val errorBody = e.response()?.errorBody()?.string()
+  //                Log.e("ChatViewModel", "HTTP error: ${e.code()} ${e.message()}, Body:
+  // $errorBody", e)
+  //                _errorMessage.value = "Failed to send message: ${e.message()}"
+  //            } catch (e: Exception) {
+  //                Log.e("ChatViewModel", "Error sending message: ${e.message}", e)
+  //                _errorMessage.value = "Failed to send message: ${e.message}"
+  //            } finally {
+  //                _isLoading.value = false
+  //            }
+  //        }
+  //    }
+
+  /**
+   * Initializes the conversation for a battle session.
+   *
+   * @param battleId The unique ID of the battle.
+   * @param friendName The UID of the friend participating in the battle.
+   */
+  fun initializeBattleConversation(battleId: String, friendName: String) {
+    if (isConversationInitialized) return
+    isConversationInitialized = true
+
+    _collectedAnalysisData.value = emptyList() // Reset the analysis data history
+    val practiceContextAsValue =
+        (apiLinkViewModel.practiceContext.value ?: return) as InterviewContext
+
+    val systemMessageContent =
+        """
+                    You are engaged in a battle against $friendName a ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.targetPosition} at ${practiceContextAsValue.companyName}. 
+                    Focus on the following areas: ${practiceContextAsValue.focusArea}. 
+                    Ask questions one at a time and wait for the user's response before proceeding. 
+                    Do not provide feedback until the end.
+                """
+            .trimIndent()
+
+    val systemMessage = Message(role = "system", content = systemMessageContent)
+
+    val userStartMessage =
+        Message(role = "user", content = "I'm ready to begin the battle session.")
+
+    _chatMessages.value = listOf(systemMessage, userStartMessage)
+
+    getNextGPTResponse()
+  }
+
+  fun performEvaluation(
+      battleId: String,
+      battle: SpeechBattle,
+      challengerMessages: List<Message>,
+      opponentMessages: List<Message>,
+      battleViewModel: BattleViewModel,
+      navigationActions: NavigationActions
+  ) {
+    val context = battle.context as? InterviewContext ?: return
+
+    val prompt = generateEvaluationPrompt(challengerMessages, opponentMessages, context)
+
+    viewModelScope.launch {
+      try {
+        val request =
+            ChatRequest(
+                model = "gpt-3.5-turbo",
+                messages =
+                    listOf(
+                        Message(
+                            role = "system", content = "You are an expert interview evaluator."),
+                        Message(role = "user", content = prompt)))
+
+        val response = chatGPTService.getChatCompletion(request)
+
+        val content = response.choices.firstOrNull()?.message?.content ?: ""
+
+        // Parse the winner from the response
+        val winnerUid = parseWinnerFromResponse(content, battle)
+
+        // Update battle result
+        battleViewModel.updateBattleResult(battleId, winnerUid, content)
+
+        // Notify users
+        navigationActions.navigateToEvaluationScreen(battleId)
+      } catch (e: Exception) {
+        Log.e("BattleViewModel", "Error evaluating battle", e)
+      }
+    }
+  }
+
+  private fun generateEvaluationPrompt(
+      challengerMessages: List<Message>,
+      opponentMessages: List<Message>,
+      context: InterviewContext
+  ): String {
+    val challengerTranscript = messagesToTranscript(challengerMessages)
+    val opponentTranscript = messagesToTranscript(opponentMessages)
+
+    return """
+        You are to evaluate two interview performances for the position of ${context.targetPosition} at ${context.companyName}.
+
+        Candidate 1's responses:
+        $challengerTranscript
+
+        Candidate 2's responses:
+        $opponentTranscript
+
+        Please analyze both candidates' performances based on clarity, relevance, and professionalism. Determine which candidate performed better and provide a brief explanation for your decision.
+
+        At the end, state "Candidate 1" or "Candidate 2" to indicate who should be hired.
+    """
+        .trimIndent()
+  }
+
+  private fun messagesToTranscript(messages: List<Message>): String {
+    return messages.filter { it.role == "user" }.joinToString("\n") { it.content }
+  }
+
+  private fun parseWinnerFromResponse(response: String, battle: SpeechBattle): String {
+    return when {
+      response.contains("Candidate 1", ignoreCase = true) -> battle.challenger
+      response.contains("Candidate 2", ignoreCase = true) -> battle.opponent
+      else -> ""
     }
   }
 }

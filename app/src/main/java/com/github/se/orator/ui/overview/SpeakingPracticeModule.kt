@@ -37,7 +37,7 @@ import kotlin.math.roundToInt
  * @param screenTitle The title of the screen.
  * @param headerText The header text.
  * @param inputs The input fields.
- * @param onGetStarted The action to perform when the Get Started button is clicked.
+ * @param onClick The action to perform when the Get Started button is clicked.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +46,8 @@ fun SpeakingPracticeModule(
     screenTitle: String,
     headerText: String,
     inputs: List<InputFieldData>,
-    onGetStarted: () -> Unit
+    onClick: () -> Unit,
+    buttonName: String = "Get Started"
 ) {
   val context = LocalContext.current
 
@@ -240,7 +241,7 @@ fun SpeakingPracticeModule(
                     onClick = {
                       // Custom action, can be customized for different modules
                       if (inputs.all { it.value.isNotEmpty() }) {
-                        onGetStarted()
+                        onClick()
                       } else {
                         Toast.makeText(context, "Please fill all the fields!", Toast.LENGTH_SHORT)
                             .show()
@@ -258,7 +259,7 @@ fun SpeakingPracticeModule(
                         ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                       Text(
-                          "Get Started",
+                          text = buttonName,
                           modifier = Modifier.testTag("getStartedText"),
                           color = MaterialTheme.colorScheme.primary)
                     }
