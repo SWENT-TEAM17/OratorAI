@@ -31,29 +31,34 @@ import com.github.se.orator.ui.theme.AppDimensions
 enum class ChatButtonType(
     val testTag: String,
     val buttonText: String,
-    val buttonTextTestTag: String
+    val buttonTextTestTag: String,
+    val buttonTestTag: String
 ) {
     FEEDBACK_BUTTON(
         testTag = "feedback_button",
         buttonText = "Request Feedback",
-        buttonTextTestTag = "request_feedback_button_text"
+        buttonTextTestTag = "request_feedback_button_text",
+        buttonTestTag = "request_feedback_button"
     ),
     FINISH_BATTLE_BUTTON(
         testTag = "finish_battle_button",
         buttonText = "Finish Battle",
-        buttonTextTestTag = "finish_battle_button_text"
+        buttonTextTestTag = "finish_battle_button_text",
+        buttonTestTag = "finish_battle_button"
     );
 }
 
 /**
- * Composable function that represents the Chat Screen.
+ * Composable function that represents the Chat or Battle Chat Screen.
  *
  * This screen displays a list of chat messages between the user and the assistant. It includes a
  * top app bar with a back button, a scrollable list of messages, and buttons at the bottom for
- * recording a response or requesting feedback.
+ * recording a response or requesting feedback or ending the battle.
  *
  * @param navigationActions An instance of [NavigationActions] to handle navigation events.
  * @param chatViewModel The [ChatViewModel] that provides chat messages and loading state.
+ * @param chatButtonType The type of button to display in the chat screen.
+ * @param onChatButtonClick The action to perform when the chat button is clicked.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -181,7 +186,7 @@ fun ChatScreen(
                                     color = MaterialTheme.colorScheme.outline.copy(
                                             alpha = 0.5f),
                                     shape = MaterialTheme.shapes.medium)
-                                .testTag(chatButtonType.testTag),
+                                .testTag(chatButtonType.buttonTestTag),
                         colors =
                             ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {

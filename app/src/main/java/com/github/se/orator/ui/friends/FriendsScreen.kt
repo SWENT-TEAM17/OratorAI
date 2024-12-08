@@ -61,6 +61,7 @@ import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
+import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -93,7 +94,7 @@ import kotlinx.coroutines.launch
 fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel,
-    battleViewModel: BattleViewModel
+    battleViewModel: BattleViewModel? = null // Optional ViewModel for battle management
 ) {
     // State variables
     val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
@@ -122,10 +123,12 @@ fun ViewFriendsScreen(
     var isFriendRequestsExpanded by remember { mutableStateOf(true) }
 
     // Fetch pending battles when the screen is composed
-    LaunchedEffect(Unit) { battleViewModel.fetchPendingBattlesForUser() }
+    LaunchedEffect(Unit) { battleViewModel?.fetchPendingBattlesForUser() }
 
-    // Collect the pending battles as state
-    val pendingBattles by battleViewModel.pendingBattles.observeAsState(emptyList())
+    // Collect the pending battles as state, fallback to an empty list if battleViewModel is null
+    val pendingBattles by battleViewModel?.pendingBattles?.observeAsState(emptyList()) ?: remember {
+        mutableStateOf(emptyList<SpeechBattle>())
+    }
 
     // Create a HashMap of challengerUID to battleID for quick lookup
     val challengerBattleMap = remember(pendingBattles) {
@@ -368,7 +371,7 @@ fun ViewFriendsScreen(
                                 onClick = { selectedFriend ->
                                     if (hasPendingBattle) {
                                         // Accept battle and navigate to battle screen
-                                        battleViewModel.acceptBattle(
+                                        battleViewModel?.acceptBattle(
                                             challengerBattleMap[friend.uid]!!
                                         )
                                     } else {
@@ -527,6 +530,7 @@ fun FriendItem(
                     modifier = Modifier
                         .size(AppDimensions.iconSizeMedium)
                         .padding(end = AppDimensions.smallPadding)
+                        .testTag("pendingBattleIcon#${friend.uid}")
                 )
             }
             DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
