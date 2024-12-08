@@ -386,27 +386,6 @@ fun ChoosePictureDialog(
 }
 
 /**
- * Helper function to launch the camera after creating a file URI.
- *
- * @param context The current context.
- * @param takePictureLauncher The lambda to handle launching the camera.
- * @param onUriCreated Callback to handle the created URI.
- */
-private fun launchCamera(
-    context: Context,
-    takePictureLauncher: (Uri) -> Unit,
-    onUriCreated: (Uri) -> Unit
-) {
-  val uri = createImageFileUri(context)
-  if (uri != null) {
-    onUriCreated(uri)
-    takePictureLauncher(uri)
-  } else {
-    Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
-  }
-}
-
-/**
  * Creates a URI for the image file where the camera app will save the photo.
  *
  * @param context The current context.
