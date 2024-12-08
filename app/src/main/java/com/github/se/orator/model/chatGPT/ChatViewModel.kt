@@ -13,6 +13,7 @@ import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -39,6 +40,11 @@ class ChatViewModel(
   val collectedAnalysisData = _collectedAnalysisData.asStateFlow()
 
   private val practiceContext = apiLinkViewModel.practiceContext
+
+  private val has_responded = MutableStateFlow(false)
+  private val _response = MutableStateFlow("")
+  val response: StateFlow<String>
+    get() = _response
 
   data class DecisionResult(val message: String, val isSuccess: Boolean)
 
@@ -111,7 +117,11 @@ class ChatViewModel(
             1. **Speech Structure and Content**:
                - Help the user structure their speech according to a ${practiceContextAsValue.presentationStyle} style.
                - Focus on the main points: ${practiceContextAsValue.mainPoints.joinToString(", ")}.
-               - Address any anticipated challenges: ${practiceContextAsValue.anticipatedChallenges.joinToString(", ")}.
+               - Address any anticipated challenges: ${
+                        practiceContextAsValue.anticipatedChallenges.joinToString(
+                            ", "
+                        )
+                    }.
 
             2. **Delivery Improvement**:
                - Provide guidance on improving ${practiceContextAsValue.focusArea}.
@@ -134,11 +144,19 @@ class ChatViewModel(
 
             1. **Scenario Setup**:
                - Role-play as a potential client from the target audience (${practiceContextAsValue.targetAudience}).
-               - Incorporate anticipated challenges: ${practiceContextAsValue.anticipatedChallenges.joinToString(", ")}.
+               - Incorporate anticipated challenges: ${
+                        practiceContextAsValue.anticipatedChallenges.joinToString(
+                            ", "
+                        )
+                    }.
                - Focus on the negotiation aspect: ${practiceContextAsValue.negotiationFocus}.
 
             2. **Session Structure**:
-               - Allow the user to deliver their pitch, emphasizing key features: ${practiceContextAsValue.keyFeatures.joinToString(", ")}.
+               - Allow the user to deliver their pitch, emphasizing key features: ${
+                        practiceContextAsValue.keyFeatures.joinToString(
+                            ", "
+                        )
+                    }.
                - Introduce objections or negotiation hurdles relevant to the scenario.
 
             3. **Focus Areas**:
@@ -162,6 +180,11 @@ class ChatViewModel(
     _chatMessages.value = listOf(systemMessage, userStartMessage)
 
     getNextGPTResponse()
+  }
+
+  fun resetResponse() {
+    _response.value = ""
+    has_responded.value = false
   }
 
   fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
@@ -200,6 +223,46 @@ class ChatViewModel(
     }
   }
 
+  /**
+   * Function to send individual requests to GPT to get feedback for the offline queries
+   *
+   * @param msg: What the user said and wishes to get feedback on
+   */
+  fun offlineRequest(msg: String, company: String, position: String) {
+    Log.d("ChatViewModel", "Getting next GPT response")
+    viewModelScope.launch {
+      try {
+        _isLoading.value = true
+
+        val gptQuery =
+            "For the upcoming query you will respond as if you are a very strict interviewer who is interviewing someone applying for a $position position at $company that is very competitive. " +
+                "For example if the user only gives a few strengths you will tell him to cite more. If his strengths don't aline with a job as a $position or are off topic you will mention that." +
+                "Do not ask questions for the user to provide more skills or strengths. Assume this is a one time exchange where you can only give remarks without expecting any more messages." +
+                "The query the interviewee has said that you will critique is: $msg"
+        Log.d("mr smith", gptQuery)
+
+        val request =
+            ChatRequest(
+                model = "gpt-3.5-turbo",
+                messages = listOf(Message(role = "system", content = gptQuery)))
+
+        val response = chatGPTService.getChatCompletion(request)
+
+        if (!has_responded.value) {
+          response.choices.firstOrNull()?.message?.let { responseMessage ->
+            _response.value = responseMessage.content
+            has_responded.value = true
+            Log.d("aa", "$responseMessage.content")
+          }
+        }
+      } catch (e: Exception) {
+        handleError(e)
+      } finally {
+        _isLoading.value = false
+      }
+    }
+  }
+
   fun resetPracticeContext() {
     apiLinkViewModel.clearPracticeContext()
   }
@@ -208,6 +271,37 @@ class ChatViewModel(
     isConversationInitialized = false
     apiLinkViewModel.clearAnalysisData() // because I don t want to reset before generating Feedback
   }
+
+  /*fun requestFeedback() {
+    val analysisSummary = generateAnalysisSummary(collectedAnalysisData)
+
+    val feedbackRequestMessage =
+        Message(
+            role = "user",
+            content =
+                """
+                The interview is now over. Please provide feedback on my performance, considering the following analysis of my responses:
+
+                $analysisSummary
+            """
+                    .trimIndent())
+
+    _chatMessages.value += feedbackRequestMessage
+
+    getNextGPTResponse()
+  }*/
+
+  //    fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
+  //        val userMessage = Message(
+  //            role = "user",
+  //            content = transcript
+  //        )
+  //        _chatMessages.value = _chatMessages.value + userMessage
+  //
+  //        collectedAnalysisData.add(analysisData)
+  //
+  //        getNextGPTResponse()
+  //    }
 
   private fun getAnalysisSummary(): String {
     return generateAnalysisSummary(_collectedAnalysisData.value)
