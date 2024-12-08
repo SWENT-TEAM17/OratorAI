@@ -1,7 +1,6 @@
 package com.github.se.orator.ui.profile
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
@@ -279,35 +278,14 @@ fun EditProfileScreen(
                   }
             }
 
-        // Dialog for choosing between camera and gallery
-        if (isDialogOpen) {
-          ChoosePictureDialog(
-              onDismiss = { isDialogOpen = false },
-              onTakePhoto = {
-                isDialogOpen = false
-                // Check camera permission
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-                    PackageManager.PERMISSION_GRANTED) {
-                  // Launch camera with pendingImageUri
-                  val uri = createImageFileUri(context)
-                  if (uri != null) {
-                    pendingImageUri = uri
-                    takePictureLauncher.launch(uri)
-                  } else {
-                    Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT)
-                        .show()
-                  }
-                } else {
-                  // Request camera permission
-                  isCameraRequested = true
-                  cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                }
-              },
-              onPickFromGallery = {
-                isDialogOpen = false
-                pickImageLauncher.launch("image/*")
-              })
-        }
+        // Integrate the ImagePicker
+        ImagePicker(
+            isDialogOpen = isDialogOpen,
+            onDismiss = { isDialogOpen = false },
+            onImageSelected = { uri ->
+              newProfilePicUri = uri
+              Toast.makeText(context, "Profile picture updated.", Toast.LENGTH_SHORT).show()
+            })
       }
 }
 
@@ -386,22 +364,143 @@ fun ChoosePictureDialog(
 }
 
 /**
- * Creates a URI for the image file where the camera app will save the photo.
+ * A reusable composable that handles image picking from the gallery or capturing a photo using the
+ * camera.
  *
- * @param context The current context.
- * @return The URI of the created image file, or null if creation failed.
+ * @param isDialogOpen Controls the visibility of the image selection dialog.
+ * @param onDismiss Callback to dismiss the dialog.
+ * @param onImageSelected Callback with the selected image URI.
  */
-fun createImageFileUri(context: Context): Uri? {
-  return try {
-    val imageFileName = "profile_picture_${System.currentTimeMillis()}.jpg"
-    val storageDir = File(context.filesDir, "images")
-    if (!storageDir.exists()) {
-      storageDir.mkdirs()
+@Composable
+fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (Uri) -> Unit) {
+  val context = LocalContext.current
+  var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
+  var isCameraRequested by remember { mutableStateOf(false) }
+
+  // Launcher for picking an image from the gallery
+  val pickImageLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { onImageSelected(it) }
+      }
+
+  // Launcher to take a picture using the camera
+  val takePictureLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+          pendingImageUri?.let { uri -> onImageSelected(uri) }
+          pendingImageUri = null
+        } else {
+          Toast.makeText(context, "Failed to capture image.", Toast.LENGTH_SHORT).show()
+        }
+      }
+
+  // Request camera permission launcher
+  val cameraPermissionLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted && isCameraRequested) {
+          isCameraRequested = false
+          // Launch camera with the pending URI
+          pendingImageUri?.let { uri -> takePictureLauncher.launch(uri) }
+        } else if (!granted && isCameraRequested) {
+          isCameraRequested = false
+          Toast.makeText(context, "Camera permission denied.", Toast.LENGTH_SHORT).show()
+        }
+      }
+
+  // Function to create a URI for the image file where the camera app will save the photo
+  fun createImageFileUri(): Uri? {
+    return try {
+      val imageFileName = "profile_picture_${System.currentTimeMillis()}.jpg"
+      val storageDir = File(context.filesDir, "images").apply { if (!exists()) mkdirs() }
+      val imageFile = File(storageDir, imageFileName)
+      FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
     }
-    val imageFile = File(storageDir, imageFileName)
-    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
-  } catch (e: Exception) {
-    e.printStackTrace()
-    null
+  }
+
+  if (isDialogOpen) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = {
+          Text(
+              "Choose Profile Picture",
+              color = androidx.compose.material.MaterialTheme.colors.onSurface)
+        },
+        text = {
+          Text(
+              "Select an option to update your profile picture.",
+              color = androidx.compose.material.MaterialTheme.colors.onSurface.copy(alpha = 0.7f))
+        },
+        buttons = {
+          androidx.compose.foundation.layout.Column(
+              modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmallMedium),
+              horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                Button(
+                    onClick = {
+                      onDismiss()
+                      // Check camera permission
+                      if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                          PackageManager.PERMISSION_GRANTED) {
+                        // Launch camera with pendingImageUri
+                        val uri = createImageFileUri()
+                        if (uri != null) {
+                          pendingImageUri = uri
+                          takePictureLauncher.launch(uri)
+                        } else {
+                          Toast.makeText(
+                                  context, "Failed to create image file.", Toast.LENGTH_SHORT)
+                              .show()
+                        }
+                      } else {
+                        // Request camera permission
+                        isCameraRequested = true
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                      }
+                    },
+                    modifier = Modifier.testTag("PhotoOnTake"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor =
+                                androidx.compose.material.MaterialTheme.colors.primary)) {
+                      Text(
+                          "Take Photo",
+                          color = androidx.compose.material.MaterialTheme.colors.onPrimary,
+                          modifier = Modifier.testTag("TakePhotoText"))
+                    }
+                androidx.compose.foundation.layout.Spacer(
+                    modifier = Modifier.height(AppDimensions.paddingSmall))
+                Button(
+                    onClick = {
+                      onDismiss()
+                      pickImageLauncher.launch("image/*")
+                    },
+                    modifier = Modifier.testTag("PhotoOnPick"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor =
+                                androidx.compose.material.MaterialTheme.colors.primary)) {
+                      Text(
+                          "Upload from Gallery",
+                          color = androidx.compose.material.MaterialTheme.colors.onPrimary,
+                          modifier = Modifier.testTag("UploadGalleryText"))
+                    }
+                androidx.compose.foundation.layout.Spacer(
+                    modifier = Modifier.height(AppDimensions.paddingSmall))
+                Button(
+                    onClick = { onDismiss() },
+                    modifier = Modifier.testTag("PhotoOnDismiss"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor =
+                                androidx.compose.material.MaterialTheme.colors.surface)) {
+                      Text(
+                          "Cancel",
+                          color = androidx.compose.material.MaterialTheme.colors.primary,
+                          modifier = Modifier.testTag("CancelText"))
+                    }
+              }
+        })
   }
 }

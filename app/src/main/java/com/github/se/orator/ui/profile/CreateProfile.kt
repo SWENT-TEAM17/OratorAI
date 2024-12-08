@@ -1,8 +1,6 @@
 package com.github.se.orator.ui.profile
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -40,7 +38,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.core.content.ContextCompat
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -299,34 +296,12 @@ fun CreateAccountScreen(
             }
       })
 
-  // Dialog for choosing between camera and gallery
-  if (isDialogOpen) {
-    ChoosePictureDialog(
-        onDismiss = { isDialogOpen = false },
-        onTakePhoto = {
-          isDialogOpen = false
-          // Camera functionality below
-
-          // Check camera permission
-          if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-              PackageManager.PERMISSION_GRANTED) {
-            // Launch camera with pendingImageUri
-            val uri = createImageFileUri(context)
-            if (uri != null) {
-              pendingImageUri = uri
-              takePictureLauncher.launch(uri)
-            } else {
-              Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
-            }
-          } else {
-            // Request camera permission
-            isCameraRequested = true
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-          }
-        },
-        onPickFromGallery = {
-          isDialogOpen = false
-          pickImageLauncher.launch("image/*")
-        })
-  }
+  // Integrate the ImagePicker
+  ImagePicker(
+      isDialogOpen = isDialogOpen,
+      onDismiss = { isDialogOpen = false },
+      onImageSelected = { uri ->
+        profilePicUri = uri
+        Toast.makeText(context, "Profile picture updated.", Toast.LENGTH_SHORT).show()
+      })
 }

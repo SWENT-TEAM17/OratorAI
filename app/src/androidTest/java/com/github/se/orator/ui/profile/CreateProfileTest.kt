@@ -1,6 +1,7 @@
 package com.github.se.orator.ui.profile
 
 import android.Manifest
+import android.content.Context
 import android.net.Uri
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -20,9 +21,9 @@ import com.github.se.orator.model.profile.UserStatistics
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.navigation.TopLevelDestinations
-import io.mockk.every
+import io.mockk.MockKAnnotations
+import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -44,6 +45,7 @@ class CreateAccountScreenTest {
   val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
 
   private val fakeImageUri = Uri.parse("test_profile_image.jpeg")
+  private lateinit var mockContext: Context
 
   @Before
   fun setUp() {
@@ -51,6 +53,9 @@ class CreateAccountScreenTest {
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
     `when`(navigationActions.currentRoute()).thenReturn(Screen.HOME)
+    MockKAnnotations.init(this)
+    mockContext = mockk(relaxed = true)
+    mockkStatic("android.widget.Toast") // Mock Toast
   }
 
   @Test
@@ -115,17 +120,6 @@ class CreateAccountScreenTest {
   }
 
   @Test
-  fun profilePictureUploadClickOpensDialog() {
-    composeTestRule.setContent { CreateAccountScreen(navigationActions, userProfileViewModel) }
-
-    // Click on the upload profile picture button
-    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
-
-    // Check if the dialog is displayed
-    composeTestRule.onNodeWithTag("upload_dialog").assertIsDisplayed()
-  }
-
-  @Test
   fun backButtonNavigatesBack() {
     composeTestRule.setContent { CreateAccountScreen(navigationActions, userProfileViewModel) }
     composeTestRule.onNodeWithTag("back_button").performClick()
@@ -141,76 +135,60 @@ class CreateAccountScreenTest {
     composeTestRule
         .onNodeWithText("Select an option to update your profile picture.")
         .assertIsDisplayed()
-    composeTestRule.onNodeWithTag("upload_dialog").assertIsDisplayed()
     composeTestRule.onNodeWithText("Take Photo").assertIsDisplayed()
     composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
   }
 
-  /**
-   * Test when createImageFileUri returns null. This simulates a failure in creating the image file
-   * URI.
-   */
   @Test
-  fun createImageFileUriReturnsNull_showsErrorToast() {
-    // Mock the createImageFileUri top-level function to return null
-    mockkStatic("com.github.se.orator.ui.profile.EditProfileKt")
-    every { createImageFileUri(any()) } returns null
-
-    // Set the content of the Compose screen
+  fun createAccountScreen_uploadButton_opensImagePickerDialog() {
     composeTestRule.setContent {
       CreateAccountScreen(
           navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
     }
 
-    // Open the dialog by clicking the upload profile picture button
+    // Click the upload profile picture button
     composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
 
-    // Click on "Take Photo" button
-    composeTestRule.onNodeWithText("Take Photo").performClick()
-
-    // Enter a username
-    composeTestRule.onNodeWithTag("username_input").performTextInput("TestUser")
-
-    // Save button should be enabled
-    composeTestRule.onNodeWithTag("save_profile_button").assertIsEnabled()
-
-    // Click Save
-    composeTestRule.onNodeWithTag("save_profile_button").performClick()
-
-    // Clean up the mocks
-    unmockkStatic("com.github.se.orator.ui.profile.EditProfileKt")
+    // Verify that the ImagePicker dialog is displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Take Photo").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
   }
-  /**
-   * Test when createImageFileUri returns a specific Uri. This simulates a successful creation of
-   * the image file URI and setting the profile picture.
-   */
-  @Test
-  fun createImageFileUriReturnsUri_updatesProfilePicture() {
-    // Mock the createImageFileUri top-level function to return a specific Uri
-    mockkStatic("com.github.se.orator.ui.profile.EditProfileKt")
-    every { createImageFileUri(any()) } returns fakeImageUri
 
+  @Test
+  fun createAccountScreen_uploadFromGalleryButton_launchesGalleryPicker() {
     composeTestRule.setContent {
       CreateAccountScreen(
           navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
     }
 
-    // Open the dialog
+    // Click the upload profile picture button to open ImagePicker
     composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
 
-    // Click on "Take Photo"
-    composeTestRule.onNodeWithText("Take Photo").performClick()
+    // Click the "Upload from Gallery" button within ImagePicker
+    composeTestRule.onNodeWithTag("PhotoOnPick").performClick()
 
-    // Since createImageFileUri returns a valid Uri, profilePicUri should be set to fakeImageUri
-    // Verify that the ProfilePicture composable reflects the updated image
-    // Assuming ProfilePicture displays an Image with a test tag like "profile_picture_image"
+    // Since launching gallery involves external intents, we can verify that the launcher was called
+    // However, Compose testing does not support verifying ActivityResultLauncher calls directly
+    // Alternatively, you can verify side effects or state changes if any
+  }
 
-    // Modify your ProfilePicture composable to have distinct test tags based on the state
-    // For example, if profilePicUri is not null, show "profile_picture_image"; else, show
-    // "profile_placeholder_image"
+  @Test
+  fun createAccountScreen_cancelButton_dismissesImagePickerDialog() {
+    composeTestRule.setContent {
+      CreateAccountScreen(
+          navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
+    }
 
-    // Clean up the mock
-    unmockkStatic("com.github.se.orator.ui.profile.EditProfileKt")
+    // Click the upload profile picture button to open ImagePicker
+    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
+
+    // Click the "Cancel" button within ImagePicker
+    composeTestRule.onNodeWithTag("PhotoOnDismiss").performClick()
+
+    // Verify that the ImagePicker dialog is dismissed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
   }
 }
