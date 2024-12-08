@@ -112,4 +112,24 @@ class EditProfileTest {
     // update or create either one
     //        verify(userProfileRepository).updateUserProfile(any(), any(), any())
   }
+
+  @Test
+  fun editProfileScreen_dialogBoxDisplaysCorrectly() {
+    composeTestRule.setContent {
+      EditProfileScreen(
+          navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
+    }
+
+    // Click the upload profile picture button to open ImagePicker
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Verify that all elements of the ImagePicker dialog are displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText("Select an option to update your profile picture.")
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithText("Take Photo").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
+  }
 }

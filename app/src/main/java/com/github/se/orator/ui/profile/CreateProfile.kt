@@ -3,8 +3,6 @@ package com.github.se.orator.ui.profile
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,15 +70,10 @@ fun CreateAccountScreen(
   // State for tracking the upload status
   var isUploading by remember { mutableStateOf(false) }
 
-  val context = LocalContext.current
+  // Temporary variable to hold the pending image URI before confirmation
+  var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
 
-  // Launcher for picking an image from the gallery
-  val pickImageLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-          profilePicUri = it // Update the profilePicUri to display the image
-        }
-      }
+  val context = LocalContext.current
 
   Scaffold(
       topBar = {
@@ -125,8 +118,7 @@ fun CreateAccountScreen(
                       Modifier.size(
                               AppDimensions.slightlyLargerProfilePictureSize) // Slightly larger to
                           // accommodate the IconButton
-                          // outside the
-                          // circle
+                          // outside the circle
                           .testTag("profile_picture_container")) {
                     // Circle with background image and profile picture
                     Box(
@@ -264,17 +256,12 @@ fun CreateAccountScreen(
             }
       })
 
-  // Dialog for choosing between camera and gallery
-  if (isDialogOpen) {
-    ChoosePictureDialog(
-        onDismiss = { isDialogOpen = false },
-        onTakePhoto = {
-          isDialogOpen = false
-          Toast.makeText(context, "Taking a photo is not supported yet.", Toast.LENGTH_SHORT).show()
-        },
-        onPickFromGallery = {
-          isDialogOpen = false
-          pickImageLauncher.launch("image/*")
-        })
-  }
+  // Integrate the ImagePicker
+  ImagePicker(
+      isDialogOpen = isDialogOpen,
+      onDismiss = { isDialogOpen = false },
+      onImageSelected = { uri ->
+        profilePicUri = uri
+        Toast.makeText(context, "Profile picture updated.", Toast.LENGTH_SHORT).show()
+      })
 }
