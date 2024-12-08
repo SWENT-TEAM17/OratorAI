@@ -182,7 +182,7 @@ class BattleChatScreenTest {
 
     composeTestRule.onNodeWithTag("loading_indicator").assertDoesNotExist()
     composeTestRule
-        .onNodeWithTag(ChatButtonType.FINISH_BATTLE_BUTTON.buttonTextTestTag)
+        .onNodeWithTag(ChatButtonType.FINISH_BATTLE_BUTTON.buttonTextTestTag, useUnmergedTree = true)
         .assertExists()
     composeTestRule
         .onNodeWithTag(ChatButtonType.FINISH_BATTLE_BUTTON.buttonTestTag)
