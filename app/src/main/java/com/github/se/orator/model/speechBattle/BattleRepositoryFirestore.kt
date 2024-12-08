@@ -81,7 +81,11 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
    * @param status The new status.
    * @param callback A callback function to indicate success or failure.
    */
-  override fun updateBattleStatus(battleId: String, status: BattleStatus, callback: (Boolean) -> Unit) {
+  override fun updateBattleStatus(
+      battleId: String,
+      status: BattleStatus,
+      callback: (Boolean) -> Unit
+  ) {
     val battleRef = db.collection("battles").document(battleId)
 
     battleRef
@@ -118,51 +122,49 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
         }
   }
 
-    /** Converts a Firestore DocumentSnapshot to a SpeechBattle object. */
-    private fun documentToSpeechBattle(document: DocumentSnapshot): SpeechBattle? {
-        val data = document.data ?: return null
+  /** Converts a Firestore DocumentSnapshot to a SpeechBattle object. */
+  private fun documentToSpeechBattle(document: DocumentSnapshot): SpeechBattle? {
+    val data = document.data ?: return null
 
-        // Extract basic battle information
-        val battleId = data["battleId"] as? String ?: return null
-        val challenger = data["challenger"] as? String ?: return null
-        val opponent = data["opponent"] as? String ?: return null
-        val statusString = data["status"] as? String ?: return null
-        val status = BattleStatus.valueOf(statusString)
-        val winner = data["winner"] as? String ?: ""
+    // Extract basic battle information
+    val battleId = data["battleId"] as? String ?: return null
+    val challenger = data["challenger"] as? String ?: return null
+    val opponent = data["opponent"] as? String ?: return null
+    val statusString = data["status"] as? String ?: return null
+    val status = BattleStatus.valueOf(statusString)
+    val winner = data["winner"] as? String ?: ""
 
-        // Use UserProfileRepositoryFirestore.convert to handle InterviewContext conversion
-        val userProfileRepository = UserProfileRepositoryFirestore(db) // Create an instance
-        val interviewContextMap = data["interviewContext"] as? Map<String, Any> ?: return null
-        val interviewContext = userProfileRepository.convertInterviewContext(interviewContextMap) ?: return null
+    // Use UserProfileRepositoryFirestore.convert to handle InterviewContext conversion
+    val userProfileRepository = UserProfileRepositoryFirestore(db) // Create an instance
+    val interviewContextMap = data["interviewContext"] as? Map<String, Any> ?: return null
+    val interviewContext =
+        userProfileRepository.convertInterviewContext(interviewContextMap) ?: return null
 
-        // Extract the challengerCompleted and opponentCompleted fields
-        val challengerCompleted = data["challengerCompleted"] as? Boolean ?: false
-        val opponentCompleted = data["opponentCompleted"] as? Boolean ?: false
+    // Extract the challengerCompleted and opponentCompleted fields
+    val challengerCompleted = data["challengerCompleted"] as? Boolean ?: false
+    val opponentCompleted = data["opponentCompleted"] as? Boolean ?: false
 
-        return SpeechBattle(
-            battleId = battleId,
-            challenger = challenger,
-            opponent = opponent,
-            status = status,
-            context = interviewContext,
-            winner = winner,
-            challengerCompleted = challengerCompleted,
-            opponentCompleted = opponentCompleted
-        )
-    }
+    return SpeechBattle(
+        battleId = battleId,
+        challenger = challenger,
+        opponent = opponent,
+        status = status,
+        context = interviewContext,
+        winner = winner,
+        challengerCompleted = challengerCompleted,
+        opponentCompleted = opponentCompleted)
+  }
 
-    /** Serializes an InterviewContext to a Map. */
-    private fun interviewContextToMap(interviewContext: InterviewContext): Map<String, Any> {
-        return mapOf(
-            "targetPosition" to interviewContext.targetPosition,
-            "companyName" to interviewContext.companyName,
-            "interviewType" to interviewContext.interviewType,
-            "experienceLevel" to interviewContext.experienceLevel,
-            "jobDescription" to interviewContext.jobDescription,
-            "focusArea" to interviewContext.focusArea
-        )
-    }
-
+  /** Serializes an InterviewContext to a Map. */
+  private fun interviewContextToMap(interviewContext: InterviewContext): Map<String, Any> {
+    return mapOf(
+        "targetPosition" to interviewContext.targetPosition,
+        "companyName" to interviewContext.companyName,
+        "interviewType" to interviewContext.interviewType,
+        "experienceLevel" to interviewContext.experienceLevel,
+        "jobDescription" to interviewContext.jobDescription,
+        "focusArea" to interviewContext.focusArea)
+  }
 
   override fun getPendingBattlesForUser(
       userUid: String,

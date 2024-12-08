@@ -160,15 +160,15 @@ fun OratorApp(
           SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
-    // Initialize BattleViewModel using the factory
-    val battleViewModel: BattleViewModel = viewModel(
-        factory = BattleViewModelFactory(
-            userProfileViewModel = userProfileViewModel,
-            navigationActions = navigationActions,
-            apiLinkViewModel = apiLinkViewModel,
-            chatViewModel = chatViewModel
-        )
-    )
+  // Initialize BattleViewModel using the factory
+  val battleViewModel: BattleViewModel =
+      viewModel(
+          factory =
+              BattleViewModelFactory(
+                  userProfileViewModel = userProfileViewModel,
+                  navigationActions = navigationActions,
+                  apiLinkViewModel = apiLinkViewModel,
+                  chatViewModel = chatViewModel))
 
   // Scaffold composable to provide basic layout structure for the app
   Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
@@ -229,10 +229,7 @@ fun OratorApp(
           // Friends flow
           navigation(startDestination = Screen.FRIENDS, route = Route.FRIENDS) {
             composable(Screen.FRIENDS) {
-              ViewFriendsScreen(
-                  navigationActions,
-                  userProfileViewModel,
-                  battleViewModel)
+              ViewFriendsScreen(navigationActions, userProfileViewModel, battleViewModel)
             }
           }
 

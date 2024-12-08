@@ -219,112 +219,110 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         }
   }
 
-    /**
-     * Convert Firestore document to UserProfile object.
-     *
-     * @param document The Firestore document to be converted.
-     * @return The converted UserProfile object, or null if conversion fails.
-     */
-    private fun documentToUserProfile(document: DocumentSnapshot): UserProfile? {
-        return try {
-            val uid = document.id
-            val name = document.getString("name") ?: return null
-            val age = document.getLong("age")?.toInt() ?: return null
-            val lastLoginDate = document.getString("lastLoginDate") ?: "1970-10-10"
-            val currentStreak = document.getLong("currentStreak") ?: 0L
+  /**
+   * Convert Firestore document to UserProfile object.
+   *
+   * @param document The Firestore document to be converted.
+   * @return The converted UserProfile object, or null if conversion fails.
+   */
+  private fun documentToUserProfile(document: DocumentSnapshot): UserProfile? {
+    return try {
+      val uid = document.id
+      val name = document.getString("name") ?: return null
+      val age = document.getLong("age")?.toInt() ?: return null
+      val lastLoginDate = document.getString("lastLoginDate") ?: "1970-10-10"
+      val currentStreak = document.getLong("currentStreak") ?: 0L
 
-            // Retrieve 'statistics' map
-            val statisticsMap = document.get("statistics") as? Map<*, *>
-            val statistics = statisticsMap?.let {
-                val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
+      // Retrieve 'statistics' map
+      val statisticsMap = document.get("statistics") as? Map<*, *>
+      val statistics =
+          statisticsMap?.let {
+            val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
 
-                // Extract 'previousRuns' list and map each entry to 'SpeechStats'
-                val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
-                val previousRuns = previousRunsList?.map { run ->
-                    SpeechStats(
-                        title = run["title"] as? String ?: "",
-                        duration = (run["duration"] as? Number)?.toInt() ?: 0,
-                        date = run["date"] as? Timestamp ?: Timestamp.now(),
-                        accuracy = (run["accuracy"] as? Number)?.toFloat() ?: 0.0f,
-                        wordsPerMinute = (run["wordsPerMinute"] as? Number)?.toInt() ?: 0
-                    )
+            // Extract 'previousRuns' list and map each entry to 'SpeechStats'
+            val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
+            val previousRuns =
+                previousRunsList?.map { run ->
+                  SpeechStats(
+                      title = run["title"] as? String ?: "",
+                      duration = (run["duration"] as? Number)?.toInt() ?: 0,
+                      date = run["date"] as? Timestamp ?: Timestamp.now(),
+                      accuracy = (run["accuracy"] as? Number)?.toFloat() ?: 0.0f,
+                      wordsPerMinute = (run["wordsPerMinute"] as? Number)?.toInt() ?: 0)
                 } ?: emptyList()
 
-                val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
-                val battleStats = battleStatsList?.mapNotNull { battle ->
-                    try {
-                        convertInterviewContext(battle["context"] as? Map<String, Any>)?.let { it1 ->
-                            SpeechBattle(
-                                battleId = battle["battleId"] as? String ?: "",
-                                challenger = battle["challenger"] as? String ?: "",
-                                opponent = battle["opponent"] as? String ?: "",
-                                status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
-                                context = it1,
-                                winner = battle["winner"] as? String ?: ""
-                            )
-                        }
-                    } catch (e: Exception) {
-                        Log.e("UserProfileRepository", "Error parsing battleStats", e)
-                        null
+            val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
+            val battleStats =
+                battleStatsList?.mapNotNull { battle ->
+                  try {
+                    convertInterviewContext(battle["context"] as? Map<String, Any>)?.let { it1 ->
+                      SpeechBattle(
+                          battleId = battle["battleId"] as? String ?: "",
+                          challenger = battle["challenger"] as? String ?: "",
+                          opponent = battle["opponent"] as? String ?: "",
+                          status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
+                          context = it1,
+                          winner = battle["winner"] as? String ?: "")
                     }
+                  } catch (e: Exception) {
+                    Log.e("UserProfileRepository", "Error parsing battleStats", e)
+                    null
+                  }
                 } ?: emptyList()
 
-                UserStatistics(
-                    sessionsGiven = emptyMap(),
-                    successfulSessions = emptyMap(),
-                    improvement = improvement,
-                    previousRuns = previousRuns,
-                    battleStats = battleStats
-                )
-            } ?: UserStatistics()
+            UserStatistics(
+                sessionsGiven = emptyMap(),
+                successfulSessions = emptyMap(),
+                improvement = improvement,
+                previousRuns = previousRuns,
+                battleStats = battleStats)
+          } ?: UserStatistics()
 
-            // Retrieve other fields from the document
-            val friends = document.get("friends") as? List<String> ?: emptyList()
-            val recReq = document.get("recReq") as? List<String> ?: emptyList()
-            val sentReq = document.get("sentReq") as? List<String> ?: emptyList()
-            val profilePic = document.getString(FIELD_PROFILE_PIC)
-            val bio = document.getString("bio")
+      // Retrieve other fields from the document
+      val friends = document.get("friends") as? List<String> ?: emptyList()
+      val recReq = document.get("recReq") as? List<String> ?: emptyList()
+      val sentReq = document.get("sentReq") as? List<String> ?: emptyList()
+      val profilePic = document.getString(FIELD_PROFILE_PIC)
+      val bio = document.getString("bio")
 
-            // Construct and return the 'UserProfile' object
-            UserProfile(
-                uid = uid,
-                name = name,
-                age = age,
-                statistics = statistics,
-                friends = friends,
-                recReq = recReq,
-                sentReq = sentReq,
-                profilePic = profilePic,
-                currentStreak = currentStreak,
-                lastLoginDate = lastLoginDate,
-                bio = bio
-            )
-        } catch (e: Exception) {
-            Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
-            null
-        }
+      // Construct and return the 'UserProfile' object
+      UserProfile(
+          uid = uid,
+          name = name,
+          age = age,
+          statistics = statistics,
+          friends = friends,
+          recReq = recReq,
+          sentReq = sentReq,
+          profilePic = profilePic,
+          currentStreak = currentStreak,
+          lastLoginDate = lastLoginDate,
+          bio = bio)
+    } catch (e: Exception) {
+      Log.e("UserProfileRepository", "Error converting document to UserProfile", e)
+      null
     }
+  }
 
-    /**
-     * Converts a map to an InterviewContext object.
-     *
-     * @param contextMap The map representation of an InterviewContext.
-     * @return The corresponding InterviewContext object, or null if conversion fails.
-     */
-     fun convertInterviewContext(contextMap: Map<String, Any>?): InterviewContext? {
-        return contextMap?.let {
-            InterviewContext(
-                targetPosition = it["targetPosition"] as? String ?: "",
-                companyName = it["companyName"] as? String ?: "",
-                interviewType = it["interviewType"] as? String ?: "",
-                experienceLevel = it["experienceLevel"] as? String ?: "",
-                jobDescription = it["jobDescription"] as? String ?: "",
-                focusArea = it["focusArea"] as? String ?: ""
-            )
-        }
+  /**
+   * Converts a map to an InterviewContext object.
+   *
+   * @param contextMap The map representation of an InterviewContext.
+   * @return The corresponding InterviewContext object, or null if conversion fails.
+   */
+  fun convertInterviewContext(contextMap: Map<String, Any>?): InterviewContext? {
+    return contextMap?.let {
+      InterviewContext(
+          targetPosition = it["targetPosition"] as? String ?: "",
+          companyName = it["companyName"] as? String ?: "",
+          interviewType = it["interviewType"] as? String ?: "",
+          experienceLevel = it["experienceLevel"] as? String ?: "",
+          jobDescription = it["jobDescription"] as? String ?: "",
+          focusArea = it["focusArea"] as? String ?: "")
     }
+  }
 
-    /**
+  /**
    * Helper function to perform Firestore operations.
    *
    * @param task The Firestore task to be performed.

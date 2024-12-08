@@ -13,21 +13,22 @@ class BattleViewModelFactory(
     private val navigationActions: NavigationActions,
     private val apiLinkViewModel: ApiLinkViewModel,
     private val chatViewModel: ChatViewModel,
-    private val battleRepository: BattleRepositoryFirestore = BattleRepositoryFirestore(
-        FirebaseFirestore.getInstance() // Default instance of Firestore
-    )
+    private val battleRepository: BattleRepositoryFirestore =
+        BattleRepositoryFirestore(
+            FirebaseFirestore.getInstance() // Default instance of Firestore
+            )
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(BattleViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return BattleViewModel(
-                battleRepository,
-                userProfileViewModel,
-                navigationActions,
-                apiLinkViewModel,
-                chatViewModel)
-                    as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    if (modelClass.isAssignableFrom(BattleViewModel::class.java)) {
+      @Suppress("UNCHECKED_CAST")
+      return BattleViewModel(
+          battleRepository,
+          userProfileViewModel,
+          navigationActions,
+          apiLinkViewModel,
+          chatViewModel)
+          as T
     }
+    throw IllegalArgumentException("Unknown ViewModel class")
+  }
 }

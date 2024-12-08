@@ -3,7 +3,6 @@ package com.github.se.orator.ui.battle
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,7 +57,7 @@ fun BattleRequestSentScreen(
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
                 Icon(
-                    Icons.Filled.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.testTag("backButton"))
               }

@@ -27,76 +27,76 @@ fun BattleScreen(
     battleViewModel: BattleViewModel
 ) {
 
-    val friendName = userProfileViewModel.getName(friendUid)
-    var targetPosition by remember { mutableStateOf("") }
-    var companyName by remember { mutableStateOf("") }
-    var interviewType by remember { mutableStateOf("") }
-    var experienceLevel by remember { mutableStateOf("") }
-    var jobDescription by remember { mutableStateOf("") }
-    var focusArea by remember { mutableStateOf("") }
+  val friendName = userProfileViewModel.getName(friendUid)
+  var targetPosition by remember { mutableStateOf("") }
+  var companyName by remember { mutableStateOf("") }
+  var interviewType by remember { mutableStateOf("") }
+  var experienceLevel by remember { mutableStateOf("") }
+  var jobDescription by remember { mutableStateOf("") }
+  var focusArea by remember { mutableStateOf("") }
 
-    val inputFields =
-        listOf(
-            InputFieldData(
-                value = targetPosition,
-                onValueChange = { targetPosition = it },
-                question = "What is your target job position?",
-                placeholder = "e.g., Senior Executive",
-                testTag = "targetPositionInput"),
-            InputFieldData(
-                value = companyName,
-                onValueChange = { companyName = it },
-                question = "Which company are you applying to?",
-                placeholder = "e.g., McKinsey",
-                testTag = "companyNameInput"),
-            InputFieldData(
-                value = interviewType,
-                onValueChange = { interviewType = it },
-                question = "What type of interview are you preparing for?",
-                placeholder = "Select interview type",
-                testTag = "interviewTypeInput",
-                isDropdown = true,
-                dropdownItems =
-                listOf(
-                    "Phone Interview",
-                    "Video Interview",
-                    "In-Person Interview",
-                    "Panel Interview",
-                    "Group Interview",
-                    "Assessment Center")),
-            InputFieldData(
-                value = experienceLevel,
-                onValueChange = { experienceLevel = it },
-                question = "What is your experience level in this field?",
-                placeholder = "Select experience level",
-                testTag = "experienceLevelInput",
-                isDropdown = true,
-                dropdownItems =
-                listOf("Entry-Level", "Mid-Level", "Senior-Level", "Executive-Level")),
-            InputFieldData(
-                value = jobDescription,
-                onValueChange = { jobDescription = it },
-                question = "Please provide the job description:",
-                placeholder = "Paste the job description here",
-                testTag = "jobDescriptionInput",
-                isScrollable = true,
-                height = AppDimensions.jobDescriptionInputFieldHeight),
-            InputFieldData(
-                value = focusArea,
-                onValueChange = { focusArea = it },
-                question = "What do you want to focus on the most?",
-                placeholder = "Select focus area",
-                testTag = "focusAreaInput",
-                isDropdown = true,
-                dropdownItems =
-                listOf(
-                    "Behavioral Questions",
-                    "Technical Questions",
-                    "Situational Questions",
-                    "Competency-Based Questions",
-                    "Case Studies",
-                    "Company-Specific Questions")),
-        )
+  val inputFields =
+      listOf(
+          InputFieldData(
+              value = targetPosition,
+              onValueChange = { targetPosition = it },
+              question = "What is your target job position?",
+              placeholder = "e.g., Senior Executive",
+              testTag = "targetPositionInput"),
+          InputFieldData(
+              value = companyName,
+              onValueChange = { companyName = it },
+              question = "Which company are you applying to?",
+              placeholder = "e.g., McKinsey",
+              testTag = "companyNameInput"),
+          InputFieldData(
+              value = interviewType,
+              onValueChange = { interviewType = it },
+              question = "What type of interview are you preparing for?",
+              placeholder = "Select interview type",
+              testTag = "interviewTypeInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf(
+                      "Phone Interview",
+                      "Video Interview",
+                      "In-Person Interview",
+                      "Panel Interview",
+                      "Group Interview",
+                      "Assessment Center")),
+          InputFieldData(
+              value = experienceLevel,
+              onValueChange = { experienceLevel = it },
+              question = "What is your experience level in this field?",
+              placeholder = "Select experience level",
+              testTag = "experienceLevelInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf("Entry-Level", "Mid-Level", "Senior-Level", "Executive-Level")),
+          InputFieldData(
+              value = jobDescription,
+              onValueChange = { jobDescription = it },
+              question = "Please provide the job description:",
+              placeholder = "Paste the job description here",
+              testTag = "jobDescriptionInput",
+              isScrollable = true,
+              height = AppDimensions.jobDescriptionInputFieldHeight),
+          InputFieldData(
+              value = focusArea,
+              onValueChange = { focusArea = it },
+              question = "What do you want to focus on the most?",
+              placeholder = "Select focus area",
+              testTag = "focusAreaInput",
+              isDropdown = true,
+              dropdownItems =
+                  listOf(
+                      "Behavioral Questions",
+                      "Technical Questions",
+                      "Situational Questions",
+                      "Competency-Based Questions",
+                      "Case Studies",
+                      "Company-Specific Questions")),
+      )
 
   // Use the existing SpeakingPracticeModule for consistent UI
   SpeakingPracticeModule(
@@ -107,15 +107,15 @@ fun BattleScreen(
       onClick = {
 
         // Collect the inputs and create an InterviewContext object
-          val interviewContext =
-              InterviewContext(
-                  targetPosition = targetPosition,
-                  companyName = companyName,
-                  interviewType = interviewType,
-                  experienceLevel = experienceLevel,
-                  jobDescription = jobDescription,
-                  focusArea = focusArea,
-              )
+        val interviewContext =
+            InterviewContext(
+                targetPosition = targetPosition,
+                companyName = companyName,
+                interviewType = interviewType,
+                experienceLevel = experienceLevel,
+                jobDescription = jobDescription,
+                focusArea = focusArea,
+            )
 
         // Create the battle speech instance
         val battleId = battleViewModel.createBattleRequest(friendUid, interviewContext)

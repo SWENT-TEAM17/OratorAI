@@ -1,7 +1,7 @@
 package com.github.se.orator.model.profile
 
-import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.model.speaking.AnalysisData
+import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.google.firebase.Timestamp
 
 /**

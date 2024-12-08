@@ -19,7 +19,6 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.network.Message
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 
 /**
@@ -34,18 +33,16 @@ enum class ChatButtonType(
     val buttonTextTestTag: String,
     val buttonTestTag: String
 ) {
-    FEEDBACK_BUTTON(
-        testTag = "feedback_button",
-        buttonText = "Request Feedback",
-        buttonTextTestTag = "request_feedback_button_text",
-        buttonTestTag = "request_feedback_button"
-    ),
-    FINISH_BATTLE_BUTTON(
-        testTag = "finish_battle_button",
-        buttonText = "Finish Battle",
-        buttonTextTestTag = "finish_battle_button_text",
-        buttonTestTag = "finish_battle_button"
-    );
+  FEEDBACK_BUTTON(
+      testTag = "feedback_button",
+      buttonText = "Request Feedback",
+      buttonTextTestTag = "request_feedback_button_text",
+      buttonTestTag = "request_feedback_button"),
+  FINISH_BATTLE_BUTTON(
+      testTag = "finish_battle_button",
+      buttonText = "Finish Battle",
+      buttonTextTestTag = "finish_battle_button_text",
+      buttonTestTag = "finish_battle_button")
 }
 
 /**
@@ -183,15 +180,14 @@ fun ChatScreen(
                     Button(
                         onClick = {
                           chatViewModel.toggleTextToSpeech(false)
-                            onChatButtonClick()
+                          onChatButtonClick()
                         },
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = AppDimensions.paddingSmall)
                                 .border(
                                     width = AppDimensions.borderStrokeWidth,
-                                    color = MaterialTheme.colorScheme.outline.copy(
-                                            alpha = 0.5f),
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                                     shape = MaterialTheme.shapes.medium)
                                 .testTag(chatButtonType.buttonTestTag),
                         colors =

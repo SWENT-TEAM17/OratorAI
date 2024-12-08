@@ -22,7 +22,6 @@ import com.github.se.orator.ui.network.Usage
 import com.github.se.orator.ui.overview.ChatButtonType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -37,164 +36,156 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 
 class BattleChatScreenTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    private val testDispatcher = StandardTestDispatcher()
+  private val testDispatcher = StandardTestDispatcher()
 
-    @Mock private lateinit var mockNavigationActions: NavigationActions
-    @Mock private lateinit var mockBattleRepository: BattleRepository
-    @Mock private lateinit var mockUserProfileRepository: UserProfileRepository
-    @Mock private lateinit var chatGPTService: ChatGPTService
+  @Mock private lateinit var mockNavigationActions: NavigationActions
+  @Mock private lateinit var mockBattleRepository: BattleRepository
+  @Mock private lateinit var mockUserProfileRepository: UserProfileRepository
+  @Mock private lateinit var chatGPTService: ChatGPTService
 
-    private lateinit var userProfileViewModel: UserProfileViewModel
-    private lateinit var battleViewModel: BattleViewModel
-    private lateinit var apiLinkViewModel: ApiLinkViewModel
-    private lateinit var chatViewModel: ChatViewModel
+  private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var battleViewModel: BattleViewModel
+  private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var chatViewModel: ChatViewModel
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-        MockitoAnnotations.openMocks(this)
+  @Before
+  fun setUp() {
+    Dispatchers.setMain(testDispatcher)
+    MockitoAnnotations.openMocks(this)
 
-        // Mock the necessary dependencies
-        `when`(mockUserProfileRepository.getCurrentUserUid()).thenReturn("testUser")
-        userProfileViewModel = UserProfileViewModel(mockUserProfileRepository)
+    // Mock the necessary dependencies
+    `when`(mockUserProfileRepository.getCurrentUserUid()).thenReturn("testUser")
+    userProfileViewModel = UserProfileViewModel(mockUserProfileRepository)
 
-        apiLinkViewModel = ApiLinkViewModel()
+    apiLinkViewModel = ApiLinkViewModel()
 
-        // Initialize `chatViewModel`
-        chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+    // Initialize `chatViewModel`
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
-        // Mock `getBattleById`
-        `when`(mockBattleRepository.getBattleById(eq("testBattle"), any())).thenAnswer { invocation ->
-            val callback = invocation.getArgument<(SpeechBattle?) -> Unit>(1)
-            callback.invoke(
-                SpeechBattle(
-                    battleId = "testBattle",
-                    challenger = "friendUid",
-                    opponent = "testUser",
-                    status = BattleStatus.PENDING,
-                    context = InterviewContext(
-                        "testPosition",
-                        "testCompany",
-                        "testType",
-                        "testExperience",
-                        "testDescription",
-                        "testFocusArea"
-                    )
-                )
-            )
-        }
+    // Mock `getBattleById`
+    `when`(mockBattleRepository.getBattleById(eq("testBattle"), any())).thenAnswer { invocation ->
+      val callback = invocation.getArgument<(SpeechBattle?) -> Unit>(1)
+      callback.invoke(
+          SpeechBattle(
+              battleId = "testBattle",
+              challenger = "friendUid",
+              opponent = "testUser",
+              status = BattleStatus.PENDING,
+              context =
+                  InterviewContext(
+                      "testPosition",
+                      "testCompany",
+                      "testType",
+                      "testExperience",
+                      "testDescription",
+                      "testFocusArea")))
+    }
 
-        // Initialize `battleViewModel` after all dependencies are mocked
-        battleViewModel = BattleViewModel(
+    // Initialize `battleViewModel` after all dependencies are mocked
+    battleViewModel =
+        BattleViewModel(
             battleRepository = mockBattleRepository,
             userProfileViewModel = userProfileViewModel,
             navigationActions = mockNavigationActions,
             apiLinkViewModel = apiLinkViewModel,
-            chatViewModel = chatViewModel
-        )
+            chatViewModel = chatViewModel)
+  }
+
+  @After
+  fun tearDown() {
+    Dispatchers.resetMain()
+    testDispatcher.cancel()
+  }
+
+  @Test
+  fun screenIsDisplayed() = runTest {
+    `when`(chatGPTService.getChatCompletion(any()))
+        .thenReturn(ChatResponse("id", "object", 0, "model", emptyList(), Usage(0, 0, 0)))
+
+    chatViewModel.initializeConversation()
+    advanceUntilIdle()
+
+    composeTestRule.setContent {
+      BattleChatScreen(
+          battleId = "testBattle",
+          userId = "testUser",
+          navigationActions = mockNavigationActions,
+          battleViewModel = battleViewModel,
+          chatViewModel = chatViewModel,
+          userProfileViewModel = userProfileViewModel)
     }
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-        testDispatcher.cancel()
+    composeTestRule.onNodeWithTag("top_app_bar").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("chat_screen_column").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("chat_messages_list").assertExists().assertIsDisplayed()
+  }
+
+  @Test
+  fun finishBattleButtonTriggersViewModelMethod() = runTest {
+    val chatMessages = emptyList<Message>()
+
+    composeTestRule.setContent {
+      BattleChatScreen(
+          battleId = "testBattle",
+          userId = "testUser",
+          navigationActions = mockNavigationActions,
+          battleViewModel = battleViewModel,
+          chatViewModel = chatViewModel,
+          userProfileViewModel = userProfileViewModel)
     }
 
-    @Test
-    fun screenIsDisplayed() = runTest {
+    composeTestRule.onNodeWithTag("finish_battle_button").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("finish_battle_button").performClick()
 
-        `when`(chatGPTService.getChatCompletion(any()))
-            .thenReturn(ChatResponse("id", "object", 0, "model", emptyList(), Usage(0, 0, 0)))
+    // Verify that the repository method was called with the correct parameters
+    verify(mockBattleRepository)
+        .updateUserBattleData(eq("testBattle"), eq("testUser"), eq(chatMessages), any())
+  }
 
-        chatViewModel.initializeConversation()
-        advanceUntilIdle()
-
-        composeTestRule.setContent {
-            BattleChatScreen(
-                battleId = "testBattle",
-                userId = "testUser",
-                navigationActions = mockNavigationActions,
-                battleViewModel = battleViewModel,
-                chatViewModel = chatViewModel,
-                userProfileViewModel = userProfileViewModel
-            )
-        }
-
-        composeTestRule.onNodeWithTag("top_app_bar").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithTag("chat_screen_column").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithTag("chat_messages_list").assertExists().assertIsDisplayed()
+  @Test
+  fun backButtonNavigatesBack() = runTest {
+    composeTestRule.setContent {
+      BattleChatScreen(
+          battleId = "testBattle",
+          userId = "testUser",
+          navigationActions = mockNavigationActions,
+          battleViewModel = battleViewModel,
+          chatViewModel = chatViewModel,
+          userProfileViewModel = userProfileViewModel)
     }
 
-    @Test
-    fun finishBattleButtonTriggersViewModelMethod() = runTest {
-        val chatMessages = emptyList<Message>()
+    composeTestRule.onNodeWithTag("back_button").performClick()
 
-        composeTestRule.setContent {
-            BattleChatScreen(
-                battleId = "testBattle",
-                userId = "testUser",
-                navigationActions = mockNavigationActions,
-                battleViewModel = battleViewModel,
-                chatViewModel = chatViewModel,
-                userProfileViewModel = userProfileViewModel
-            )
-        }
+    verify(mockNavigationActions).goBack()
+  }
 
-        composeTestRule.onNodeWithTag("finish_battle_button").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithTag("finish_battle_button").performClick()
+  @Test
+  fun loadingIndicatorIsNotDisplayedAndFinishBattleButtonIsEnabled() = runTest {
+    `when`(chatGPTService.getChatCompletion(any()))
+        .thenReturn(ChatResponse("id", "object", 0, "model", emptyList(), Usage(0, 0, 0)))
 
-        // Verify that the repository method was called with the correct parameters
-        verify(mockBattleRepository).updateUserBattleData(eq("testBattle"), eq("testUser"), eq(chatMessages), any())
+    composeTestRule.setContent {
+      BattleChatScreen(
+          battleId = "testBattle",
+          userId = "testUser",
+          navigationActions = mockNavigationActions,
+          battleViewModel = battleViewModel,
+          chatViewModel = chatViewModel,
+          userProfileViewModel = userProfileViewModel)
     }
 
-
-
-    @Test
-    fun backButtonNavigatesBack() = runTest {
-
-        composeTestRule.setContent {
-            BattleChatScreen(
-                battleId = "testBattle",
-                userId = "testUser",
-                navigationActions = mockNavigationActions,
-                battleViewModel = battleViewModel,
-                chatViewModel = chatViewModel,
-                userProfileViewModel = userProfileViewModel
-            )
-        }
-
-        composeTestRule.onNodeWithTag("back_button").performClick()
-
-        verify(mockNavigationActions).goBack()
-    }
-
-    @Test
-    fun loadingIndicatorIsNotDisplayedAndFinishBattleButtonIsEnabled() = runTest {
-        `when`(chatGPTService.getChatCompletion(any()))
-            .thenReturn(ChatResponse("id", "object", 0, "model", emptyList(), Usage(0, 0, 0)))
-
-        composeTestRule.setContent {
-            BattleChatScreen(
-                battleId = "testBattle",
-                userId = "testUser",
-                navigationActions = mockNavigationActions,
-                battleViewModel = battleViewModel,
-                chatViewModel = chatViewModel,
-                userProfileViewModel = userProfileViewModel
-            )
-        }
-
-        composeTestRule.onNodeWithTag("loading_indicator").assertDoesNotExist()
-        composeTestRule.onNodeWithTag(ChatButtonType.FINISH_BATTLE_BUTTON.buttonTextTestTag).assertExists()
-        composeTestRule.onNodeWithTag(ChatButtonType.FINISH_BATTLE_BUTTON.buttonTestTag).assertIsEnabled()
-    }
-
+    composeTestRule.onNodeWithTag("loading_indicator").assertDoesNotExist()
+    composeTestRule
+        .onNodeWithTag(ChatButtonType.FINISH_BATTLE_BUTTON.buttonTextTestTag)
+        .assertExists()
+    composeTestRule
+        .onNodeWithTag(ChatButtonType.FINISH_BATTLE_BUTTON.buttonTestTag)
+        .assertIsEnabled()
+  }
 }
