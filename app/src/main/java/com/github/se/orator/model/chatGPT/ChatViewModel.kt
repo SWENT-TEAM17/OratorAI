@@ -24,7 +24,7 @@ class ChatViewModel(
     private val textToSpeech: TextToSpeech? = null
 ) : ViewModel() {
 
-  private var isConversationInitialized = false
+  var isConversationInitialized = false
 
   private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
   val chatMessages = _chatMessages.asStateFlow()

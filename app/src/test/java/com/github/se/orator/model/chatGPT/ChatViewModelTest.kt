@@ -12,7 +12,9 @@ import com.github.se.orator.ui.network.ChatResponse
 import com.github.se.orator.ui.network.Choice
 import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.network.Usage
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -407,4 +409,45 @@ class ChatViewModelTest {
 
         verify(chatGPTService, times(1)).getChatCompletion(any())
       }
+
+  @Test
+  fun `generateFeedback returns null when practiceContext is null`() = runTest {
+    // Set practiceContext to null
+    `when`(apiLinkViewModel.practiceContext).thenReturn(MutableStateFlow(null))
+
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    // Add enough answers to trigger full feedback scenario (≥8)
+    val analysisDataList = List(8) { AnalysisData("transcription$it", 0, 0.0, 0.0) }
+    chatViewModel._collectedAnalysisData.value = analysisDataList
+
+    val feedback = chatViewModel.generateFeedback()
+    // Since practiceContext is null, it should return null and never call the API
+    verify(chatGPTService, never()).getChatCompletion(any())
+    assertNull(feedback)
+  }
+
+  @Test
+  fun `resetPracticeContext calls apiLinkViewModel clearPracticeContext`() {
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    chatViewModel.resetPracticeContext()
+    verify(apiLinkViewModel).clearPracticeContext()
+  }
+
+  @Test
+  fun `endConversation resets conversation and does not clear practice context`() {
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    // Initialize conversation to set isConversationInitialized = true
+    chatViewModel.initializeConversation()
+    assertTrue(chatViewModel.isConversationInitialized)
+
+    // End conversation
+    chatViewModel.endConversation()
+    assertFalse(chatViewModel.isConversationInitialized)
+    // endConversation clears analysis data but not context
+    verify(apiLinkViewModel).clearAnalysisData()
+    verify(apiLinkViewModel, never()).clearPracticeContext()
+  }
 }
