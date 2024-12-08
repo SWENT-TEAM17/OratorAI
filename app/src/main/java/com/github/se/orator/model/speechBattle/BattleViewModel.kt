@@ -8,6 +8,7 @@ import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.channels.awaitClose
@@ -22,7 +23,7 @@ import kotlinx.coroutines.flow.callbackFlow
  * @property apiLinkViewModel ViewModel for API link data.
  */
 class BattleViewModel(
-    internal val battleRepository: BattleRepositoryFirestore,
+    internal val battleRepository: BattleRepository,
     private val userProfileViewModel: UserProfileViewModel,
     private val navigationActions: NavigationActions,
     private val apiLinkViewModel: ApiLinkViewModel,
@@ -30,7 +31,7 @@ class BattleViewModel(
 ) : ViewModel() {
 
   // List of all the incoming battles
-  private val _pendingBattles = MutableLiveData<List<SpeechBattle>>()
+  private val _pendingBattles = MutableLiveData<List<SpeechBattle>>(emptyList())
   val pendingBattles: LiveData<List<SpeechBattle>> = _pendingBattles
 
   /**

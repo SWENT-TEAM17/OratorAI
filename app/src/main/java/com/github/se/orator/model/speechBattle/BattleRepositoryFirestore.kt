@@ -9,10 +9,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import java.util.UUID
 
-class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
+class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepository {
 
   /** Generates a unique battle ID. */
-  fun generateUniqueBattleId(): String {
+  override fun generateUniqueBattleId(): String {
     return UUID.randomUUID().toString()
   }
 
@@ -22,7 +22,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param speechBattle The battle to store.
    * @param callback A callback function to indicate success or failure.
    */
-  fun storeBattleRequest(speechBattle: SpeechBattle, callback: (Boolean) -> Unit) {
+  override fun storeBattleRequest(speechBattle: SpeechBattle, callback: (Boolean) -> Unit) {
     // Serialize the InterviewContext
     val interviewContextMap = interviewContextToMap(speechBattle.context)
 
@@ -54,7 +54,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param userUid The UID of the user.
    * @param callback A callback function to handle the list of pending battles.
    */
-  fun listenForPendingBattles(
+  override fun listenForPendingBattles(
       userUid: String,
       callback: (List<SpeechBattle>) -> Unit
   ): ListenerRegistration {
@@ -81,7 +81,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param status The new status.
    * @param callback A callback function to indicate success or failure.
    */
-  fun updateBattleStatus(battleId: String, status: BattleStatus, callback: (Boolean) -> Unit) {
+  override fun updateBattleStatus(battleId: String, status: BattleStatus, callback: (Boolean) -> Unit) {
     val battleRef = db.collection("battles").document(battleId)
 
     battleRef
@@ -99,7 +99,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param battleId The ID of the battle.
    * @param callback A callback function to handle the retrieved SpeechBattle.
    */
-  fun getBattleById(battleId: String, callback: (SpeechBattle?) -> Unit) {
+  override fun getBattleById(battleId: String, callback: (SpeechBattle?) -> Unit) {
     val battleRef = db.collection("battles").document(battleId)
 
     battleRef
@@ -164,7 +164,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
     }
 
 
-  fun getPendingBattlesForUser(
+  override fun getPendingBattlesForUser(
       userUid: String,
       callback: (List<SpeechBattle>) -> Unit,
       onFailure: (Exception) -> Unit
@@ -184,7 +184,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
         }
   }
 
-  fun listenToBattleUpdates(
+  override fun listenToBattleUpdates(
       battleId: String,
       callback: (SpeechBattle?) -> Unit
   ): ListenerRegistration {
@@ -213,7 +213,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param messages The list of messages exchanged by the user during the battle.
    * @param callback A callback to indicate success or failure.
    */
-  fun updateUserBattleData(
+  override fun updateUserBattleData(
       battleId: String,
       userId: String,
       messages: List<Message>,
@@ -296,7 +296,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) {
    * @param winnerUid The UID of the winner.
    * @param evaluationText The evaluation text.
    */
-  fun updateBattleResult(
+  override fun updateBattleResult(
       battleId: String,
       winnerUid: String,
       evaluationText: String,
