@@ -230,7 +230,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       val uid = document.id
       val name = document.getString("name") ?: return null
       val age = document.getLong("age")?.toInt() ?: return null
-      val lastLoginDate = document.getString("lastLoginDate") ?: "1970-10-10"
+      val lastLoginDate = document.getString("lastLoginDate") ?: "1970-01-01"
       val currentStreak = document.getLong("currentStreak") ?: 0L
 
       // Retrieve 'statistics' map
@@ -239,7 +239,16 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           statisticsMap?.let {
             val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
 
-            // Extract 'previousRuns' list and map each entry to 'SpeechStats'
+            // Extract 'sessionsGiven' map
+            val sessionsGivenMap = it["sessionsGiven"] as? Map<String, Long> ?: emptyMap()
+            val sessionsGiven = sessionsGivenMap.mapValues { entry -> entry.value.toInt() }
+
+            // Extract 'successfulSessions' map
+            val successfulSessionsMap = it["successfulSessions"] as? Map<String, Long> ?: emptyMap()
+            val successfulSessions =
+                successfulSessionsMap.mapValues { entry -> entry.value.toInt() }
+
+            // Extract 'previousRuns' list
             val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
             val previousRuns =
                 previousRunsList?.map { run ->
@@ -251,17 +260,19 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
                       wordsPerMinute = (run["wordsPerMinute"] as? Number)?.toInt() ?: 0)
                 } ?: emptyList()
 
+            // Extract 'battleStats' list
             val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
             val battleStats =
                 battleStatsList?.mapNotNull { battle ->
                   try {
-                    convertInterviewContext(battle["context"] as? Map<String, Any>)?.let { it1 ->
+                    convertInterviewContext(battle["context"] as? Map<String, Any>)?.let { context
+                      ->
                       SpeechBattle(
                           battleId = battle["battleId"] as? String ?: "",
                           challenger = battle["challenger"] as? String ?: "",
                           opponent = battle["opponent"] as? String ?: "",
                           status = BattleStatus.valueOf(battle["status"] as? String ?: "PENDING"),
-                          context = it1,
+                          context = context,
                           winner = battle["winner"] as? String ?: "")
                     }
                   } catch (e: Exception) {
@@ -271,8 +282,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
                 } ?: emptyList()
 
             UserStatistics(
-                sessionsGiven = emptyMap(),
-                successfulSessions = emptyMap(),
+                sessionsGiven = sessionsGiven,
+                successfulSessions = successfulSessions,
                 improvement = improvement,
                 previousRuns = previousRuns,
                 battleStats = battleStats)
