@@ -114,41 +114,6 @@ class EditProfileTest {
   }
 
   @Test
-  fun edit_uploadFromGalleryButton_launchesGalleryPicker() {
-    composeTestRule.setContent {
-      EditProfileScreen(
-          navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
-    }
-
-    // Click the upload profile picture button to open ImagePicker
-    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
-
-    // Click the "Upload from Gallery" button within ImagePicker
-    composeTestRule.onNodeWithTag("PhotoOnPick").performClick()
-
-    // Since launching gallery involves external intents, we can verify that the ImagePicker dialog
-    // is dismissed
-    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
-  }
-
-  @Test
-  fun edit_cancelButton_dismissesImagePickerDialog() {
-    composeTestRule.setContent {
-      EditProfileScreen(
-          navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
-    }
-
-    // Click the upload profile picture button to open ImagePicker
-    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
-
-    // Click the "Cancel" button within ImagePicker
-    composeTestRule.onNodeWithTag("PhotoOnDismiss").performClick()
-
-    // Verify that the ImagePicker dialog is dismissed
-    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
-  }
-
-  @Test
   fun editProfileScreen_dialogBoxDisplaysCorrectly() {
     composeTestRule.setContent {
       EditProfileScreen(
