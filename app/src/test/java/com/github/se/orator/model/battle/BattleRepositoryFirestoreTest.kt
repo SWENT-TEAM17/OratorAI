@@ -163,11 +163,13 @@ class BattleRepositoryFirestoreTest {
         opponent = "user2",
         status = BattleStatus.PENDING,
         context =
-            InterviewContext(
-                interviewType = "Job Interview",
-                role = "Developer",
-                company = "TechCorp",
-                focusAreas = listOf("Algorithms", "System Design")),
+        InterviewContext(
+          targetPosition = "",
+          companyName = "",
+          interviewType = "",
+          experienceLevel = "",
+          jobDescription = "",
+          focusArea = ""),
         winner = "")
   }
 

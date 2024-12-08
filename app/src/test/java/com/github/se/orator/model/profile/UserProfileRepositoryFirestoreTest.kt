@@ -307,11 +307,13 @@ class UserProfileRepositoryFirestoreTest {
             opponent = "user4",
             status = BattleStatus.PENDING,
             context =
-                InterviewContext(
-                    interviewType = "Negotiation",
-                    role = "Negotiator",
-                    company = "Global Inc",
-                    focusAreas = listOf("Conflict Resolution", "Strategy")),
+            InterviewContext(
+                targetPosition = "",
+                companyName = "",
+                interviewType = "",
+                experienceLevel = "",
+                jobDescription = "",
+                focusArea = ""),
             winner = "")
 
     // Create an existing user profile with existing stats
