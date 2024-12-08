@@ -42,6 +42,6 @@ class MainActivityTest {
 
   @Test
   fun noAppThemeViewModelDoesNotCrash() {
-    composeTestRule.setContent { OratorApp(mock(ChatGPTService::class.java), false, null) }
+    composeTestRule.setContent { OratorApp(mock(ChatGPTService::class.java), false, null, null) }
   }
 }
