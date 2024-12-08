@@ -81,47 +81,6 @@ fun EditProfileScreen(
 
   val context = LocalContext.current
 
-  // Create a launcher for picking an image from the gallery
-  val pickImageLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { newProfilePicUri = it }
-      }
-
-  // Camera-related variables and launchers here
-
-  // Temporary variable to hold the pending image URI
-  var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
-
-  // Launcher to take a picture using the camera
-  val takePictureLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) {
-          // Only set newProfilePicUri if capture was successful
-          pendingImageUri?.let { uri ->
-            newProfilePicUri = uri
-            pendingImageUri = null
-          }
-        } else {
-          Toast.makeText(context, "Failed to capture image.", Toast.LENGTH_SHORT).show()
-        }
-      }
-
-  // State to track if the user initiated a camera request
-  var isCameraRequested by remember { mutableStateOf(false) }
-
-  // Request camera permission launcher
-  val cameraPermissionLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted && isCameraRequested) {
-          isCameraRequested = false
-          // Launch camera with the pending URI
-          pendingImageUri?.let { uri -> takePictureLauncher.launch(uri) }
-        } else if (!granted && isCameraRequested) {
-          isCameraRequested = false
-          Toast.makeText(context, "Camera permission denied.", Toast.LENGTH_SHORT).show()
-        }
-      }
-
   Scaffold(
       topBar = {
         TopAppBar(
@@ -290,6 +249,80 @@ fun EditProfileScreen(
 }
 
 /**
+ * Composable function to display a dialog for choosing a profile picture.
+ *
+ * @param onDismiss Callback to dismiss the dialog.
+ * @param onTakePhoto Callback to take a photo using the camera.
+ * @param onPickFromGallery Callback to pick an image from the gallery.
+ */
+@Composable
+fun ChoosePictureDialog(
+    onDismiss: () -> Unit,
+    onTakePhoto: () -> Unit,
+    onPickFromGallery: () -> Unit
+) {
+  AlertDialog(
+      onDismissRequest = { onDismiss() },
+      title = {
+        Text(
+            "Choose Profile Picture",
+            modifier = Modifier.testTag("ProfilePictureTitle"),
+            color = MaterialTheme.colorScheme.onSurface)
+      },
+      text = {
+        Text(
+            "Select an option to update your profile picture.",
+            modifier = Modifier.testTag("ProfilePictureButton"),
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+      },
+      backgroundColor = MaterialTheme.colorScheme.surface,
+      buttons = {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(AppDimensions.paddingSmallMedium) // Replaced 16.dp
+                    .testTag("upload_dialog"),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Button(
+                  onClick = { onTakePhoto() },
+                  modifier = Modifier.testTag("PhotoOnTake"),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          backgroundColor = MaterialTheme.colorScheme.primary)) {
+                    Text(
+                        "Take Photo",
+                        modifier = Modifier.testTag("TakePhotoText"),
+                        color = MaterialTheme.colorScheme.primary)
+                  }
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 8.dp
+              Button(
+                  onClick = { onPickFromGallery() },
+                  modifier = Modifier.testTag("PhotoOnPick"),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          backgroundColor = MaterialTheme.colorScheme.primary)) {
+                    Text(
+                        "Upload from Gallery",
+                        modifier = Modifier.testTag("UploadGalleryText"),
+                        color = MaterialTheme.colorScheme.primary)
+                  }
+              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 8.dp
+              Button(
+                  onClick = { onDismiss() },
+                  modifier = Modifier.testTag("PhotoOnDismiss"),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+                    Text(
+                        "Cancel",
+                        modifier = Modifier.testTag("CancelText"),
+                        color = MaterialTheme.colorScheme.primary)
+                  }
+            }
+      })
+}
+
+/**
  * A reusable composable that handles image picking from the gallery or capturing a photo using the
  * camera.
  *
@@ -313,7 +346,7 @@ fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (
   val takePictureLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-          pendingImageUri?.let { uri -> onImageSelected(uri) }
+          pendingImageUri?.let { onImageSelected(it) }
           pendingImageUri = null
         } else {
           Toast.makeText(context, "Failed to capture image.", Toast.LENGTH_SHORT).show()
@@ -325,7 +358,6 @@ fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (
       rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted && isCameraRequested) {
           isCameraRequested = false
-          // Launch camera with the pending URI
           pendingImageUri?.let { uri -> takePictureLauncher.launch(uri) }
         } else if (!granted && isCameraRequested) {
           isCameraRequested = false
@@ -349,84 +381,65 @@ fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (
   if (isDialogOpen) {
     AlertDialog(
         onDismissRequest = { onDismiss() },
-        title = {
-          Text(
-              "Choose Profile Picture",
-              color = androidx.compose.material.MaterialTheme.colors.onSurface)
-        },
-        text = {
-          Text(
-              "Select an option to update your profile picture.",
-              color = androidx.compose.material.MaterialTheme.colors.onSurface.copy(alpha = 0.7f))
-        },
+        title = { Text("Choose Profile Picture") },
+        text = { Text("Select an option to update your profile picture.") },
         buttons = {
-          androidx.compose.foundation.layout.Column(
+          Column(
               modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmallMedium),
-              horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-                Button(
-                    onClick = {
-                      onDismiss()
-                      // Check camera permission
-                      if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-                          PackageManager.PERMISSION_GRANTED) {
-                        // Launch camera with pendingImageUri
-                        val uri = createImageFileUri()
-                        if (uri != null) {
-                          pendingImageUri = uri
-                          takePictureLauncher.launch(uri)
-                        } else {
-                          Toast.makeText(
-                                  context, "Failed to create image file.", Toast.LENGTH_SHORT)
-                              .show()
-                        }
-                      } else {
-                        // Request camera permission
-                        isCameraRequested = true
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                      }
-                    },
-                    modifier = Modifier.testTag("PhotoOnTake"),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            backgroundColor =
-                                androidx.compose.material.MaterialTheme.colors.primary)) {
-                      Text(
-                          "Take Photo",
-                          color = androidx.compose.material.MaterialTheme.colors.onPrimary,
-                          modifier = Modifier.testTag("TakePhotoText"))
+          ) {
+            Button(
+                onClick = {
+                  onDismiss()
+                  // Check camera permission
+                  if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                      PackageManager.PERMISSION_GRANTED) {
+                    // Launch camera with pendingImageUri
+                    val uri = createImageFileUri()
+                    if (uri != null) {
+                      pendingImageUri = uri
+                      takePictureLauncher.launch(uri)
+                    } else {
+                      Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT)
+                          .show()
                     }
-                androidx.compose.foundation.layout.Spacer(
-                    modifier = Modifier.height(AppDimensions.paddingSmall))
-                Button(
-                    onClick = {
-                      onDismiss()
-                      pickImageLauncher.launch("image/*")
-                    },
-                    modifier = Modifier.testTag("PhotoOnPick"),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            backgroundColor =
-                                androidx.compose.material.MaterialTheme.colors.primary)) {
-                      Text(
-                          "Upload from Gallery",
-                          color = androidx.compose.material.MaterialTheme.colors.onPrimary,
-                          modifier = Modifier.testTag("UploadGalleryText"))
-                    }
-                androidx.compose.foundation.layout.Spacer(
-                    modifier = Modifier.height(AppDimensions.paddingSmall))
-                Button(
-                    onClick = { onDismiss() },
-                    modifier = Modifier.testTag("PhotoOnDismiss"),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            backgroundColor =
-                                androidx.compose.material.MaterialTheme.colors.surface)) {
-                      Text(
-                          "Cancel",
-                          color = androidx.compose.material.MaterialTheme.colors.primary,
-                          modifier = Modifier.testTag("CancelText"))
-                    }
-              }
+                  } else {
+                    // Request camera permission
+                    isCameraRequested = true
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                  }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = androidx.compose.material.MaterialTheme.colors.primary)) {
+                  Text(
+                      "Take Photo",
+                      color = androidx.compose.material.MaterialTheme.colors.onPrimary)
+                }
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = {
+                  onDismiss()
+                  pickImageLauncher.launch("image/*")
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = androidx.compose.material.MaterialTheme.colors.primary)) {
+                  Text(
+                      "Upload from Gallery",
+                      color = androidx.compose.material.MaterialTheme.colors.onPrimary)
+                }
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = { onDismiss() },
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = androidx.compose.material.MaterialTheme.colors.surface)) {
+                  Text("Cancel", color = androidx.compose.material.MaterialTheme.colors.primary)
+                }
+          }
         })
   }
 }

@@ -3,8 +3,6 @@ package com.github.se.orator.ui.profile
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -76,44 +74,6 @@ fun CreateAccountScreen(
   var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
 
   val context = LocalContext.current
-
-  // Launcher for picking an image from the gallery
-  val pickImageLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-          profilePicUri = it // Update the profilePicUri to display the image
-        }
-      }
-
-  // Launcher to take a picture using the camera
-  val takePictureLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) {
-          // Only set profilePicUri if capture was successful
-          pendingImageUri?.let { uri ->
-            profilePicUri = uri
-            pendingImageUri = null
-          }
-        } else {
-          Toast.makeText(context, "Failed to capture image.", Toast.LENGTH_SHORT).show()
-        }
-      }
-
-  // State to track if the user initiated a camera request
-  var isCameraRequested by remember { mutableStateOf(false) }
-
-  // Request camera permission launcher
-  val cameraPermissionLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted && isCameraRequested) {
-          isCameraRequested = false
-          // Launch camera with the pending URI
-          pendingImageUri?.let { uri -> takePictureLauncher.launch(uri) }
-        } else if (!granted && isCameraRequested) {
-          isCameraRequested = false
-          Toast.makeText(context, "Camera permission denied.", Toast.LENGTH_SHORT).show()
-        }
-      }
 
   Scaffold(
       topBar = {

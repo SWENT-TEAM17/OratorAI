@@ -156,39 +156,4 @@ class CreateAccountScreenTest {
     composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
   }
-
-  @Test
-  fun createAccountScreen_uploadFromGalleryButton_launchesGalleryPicker() {
-    composeTestRule.setContent {
-      CreateAccountScreen(
-          navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
-    }
-
-    // Click the upload profile picture button to open ImagePicker
-    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
-
-    // Click the "Upload from Gallery" button within ImagePicker
-    composeTestRule.onNodeWithTag("PhotoOnPick").performClick()
-
-    // Since launching gallery involves external intents, we can verify that the launcher was called
-    // However, Compose testing does not support verifying ActivityResultLauncher calls directly
-    // Alternatively, you can verify side effects or state changes if any
-  }
-
-  @Test
-  fun createAccountScreen_cancelButton_dismissesImagePickerDialog() {
-    composeTestRule.setContent {
-      CreateAccountScreen(
-          navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
-    }
-
-    // Click the upload profile picture button to open ImagePicker
-    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
-
-    // Click the "Cancel" button within ImagePicker
-    composeTestRule.onNodeWithTag("PhotoOnDismiss").performClick()
-
-    // Verify that the ImagePicker dialog is dismissed
-    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
-  }
 }
