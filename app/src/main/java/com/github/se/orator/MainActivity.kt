@@ -5,6 +5,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -33,6 +34,7 @@ import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModelFactory
 import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
+import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.network.OfflineViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
@@ -66,12 +68,16 @@ import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.google.firebase.auth.FirebaseAuth
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
+  lateinit var textToSpeech: TextToSpeech
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
   private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
+
+  private val themeViewModel: AppThemeViewModel = AppThemeViewModel(this)
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,15 +110,23 @@ class MainActivity : ComponentActivity() {
       }
     }
 
+    textToSpeech =
+        TextToSpeech(this) { status ->
+          if (status == TextToSpeech.SUCCESS) {
+            textToSpeech.setSpeechRate(1.7f)
+            textToSpeech.language = Locale.UK
+          }
+        }
+
     enableEdgeToEdge()
     setContent {
-      ProjectTheme {
+      ProjectTheme(themeViewModel = themeViewModel) {
         Scaffold(
             modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold") // Tag for testing
             ) {
               // Observe offline mode state
               val isOffline by offlineViewModel.isOffline.observeAsState(false)
-              OratorApp(chatGPTService, isOffline)
+              OratorApp(chatGPTService, isOffline, themeViewModel, textToSpeech)
             }
       }
     }
@@ -127,7 +141,12 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
+fun OratorApp(
+    chatGPTService: ChatGPTService,
+    isOffline: Boolean,
+    themeViewModel: AppThemeViewModel? = null,
+    textToSpeech: TextToSpeech? = null
+) {
   // Create NavController for navigation within the app
   val navController = rememberNavController()
   // Initialize NavigationActions to handle navigation events
@@ -139,7 +158,7 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val speakingViewModel =
       SpeakingViewModel(
           SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel, userProfileViewModel)
-  val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+  val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
     // Initialize BattleViewModel using the factory
     val battleViewModel: BattleViewModel = viewModel(
@@ -229,7 +248,9 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             composable(Screen.ADD_FRIENDS) {
               AddFriendsScreen(navigationActions, userProfileViewModel)
             }
-            composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+            composable(Screen.SETTINGS) {
+              SettingsScreen(navigationActions, userProfileViewModel, themeViewModel)
+            }
           }
 
           // Battle screen integration

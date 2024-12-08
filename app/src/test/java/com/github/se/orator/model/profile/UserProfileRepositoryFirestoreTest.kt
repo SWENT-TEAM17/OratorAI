@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
@@ -439,6 +440,42 @@ class UserProfileRepositoryFirestoreTest {
 
     // Assert that onFailure was called
     assert(failureCalled)
+  }
+
+  @Test
+  fun `getMetricMean should return 0_0 when list is empty`() {
+    // Arrange
+    val emptyList = listOf<Double>()
+
+    // Act
+    val mean = repository.getMetricMean(emptyList)
+
+    // Assert
+    assertEquals(0.0, mean, 0.001)
+  }
+
+  @Test
+  fun `getMetricMean should return the element when list has one element`() {
+    // Arrange
+    val singleElementList = listOf(42.0)
+
+    // Act
+    val mean = repository.getMetricMean(singleElementList)
+
+    // Assert
+    assertEquals(42.0, mean, 0.001)
+  }
+
+  @Test
+  fun `getMetricMean should calculate mean for multiple elements`() {
+    // Arrange
+    val list = listOf(10.0, 20.0, 30.0)
+
+    // Act
+    val mean = repository.getMetricMean(list)
+
+    // Assert
+    assertEquals(20.0, mean, 0.001)
   }
 
   /** Test that sendFriendRequest successfully sends a friend request. */

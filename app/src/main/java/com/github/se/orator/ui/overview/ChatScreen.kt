@@ -100,6 +100,7 @@ fun ChatScreen(
               IconButton(
                   onClick = {
                     navigationActions.goBack()
+                    chatViewModel.toggleTextToSpeech(false)
                     chatViewModel.resetPracticeContext()
                     chatViewModel.endConversation()
                   },
@@ -156,7 +157,10 @@ fun ChatScreen(
 
                     // Button to navigate to the "Speaking" screen to record a response.
                     Button(
-                        onClick = { navigationActions.navigateTo(Screen.SPEAKING) },
+                        onClick = {
+                          chatViewModel.toggleTextToSpeech(false)
+                          navigationActions.navigateTo(Screen.SPEAKING)
+                        },
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = AppDimensions.paddingSmall)
@@ -177,7 +181,10 @@ fun ChatScreen(
 
                     // Dynamic "Request Feedback" button with customizable text and action.
                     Button(
-                        onClick = { onChatButtonClick() }, // Custom action for the button
+                        onClick = {
+                          chatViewModel.toggleTextToSpeech(false)
+                            onChatButtonClick()
+                        },
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = AppDimensions.paddingSmall)

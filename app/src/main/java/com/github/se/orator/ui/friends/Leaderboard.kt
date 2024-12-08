@@ -22,6 +22,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.ProjectTheme
 
 /**
@@ -130,7 +131,7 @@ fun PracticeModeSelector() {
       contentAlignment = Alignment.Center) {
         Text(
             text = selectedMode,
-            fontSize = AppDimensions.mediumText,
+            fontSize = AppFontSizes.subtitle, // 16.0sp
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("selectedMode"))

@@ -221,46 +221,43 @@ fun ViewFriendsScreen(
                     )
                 }) { innerPadding ->
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = AppDimensions.paddingMedium)
-                        .clickable { focusManager.clearFocus() }
-                ) {
-                    // Search bar for filtering friends
-                    item {
-                        Box(
-                            modifier = Modifier.padding(vertical = AppDimensions.paddingMediumSmall)
-                        ) {
-                            OutlinedTextField(
-                                value = searchQuery,
-                                onValueChange = { searchQuery = it },
-                                label = { Text("Search for a friend.") },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Search,
-                                        contentDescription = "Search Icon"
-                                    )
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState())
-                                    .height(AppDimensions.mediumHeight)
-                                    .focusRequester(focusRequester)
-                                    .testTag("viewFriendsSearch"),
-                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                    backgroundColor = MaterialTheme.colorScheme.surface,
-                                    textColor = MaterialTheme.colorScheme.onSurface,
-                                    focusedBorderColor = MaterialTheme.colorScheme.outline,
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    cursorColor = MaterialTheme.colorScheme.primary,
-                                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    leadingIconColor = MaterialTheme.colorScheme.primary
-                                )
-                            )
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .padding(innerPadding)
+                            .padding(horizontal = AppDimensions.paddingMedium)
+                            .clickable { focusManager.clearFocus() }) {
+                      // Search bar for filtering friends
+                      item {
+                        Box(modifier = Modifier.padding(vertical = AppDimensions.paddingSmall)) {
+                          OutlinedTextField(
+                              value = searchQuery,
+                              onValueChange = { searchQuery = it },
+                              label = { Text("Search for a friend.") },
+                              leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search Icon")
+                              },
+                              modifier =
+                                  Modifier.fillMaxWidth(1f)
+                                      .horizontalScroll(rememberScrollState())
+                                      .wrapContentHeight()
+                                      .focusRequester(focusRequester)
+                                      .testTag("viewFriendsSearch"),
+                              colors =
+                                  TextFieldDefaults.outlinedTextFieldColors(
+                                      backgroundColor = MaterialTheme.colorScheme.surface,
+                                      textColor = MaterialTheme.colorScheme.onSurface,
+                                      focusedBorderColor = MaterialTheme.colorScheme.outline,
+                                      unfocusedBorderColor =
+                                          MaterialTheme.colorScheme.outlineVariant,
+                                      cursorColor = MaterialTheme.colorScheme.primary,
+                                      focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                      unfocusedLabelColor =
+                                          MaterialTheme.colorScheme.onSurfaceVariant,
+                                      leadingIconColor = MaterialTheme.colorScheme.primary))
                         }
-                    }
+                      }
 
                     // Spacer
                     item { Spacer(modifier = Modifier.height(AppDimensions.paddingMedium)) }
