@@ -192,8 +192,7 @@ fun FeedbackScreen(
                     Text(
                         text = "No feedback available.",
                         style = AppTypography.bodyLargeStyle,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.testTag("feedbackNoMessage"))
+                        color = MaterialTheme.colorScheme.secondary)
                   }
                 }
 
