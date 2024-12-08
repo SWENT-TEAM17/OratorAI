@@ -36,7 +36,7 @@ class ChatViewModel(
   val errorMessage = _errorMessage.asStateFlow()
 
   // Change to List<AnalysisData> and update properly
-  private val _collectedAnalysisData = MutableStateFlow<List<AnalysisData>>(emptyList())
+  val _collectedAnalysisData = MutableStateFlow<List<AnalysisData>>(emptyList())
   val collectedAnalysisData = _collectedAnalysisData.asStateFlow()
 
   private val practiceContext = apiLinkViewModel.practiceContext
