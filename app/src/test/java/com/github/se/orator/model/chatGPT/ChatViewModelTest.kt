@@ -7,6 +7,7 @@ import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatResponse
+import com.github.se.orator.ui.network.Choice
 import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.network.Usage
 import kotlinx.coroutines.Dispatchers
@@ -244,5 +245,50 @@ class ChatViewModelTest {
     // Call the generateFeedback method
     assert(chatViewModel.generateFeedback() == chatResp.choices.firstOrNull()?.message?.content)
     verify(chatGPTService).getChatCompletion(any())
+  }
+
+  @Test
+  fun `offlineRequest sends query and sets response`() = runTest {
+    val choice: Choice = Choice(0, Message("assistant", "Response content"), "done")
+    // Arrange
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+    val message = "Test message"
+    val company = "Test Company"
+    val position = "Test Position"
+    val mockResponse =
+        ChatResponse(
+            id = "1",
+            `object` = "chat.completion",
+            created = 0,
+            model = "gpt-3.5-turbo",
+            choices = listOf(choice),
+            usage = Usage(1, 1, 2))
+
+    `when`(chatGPTService.getChatCompletion(any())).thenReturn(mockResponse)
+
+    // Act
+    chatViewModel.offlineRequest(message, company, position)
+    advanceUntilIdle()
+
+    // Assert
+    assert(chatViewModel.response.value == "Response content")
+  }
+
+  @Test
+  fun `offlineRequest handles exception`() = runTest {
+    // Arrange
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+    val message = "Test message"
+    val company = "Test Company"
+    val position = "Test Position"
+
+    `when`(chatGPTService.getChatCompletion(any())).thenThrow(RuntimeException("Error"))
+
+    // Act
+    chatViewModel.offlineRequest(message, company, position)
+    advanceUntilIdle()
+
+    // Assert
+    assert(chatViewModel.errorMessage.value == "Error")
   }
 }

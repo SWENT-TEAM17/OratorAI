@@ -28,11 +28,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
-import com.github.se.orator.model.symblAi.AudioRecorder
+import com.github.se.orator.model.symblAi.AudioPlayer
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
@@ -45,15 +46,16 @@ import loadPromptsFromFile
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @Composable
 fun PreviousRecordingsFeedbackScreen(
-    context: Context,
+    context: Context = LocalContext.current,
     navigationActions: NavigationActions,
     viewModel: ChatViewModel,
-    speakingViewModel: SpeakingViewModel
+    speakingViewModel: SpeakingViewModel,
+    player: AudioPlayer = AndroidAudioPlayer(context)
 ) {
 
-  val recorder by lazy { AudioRecorder(context = context) }
+  // val recorder by lazy { AudioRecorder(context = context) }
 
-  val player by lazy { AndroidAudioPlayer(context) }
+  // val player by lazy { AndroidAudioPlayer(context) }
   var prompts: Map<String, String>? =
       loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
   var ID: String = prompts?.get("ID") ?: "audio.mp3"
@@ -76,12 +78,6 @@ fun PreviousRecordingsFeedbackScreen(
     Log.d("prompts are: ", prompts?.get("targetPosition") ?: "Default Value")
     viewModel.resetResponse()
   }
-
-  Log.d("hi", "hello!")
-  //    symblApiClient.getTranscription(audioFile, {analysisData -> whatUserSaid.value =
-  // analysisData.transcription
-  //                                               Log.d("this is inside getTranscription in
-  // feedback", whatUserSaid.value)}, {})
 
   val response by viewModel.response.collectAsState("")
 
@@ -112,11 +108,12 @@ fun PreviousRecordingsFeedbackScreen(
         Button(
             onClick = { player.playFile(audioFile) },
             shape = AppShapes.circleShape,
+            modifier = Modifier.testTag("play_button"),
             colors = ButtonDefaults.buttonColors(Color.White),
             contentPadding = PaddingValues(0.dp)) {
               androidx.compose.material.Icon(
                   Icons.Outlined.PlayCircleOutline,
-                  contentDescription = "Edit button",
+                  contentDescription = "Play button",
                   modifier = Modifier.size(30.dp),
                   tint = AppColors.primaryColor)
             }
