@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.media.AudioRecord
 import androidx.core.app.ActivityCompat
 import java.io.File
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -124,5 +125,63 @@ class AudioRecorderTest {
     // Verify that AudioRecord stopped and released
     verify(mockAudioRecord).stop()
     verify(mockAudioRecord).release()
+  }
+
+  @Test
+  fun testSaveOfflineRecordingToFilesDir() {
+    val mockFileDir = File("mockFileDir")
+    whenever(context.filesDir).thenReturn(mockFileDir)
+
+    val offlineRecorder = AudioRecorder(context, isOffline = true)
+    offlineRecorder.startRecording()
+    offlineRecorder.stopRecording()
+
+    // Check if the audio file was saved in filesDir
+    val audioFileField = AudioRecorder::class.java.getDeclaredField("audioFile")
+    audioFileField.isAccessible = true
+    val savedFile = audioFileField.get(offlineRecorder) as File
+
+    assertTrue(savedFile.path.startsWith(mockFileDir.path))
+  }
+
+  @Test
+  fun testSaveOnlineRecordingToCacheDir() {
+    val mockCacheDir = File("mockCacheDir")
+    whenever(context.cacheDir).thenReturn(mockCacheDir)
+
+    val onlineRecorder = AudioRecorder(context, isOffline = false)
+    onlineRecorder.startRecording()
+    onlineRecorder.stopRecording()
+
+    // Check if the audio file was saved in cacheDir
+    val audioFileField = AudioRecorder::class.java.getDeclaredField("audioFile")
+    audioFileField.isAccessible = true
+    val savedFile = audioFileField.get(onlineRecorder) as File
+
+    assertTrue(savedFile.path.startsWith(mockCacheDir.path))
+
+    savedFile.delete()
+  }
+
+  @Test
+  fun testFilenameIncludesTimestamp() {
+    val recorder = AudioRecorder(context, isOffline = true)
+    recorder.startRecording()
+    recorder.stopRecording()
+
+    val audioFileField = AudioRecorder::class.java.getDeclaredField("audioFile")
+    audioFileField.isAccessible = true
+    val savedFile = audioFileField.get(recorder) as File
+
+    assertTrue(savedFile.name.matches(Regex("audio_record_\\d+\\.wav")))
+
+    savedFile.delete()
+  }
+
+  @After
+  fun tearDown() {
+    val testFiles =
+        File(".").listFiles { _, name -> name.startsWith("test_audio") && name.endsWith(".wav") }
+    testFiles?.forEach { it.delete() }
   }
 }

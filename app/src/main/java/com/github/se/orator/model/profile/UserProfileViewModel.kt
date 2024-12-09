@@ -1,11 +1,13 @@
 package com.github.se.orator.model.profile
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.orator.model.speaking.AnalysisData
 import com.google.firebase.firestore.FirebaseFirestore
+import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +21,10 @@ import kotlinx.coroutines.flow.asStateFlow
  * @param repository The repository for accessing user profile data.
  */
 class UserProfileViewModel(internal val repository: UserProfileRepository) : ViewModel() {
+
+  // Holds the saved audio recordings from local storage.
+  private val savedRecordings_ = MutableStateFlow<List<File>>(emptyList())
+  val savedRecordings: StateFlow<List<File>> = savedRecordings_.asStateFlow()
 
   // Mutable state flow to hold the user profile
   private val userProfile_ = MutableStateFlow<UserProfile?>(null)
@@ -629,5 +635,13 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     } else {
       Log.e("UserProfileViewModel", "Cannot update streak: User is not authenticated.")
     }
+  }
+
+  // Method to load recordings from filesDir
+  fun loadSavedRecordings(context: Context) {
+    val recordingsDir = context.filesDir
+    val recordings =
+        recordingsDir.listFiles { _, name -> name.endsWith(".wav") }?.toList() ?: emptyList()
+    savedRecordings_.value = recordings
   }
 }

@@ -1,7 +1,9 @@
 package com.github.se.orator.model.profile
 
+import android.content.Context
 import android.net.Uri
 import com.github.se.orator.model.speaking.AnalysisData
+import java.io.FilenameFilter
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.*
@@ -22,7 +24,7 @@ class UserProfileViewModelTest {
   private lateinit var viewModel: UserProfileViewModel
 
   private val testDispatcher = StandardTestDispatcher()
-
+  private lateinit var mockContext: Context
   private val testUid = "testUid"
   private val testUserProfile =
       UserProfile(
@@ -37,7 +39,7 @@ class UserProfileViewModelTest {
   fun setUp() {
     MockitoAnnotations.openMocks(this)
     Dispatchers.setMain(testDispatcher)
-
+    mockContext = mock(Context::class.java)
     `when`(repository.getCurrentUserUid()).thenReturn(testUid)
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
@@ -210,6 +212,33 @@ class UserProfileViewModelTest {
 
     verify(repository).updateLoginStreak(eq(testUid), any(), any())
     verify(repository).getUserProfile(eq(testUid), any(), any())
+  }
+
+  @Test
+  fun testLoadSavedRecordings() = runTest {
+    // Mock filesDir and listFiles for the Context
+    val mockFilesDir = mock(java.io.File::class.java)
+    `when`(mockContext.filesDir).thenReturn(mockFilesDir)
+
+    val mockFile1 = mock(java.io.File::class.java)
+    val mockFile2 = mock(java.io.File::class.java)
+
+    // Mock file names and directory listing
+    `when`(mockFile1.name).thenReturn("recording1.wav")
+    `when`(mockFile2.name).thenReturn("recording2.wav")
+    `when`(mockFilesDir.listFiles(any<FilenameFilter>())).thenReturn(arrayOf(mockFile1, mockFile2))
+    // Call the method to load saved recordings
+    viewModel.loadSavedRecordings(mockContext)
+
+    // Assert that the ViewModel has updated the savedRecordings StateFlow
+    val savedRecordings = viewModel.savedRecordings.value
+    assert(savedRecordings.size == 2)
+    assert(savedRecordings.contains(mockFile1))
+    assert(savedRecordings.contains(mockFile2))
+
+    // Verify the mocked interactions
+    verify(mockContext).filesDir
+    verify(mockFilesDir).listFiles(any<FilenameFilter>())
   }
 
   @Test

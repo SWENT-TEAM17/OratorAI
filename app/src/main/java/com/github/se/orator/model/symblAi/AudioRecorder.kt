@@ -15,6 +15,7 @@ import java.io.FileOutputStream
 
 class AudioRecorder(
     private val context: Context,
+    private val isOffline: Boolean = false, // Pass offline state from ViewModel or activity
     private val sampleRate: Int = 16000,
     private val channelConfig: Int = AudioFormat.CHANNEL_IN_MONO,
     private val audioFormat: Int = AudioFormat.ENCODING_PCM_16BIT
@@ -47,8 +48,10 @@ class AudioRecorder(
         AudioRecord(
             MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, bufferSize)
 
-    audioFile = File(context.cacheDir, "audio_record.wav") // Recording in WAV format
-
+    // Save file to the appropriate directory based on offline mode
+    val saveDir = if (isOffline) context.filesDir else context.cacheDir
+    audioFile =
+        File(saveDir, "audio_record_${System.currentTimeMillis()}.wav") // Recording in WAV format
     audioRecord?.startRecording()
     isRecordingAudio = true
 
