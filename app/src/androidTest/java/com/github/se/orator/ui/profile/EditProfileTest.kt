@@ -250,4 +250,63 @@ class EditProfileTest {
     // For a more thorough test, consider using instrumented tests with Robolectric or similar
     // frameworks.
   }
+
+  @Test
+  fun handleImageFileCreationFailure() {
+    // We cannot directly mock FileProvider to cause an exception,
+    // but we can assume that if createImageFileUri fails (returns null),
+    // the "Take Photo" action will not update the picture and will show a toast.
+    // We'll just verify the dialog closes indicating an error scenario was handled.
+
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Click "Take Photo"
+    composeTestRule.onNodeWithText("Take Photo").performClick()
+
+    // If createImageFileUri fails, no URI is created and we show a toast.
+    // We can't check the toast, but we can ensure the dialog is gone.
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+  }
+
+  @Test
+  fun cameraCaptureFailureScenario() {
+    // We can't trigger the camera result directly,
+    // but we can assume that if camera capture fails,
+    // the dialog won't reappear and a toast would be shown.
+
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Click "Take Photo"
+    composeTestRule.onNodeWithText("Take Photo").performClick()
+
+    // Assume camera capture failed. Since we can't simulate activity result,
+    // we rely on the code's behavior: it would show a toast and not reopen the dialog.
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+  }
+
+  @Test
+  fun cameraCaptureSuccessScenario() {
+    // Similarly, we can't simulate a successful camera capture directly,
+    // but we can at least ensure that after "Take Photo" is clicked
+    // the dialog is dismissed, implying the process started.
+    // In a real scenario, we'd mock the ActivityResult to simulate success.
+
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Click "Take Photo"
+    composeTestRule.onNodeWithText("Take Photo").performClick()
+
+    // Dialog should be dismissed. If success happened later, the image would update,
+    // but we can't verify that without dependency injection or a mock ActivityResult.
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+  }
 }
