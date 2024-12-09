@@ -10,9 +10,6 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
-import com.github.se.orator.model.speechBattle.BattleViewModel
-import com.github.se.orator.model.speechBattle.SpeechBattle
-import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
@@ -529,80 +526,7 @@ The session is now over. According to the initial instructions, you can now brea
     getNextGPTResponse()
   }
 
-  fun performEvaluation(
-      battleId: String,
-      battle: SpeechBattle,
-      challengerMessages: List<Message>,
-      opponentMessages: List<Message>,
-      battleViewModel: BattleViewModel,
-      navigationActions: NavigationActions
-  ) {
-    val context = battle.context as? InterviewContext ?: return
-
-    val prompt = generateEvaluationPrompt(challengerMessages, opponentMessages, context)
-
-    viewModelScope.launch {
-      try {
-        val request =
-            ChatRequest(
-                model = "gpt-3.5-turbo",
-                messages =
-                    listOf(
-                        Message(
-                            role = "system", content = "You are an expert interview evaluator."),
-                        Message(role = "user", content = prompt)))
-
-        val response = chatGPTService.getChatCompletion(request)
-
-        val content = response.choices.firstOrNull()?.message?.content ?: ""
-
-        // Parse the winner from the response
-        val winnerUid = parseWinnerFromResponse(content, battle)
-
-        // Update battle result
-        battleViewModel.updateBattleResult(battleId, winnerUid, content)
-
-        // Notify users
-        navigationActions.navigateToEvaluationScreen(battleId)
-      } catch (e: Exception) {
-        Log.e("BattleViewModel", "Error evaluating battle", e)
-      }
-    }
-  }
-
-  private fun generateEvaluationPrompt(
-      challengerMessages: List<Message>,
-      opponentMessages: List<Message>,
-      context: InterviewContext
-  ): String {
-    val challengerTranscript = messagesToTranscript(challengerMessages)
-    val opponentTranscript = messagesToTranscript(opponentMessages)
-
-    return """
-        You are to evaluate two interview performances for the position of ${context.targetPosition} at ${context.companyName}.
-
-        Candidate 1's responses:
-        $challengerTranscript
-
-        Candidate 2's responses:
-        $opponentTranscript
-
-        Please analyze both candidates' performances based on clarity, relevance, and professionalism. Determine which candidate performed better and provide a brief explanation for your decision.
-
-        At the end, state "Candidate 1" or "Candidate 2" to indicate who should be hired.
-    """
-        .trimIndent()
-  }
-
   private fun messagesToTranscript(messages: List<Message>): String {
     return messages.filter { it.role == "user" }.joinToString("\n") { it.content }
-  }
-
-  private fun parseWinnerFromResponse(response: String, battle: SpeechBattle): String {
-    return when {
-      response.contains("Candidate 1", ignoreCase = true) -> battle.challenger
-      response.contains("Candidate 2", ignoreCase = true) -> battle.opponent
-      else -> ""
-    }
   }
 }
