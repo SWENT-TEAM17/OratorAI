@@ -321,4 +321,27 @@ class BattleViewModelTest {
     Assert.assertNotNull(battleViewModel)
     Assert.assertNotNull(battleViewModel.pendingBattles)
   }
+
+  @Test
+  fun `declineBattle should call updateBattleStatus with CANCELLED`() = runTest {
+    // Arrange
+    val battleId = "testBattleId"
+
+    // Mock the repository to simulate a successful update
+    whenever(
+            mockBattleRepository.updateBattleStatus(
+                eq(battleId), eq(BattleStatus.CANCELLED), any()))
+        .thenAnswer { invocation ->
+          val callback = invocation.getArgument<(Boolean) -> Unit>(2)
+          callback.invoke(true) // Simulate success
+          null
+        }
+
+    // Act
+    battleViewModel.declineBattle(battleId)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    verify(mockBattleRepository).updateBattleStatus(eq(battleId), eq(BattleStatus.CANCELLED), any())
+  }
 }
