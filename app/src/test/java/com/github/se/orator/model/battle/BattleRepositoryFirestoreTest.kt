@@ -5,11 +5,15 @@ import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speechBattle.BattleRepositoryFirestore
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.SpeechBattle
+import com.github.se.orator.ui.network.Message
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.*
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyMap
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.*
@@ -27,6 +31,8 @@ class BattleRepositoryFirestoreTest {
   @Mock private lateinit var mockDocumentReference: DocumentReference
 
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
+
+  @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
 
   @Mock private lateinit var mockListenerRegistration: ListenerRegistration
 
@@ -74,6 +80,30 @@ class BattleRepositoryFirestoreTest {
     assert(callbackCalled)
   }
 
+  /** Test storing a battle request failure */
+  @Test
+  fun storeBattleRequest_failure_callsCallbackWithFalse() {
+    val speechBattle = createTestSpeechBattle()
+
+    // Mock Firestore set operation to fail
+    val exception = Exception("Set failed")
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forException(exception))
+
+    var callbackCalled = false
+
+    repository.storeBattleRequest(speechBattle) { success ->
+      assert(!success)
+      callbackCalled = true
+    }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify that set was called on the document reference
+    verify(mockDocumentReference).set(any())
+    assert(callbackCalled)
+  }
+
   /** Test retrieving a battle by ID successfully */
   @Test
   fun getBattleById_success_returnsSpeechBattle() {
@@ -91,11 +121,11 @@ class BattleRepositoryFirestoreTest {
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).get()
-    assert(callbackBattle != null)
-    assert(callbackBattle?.battleId == "battle1")
-    assert(callbackBattle?.challenger == "user1")
-    assert(callbackBattle?.opponent == "user2")
-    assert(callbackBattle?.status == BattleStatus.PENDING)
+    assertNotNull(callbackBattle)
+    assertEquals("battle1", callbackBattle?.battleId)
+    assertEquals("user1", callbackBattle?.challenger)
+    assertEquals("user2", callbackBattle?.opponent)
+    assertEquals(BattleStatus.PENDING, callbackBattle?.status)
   }
 
   /** Test retrieving a battle by ID when document does not exist */
@@ -114,7 +144,7 @@ class BattleRepositoryFirestoreTest {
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).get()
-    assert(callbackBattle == null)
+    assertNull(callbackBattle)
   }
 
   /** Test listenForPendingBattles method */
@@ -123,19 +153,16 @@ class BattleRepositoryFirestoreTest {
     val userUid = "user2"
 
     // Mock QuerySnapshot and DocumentSnapshot
-    val mockQuerySnapshot = mock(QuerySnapshot::class.java)
-    val mockDocumentSnapshot1 = mock(DocumentSnapshot::class.java)
-    `when`(mockDocumentSnapshot1.data).thenReturn(createTestBattleDataMap())
-
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot1))
+    `when`(mockDocumentSnapshot.data).thenReturn(createTestBattleDataMap())
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
 
     // Mock Firestore query and snapshot listener
-    val query = mock(Query::class.java)
-    `when`(mockCollectionReference.whereEqualTo("opponent", userUid)).thenReturn(query)
-    `when`(query.whereEqualTo("status", BattleStatus.PENDING.name)).thenReturn(query)
-    `when`(query.addSnapshotListener(any<EventListener<QuerySnapshot>>())).thenAnswer { invocation
-      ->
-      val listener = invocation.arguments[0] as EventListener<QuerySnapshot>
+    `when`(mockCollectionReference.whereEqualTo("opponent", userUid))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.whereEqualTo("status", BattleStatus.PENDING.name))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.addSnapshotListener(any())).thenAnswer { invocation ->
+      val listener = invocation.getArgument<EventListener<QuerySnapshot>>(0)
       listener.onEvent(mockQuerySnapshot, null)
       mockListenerRegistration
     }
@@ -146,16 +173,238 @@ class BattleRepositoryFirestoreTest {
 
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(query).addSnapshotListener(any<EventListener<QuerySnapshot>>())
-    assert(callbackBattles != null)
-    assert(callbackBattles!!.size == 1)
+    verify(mockCollectionReference, times(2)).whereEqualTo(anyString(), any())
+    verify(mockCollectionReference).addSnapshotListener(any())
+    assertNotNull(callbackBattles)
+    assertEquals(1, callbackBattles!!.size)
     val battle = callbackBattles!![0]
-    assert(battle.battleId == "battle1")
-    assert(battle.opponent == "user2")
+    assertEquals("battle1", battle.battleId)
+    assertEquals("user2", battle.opponent)
   }
 
-  // Helper methods to create test data
+  /** Test updateBattleStatus successfully updates the status */
+  @Test
+  fun updateBattleStatus_success_callsCallbackWithTrue() {
+    // Arrange
+    val battleId = "battle1"
+    val newStatus = BattleStatus.IN_PROGRESS
 
+    // Mock Firestore update operation to succeed
+    `when`(mockDocumentReference.update("status", newStatus.name)).thenReturn(Tasks.forResult(null))
+
+    var callbackResult = false
+
+    // Act
+    repository.updateBattleStatus(battleId, newStatus) { success -> callbackResult = success }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).update("status", newStatus.name)
+    assertTrue(callbackResult)
+  }
+
+  /** Test updateBattleStatus failure */
+  @Test
+  fun updateBattleStatus_failure_callsCallbackWithFalse() {
+    // Arrange
+    val battleId = "battle1"
+    val newStatus = BattleStatus.IN_PROGRESS
+
+    // Mock Firestore update operation to fail
+    val exception = Exception("Update failed")
+    `when`(mockDocumentReference.update("status", newStatus.name))
+        .thenReturn(Tasks.forException(exception))
+
+    var callbackResult = true // Initialize to true to check if it's set to false
+
+    // Act
+    repository.updateBattleStatus(battleId, newStatus) { success -> callbackResult = success }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).update("status", newStatus.name)
+    assertFalse(callbackResult)
+  }
+
+  /** Test updateBattleResult successfully updates the battle result */
+  @Test
+  fun updateBattleResult_success_callsCallbackWithTrue() {
+    // Arrange
+    val battleId = "battle1"
+    val winnerUid = "user1"
+    val evaluationText = "Great performance!"
+
+    val updates =
+        mapOf(
+            "status" to BattleStatus.COMPLETED.name,
+            "winner" to winnerUid,
+            "evaluation" to evaluationText)
+
+    // Mock Firestore update operation to succeed
+    `when`(mockDocumentReference.update(updates)).thenReturn(Tasks.forResult(null))
+
+    var callbackResult = false
+
+    // Act
+    repository.updateBattleResult(battleId, winnerUid, evaluationText) { success ->
+      callbackResult = success
+    }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).update(updates)
+    assertTrue(callbackResult)
+  }
+
+  /** Test updateBattleResult failure */
+  @Test
+  fun updateBattleResult_failure_callsCallbackWithFalse() {
+    // Arrange
+    val battleId = "battle1"
+    val winnerUid = "user1"
+    val evaluationText = "Great performance!"
+
+    val updates =
+        mapOf(
+            "status" to BattleStatus.COMPLETED.name,
+            "winner" to winnerUid,
+            "evaluation" to evaluationText)
+
+    // Mock Firestore update operation to fail
+    val exception = Exception("Update failed")
+    `when`(mockDocumentReference.update(updates)).thenReturn(Tasks.forException(exception))
+
+    var callbackResult = true // Initialize to true to check if it's set to false
+
+    // Act
+    repository.updateBattleResult(battleId, winnerUid, evaluationText) { success ->
+      callbackResult = success
+    }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).update(updates)
+    assertFalse(callbackResult)
+  }
+
+  /** Test listenToBattleUpdates successfully listens to updates */
+  @Test
+  fun listenToBattleUpdates_success_callsCallbackWithSpeechBattle() {
+    // Arrange
+    val battleId = "battle1"
+    val mockBattleDocument = mock(DocumentSnapshot::class.java)
+    val battleData = createTestBattleDataMap()
+    `when`(mockBattleDocument.exists()).thenReturn(true)
+    `when`(mockBattleDocument.data).thenReturn(battleData)
+
+    // Mock Firestore addSnapshotListener to invoke callback with the mocked document
+    `when`(mockDocumentReference.addSnapshotListener(any())).thenAnswer { invocation ->
+      val listener = invocation.getArgument<EventListener<DocumentSnapshot>>(0)
+      listener.onEvent(mockBattleDocument, null)
+      mockListenerRegistration
+    }
+
+    var callbackBattle: SpeechBattle? = null
+
+    // Act
+    repository.listenToBattleUpdates(battleId) { battle -> callbackBattle = battle }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).addSnapshotListener(any())
+    assertNotNull(callbackBattle)
+    assertEquals("battle1", callbackBattle?.battleId)
+    assertEquals("user1", callbackBattle?.challenger)
+    assertEquals("user2", callbackBattle?.opponent)
+    assertEquals(BattleStatus.PENDING, callbackBattle?.status)
+  }
+
+  /** Test updateUserBattleData successfully updates user data */
+  @Test
+  fun updateUserBattleData_success_callsCallbackWithTrue() {
+    // Arrange
+    val battleId = "battle1"
+    val userId = "user1" // Assuming user1 is the challenger
+    val messages =
+        listOf(
+            Message(role = "user", content = "Hello"),
+            Message(role = "user", content = "How are you?"))
+
+    // Mock Firestore get operation to return an existing battle
+    val mockBattleDocument = mock(DocumentSnapshot::class.java)
+    `when`(mockBattleDocument.exists()).thenReturn(true)
+    `when`(mockBattleDocument.data).thenReturn(createTestBattleDataMap())
+
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockBattleDocument))
+
+    // Mock Firestore update operation to succeed
+    `when`(mockDocumentReference.update(anyMap())).thenReturn(Tasks.forResult(null))
+
+    var callbackResult = false
+
+    // Act
+    repository.updateUserBattleData(battleId, userId, messages) { success ->
+      callbackResult = success
+    }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).get()
+    verify(mockDocumentReference).update(anyMap())
+    assertTrue(callbackResult)
+  }
+
+  /** Test updateUserBattleData failure */
+  @Test
+  fun updateUserBattleData_failure_callsCallbackWithFalse() {
+    // Arrange
+    val battleId = "battle1"
+    val userId = "user1" // Assuming user1 is the challenger
+    val messages =
+        listOf(
+            Message(role = "user", content = "Hello"),
+            Message(role = "user", content = "How are you?"))
+
+    // Mock Firestore get operation to return an existing battle
+    val mockBattleDocument = mock(DocumentSnapshot::class.java)
+    `when`(mockBattleDocument.exists()).thenReturn(true)
+    `when`(mockBattleDocument.data).thenReturn(createTestBattleDataMap())
+
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockBattleDocument))
+
+    // Mock Firestore update operation to fail
+    val exception = Exception("Update failed")
+    `when`(mockDocumentReference.update(anyMap())).thenReturn(Tasks.forException(exception))
+
+    var callbackResult = true // Initialize to true to check if it's set to false
+
+    // Act
+    repository.updateUserBattleData(battleId, userId, messages) { success ->
+      callbackResult = success
+    }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).get()
+    verify(mockDocumentReference).update(anyMap())
+    assertFalse(callbackResult)
+  }
+
+  /** Helper methods to create test data */
   private fun createTestSpeechBattle(): SpeechBattle {
     return SpeechBattle(
         battleId = "battle1",
@@ -164,12 +413,12 @@ class BattleRepositoryFirestoreTest {
         status = BattleStatus.PENDING,
         context =
             InterviewContext(
-                targetPosition = "",
-                companyName = "",
-                interviewType = "",
-                experienceLevel = "",
-                jobDescription = "",
-                focusArea = ""),
+                targetPosition = "Developer",
+                companyName = "TechCorp",
+                interviewType = "Technical",
+                experienceLevel = "Junior",
+                jobDescription = "Develop software",
+                focusArea = "Backend"),
         winner = "")
   }
 
@@ -182,11 +431,13 @@ class BattleRepositoryFirestoreTest {
         "winner" to "",
         "interviewContext" to
             mapOf(
-                "interviewType" to "Job Interview",
-                "role" to "Developer",
-                "company" to "TechCorp",
-                "focusAreas" to listOf("Algorithms", "System Design")),
-        "challengerCompleted" to true,
+                "targetPosition" to "Developer",
+                "companyName" to "TechCorp",
+                "interviewType" to "Technical",
+                "experienceLevel" to "Junior",
+                "jobDescription" to "Develop software",
+                "focusArea" to "Backend"),
+        "challengerCompleted" to false,
         "opponentCompleted" to false)
   }
 }
