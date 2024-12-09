@@ -11,12 +11,20 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.profile.UserStatistics
+import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.speechBattle.BattleRepository
+import com.github.se.orator.model.speechBattle.BattleStatus
+import com.github.se.orator.model.speechBattle.BattleViewModel
+import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.utils.formatDate
 import com.github.se.orator.utils.getCurrentDate
 import org.junit.Before
@@ -102,11 +110,30 @@ class FriendsUITests {
           lastLoginDate = null,
           bio = "Bio of Friend Six")
 
+  val profile7 =
+      UserProfile(
+          uid = "7",
+          name = "Friend Seven",
+          age = 25,
+          statistics = UserStatistics(),
+          friends = listOf("testUser"),
+          recReq = emptyList(),
+          sentReq = emptyList(),
+          profilePic = null,
+          currentStreak = 0,
+          lastLoginDate = null,
+          bio = "Bio of Friend Seven")
+
   @Mock private lateinit var mockNavigationActions: NavigationActions
   @Mock private lateinit var mockUserProfileRepository: UserProfileRepository
-  private lateinit var userProfileViewModel: UserProfileViewModel
+  @Mock private lateinit var mockBattleRepository: BattleRepository
+  @Mock private lateinit var chatGPTService: ChatGPTService
 
-  // Adjust testProfile to have recReq = listOf("profile4")
+  private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var battleViewModel: BattleViewModel
+  private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var chatViewModel: ChatViewModel
+
   private val testProfile =
       UserProfile(
           uid = "testUser",
@@ -143,36 +170,43 @@ class FriendsUITests {
       it.getArgument<(List<UserProfile>) -> Unit>(0)(listOf(profile1, profile2, profile3))
     }
 
-    // Mock getRecReqProfiles to return the desired profiles
+    // Mock getRecReqProfiles
     `when`(mockUserProfileRepository.getRecReqProfiles(any(), any(), any())).then {
       it.getArgument<(List<UserProfile>) -> Unit>(1)(listOf(incomingProfile, rejectProfile))
     }
 
-    // Mock getSentReqProfiles to return the desired profiles
+    // Mock getSentReqProfiles
     `when`(mockUserProfileRepository.getSentReqProfiles(any(), any(), any())).then {
       it.getArgument<(List<UserProfile>) -> Unit>(1)(listOf(sentProfile))
     }
 
     userProfileViewModel = UserProfileViewModel(mockUserProfileRepository)
     userProfileViewModel.getUserProfile(testProfile.uid)
+
+    apiLinkViewModel = ApiLinkViewModel()
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    battleViewModel =
+        BattleViewModel(
+            battleRepository = mockBattleRepository,
+            userProfileViewModel = userProfileViewModel,
+            navigationActions = mockNavigationActions,
+            apiLinkViewModel = apiLinkViewModel,
+            chatViewModel = chatViewModel)
   }
 
   /** Function used to setup a testing environment for the ViewFriendsScreen tests */
   private fun viewFriendsTestsSetup() {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.FRIENDS)
-    composeTestRule.setContent { ViewFriendsScreen(mockNavigationActions, userProfileViewModel) }
+    composeTestRule.setContent {
+      ViewFriendsScreen(mockNavigationActions, userProfileViewModel, battleViewModel)
+    }
   }
 
   /**
    * ============================
    * Existing Tests
    * ============================
-   */
-
-  /**
-   * Tests that the action button works correctly on the View Friends screen. It verifies that the
-   * menu button exists, is displayed, and can be clicked. After clicking, it checks that the drawer
-   * menu and its elements are displayed.
    */
   @Test
   fun testActionButtonWorks() {
@@ -190,11 +224,6 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("viewFriendsLeaderboardButton").assertIsDisplayed()
   }
 
-  /**
-   * Tests that the friends list is displayed correctly on the View Friends screen. It verifies that
-   * the friends list exists and is displayed. It also checks that the first friend item is
-   * displayed.
-   */
   @Test
   fun testFriendsListIsDisplayed() {
     viewFriendsTestsSetup()
@@ -205,20 +234,10 @@ class FriendsUITests {
 
   @Test
   fun testFriendStreakIsDisplayed() {
-    // Set up the test environment
     viewFriendsTestsSetup()
 
-    // Ensure that profile1 is part of the friends list
-    // This is already handled in the setUp() method where profile1 and profile2 are returned as
-    // friends
-
-    // Wait for the UI to render the friends list
     composeTestRule.waitForIdle()
-
-    // Define the expected streak text for profile1
     val expectedStreakText = "1 day streak"
-
-    // Locate the streak text for profile1 using the unique test tag
     composeTestRule
         .onNodeWithTag("friendStreak", useUnmergedTree = true)
         .assertExists("Streak text for profile1 does not exist")
@@ -226,7 +245,6 @@ class FriendsUITests {
         .assertTextEquals(expectedStreakText)
   }
 
-  /** Tests that navigation to Add Friend and Leaderboard screens works correctly. */
   @Test
   fun testCanGoToAddFriendAndLeaderboardScreens() {
     viewFriendsTestsSetup()
@@ -246,11 +264,6 @@ class FriendsUITests {
     verify(mockNavigationActions).navigateTo(eq(Screen.LEADERBOARD))
   }
 
-  /**
-   * Tests that the search functionality works correctly on the View Friends screen. It verifies
-   * that the search field exists and is displayed, can be clicked and text can be inputted. After
-   * inputting text, it checks that the first friend item is displayed and the second is not.
-   */
   @Test
   fun testCanSearchForFriends() {
     viewFriendsTestsSetup()
@@ -264,23 +277,15 @@ class FriendsUITests {
         .assertIsNotDisplayed()
   }
 
-  /** Tests that the Add Friends screen elements are displayed correctly. */
   @Test
   fun testAddFriendsScreenElementsAreDisplayed() {
-
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.ADD_FRIENDS)
     composeTestRule.setContent { AddFriendsScreen(mockNavigationActions, userProfileViewModel) }
 
-    // Check if the add friend screen elements are displayed
     composeTestRule.onNodeWithTag("addFriendTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("addFriendSearchField").assertIsDisplayed()
   }
 
-  /**
-   * Tests that the search functionality works correctly on the Add Friends screen. After inputting
-   * text, it checks that the first friend item is not displayed because the user searching should
-   * not be displayed and the second is not because it's not the right name.
-   */
   @Test
   fun testAddFriendSearch() {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.ADD_FRIENDS)
@@ -293,52 +298,37 @@ class FriendsUITests {
     composeTestRule.onNodeWithTag("addFriendUserItem#2").assertIsNotDisplayed()
   }
 
-  /** Tests that the leaderboard screen elements are displayed correctly. */
   @Test
   fun testLeaderboardScreenElementsAreDisplayed() {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LEADERBOARD)
     composeTestRule.setContent { LeaderboardScreen(mockNavigationActions, userProfileViewModel) }
 
-    // Check if the leaderboard screen elements are displayed
     composeTestRule.onNodeWithTag("leaderboardTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("leaderboardList").assertIsDisplayed()
   }
 
-  /** Tests that the leaderboard item elements are displayed correctly. */
   @Test
   fun testLeaderboardItemElementsAreDisplayed() {
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LEADERBOARD)
     composeTestRule.setContent { LeaderboardScreen(mockNavigationActions, userProfileViewModel) }
 
-    // Check if the leaderboard item elements are displayed
     composeTestRule.onNodeWithTag("leaderboardItem#1", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("leaderboardItem#2", useUnmergedTree = true).assertIsDisplayed()
   }
 
-  /** Tests the Practice Mode Selector functionality. */
   @Test
   fun testPracticeModeSelector() {
-    // Set up the content with the PracticeModeSelector composable
     composeTestRule.setContent { PracticeModeSelector() }
 
-    // Open the dropdown menu
     composeTestRule.onNodeWithTag("practiceModeSelector").performClick()
-
-    // Verify the dropdown menu options are displayed
     composeTestRule.onNodeWithTag("practiceModeOption1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("practiceModeOption2").assertIsDisplayed()
-
-    // Select "Practice mode 2"
     composeTestRule.onNodeWithTag("practiceModeOption2").performClick()
-
-    // Optionally, verify that the selected mode is reflected
     composeTestRule.onNodeWithTag("practiceModeSelector").assertTextEquals("Practice mode 2")
   }
 
-  /** Tests sending a friend request. */
   @Test
   fun testSendFriendRequest() {
-    // Mock getUserProfile to return testProfile initially with no sent requests
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
           onSuccess(testProfile)
@@ -347,7 +337,6 @@ class FriendsUITests {
         .`when`(mockUserProfileRepository)
         .getUserProfile(eq(testProfile.uid), any(), any())
 
-    // Mock getFriendsProfiles to return an empty list as there are no friends initially
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<UserProfile>) -> Unit>(1)
           onSuccess(emptyList())
@@ -356,16 +345,14 @@ class FriendsUITests {
         .`when`(mockUserProfileRepository)
         .getFriendsProfiles(eq(emptyList()), any(), any())
 
-    // Mock getAllUserProfiles to include profile3
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<UserProfile>) -> Unit>(0)
-          onSuccess(listOf(profile3)) // Include profile3 in allProfiles
+          onSuccess(listOf(profile3))
           null
         }
         .`when`(mockUserProfileRepository)
         .getAllUserProfiles(any(), any())
 
-    // Mock sendFriendRequest to simulate successful request
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(2)
           onSuccess()
@@ -374,7 +361,6 @@ class FriendsUITests {
         .`when`(mockUserProfileRepository)
         .sendFriendRequest(eq(testProfile.uid), eq(profile3.uid), any(), any())
 
-    // After sending, sent requests include profile3
     val updatedTestProfile = testProfile.copy(sentReq = listOf(profile3.uid))
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
@@ -384,73 +370,48 @@ class FriendsUITests {
         .`when`(mockUserProfileRepository)
         .getUserProfile(eq(testProfile.uid), any(), any())
 
-    // Set up the AddFriendsScreen composable
     composeTestRule.setContent {
       AddFriendsScreen(
           navigationActions = mockNavigationActions, userProfileViewModel = userProfileViewModel)
     }
 
-    // Wait for the initial UI to render
     composeTestRule.waitForIdle()
-
-    // **Input a search query that matches profile3's name**
-    composeTestRule
-        .onNodeWithTag("addFriendSearchField")
-        .assertExists("No search bar is being displayed.")
-        .performTextInput("Friend Three") // Adjust the query to match profile3.name
-
-    // Wait for the UI to process the search
+    composeTestRule.onNodeWithTag("addFriendSearchField").performTextInput("Friend Three")
     composeTestRule.waitForIdle()
-
-    // **Log available testTags to verify presence**
     composeTestRule.onAllNodesWithTag("*").printToLog("AvailableTestTagsAfterSearch")
-
-    // **Locate and click the "Send Friend Request" button with the correct testTag**
     composeTestRule
         .onNodeWithTag("sendFriendRequestButton#3", useUnmergedTree = true)
         .assertExists("Send Friend Request button does not exist for 3")
         .assertIsEnabled()
         .performClick()
 
-    // Wait for the UI to process the state change
     composeTestRule.waitForIdle()
-
-    // **Verify that sendFriendRequest was called with correct parameters**
     verify(mockUserProfileRepository)
         .sendFriendRequest(eq(testProfile.uid), eq(profile3.uid), any(), any())
-    // Step 6: Check if the Sent Requests list is already expanded
+
     val sentRequestsList =
         composeTestRule.onAllNodesWithTag("sentFriendRequestsList", useUnmergedTree = true)
     if (sentRequestsList.fetchSemanticsNodes().isEmpty()) {
-      // If the list is not displayed, expand the Sent Friend Requests section
       composeTestRule
           .onNodeWithTag("toggleSentRequestsButton", useUnmergedTree = true)
           .assertExists("Toggle Sent Requests button does not exist")
           .assertIsEnabled()
           .performClick()
-
-      // Wait for the UI to render the expanded list
       composeTestRule.waitForIdle()
     }
 
-    // **Assert that profile3 now appears in the "Sent Requests" list**
     composeTestRule
         .onNodeWithTag("sentFriendRequestItem#3", useUnmergedTree = true)
         .assertExists("Sent Request item for 3 does not exist")
         .assertIsDisplayed()
 
-    // **Optionally, assert that the send button is disabled or shows "Request Sent"**
     composeTestRule
         .onNodeWithTag("sendFriendRequestButton#3", useUnmergedTree = true)
         .assertIsNotDisplayed()
   }
 
-  /** Tests accepting a friend request. */
   @Test
   fun testAcceptFriendRequest() {
-    // No need to redefine testProfile or incomingProfile here
-
-    // Mock acceptFriendRequest to simulate successful acceptance
     `when`(
             mockUserProfileRepository.acceptFriendRequest(
                 eq(testProfile.uid), eq(incomingProfile.uid), any(), any()))
@@ -459,13 +420,10 @@ class FriendsUITests {
           onSuccess()
         }
 
-    // After accepting, update testProfile
     val updatedTestProfile =
         testProfile.copy(friends = listOf(incomingProfile.uid), recReq = emptyList())
-    // Update incomingProfile
     val updatedIncomingProfile = incomingProfile.copy(friends = listOf(testProfile.uid))
 
-    // Mock getUserProfile to return updated profiles after acceptance
     `when`(mockUserProfileRepository.getUserProfile(eq(testProfile.uid), any(), any()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
@@ -477,41 +435,31 @@ class FriendsUITests {
           onSuccess(updatedIncomingProfile)
         }
 
-    // Set up the ViewFriendsScreen
     viewFriendsTestsSetup()
-
-    // Update ViewModel state after accepting
     userProfileViewModel.getUserProfile(testProfile.uid)
 
-    // Assert that incomingProfile is displayed in the "Received Requests" list
     composeTestRule
         .onNodeWithTag("friendRequestItem#${incomingProfile.uid}", useUnmergedTree = true)
         .assertExists("Friend Request item for ${incomingProfile.uid} does not exist")
         .assertIsDisplayed()
 
-    // Click the accept button
     composeTestRule
         .onNodeWithTag("acceptFriendButton#${incomingProfile.uid}", useUnmergedTree = true)
         .assertExists("Accept Friend Request button does not exist for ${incomingProfile.uid}")
         .assertIsEnabled()
         .performClick()
 
-    // Wait for the UI to process the state change
     composeTestRule.waitForIdle()
-
-    // Verify that acceptFriendRequest was called with correct parameters
     verify(mockUserProfileRepository)
         .acceptFriendRequest(eq(testProfile.uid), eq(incomingProfile.uid), any(), any())
 
-    // Assert that incomingProfile no longer appears in the "Received Requests" list
     composeTestRule
         .onNodeWithTag("friendRequestItem#${incomingProfile.uid}", useUnmergedTree = true)
         .assertDoesNotExist()
   }
-  /** Tests rejecting (declining) a friend request. */
+
   @Test
   fun testRejectFriendRequest() {
-    // Mock declineFriendRequest to simulate successful rejection
     `when`(
             mockUserProfileRepository.declineFriendRequest(
                 eq(testProfile.uid), eq(rejectProfile.uid), any(), any()))
@@ -520,60 +468,45 @@ class FriendsUITests {
           onSuccess()
         }
 
-    // After declining, update testProfile to remove the rejected UID from recReq
     val updatedTestProfile = testProfile.copy(recReq = testProfile.recReq - rejectProfile.uid)
-
-    // Mock getUserProfile to return the updated profile after rejection
     `when`(mockUserProfileRepository.getUserProfile(eq(testProfile.uid), any(), any()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
           onSuccess(updatedTestProfile)
         }
 
-    // Set up the ViewFriendsScreen
     viewFriendsTestsSetup()
-
-    // Update ViewModel state after rejection
     userProfileViewModel.getUserProfile(testProfile.uid)
 
-    // Assert that rejectProfile is displayed in the "Received Requests" list
     composeTestRule
         .onNodeWithTag("friendRequestItem#${rejectProfile.uid}", useUnmergedTree = true)
         .assertExists("Friend Request item for ${rejectProfile.uid} does not exist")
         .assertIsDisplayed()
 
-    // Click the reject button
     composeTestRule
         .onNodeWithTag("declineFriendButton#${rejectProfile.uid}", useUnmergedTree = true)
         .assertExists("Reject Friend Request button does not exist for ${rejectProfile.uid}")
         .assertIsEnabled()
         .performClick()
 
-    // Wait for the UI to process the state change
     composeTestRule.waitForIdle()
 
-    // Verify that declineFriendRequest was called with correct parameters
     verify(mockUserProfileRepository)
         .declineFriendRequest(eq(testProfile.uid), eq(rejectProfile.uid), any(), any())
 
-    // Assert that rejectProfile no longer appears in the "Received Requests" list
     composeTestRule
         .onNodeWithTag("friendRequestItem#${rejectProfile.uid}", useUnmergedTree = true)
         .assertDoesNotExist()
   }
 
-  /** Tests cancelling a sent friend request. */
-  /** Tests cancelling a sent friend request. */
   @Test
   fun testCancelSentFriendRequest() {
-    // Step 1: Mock getUserProfile to return testProfile with sentFriendRequest (sentProfile)
     `when`(mockUserProfileRepository.getUserProfile(eq(testProfile.uid), any(), any()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
           onSuccess(testProfile.copy(sentReq = listOf(sentProfile.uid)))
         }
 
-    // Step 2: Mock cancelFriendRequest to simulate successful cancellation
     `when`(
             mockUserProfileRepository.cancelFriendRequest(
                 eq(testProfile.uid), eq(sentProfile.uid), any(), any()))
@@ -582,8 +515,6 @@ class FriendsUITests {
           onSuccess()
         }
 
-    // Step 3: Mock getUserProfile to return updatedTestProfile after cancellation (sentReq is
-    // empty)
     val updatedTestProfile = testProfile.copy(sentReq = emptyList())
     `when`(mockUserProfileRepository.getUserProfile(eq(testProfile.uid), any(), any()))
         .thenAnswer { invocation ->
@@ -591,58 +522,146 @@ class FriendsUITests {
           onSuccess(updatedTestProfile)
         }
 
-    // Step 4: Set up the AddFriendsScreen composable
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.ADD_FRIENDS)
     composeTestRule.setContent {
       AddFriendsScreen(
           navigationActions = mockNavigationActions, userProfileViewModel = userProfileViewModel)
     }
 
-    // Step 5: Trigger the initial profile fetch with sentFriendRequest
     userProfileViewModel.getUserProfile(testProfile.uid)
 
-    // Step 6: Check if the Sent Requests list is already expanded
     val sentRequestsList =
         composeTestRule.onAllNodesWithTag("sentFriendRequestsList", useUnmergedTree = true)
     if (sentRequestsList.fetchSemanticsNodes().isEmpty()) {
-      // If the list is not displayed, expand the Sent Friend Requests section
       composeTestRule
           .onNodeWithTag("toggleSentRequestsButton", useUnmergedTree = true)
           .assertExists("Toggle Sent Requests button does not exist")
           .assertIsEnabled()
           .performClick()
-
-      // Wait for the UI to render the expanded list
       composeTestRule.waitForIdle()
     }
 
     composeTestRule.waitForIdle()
-
-    // Step 7: Assert that sentProfile is displayed in the "Sent Requests" list
     composeTestRule
         .onNodeWithTag("sentFriendRequestItem#${sentProfile.uid}", useUnmergedTree = true)
         .assertExists("Sent Friend Request item for ${sentProfile.uid} should be displayed")
         .assertIsDisplayed()
 
-    // Step 8: Click the cancel friend request button
     composeTestRule
         .onNodeWithTag("cancelFriendRequestButton#${sentProfile.uid}", useUnmergedTree = true)
         .assertExists("Cancel Friend Request button does not exist for ${sentProfile.uid}")
         .assertIsEnabled()
         .performClick()
 
-    // Wait for the UI to process the cancellation
     composeTestRule.waitForIdle()
 
-    // Step 9: Verify that cancelFriendRequest was called with correct parameters
     verify(mockUserProfileRepository)
         .cancelFriendRequest(eq(testProfile.uid), eq(sentProfile.uid), any(), any())
 
     composeTestRule.waitForIdle()
-
-    // Step 11: Assert that sentProfile no longer appears in the "Sent Requests" list
     composeTestRule
         .onNodeWithTag("sentFriendRequestItem#${sentProfile.uid}", useUnmergedTree = true)
         .assertDoesNotExist()
+  }
+
+  @Test
+  fun testNoPendingBattlesIconNotDisplayed() {
+    // Set up the mocks to return no pending battles
+    doAnswer { invocation ->
+          val callback = invocation.getArgument<(List<SpeechBattle>) -> Unit>(1)
+          callback(emptyList())
+          null
+        }
+        .`when`(mockBattleRepository)
+        .getPendingBattlesForUser(any(), any(), any())
+
+    // Render the screen with no pending battles
+    composeTestRule.setContent {
+      ViewFriendsScreen(
+          navigationActions = mockNavigationActions,
+          userProfileViewModel = userProfileViewModel,
+          battleViewModel = battleViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Since there are no pending battles, we expect no pending battle icons
+    composeTestRule
+        .onNodeWithTag("pendingBattleIcon#3", useUnmergedTree = true)
+        .assertDoesNotExist()
+  }
+
+  @Test
+  fun testAcceptPendingBattle() {
+    val mockBattles =
+        listOf(
+            SpeechBattle(
+                battleId = "battle1",
+                challenger = "1",
+                opponent = "testUser",
+                status = BattleStatus.PENDING,
+                context =
+                    InterviewContext(
+                        "testPosition",
+                        "testCompany",
+                        "testType",
+                        "testExperience",
+                        "testDescription",
+                        "testFocusArea")))
+
+    // Mock getPendingBattlesForUser
+    doAnswer { invocation ->
+          val callback = invocation.getArgument<(List<SpeechBattle>) -> Unit>(1)
+          callback(mockBattles)
+          null
+        }
+        .`when`(mockBattleRepository)
+        .getPendingBattlesForUser(any(), any(), any())
+
+    // Mock getBattleById to return the battle so that friendUid is not null
+    `when`(mockBattleRepository.getBattleById(eq("battle1"), any())).thenAnswer { invocation ->
+      val callback = invocation.getArgument<(SpeechBattle?) -> Unit>(1)
+      callback.invoke(mockBattles.first())
+      null
+    }
+
+    // Now render the screen
+    composeTestRule.setContent {
+      ViewFriendsScreen(
+          navigationActions = mockNavigationActions,
+          userProfileViewModel = userProfileViewModel,
+          battleViewModel = battleViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Verify that the pending battle icon is displayed
+    composeTestRule
+        .onNodeWithTag("pendingBattleIcon#1", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .performClick()
+
+    // Verify that updateBattleStatus was called
+    verify(mockBattleRepository)
+        .updateBattleStatus(eq("battle1"), eq(BattleStatus.IN_PROGRESS), any())
+  }
+
+  @Test
+  fun clickingOnFriendOpensChatScreen() {
+
+    composeTestRule.setContent {
+      ViewFriendsScreen(
+          navigationActions = mockNavigationActions,
+          userProfileViewModel = userProfileViewModel,
+          battleViewModel = battleViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Click on friend profile
+    composeTestRule.onNodeWithTag("viewFriendsItem#2").performClick()
+
+    // Verify that we navigate to the send battle screen
+    verify(mockNavigationActions).navigateToSendBattleScreen(eq("2"))
   }
 }
