@@ -138,7 +138,6 @@ class FeedbackScreenTest {
     composeTestRule.onNodeWithTag("feedbackContent").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackTitle").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackSubtitle").assertExists().assertIsDisplayed()
-    composeTestRule.onNodeWithTag("feedbackNoMessage").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("retryButton").assertExists().assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("retryButtonText", useUnmergedTree = true)

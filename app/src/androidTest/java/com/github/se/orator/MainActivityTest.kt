@@ -1,16 +1,18 @@
 package com.github.se.orator
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.core.app.ActivityScenario
+import com.github.se.orator.ui.network.ChatGPTService
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 
 class MainActivityTest {
 
   //  @get:Rule val composeTestRule = createComposeRule()
-  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
+  @get:Rule val composeTestRule = createComposeRule()
 
   //  @Test
   //  fun oratorScaffoldExists() {
@@ -24,6 +26,8 @@ class MainActivityTest {
   @Test
   fun testMainActivityOnCreate() {
 
+    composeTestRule.setContent { MainActivity() }
+
     // Launch MainActivity
     val scenario = ActivityScenario.launch(MainActivity::class.java)
 
@@ -34,5 +38,10 @@ class MainActivityTest {
 
     // Check that the orator scaffold exists
     composeTestRule.onNodeWithTag("oratorScaffold").assertExists()
+  }
+
+  @Test
+  fun noAppThemeViewModelDoesNotCrash() {
+    composeTestRule.setContent { OratorApp(mock(ChatGPTService::class.java), false, null, null) }
   }
 }

@@ -1,6 +1,8 @@
 package com.github.se.orator.model.chatGPT
 
+import android.speech.tts.TextToSpeech
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.profile.SessionType
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
@@ -10,6 +12,10 @@ import com.github.se.orator.ui.network.ChatResponse
 import com.github.se.orator.ui.network.Choice
 import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.network.Usage
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -24,6 +30,8 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -242,9 +250,205 @@ class ChatViewModelTest {
     // Verify that chatGPTService.getChatCompletion was called and retrieve the argument
     `when`(chatGPTService.getChatCompletion(any())).thenReturn(chatResp)
 
-    // Call the generateFeedback method
-    assert(chatViewModel.generateFeedback() == chatResp.choices.firstOrNull()?.message?.content)
-    verify(chatGPTService).getChatCompletion(any())
+    val feedback = chatViewModel.generateFeedback()
+    assertNotNull(feedback)
+    assertTrue(feedback!!.contains("0 questions"))
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun observeTextToSpeechStateStopsTextToSpeechWhenInactive() = runTest {
+    // Mock TextToSpeech instance
+    val mockTextToSpeech = mock(TextToSpeech::class.java)
+
+    // Create a ChatViewModel instance with the mocked ChatGPTService, ApiLinkViewModel, and
+    // TextToSpeech
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, mockTextToSpeech)
+
+    // Initially, ensure TextToSpeech is active
+    assert(chatViewModel.isTextToSpeechActive.value)
+
+    // Set TextToSpeech state to inactive
+    chatViewModel.toggleTextToSpeech(false)
+
+    // Advance the test dispatcher to process the state change
+    advanceUntilIdle()
+
+    // Verify that TextToSpeech stop() method was called
+    verify(mockTextToSpeech).stop()
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun toggleTextToSpeechStateUpdatesCorrectly() = runTest {
+    // Create a ChatViewModel instance with the mocked ChatGPTService and ApiLinkViewModel
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    // Initially, ensure TextToSpeech is active
+    assert(chatViewModel.isTextToSpeechActive.value)
+
+    // Toggle TextToSpeech state to inactive
+    chatViewModel.toggleTextToSpeech(false)
+
+    // Assert that the state is updated to inactive
+    assert(!chatViewModel.isTextToSpeechActive.value)
+
+    // Toggle TextToSpeech state back to active
+    chatViewModel.toggleTextToSpeech(true)
+
+    // Assert that the state is updated to active
+    assert(chatViewModel.isTextToSpeechActive.value)
+  }
+
+  @Test
+  fun `generateFeedback indicates insufficient data when answeredCount is less than 3`() = runTest {
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    val analysisDataList =
+        listOf(
+            AnalysisData("transcription1", 0, 0.0, 0.0),
+            AnalysisData("transcription2", 0, 0.0, 0.0))
+    chatViewModel._collectedAnalysisData.value = analysisDataList
+
+    val feedback = chatViewModel.generateFeedback()
+
+    assertNotNull(feedback)
+    assertTrue(feedback!!.contains("2 questions"))
+    assertTrue(feedback.contains("isn't enough for meaningful feedback"))
+    assertTrue(feedback.contains("continue answering"))
+    assertTrue(feedback.contains("try restarting"))
+
+    verify(chatGPTService, never()).getChatCompletion(any())
+  }
+
+  @Test
+  fun `generateFeedback provides partial feedback when answeredCount is between 3 and 7`() =
+      runTest {
+        chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+        val analysisDataList = List(5) { index -> AnalysisData("transcription$index", 0, 0.0, 0.0) }
+        chatViewModel._collectedAnalysisData.value = analysisDataList
+
+        val partialFeedbackContent =
+            """
+            You have answered 5 questions so far, which gives some initial data but not enough for a full evaluation.
+            Please continue answering a few more questions or try restarting the session for a more comprehensive analysis.
+        """
+                .trimIndent()
+
+        val partialFeedbackMessage = Message(role = "assistant", content = partialFeedbackContent)
+        val partialResponse =
+            ChatResponse(
+                id = "test-id",
+                `object` = "test-object",
+                created = 0,
+                model = "gpt-3.5-turbo",
+                choices =
+                    listOf(
+                        Choice(
+                            message = partialFeedbackMessage, finish_reason = "stop", index = 0)),
+                usage = Usage(0, 0, 0))
+
+        `when`(chatGPTService.getChatCompletion(any())).thenReturn(partialResponse)
+
+        val feedback = chatViewModel.generateFeedback()
+
+        assertNotNull(feedback)
+        assertTrue(feedback!!.contains("5 questions"))
+        assertTrue(feedback.contains("gives some initial data"))
+        assertTrue(feedback.contains("not enough for a full evaluation"))
+        assertTrue(feedback.contains("continue answering"))
+        assertTrue(feedback.contains("try restarting"))
+
+        verify(chatGPTService, times(1)).getChatCompletion(any())
+      }
+
+  @Test
+  fun `generateFeedback provides full feedback with explicit assessment when answeredCount is 8 or more`() =
+      runTest {
+        chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+        val analysisDataList =
+            List(10) { index -> AnalysisData("transcription$index", 0, 0.0, 0.0) }
+        chatViewModel._collectedAnalysisData.value = analysisDataList
+
+        val st = SessionType.INTERVIEW
+        val fullFeedbackContent =
+            """
+            Congratulations! You have answered 10 questions, allowing for a thorough assessment of your performance.
+            
+            **Overall Assessment**: Would you recommend hiring me? would recommend hiring
+            **Strengths**: You demonstrated strong problem-solving skills and technical knowledge.
+            **Weaknesses**: Your communication skills could be improved, particularly in explaining complex concepts.
+            **Suggestions for Improvement**: Focus on enhancing your ability to articulate your thoughts clearly and provide more detailed explanations during technical discussions.
+        """
+                .trimIndent()
+
+        val fullFeedbackMessage = Message(role = "assistant", content = fullFeedbackContent)
+        val fullResponse =
+            ChatResponse(
+                id = "test-id",
+                `object` = "test-object",
+                created = 0,
+                model = "gpt-3.5-turbo",
+                choices =
+                    listOf(
+                        Choice(message = fullFeedbackMessage, finish_reason = "stop", index = 0)),
+                usage = Usage(0, 0, 0))
+
+        `when`(chatGPTService.getChatCompletion(any())).thenReturn(fullResponse)
+
+        val feedback = chatViewModel.generateFeedback()
+
+        assertNotNull(feedback)
+        assertTrue(feedback!!.contains("10 questions"))
+        assertTrue(feedback.contains(st.positiveResponse) || feedback.contains(st.negativeResponse))
+        assertTrue(feedback.contains("Strengths"))
+        assertTrue(feedback.contains("Weaknesses"))
+        assertTrue(feedback.contains("Suggestions for Improvement"))
+
+        verify(chatGPTService, times(1)).getChatCompletion(any())
+      }
+
+  @Test
+  fun `generateFeedback returns null when practiceContext is null`() = runTest {
+    // Set practiceContext to null
+    `when`(apiLinkViewModel.practiceContext).thenReturn(MutableStateFlow(null))
+
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    // Add enough answers to trigger full feedback scenario (≥8)
+    val analysisDataList = List(8) { AnalysisData("transcription$it", 0, 0.0, 0.0) }
+    chatViewModel._collectedAnalysisData.value = analysisDataList
+
+    val feedback = chatViewModel.generateFeedback()
+    // Since practiceContext is null, it should return null and never call the API
+    verify(chatGPTService, never()).getChatCompletion(any())
+    assertNull(feedback)
+  }
+
+  @Test
+  fun `resetPracticeContext calls apiLinkViewModel clearPracticeContext`() {
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    chatViewModel.resetPracticeContext()
+    verify(apiLinkViewModel).clearPracticeContext()
+  }
+
+  @Test
+  fun `endConversation resets conversation and does not clear practice context`() {
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+    // Initialize conversation to set isConversationInitialized = true
+    chatViewModel.initializeConversation()
+    assertTrue(chatViewModel.isConversationInitialized)
+
+    // End conversation
+    chatViewModel.endConversation()
+    assertFalse(chatViewModel.isConversationInitialized)
+    // endConversation clears analysis data but not context
+    verify(apiLinkViewModel).clearAnalysisData()
+    verify(apiLinkViewModel, never()).clearPracticeContext()
   }
 
   @Test

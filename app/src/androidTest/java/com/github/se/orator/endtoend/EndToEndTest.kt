@@ -1,5 +1,7 @@
 package com.github.se.orator.endtoend
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.NavHostController
@@ -10,6 +12,7 @@ import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.profile.UserStatistics
+import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
@@ -32,6 +35,10 @@ class EndToEndAppTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var userProfileRepository: UserProfileRepository
   private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var mockThemeContext: Context
+  private lateinit var appThemeViewModel: AppThemeViewModel
+  private lateinit var mockSharedPreferences: SharedPreferences
+  private lateinit var mockEditor: SharedPreferences.Editor
   private val bio = "Test bio"
   private val testUserProfile =
       UserProfile(uid = "testUid", name = "", age = 25, statistics = UserStatistics(), bio = bio)
@@ -55,6 +62,18 @@ class EndToEndAppTest {
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
+    mockSharedPreferences = mock(SharedPreferences::class.java)
+    mockThemeContext = mock(Context::class.java)
+    mockEditor = mock(SharedPreferences.Editor::class.java)
+    appThemeViewModel = AppThemeViewModel(mockThemeContext)
+
+    `when`(
+            mockThemeContext.getSharedPreferences(
+                org.mockito.kotlin.any(), org.mockito.kotlin.any()))
+        .thenReturn(mockSharedPreferences)
+    `when`(mockSharedPreferences.edit()).thenReturn(mockEditor)
+    `when`(mockEditor.putBoolean(org.mockito.kotlin.any(), org.mockito.kotlin.any()))
+        .thenReturn(mockEditor)
 
     // mocking the request for the user who is using the app
     `when`(
@@ -94,7 +113,9 @@ class EndToEndAppTest {
 
       NavHost(navController = navController!!, startDestination = Screen.HOME) {
         composable(Screen.HOME) { ProfileScreen(navigationActions, userProfileViewModel) }
-        composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.SETTINGS) {
+          SettingsScreen(navigationActions, userProfileViewModel, appThemeViewModel)
+        }
         composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
         composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
         composable(Screen.EDIT_PROFILE) {
@@ -168,6 +189,11 @@ class EndToEndAppTest {
       composeTestRule.onNodeWithTag(tag).assertExists()
       composeTestRule.onNodeWithTag(tag).performClick()
     }
+
+    // testing that the theme switch is triggered
+    verify(mockSharedPreferences).edit()
+    verify(mockEditor).putBoolean(org.mockito.kotlin.any(), org.mockito.kotlin.any())
+
     // go back to profile and test the features there
     composeTestRule.onNodeWithTag("back_button").performClick()
     verify(navigationActions).goBack() // ensure back button brings user back to profile
