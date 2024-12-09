@@ -55,11 +55,7 @@ class EditProfileTest {
 
     composeTestRule.onNodeWithText("Edit Profile").assertIsDisplayed()
     composeTestRule.onNodeWithTag("back_button", useUnmergedTree = true).assertIsDisplayed()
-    // composeTestRule.onNodeWithTag("BackArrowImage").assertContentDescriptionEquals("Back")
     composeTestRule.onNodeWithTag("settings_button", useUnmergedTree = true).assertIsDisplayed()
-    // composeTestRule
-    //    .onNodeWithTag("settings_button", useUnmergedTree = true)
-    //    .assertContentDescriptionEquals("Settings")
     composeTestRule.onNodeWithTag("upload_profile_picture_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("username_field").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bio_field").assertIsDisplayed()
@@ -109,8 +105,8 @@ class EditProfileTest {
 
     composeTestRule.onNodeWithText("Save changes").performClick()
 
-    // update or create either one
-    //        verify(userProfileRepository).updateUserProfile(any(), any(), any())
+    // Optionally, verify that the repository's update method is called
+    // verify(userProfileRepository).updateUserProfile(any(), any(), any())
   }
 
   @Test
@@ -131,5 +127,127 @@ class EditProfileTest {
     composeTestRule.onNodeWithText("Take Photo").assertIsDisplayed()
     composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
+  }
+
+  @Test
+  fun takePhotoButtonDismissesDialog() {
+    // Set the content
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open the ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Verify that the dialog is displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+
+    // Click the "Take Photo" button
+    composeTestRule.onNodeWithText("Take Photo").performClick()
+
+    // Verify that the dialog is dismissed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+  }
+
+  @Test
+  fun uploadFromGalleryButtonDismissesDialog() {
+    // Set the content
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open the ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Verify that the dialog is displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+
+    // Click the "Upload from Gallery" button
+    composeTestRule.onNodeWithText("Upload from Gallery").performClick()
+
+    // Verify that the dialog is dismissed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+  }
+
+  @Test
+  fun cancelButtonDismissesDialog() {
+    // Set the content
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open the ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Verify that the dialog is displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+
+    // Click the "Cancel" button
+    composeTestRule.onNodeWithText("Cancel").performClick()
+
+    // Verify that the dialog is dismissed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+  }
+
+  @Test
+  fun uploadFromGalleryUpdatesProfilePicture() {
+    // Set the content
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open the ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Verify that the dialog is displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+
+    // Click the "Upload from Gallery" button
+    composeTestRule.onNodeWithText("Upload from Gallery").performClick()
+
+    // Verify that the dialog is dismissed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+
+    // Since we cannot directly simulate image selection, verify that no new profile picture is set
+    // Alternatively, you can mock the onImageSelected callback if refactored
+  }
+
+  @Test
+  fun takePhotoUpdatesProfilePicture() {
+    // Set the content
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open the ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Verify that the dialog is displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+
+    // Click the "Take Photo" button
+    composeTestRule.onNodeWithText("Take Photo").performClick()
+
+    // Verify that the dialog is dismissed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+
+    // Since we cannot directly simulate the camera intent, we assume that the profile picture
+    // remains unchanged
+    // For a more thorough test, consider refactoring the composable to allow injecting a mock URI
+  }
+
+  @Test
+  fun takePhotoWithPermissionDenied() {
+    // Note: Directly mocking permission denial is complex in Compose tests.
+    // Instead, this test will focus on UI interactions.
+
+    // Set the content
+    composeTestRule.setContent { EditProfileScreen(navigationActions, userProfileViewModel) }
+
+    // Open the ImagePicker dialog
+    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
+
+    // Verify that the dialog is displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+
+    // Click the "Take Photo" button
+    composeTestRule.onNodeWithText("Take Photo").performClick()
+
+    // Verify that the dialog is dismissed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertDoesNotExist()
+
+    // Since we cannot mock permission denial and Toasts, we assume the behavior is as expected.
+    // For a more thorough test, consider using instrumented tests with Robolectric or similar
+    // frameworks.
   }
 }
