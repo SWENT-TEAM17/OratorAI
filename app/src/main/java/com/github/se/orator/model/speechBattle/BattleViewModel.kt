@@ -214,19 +214,6 @@ class BattleViewModel(
   }
 
   /**
-   * Evaluates the result of a completed battle.
-   *
-   * @param battle The completed SpeechBattle.
-   */
-  private fun evaluateBattle(battle: SpeechBattle) {
-    val challengerMessages = battle.challengerData
-    val opponentMessages = battle.opponentData
-
-    chatViewModel.performEvaluation(
-        battle.battleId, battle, challengerMessages, opponentMessages, this, navigationActions)
-  }
-
-  /**
    * Retrieves the opponent's UID for a given battle.
    *
    * @param battleId The ID of the battle.
