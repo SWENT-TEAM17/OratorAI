@@ -31,9 +31,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.AppDimensionsObject
 import com.github.se.orator.ui.theme.AppFontSizes
-import com.github.se.orator.ui.theme.createAppDimensions
 import kotlin.random.Random
 import savePromptsToFile
 
@@ -60,7 +58,6 @@ fun OfflineInterviewModule(
   val ID = generateRandomString()
 
   val context = LocalContext.current
-  val dimensions: AppDimensionsObject = createAppDimensions()
 
   val inputFields =
       listOf(
@@ -80,8 +77,8 @@ fun OfflineInterviewModule(
   Column(
       modifier =
           Modifier.fillMaxSize()
-              .padding(horizontal = dimensions.paddingMedium)
-              .padding(top = dimensions.paddingSmall)
+              .padding(horizontal = AppDimensions.paddingMedium)
+              .padding(top = AppDimensions.paddingSmall)
               .verticalScroll(rememberScrollState())
               .testTag("content"),
       verticalArrangement = Arrangement.Center) {
@@ -100,7 +97,7 @@ fun OfflineInterviewModule(
                       focusedLabelColor = AppColors.primaryColor,
                       unfocusedLabelColor = AppColors.textColor))
         }
-        Spacer(modifier = Modifier.height(dimensions.paddingLarge))
+        Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
         Button(
             onClick = {
