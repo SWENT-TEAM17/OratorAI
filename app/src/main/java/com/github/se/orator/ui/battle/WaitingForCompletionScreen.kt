@@ -67,7 +67,8 @@ fun WaitingForCompletionScreen(
                   text = "You have completed your interview. Waiting for the other user to finish.",
                   style = MaterialTheme.typography.bodyLarge,
                   textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(bottom = AppDimensions.paddingMedium))
+                  modifier =
+                      Modifier.padding(bottom = AppDimensions.paddingMedium).testTag("waitingText"))
 
               CircularProgressIndicator(
                   color = AppColors.loadingIndicatorColor,
