@@ -278,4 +278,15 @@ class BattleViewModel(
   fun updateBattleStatus(battleId: String, status: BattleStatus, callback: (Boolean) -> Unit) {
     battleRepository.updateBattleStatus(battleId, status, callback)
   }
+
+  fun startBattle(battleId: String) {
+    battleRepository.updateBattleStatus(battleId, BattleStatus.IN_PROGRESS) { success ->
+      if (success) {
+        navigationActions.navigateToBattleScreen(
+            battleId, userProfileViewModel.userProfile.value?.uid ?: "")
+      } else {
+        Log.e("BattleViewModel", "Failed to update battle status to IN_PROGRESS.")
+      }
+    }
+  }
 }
