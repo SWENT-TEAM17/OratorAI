@@ -47,7 +47,8 @@ fun BattleRequestSentScreen(
     if (battleStatus == BattleStatus.IN_PROGRESS) {
       Log.d("BattleRequestSentScreen", "Battle in progress")
       // Navigate to the battle screen
-      navigationActions.navigateToBattleScreen(battleId, friendUid)
+      // navigationActions.navigateToBattleScreen(battleId, friendUid)
+      battleViewModel.startBattle(battleId)
     }
   }
 
@@ -63,7 +64,8 @@ fun BattleRequestSentScreen(
                     modifier = Modifier.size(AppDimensions.iconSizeMedium).testTag("backButton"),
                     tint = MaterialTheme.colorScheme.onSurface)
               }
-            })
+            },
+            modifier = Modifier.testTag("topAppBar"))
       },
       content = { innerPadding ->
         Column(
