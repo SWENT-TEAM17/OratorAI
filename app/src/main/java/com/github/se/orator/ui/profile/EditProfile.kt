@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -142,14 +141,14 @@ fun EditProfileScreen(
                     onClick = { isDialogOpen = true },
                     modifier =
                         Modifier.testTag("upload_profile_picture_button")
-                            .width(40.dp)
-                            .height(40.dp)
+                            .width(AppDimensions.spacingXLarge)
+                            .height(AppDimensions.spacingXLarge)
                             .align(Alignment.BottomEnd),
                     shape = AppShapes.circleShape,
                     colors =
                         ButtonDefaults.buttonColors(
                             backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
-                    contentPadding = PaddingValues(0.dp)) {
+                    contentPadding = PaddingValues(AppDimensions.nullPadding)) {
                       Icon(
                           Icons.Outlined.PhotoCamera,
                           contentDescription = "Edit button",
@@ -416,7 +415,7 @@ fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (
                       "Take Photo",
                       color = androidx.compose.material.MaterialTheme.colors.onPrimary)
                 }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
             Button(
                 onClick = {
                   onDismiss()
@@ -430,7 +429,7 @@ fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (
                       "Upload from Gallery",
                       color = androidx.compose.material.MaterialTheme.colors.onPrimary)
                 }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
             Button(
                 onClick = { onDismiss() },
                 modifier = Modifier.fillMaxWidth(),
