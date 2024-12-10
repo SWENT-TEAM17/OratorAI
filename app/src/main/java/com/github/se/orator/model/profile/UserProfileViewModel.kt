@@ -634,7 +634,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   /**
    * Calculates the success ratio for a given practice mode based on the user's statistics.
    *
-   * The success ratio is computed as the ratio of successful sessions to failed sessions for the
+   * The success ratio is computed as the ratio of successful sessions to total sessions for the
    * specified practice mode. If the number of failed sessions is zero or the data for the practice
    * mode is unavailable, the function returns -1.0.
    *
@@ -646,12 +646,9 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     if (userStatistics.successfulSessions.contains(practiceMode.toString())) {
       val nbrSuccess = userStatistics.successfulSessions[practiceMode.toString()]
       val totalNbrSessions = userStatistics.sessionsGiven[practiceMode.toString()]
-      if (nbrSuccess != null && totalNbrSessions != null) {
-        val nbrFailures = totalNbrSessions - nbrSuccess
-        if (nbrFailures != 0) {
-          return (nbrSuccess / nbrFailures).toDouble()
+      if (nbrSuccess != null && totalNbrSessions != null && totalNbrSessions != 0) {
+          return (nbrSuccess / totalNbrSessions).toDouble()
         }
-      }
       return -1.0
     } else {
       return -1.0
