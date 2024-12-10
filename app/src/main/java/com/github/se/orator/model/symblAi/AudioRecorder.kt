@@ -22,7 +22,6 @@ class AudioRecorder(
 
   private var audioRecord: AudioRecord? = null
   private var isRecordingAudio = false
-  private var audioFile: File? = null
 
   // Listener to notify when recording is finished
   interface RecordingListener {
@@ -35,7 +34,7 @@ class AudioRecorder(
     recordingListener = listener
   }
 
-  fun startRecording() {
+  fun startRecording(audioFile: File = File(context.cacheDir, "audio_record.wav")) {
     val bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) !=
         PackageManager.PERMISSION_GRANTED) {
@@ -47,7 +46,7 @@ class AudioRecorder(
         AudioRecord(
             MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, bufferSize)
 
-    audioFile = File(context.cacheDir, "audio_record.wav") // Recording in WAV format
+    // audioFile = File(context.cacheDir, "audio_record.wav") // Recording in WAV format
 
     audioRecord?.startRecording()
     isRecordingAudio = true
@@ -66,10 +65,10 @@ class AudioRecorder(
 
           // Save recorded data to WAV file
           val audioData = outputStream.toByteArray()
-          saveAsWavFile(audioData, audioFile!!)
+          saveAsWavFile(audioData, audioFile)
 
           outputStream.close()
-          recordingListener?.onRecordingFinished(audioFile!!)
+          recordingListener?.onRecordingFinished(audioFile)
         }
         .start()
   }

@@ -252,7 +252,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 CardSection(
                     title = "Previous Recordings",
                     imageVector = Icons.Outlined.History,
-                    onClick = { /*TODO: Handle previous sessions click */},
+                    onClick = { navigationActions.navigateTo(Screen.OFFLINE_RECORDING_PROFILE) },
                     modifier = Modifier.testTag("previous_sessions_section"))
               }
                   ?: run {

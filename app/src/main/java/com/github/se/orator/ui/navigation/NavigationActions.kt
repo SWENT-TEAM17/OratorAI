@@ -38,6 +38,8 @@ object Route {
   const val BATTLE_CHAT = "BattleChatScreen"
   const val WAITING_FOR_COMPLETION = "WaitingForCompletionScreen"
   const val EVALUATION = "EvaluationScreen"
+  const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
+  const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
 }
 
 object Screen {
@@ -57,6 +59,7 @@ object Screen {
   const val LEADERBOARD = "LeaderBoard Screen"
   const val FEEDBACK = "Feedback Screen"
   const val CHAT_SCREEN = "chat_screen"
+  const val FEEDBACK_SCREEN = "feedback_screen" // this one is the offline mode one !!!!
   const val SPEAKING = "Speaking"
   const val PRACTICE_QUESTIONS_SCREEN = "PracticeQuestions Screen"
   const val OFFLINE = "Offline Screen"
@@ -67,6 +70,8 @@ object Screen {
   const val BATTLE_CHAT_SCREEN = "Battle Chat Screen"
   const val WAITING_FOR_COMPLETION_SCREEN = "Waiting for Completion Screen"
   const val EVALUATION_SCREEN = "Evaluation Waiting Screen"
+  const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
+  const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
 }
 
 data class TopLevelDestination(

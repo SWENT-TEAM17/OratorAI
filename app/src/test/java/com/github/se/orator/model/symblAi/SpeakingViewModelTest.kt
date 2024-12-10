@@ -3,6 +3,7 @@ package com.github.se.orator.model.symblAi
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
+import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import org.junit.*
@@ -76,5 +77,18 @@ class SpeakingViewModelTest {
     // Act: Stop recording
     speakingViewModel.onMicButtonClicked(true)
     Assert.assertFalse(speakingViewModel.isRecording.value)
+  }
+
+  @Test
+  fun `getTranscript starts and stops recording`() = runTest {
+    // Arrange
+    val mockFile = mock<File>()
+
+    // Act
+    speakingViewModel.getTranscript(mockFile)
+
+    // Assert
+    verify(speakingRepository).startRecording()
+    verify(speakingRepository).stopRecording()
   }
 }
