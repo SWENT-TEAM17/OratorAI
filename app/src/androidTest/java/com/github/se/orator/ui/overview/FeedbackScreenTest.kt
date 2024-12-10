@@ -97,10 +97,13 @@ class FeedbackScreenTest {
 
     val practiceContext =
         InterviewContext(
+            targetPosition = "Software Engineer", // Updated field
+            companyName = "Tech Corp", // Updated field
             interviewType = "Technical",
-            role = "Software Engineer",
-            company = "Tech Corp",
-            focusAreas = listOf("Algorithms", "Data Structures"))
+            experienceLevel = "Mid-Level", // New field
+            jobDescription = "Develop and maintain software applications.", // New field
+            focusArea = "Algorithms" // Changed from list to single String
+            )
     apiLinkViewModel.updatePracticeContext(practiceContext)
   }
 
@@ -135,7 +138,6 @@ class FeedbackScreenTest {
     composeTestRule.onNodeWithTag("feedbackContent").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackTitle").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("feedbackSubtitle").assertExists().assertIsDisplayed()
-    composeTestRule.onNodeWithTag("feedbackNoMessage").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithTag("retryButton").assertExists().assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("retryButtonText", useUnmergedTree = true)

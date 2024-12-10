@@ -23,7 +23,6 @@ import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.network.Message
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
 
@@ -97,7 +96,7 @@ fun FeedbackScreen(
                   text = "Feedback",
                   modifier = Modifier.testTag("FeedbackText"),
                   fontWeight = FontWeight.Bold,
-                  color = AppColors.textColor)
+                  color = MaterialTheme.colorScheme.onSurface)
             },
             navigationIcon = {
               IconButton(
@@ -107,13 +106,12 @@ fun FeedbackScreen(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                        tint = AppColors.textColor)
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
             },
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = AppColors.surfaceColor,
-                    titleContentColor = AppColors.textColor))
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer))
       },
       content = { paddingValues ->
         Column(
@@ -142,12 +140,12 @@ fun FeedbackScreen(
                             Modifier.align(Alignment.CenterHorizontally)
                                 .padding(AppDimensions.paddingMedium)
                                 .testTag("loadingIndicator"),
-                        color = AppColors.loadingIndicatorColor)
+                        color = MaterialTheme.colorScheme.onBackground)
                   }
                   errorMessage != null -> {
                     Text(
                         text = "Error: $errorMessage",
-                        color = AppColors.errorColor,
+                        color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.testTag("errorText"))
                   }
                   feedbackMessage != null -> {
@@ -162,6 +160,7 @@ fun FeedbackScreen(
                             Text(
                                 text = decisionText,
                                 style = AppTypography.largeTitleStyle,
+                                color = MaterialTheme.colorScheme.secondary,
                                 modifier =
                                     Modifier.align(Alignment.CenterHorizontally)
                                         .padding(AppDimensions.paddingMedium)
@@ -182,7 +181,8 @@ fun FeedbackScreen(
                               modifier =
                                   Modifier.align(Alignment.CenterHorizontally)
                                       .padding(AppDimensions.paddingMedium)
-                                      .testTag("successfulSessionsText"))
+                                      .testTag("successfulSessionsText"),
+                              color = MaterialTheme.colorScheme.tertiary)
                           // Display the detailed feedback message.
                           ChatMessageItem(
                               message = Message(content = feedbackMessage!!, role = "assistant"))
@@ -192,8 +192,7 @@ fun FeedbackScreen(
                     Text(
                         text = "No feedback available.",
                         style = AppTypography.bodyLargeStyle,
-                        color = AppColors.textColor,
-                        modifier = Modifier.testTag("feedbackNoMessage"))
+                        color = MaterialTheme.colorScheme.secondary)
                   }
                 }
 
@@ -207,15 +206,17 @@ fun FeedbackScreen(
                             .padding(top = AppDimensions.paddingMedium)
                             .border(
                                 width = AppDimensions.borderStrokeWidth,
-                                color = AppColors.buttonBorderColor,
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                                 shape = MaterialTheme.shapes.medium)
                             .testTag("retryButton"),
                     enabled = !isLoading,
                     colors =
                         ButtonDefaults.buttonColors(
-                            containerColor = AppColors.buttonOverviewColor,
-                            contentColor = AppColors.textColor)) {
-                      Text(text = "Try Again", modifier = Modifier.testTag("retryButtonText"))
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+                      Text(
+                          text = "Try Again",
+                          modifier = Modifier.testTag("retryButtonText"),
+                          color = MaterialTheme.colorScheme.primary)
                     }
               }
         }

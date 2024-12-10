@@ -9,6 +9,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.rule.GrantPermissionRule
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.profile.UserProfileRepository
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
@@ -34,6 +36,8 @@ class SpeakingScreenTest {
   private lateinit var speakingRepository: SpeakingRepository
   private lateinit var speakingViewModel: SpeakingViewModel
   private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var userProfileRepository: UserProfileRepository
   private lateinit var data: AnalysisData
   private lateinit var speech: String
 
@@ -41,6 +45,8 @@ class SpeakingScreenTest {
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
     apiLinkViewModel = ApiLinkViewModel()
+    userProfileRepository = mock(UserProfileRepository::class.java)
+    userProfileViewModel = UserProfileViewModel(userProfileRepository)
     speakingRepository = mock(SpeakingRepository::class.java)
     speech = "Hello! My name is John. I am an entrepreneur"
 
@@ -63,7 +69,8 @@ class SpeakingScreenTest {
 
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
@@ -86,7 +93,8 @@ class SpeakingScreenTest {
 
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.RECORDING))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
@@ -115,7 +123,8 @@ class SpeakingScreenTest {
 
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
@@ -131,7 +140,8 @@ class SpeakingScreenTest {
 
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.FINISHED))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
     }
@@ -144,7 +154,8 @@ class SpeakingScreenTest {
   fun testAudioVisualizerIsDisplayedInRecordingState() {
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.RECORDING))
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, viewModel = speakingViewModel)

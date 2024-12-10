@@ -62,7 +62,92 @@ interface UserProfileRepository {
       onFailure: (Exception) -> Unit
   )
 
+  /**
+   * Fetches all user profiles from the Firestore database. On success, it returns a list of
+   * [UserProfile] objects through the [onSuccess] callback. On failure, it returns an exception
+   * through the [onFailure] callback.
+   *
+   * @param onSuccess A lambda function that receives a list of [UserProfile] objects if the
+   *   operation succeeds.
+   * @param onFailure A lambda function that receives an [Exception] if the operation fails.
+   */
   fun getAllUserProfiles(onSuccess: (List<UserProfile>) -> Unit, onFailure: (Exception) -> Unit)
+
+  /**
+   * Sends a friend request from the current user to another user.
+   *
+   * @param currentUid The UID of the user sending the request.
+   * @param friendUid The UID of the user receiving the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  fun sendFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+  /**
+   * Accepts a friend request, establishing a friendship between two users.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user who sent the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  fun acceptFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+  /**
+   * Declines a friend request from another user.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the user who sent the request.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  fun declineFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
+   * Deletes an existing friendship between two users.
+   *
+   * @param currentUid The UID of the current user.
+   * @param friendUid The UID of the friend to remove.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked with an [Exception] on failure.
+   */
+  fun deleteFriend(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
+   * Cancel a previously sent friend request.
+   *
+   * This function removes the `friendUid` from the current user's `sentReq` list and removes the
+   * `currentUid` from the friend's `recReq` list, effectively canceling the friend request.
+   *
+   * @param currentUid The UID of the current user who sent the friend request.
+   * @param friendUid The UID of the friend to whom the request was sent.
+   * @param onSuccess Callback to be invoked on successful cancellation.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  fun cancelFriendRequest(
+      currentUid: String,
+      friendUid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
   /**
    * Update the profile picture URL in the data store.
@@ -93,6 +178,32 @@ interface UserProfileRepository {
   )
 
   /**
+   * Get friends' profiles based on their UIDs.
+   *
+   * @param recReqUIds List of UIDs of the received friend requests.
+   * @param onSuccess Callback to be invoked with the list of received friend requests profiles.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  fun getRecReqProfiles(
+      recReqUIds: List<String>,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
+   * Get sent requests profiles based on their UIDs.
+   *
+   * @param sentReqProfiles List of UIDs of the sent friend requests.
+   * @param onSuccess Callback to be invoked with the list of sent requests profiles.
+   * @param onFailure Callback to be invoked on failure with the exception.
+   */
+  fun getSentReqProfiles(
+      sentReqProfiles: List<String>,
+      onSuccess: (List<UserProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
    * Delete a user profile from the data store.
    *
    * @param uid The UID of the user whose profile is to be deleted.
@@ -101,5 +212,23 @@ interface UserProfileRepository {
    */
   fun deleteUserProfile(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
+  /**
+   * Calculates the mean (average) of the elements in a given queue.
+   *
+   * This function takes a queue of numerical values (represented as an `ArrayDeque<Double>`) and
+   * returns the mean of its elements. If the queue is empty, the function returns 0.
+   *
+   * @param values An `ArrayDeque<Double>` containing the metrics values.
+   * @return The mean of the values or 0 if it is empty
+   */
+  fun getMetricMean(values: List<Double>): Double
+
+  /**
+   * Updates the login streak for a user based on their last login date.
+   *
+   * @param uid The UID of the user.
+   * @param onSuccess Callback invoked on successful operation.
+   * @param onFailure Callback invoked on failure.
+   */
   fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit)
 }

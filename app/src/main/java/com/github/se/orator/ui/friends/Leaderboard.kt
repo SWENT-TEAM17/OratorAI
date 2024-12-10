@@ -21,9 +21,8 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
-import com.github.se.orator.ui.theme.AppColors
-import com.github.se.orator.ui.theme.AppColors.LightPurpleGrey
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.ProjectTheme
 
 /**
@@ -56,7 +55,12 @@ fun LeaderboardScreen(
     Scaffold(
         topBar = {
           TopAppBar(
-              title = { Text("Leaderboard", modifier = Modifier.testTag("leaderboardTitle")) },
+              title = {
+                Text(
+                    "Leaderboard",
+                    modifier = Modifier.testTag("leaderboardTitle"),
+                    color = MaterialTheme.colorScheme.onSurface)
+              },
               navigationIcon = {
                 IconButton(
                     onClick = {
@@ -66,9 +70,13 @@ fun LeaderboardScreen(
                       Icon(
                           Icons.AutoMirrored.Filled.ArrowBack,
                           contentDescription = "Back",
-                          modifier = Modifier.testTag("leaderboardBackIcon"))
+                          modifier = Modifier.testTag("leaderboardBackIcon"),
+                          tint = MaterialTheme.colorScheme.onSurface)
                     }
-              })
+              },
+              colors =
+                  TopAppBarDefaults.topAppBarColors(
+                      containerColor = MaterialTheme.colorScheme.surfaceContainer))
         },
         bottomBar = {
           BottomNavigationMenu(
@@ -116,14 +124,14 @@ fun PracticeModeSelector() {
   Box(
       modifier =
           Modifier.clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
-              .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+              .background(MaterialTheme.colorScheme.primaryContainer)
               .clickable { expanded = true }
               .padding(AppDimensions.paddingSmallMedium)
               .testTag("practiceModeSelector"),
       contentAlignment = Alignment.Center) {
         Text(
             text = selectedMode,
-            fontSize = AppDimensions.mediumText,
+            fontSize = AppFontSizes.subtitle, // 16.0sp
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("selectedMode"))
@@ -131,7 +139,9 @@ fun PracticeModeSelector() {
         // Dropdown menu options for selecting a practice mode
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
           DropdownMenuItem(
-              text = { Text("Practice mode 1") },
+              text = {
+                Text("Practice mode 1", color = MaterialTheme.colorScheme.onSecondaryContainer)
+              },
               onClick = {
                 selectedMode = "Practice mode 1"
                 expanded = false
@@ -164,7 +174,7 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
               .padding(horizontal = AppDimensions.paddingExtraSmall) // Side padding for each item
               .clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
               .testTag("leaderboardItem#$rank"),
-      color = LightPurpleGrey,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
       shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
       ) {
         Row(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
@@ -176,12 +186,12 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
             Text(
                 text = profile.name,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            )
+                color = MaterialTheme.colorScheme.primary)
             // Display user's improvement statistics
             Text(
                 text = "Improvement: ${profile.statistics.improvement}",
                 style = MaterialTheme.typography.bodySmall,
-                color = AppColors.secondaryTextColor,
+                color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
           }
 
@@ -192,7 +202,8 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
               text = "#$rank",
               fontWeight = FontWeight.Bold,
               modifier =
-                  Modifier.align(Alignment.CenterVertically).testTag("leaderboardItemName#$rank"))
+                  Modifier.align(Alignment.CenterVertically).testTag("leaderboardItemName#$rank"),
+              color = MaterialTheme.colorScheme.secondary)
         }
       }
 }

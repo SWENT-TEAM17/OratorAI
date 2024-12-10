@@ -5,6 +5,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -31,6 +32,7 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
+import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.network.OfflineViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
@@ -49,23 +51,33 @@ import com.github.se.orator.ui.offline.OfflineScreen
 import com.github.se.orator.ui.offline.RecordingReviewScreen
 import com.github.se.orator.ui.overview.ChatScreen
 import com.github.se.orator.ui.overview.FeedbackScreen
+import com.github.se.orator.ui.overview.OfflineInterviewModule
 import com.github.se.orator.ui.overview.SpeakingJobInterviewModule
 import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
+
 import com.github.se.orator.ui.profile.GraphStats
+
+import com.github.se.orator.ui.profile.OfflineRecordingsProfileScreen
+import com.github.se.orator.ui.profile.PreviousRecordingsFeedbackScreen
+
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
 import com.github.se.orator.ui.theme.ProjectTheme
 import com.google.firebase.auth.FirebaseAuth
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
+  lateinit var textToSpeech: TextToSpeech
   private lateinit var networkConnectivityObserver: NetworkConnectivityObserver
   private val offlineViewModel: OfflineViewModel by viewModels() // Initialize the OfflineViewModel
+
+  private val themeViewModel: AppThemeViewModel = AppThemeViewModel(this)
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,15 +110,23 @@ class MainActivity : ComponentActivity() {
       }
     }
 
+    textToSpeech =
+        TextToSpeech(this) { status ->
+          if (status == TextToSpeech.SUCCESS) {
+            textToSpeech.setSpeechRate(1.7f)
+            textToSpeech.language = Locale.UK
+          }
+        }
+
     enableEdgeToEdge()
     setContent {
-      ProjectTheme {
+      ProjectTheme(themeViewModel = themeViewModel) {
         Scaffold(
             modifier = Modifier.fillMaxSize().testTag("mainActivityScaffold") // Tag for testing
             ) {
               // Observe offline mode state
               val isOffline by offlineViewModel.isOffline.observeAsState(false)
-              OratorApp(chatGPTService, isOffline)
+              OratorApp(chatGPTService, isOffline, themeViewModel, textToSpeech)
             }
       }
     }
@@ -121,7 +141,12 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
+fun OratorApp(
+    chatGPTService: ChatGPTService,
+    isOffline: Boolean,
+    themeViewModel: AppThemeViewModel? = null,
+    textToSpeech: TextToSpeech? = null
+) {
   // Create NavController for navigation within the app
   val navController = rememberNavController()
   // Initialize NavigationActions to handle navigation events
@@ -131,8 +156,9 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
   val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
   val apiLinkViewModel = ApiLinkViewModel()
   val speakingViewModel =
-      SpeakingViewModel(SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel)
-  val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+      SpeakingViewModel(
+          SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel, userProfileViewModel)
+  val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
   // Scaffold composable to provide basic layout structure for the app
   Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
@@ -149,12 +175,20 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
             RecordingReviewScreen(navigationActions, speakingViewModel)
           }
+          composable(Screen.OFFLINE_RECORDING_PROFILE) {
+            OfflineRecordingsProfileScreen(navigationActions, speakingViewModel)
+          }
+          composable(Screen.OFFLINE_INTERVIEW_MODULE) {
+            OfflineInterviewModule(navigationActions, speakingViewModel)
+          }
+
           composable(
               route = "offline_recording/{question}",
               arguments = listOf(navArgument("question") { type = NavType.StringType })) {
                   backStackEntry ->
                 val question = backStackEntry.arguments?.getString("question") ?: ""
-                OfflineRecordingScreen(navigationActions, question, speakingViewModel)
+                OfflineRecordingScreen(
+                    LocalContext.current, navigationActions, question, speakingViewModel)
               }
 
           // Online/auth flow
@@ -200,6 +234,12 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
           // Profile flow
           navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
             composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
+
+            composable(Screen.FEEDBACK_SCREEN) {
+              PreviousRecordingsFeedbackScreen(
+                  LocalContext.current, navigationActions, chatViewModel, speakingViewModel)
+            }
+
             composable(Screen.EDIT_PROFILE) {
               EditProfileScreen(navigationActions, userProfileViewModel)
             }
@@ -212,7 +252,9 @@ fun OratorApp(chatGPTService: ChatGPTService, isOffline: Boolean) {
             composable(Screen.ADD_FRIENDS) {
               AddFriendsScreen(navigationActions, userProfileViewModel)
             }
-            composable(Screen.SETTINGS) { SettingsScreen(navigationActions, userProfileViewModel) }
+            composable(Screen.SETTINGS) {
+              SettingsScreen(navigationActions, userProfileViewModel, themeViewModel)
+            }
           }
         }
 

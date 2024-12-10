@@ -1,7 +1,9 @@
 package com.github.se.orator.model.symblAi
 
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
+import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import org.junit.*
@@ -12,13 +14,16 @@ class SpeakingViewModelTest {
   private lateinit var speakingRepository: SpeakingRepository
   private lateinit var apiLinkViewModel: ApiLinkViewModel
   private lateinit var speakingViewModel: SpeakingViewModel
+  private lateinit var userProfileViewModel: UserProfileViewModel
   private val testDispatcher = UnconfinedTestDispatcher()
 
   @Before
   fun setUp() {
     speakingRepository = mock()
     apiLinkViewModel = mock()
-    speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+    userProfileViewModel = mock()
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
   }
 
   @Test
@@ -36,7 +41,8 @@ class SpeakingViewModelTest {
   fun `onMicButtonClicked stops recording and sets isRecording to false when permission is granted and already recording`() =
       runTest {
         // Arrange
-        speakingViewModel = SpeakingViewModel(speakingRepository, apiLinkViewModel)
+        speakingViewModel =
+            SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
         speakingViewModel.onMicButtonClicked(true) // Start recording
         reset(speakingRepository) // Reset to verify stopRecording
         // Act
@@ -71,5 +77,18 @@ class SpeakingViewModelTest {
     // Act: Stop recording
     speakingViewModel.onMicButtonClicked(true)
     Assert.assertFalse(speakingViewModel.isRecording.value)
+  }
+
+  @Test
+  fun `getTranscript starts and stops recording`() = runTest {
+    // Arrange
+    val mockFile = mock<File>()
+
+    // Act
+    speakingViewModel.getTranscript(mockFile)
+
+    // Assert
+    verify(speakingRepository).startRecording()
+    verify(speakingRepository).stopRecording()
   }
 }
