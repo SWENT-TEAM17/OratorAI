@@ -650,7 +650,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
           totalNbrSessions != null &&
           nbrSuccess >= 0 &&
           totalNbrSessions > 0) {
-        return (nbrSuccess / totalNbrSessions).toDouble()
+        return nbrSuccess.toDouble() / totalNbrSessions.toDouble()
       }
       return -1.0
     } else {
