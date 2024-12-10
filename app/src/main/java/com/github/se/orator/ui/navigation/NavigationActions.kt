@@ -33,6 +33,8 @@ object Route {
   const val PRACTICE_QUESTIONS = "PracticeQuestions"
   const val OFFLINE_RECORDING = "OfflineRecording"
   const val OFFLINE_RECORDING_REVIEW = "OfflineRecordingReview"
+  const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
+  const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
 }
 
 object Screen {
@@ -52,11 +54,14 @@ object Screen {
   const val LEADERBOARD = "LeaderBoard Screen"
   const val FEEDBACK = "Feedback Screen"
   const val CHAT_SCREEN = "chat_screen"
+  const val FEEDBACK_SCREEN = "feedback_screen" // this one is the offline mode one !!!!
   const val SPEAKING = "Speaking"
   const val PRACTICE_QUESTIONS_SCREEN = "PracticeQuestions Screen"
   const val OFFLINE = "Offline Screen"
   const val OFFLINE_RECORDING_SCREEN = "OfflineRecording Screen"
   const val OFFLINE_RECORDING_REVIEW_SCREEN = "OfflineRecordingReview Screen"
+  const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
+  const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
 }
 
 data class TopLevelDestination(

@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,10 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
@@ -53,7 +53,7 @@ fun OfflineScreen(navigationActions: NavigationActions) {
                           .padding(AppDimensions.paddingLarge)
                           .testTag("OfflineScreenIconContainer")) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_no_wifi2),
+                        Icons.Filled.WifiOff,
                         contentDescription = "No connection",
                         modifier =
                             Modifier.size(AppDimensions.iconSize)
@@ -92,7 +92,7 @@ fun OfflineScreen(navigationActions: NavigationActions) {
               Button(
                   onClick = {
                     Log.d("offline screen", "Practice Offline button clicked")
-                    navigationActions.navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
+                    navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
                   },
                   colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
                   shape = RoundedCornerShape(AppDimensions.buttonHeightRounded),
