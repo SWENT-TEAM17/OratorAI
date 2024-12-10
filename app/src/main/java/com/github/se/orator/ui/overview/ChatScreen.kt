@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,21 +19,52 @@ import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.network.Message
-import com.github.se.orator.ui.theme.AppDimensions // Import AppDimensions
+import com.github.se.orator.ui.theme.AppDimensions
 
 /**
- * Composable function that represents the Chat Screen.
+ * Enum class representing the different types of buttons that can be displayed in the chat screen.
+ *
+ * @param testTag The test tag for the button.
+ * @param buttonText The text to display on the button.
+ */
+enum class ChatButtonType(
+    val testTag: String,
+    val buttonText: String,
+    val buttonTextTestTag: String,
+    val buttonTestTag: String
+) {
+  FEEDBACK_BUTTON(
+      testTag = "feedback_button",
+      buttonText = "Request Feedback",
+      buttonTextTestTag = "request_feedback_button_text",
+      buttonTestTag = "request_feedback_button"),
+  FINISH_BATTLE_BUTTON(
+      testTag = "finish_battle_button",
+      buttonText = "Finish Battle",
+      buttonTextTestTag = "finish_battle_button_text",
+      buttonTestTag = "finish_battle_button")
+}
+
+/**
+ * Composable function that represents the Chat or Battle Chat Screen.
  *
  * This screen displays a list of chat messages between the user and the assistant. It includes a
  * top app bar with a back button, a scrollable list of messages, and buttons at the bottom for
- * recording a response or requesting feedback.
+ * recording a response or requesting feedback or ending the battle.
  *
  * @param navigationActions An instance of [NavigationActions] to handle navigation events.
  * @param chatViewModel The [ChatViewModel] that provides chat messages and loading state.
+ * @param chatButtonType The type of button to display in the chat screen.
+ * @param onChatButtonClick The action to perform when the chat button is clicked.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewModel) {
+fun ChatScreen(
+    navigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
+    chatButtonType: ChatButtonType = ChatButtonType.FEEDBACK_BUTTON,
+    onChatButtonClick: () -> Unit = { navigationActions.navigateTo(Screen.FEEDBACK) }
+) {
   // Collect the list of chat messages from the view model as a state.
   val chatMessages by chatViewModel.chatMessages.collectAsState()
 
@@ -49,13 +80,6 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
       listState.animateScrollToItem(chatMessages.size - 1)
     }
   }
-
-  // Initialize and dispose of the conversation when the composable enters or leaves the
-  // composition.
-  //  DisposableEffect(Unit) {
-  //    chatViewModel.initializeConversation()
-  //    onDispose { chatViewModel.endConversation() }
-  //  }
 
   // Scaffold provides the basic visual layout structure.
   Scaffold(
@@ -79,7 +103,7 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                   },
                   modifier = Modifier.testTag("back_button")) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Icons.Outlined.ArrowBackIosNew,
                         contentDescription = "Back",
                         modifier = Modifier.size(AppDimensions.iconSizeSmall),
                         tint = MaterialTheme.colorScheme.onSurface) // Use theme color for icon
@@ -95,7 +119,9 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
             // Divider to separate the TopAppBar from the content.
             modifier =
                 Modifier.fillMaxSize().padding(paddingValues).testTag("chat_screen_column")) {
+              // Divider to separate the TopAppBar from the content.
               HorizontalDivider(modifier = Modifier.testTag("divider"))
+
               // Main content column containing the messages and buttons.
               Column(
                   modifier =
@@ -150,32 +176,26 @@ fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewMode
                               color = MaterialTheme.colorScheme.primary)
                         }
 
-                    // Button to navigate to the "Feedback" screen to request feedback.
+                    // Dynamic "Request Feedback" button with customizable text and action.
                     Button(
                         onClick = {
                           chatViewModel.toggleTextToSpeech(false)
-                          navigationActions.navigateTo(Screen.FEEDBACK)
+                          onChatButtonClick()
                         },
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = AppDimensions.paddingSmall)
                                 .border(
-                                    width =
-                                        AppDimensions
-                                            .borderStrokeWidth, // Use dimension for border width
-                                    color =
-                                        MaterialTheme.colorScheme.outline.copy(
-                                            alpha = 0.5f), // Use theme color for border
-                                    shape =
-                                        MaterialTheme.shapes
-                                            .medium) // Or any other shape you prefer
-                                .testTag("request_feedback_button"),
+                                    width = AppDimensions.borderStrokeWidth,
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                    shape = MaterialTheme.shapes.medium)
+                                .testTag(chatButtonType.buttonTestTag),
                         colors =
                             ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                           Text(
-                              text = "Request Feedback",
-                              modifier = Modifier.testTag("request_feedback_button_text"),
+                              text = chatButtonType.buttonText,
+                              modifier = Modifier.testTag(chatButtonType.buttonTextTestTag),
                               color = MaterialTheme.colorScheme.primary)
                         }
                   }

@@ -8,7 +8,19 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -25,6 +37,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -42,7 +55,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +79,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speechBattle.BattleViewModel
+import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -83,12 +106,14 @@ import kotlinx.coroutines.launch
  *
  * @param navigationActions Object to handle navigation within the app.
  * @param userProfileViewModel ViewModel providing user data and friend management functionality.
+ * @param battleViewModel ViewModel for managing battles.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewFriendsScreen(
     navigationActions: NavigationActions,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    battleViewModel: BattleViewModel? = null // Optional ViewModel for battle management
 ) {
   // State variables
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
@@ -113,6 +138,18 @@ fun ViewFriendsScreen(
 
   // New state variable for Friend Requests expansion
   var isFriendRequestsExpanded by remember { mutableStateOf(true) }
+
+  // Fetch pending battles when the screen is composed
+  LaunchedEffect(Unit) { battleViewModel?.fetchPendingBattlesForUser() }
+
+  // Collect the pending battles as state, fallback to an empty list if battleViewModel is null
+  val pendingBattles by
+      battleViewModel?.pendingBattles?.observeAsState(emptyList())
+          ?: remember { mutableStateOf(emptyList<SpeechBattle>()) }
+
+  // Create a HashMap of challengerUID to battleID for quick lookup
+  val challengerBattleMap =
+      remember(pendingBattles) { pendingBattles.associateBy({ it.challenger }, { it.battleId }) }
 
   ProjectTheme {
     ModalNavigationDrawer(
@@ -175,7 +212,7 @@ fun ViewFriendsScreen(
                       colors =
                           TopAppBarDefaults.topAppBarColors(
                               containerColor = MaterialTheme.colorScheme.surface))
-                  HorizontalDivider() // Adds a separation line below the TopAppBar
+                  HorizontalDivider()
                 }
               },
               bottomBar = {
@@ -189,7 +226,6 @@ fun ViewFriendsScreen(
                     tabList = LIST_TOP_LEVEL_DESTINATION,
                     selectedItem = Route.FRIENDS)
               }) { innerPadding ->
-                // Replace the Column with a LazyColumn
                 LazyColumn(
                     modifier =
                         Modifier.fillMaxSize()
@@ -248,7 +284,8 @@ fun ViewFriendsScreen(
                                 Text(
                                     text = "Friend Requests",
                                     style = MaterialTheme.typography.titleSmall,
-                                    modifier = Modifier.weight(1f).testTag("friendRequestsHeader"))
+                                    modifier = Modifier.weight(1f).testTag("friendRequestsHeader"),
+                                    color = MaterialTheme.colorScheme.primary)
                                 IconButton(
                                     onClick = {
                                       isFriendRequestsExpanded = !isFriendRequestsExpanded
@@ -261,7 +298,8 @@ fun ViewFriendsScreen(
                                           contentDescription =
                                               if (isFriendRequestsExpanded)
                                                   "Collapse Friend Requests"
-                                              else "Expand Friend Requests")
+                                              else "Expand Friend Requests",
+                                          tint = MaterialTheme.colorScheme.onSurface)
                                     }
                               }
                         }
@@ -294,7 +332,8 @@ fun ViewFriendsScreen(
                             style = MaterialTheme.typography.titleSmall,
                             modifier =
                                 Modifier.padding(bottom = AppDimensions.smallPadding)
-                                    .testTag("viewFriendsList"))
+                                    .testTag("viewFriendsList"),
+                            color = MaterialTheme.colorScheme.primary)
                       }
 
                       // Display message if no friends match the search query
@@ -313,10 +352,21 @@ fun ViewFriendsScreen(
                       } else {
                         // Display the list of friends if any match the search query
                         items(filteredFriends) { friend ->
+                          val hasPendingBattle = friend.uid in challengerBattleMap.keys
                           FriendItem(
                               friend = friend,
+                              hasPendingBattle = hasPendingBattle,
                               userProfileViewModel = userProfileViewModel,
-                              onProfilePictureClick = { selectedFriend = it })
+                              onProfilePictureClick = { selectedFriend = it },
+                              onClick = { selectedFriend ->
+                                if (hasPendingBattle) {
+                                  // Accept battle and navigate to battle screen
+                                  battleViewModel?.acceptBattle(challengerBattleMap[friend.uid]!!)
+                                } else {
+                                  // Navigate to create battle screen
+                                  navigationActions.navigateToSendBattleScreen(selectedFriend.uid)
+                                }
+                              })
                         }
                       }
                     }
@@ -339,16 +389,21 @@ fun ViewFriendsScreen(
  * - The friend's profile picture, name, and bio.
  * - The friend's login streak or the last login date.
  * - An option to remove the friend from the user's friend list.
+ * - A notification icon if there's a pending battle.
  *
  * @param friend The [UserProfile] object representing the friend being displayed.
+ * @param hasPendingBattle A boolean indicating if the friend has challenged the user.
  * @param userProfileViewModel The [UserProfileViewModel] that handles friend deletion.
  * @param onProfilePictureClick Callback triggered when the friend's profile picture is clicked.
+ * @param onClick Callback when the entire item is clicked.
  */
 @Composable
 fun FriendItem(
     friend: UserProfile,
+    hasPendingBattle: Boolean,
     userProfileViewModel: UserProfileViewModel,
-    onProfilePictureClick: (UserProfile) -> Unit
+    onProfilePictureClick: (UserProfile) -> Unit,
+    onClick: (UserProfile) -> Unit
 ) {
   // Compute the displayedStreak
   val displayedStreak = currentFriendStreak(friend.lastLoginDate, friend.currentStreak)
@@ -375,10 +430,10 @@ fun FriendItem(
               .padding(
                   horizontal = AppDimensions.smallPadding, vertical = AppDimensions.smallPadding)
               .clip(RoundedCornerShape(AppDimensions.paddingMediumSmall))
-              .testTag("viewFriendsItem#${friend.uid}"),
+              .testTag("viewFriendsItem#${friend.uid}")
+              .clickable { onClick(friend) },
       color = MaterialTheme.colorScheme.surfaceContainerHigh,
-      shadowElevation = AppDimensions.elevationSmall // Subtle shadow with low elevation
-      ) {
+      shadowElevation = AppDimensions.elevationSmall) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
             verticalAlignment = Alignment.CenterVertically) {
@@ -386,61 +441,65 @@ fun FriendItem(
                   profilePictureUrl = friend.profilePic,
                   onClick = { onProfilePictureClick(friend) })
               Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-              Column(
-                  modifier = Modifier.weight(1f), // Expand to push DeleteFriendButton to the end
-                  verticalArrangement = Arrangement.Center) {
-                    Text(
-                        text = friend.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier =
-                            Modifier.padding(bottom = AppDimensions.smallPadding)
-                                .testTag("friendName#${friend.uid}"),
-                        color = MaterialTheme.colorScheme.primary)
-                    Text(
-                        text = friend.bio ?: "No bio available",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.testTag("friendBio#${friend.uid}"))
-                    Spacer(modifier = Modifier.height(AppDimensions.smallPadding))
-                    // Display streak or last login message
-                    if (displayedStreak > 0) {
-                      // Display Whatshot icon with streak count
-                      Row(
-                          verticalAlignment = Alignment.CenterVertically,
-                          modifier = Modifier.fillMaxWidth()) {
-                            Icon(
-                                imageVector =
-                                    Icons.Filled.Whatshot, // Using Whatshot as the fire icon
-                                contentDescription = "Active Streak",
-                                tint = COLOR_AMBER,
-                                modifier = Modifier.size(AppDimensions.iconSizeSmall))
-                            Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-                            Text(
-                                text =
-                                    "$displayedStreak day${if (displayedStreak > 1) "s" else ""} streak",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = COLOR_AMBER,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier =
-                                    Modifier.testTag("friendStreak")
-                                        .weight(1f) // Allow the text to take available space
-                                )
-                          }
-                    } else {
-                      // Display last login message
-                      Text(
-                          text =
-                              "Last login ${daysSinceLastLogin} day${if (daysSinceLastLogin > 1) "s" else ""} ago",
-                          style = MaterialTheme.typography.bodyLarge,
-                          color = MaterialTheme.colorScheme.secondary,
-                          maxLines = 1,
-                          overflow = TextOverflow.Ellipsis,
-                          modifier = Modifier.testTag("friendLastLogin#${friend.uid}"))
-                    }
-                  }
+              Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+                Text(
+                    text = friend.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier =
+                        Modifier.padding(bottom = AppDimensions.smallPadding)
+                            .testTag("friendName#${friend.uid}"),
+                    color = MaterialTheme.colorScheme.primary)
+                Text(
+                    text = friend.bio ?: "No bio available",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("friendBio#${friend.uid}"))
+                Spacer(modifier = Modifier.height(AppDimensions.smallPadding))
+                // Display streak or last login message
+                if (displayedStreak > 0) {
+                  // Display Whatshot icon with streak count
+                  Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      modifier = Modifier.fillMaxWidth()) {
+                        Icon(
+                            imageVector = Icons.Filled.Whatshot,
+                            contentDescription = "Active Streak",
+                            tint = COLOR_AMBER,
+                            modifier = Modifier.size(AppDimensions.iconSizeSmall))
+                        Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+                        Text(
+                            text =
+                                "$displayedStreak day${if (displayedStreak > 1) "s" else ""} streak",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = COLOR_AMBER,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.testTag("friendStreak").weight(1f))
+                      }
+                } else {
+                  // Display last login message
+                  Text(
+                      text =
+                          "Last login ${daysSinceLastLogin} day${if (daysSinceLastLogin > 1) "s" else ""} ago",
+                      style = MaterialTheme.typography.bodyLarge,
+                      color = MaterialTheme.colorScheme.secondary,
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                      modifier = Modifier.testTag("friendLastLogin#${friend.uid}"))
+                }
+              }
+              if (hasPendingBattle) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Pending Battle",
+                    tint = Color.Red,
+                    modifier =
+                        Modifier.size(AppDimensions.iconSizeMedium)
+                            .padding(end = AppDimensions.smallPadding)
+                            .testTag("pendingBattleIcon#${friend.uid}"))
+              }
               DeleteFriendButton(friend = friend, userProfileViewModel = userProfileViewModel)
             }
       }
@@ -488,10 +547,7 @@ fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileVie
             .show()
       },
       modifier = Modifier.testTag("deleteFriendButton#${friend.uid}")) {
-        Icon(
-            imageVector = Icons.Default.Delete, // Built-in delete icon
-            contentDescription = "Delete",
-            tint = Color.Red)
+        Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
       }
 }
 
@@ -506,7 +562,7 @@ fun DeleteFriendButton(friend: UserProfile, userProfileViewModel: UserProfileVie
  */
 fun currentFriendStreak(lastLoginDateString: String?, currentStreak: Long): Long {
   if (!lastLoginDateString.isNullOrEmpty()) {
-    val lastLoginDate = parseDate(lastLoginDateString) ?: return 0L
+    val lastLoginDate = parseDate(lastLoginDateString)
     val currentDate = getCurrentDate()
     val daysDifference = getDaysDifference(lastLoginDate, currentDate)
     return when (daysDifference) {
@@ -517,6 +573,7 @@ fun currentFriendStreak(lastLoginDateString: String?, currentStreak: Long): Long
   }
   return -1L // No last login date recorded
 }
+
 /**
  * Composable function that represents a single friend request item in the list.
  *
@@ -554,7 +611,8 @@ fun FriendRequestItem(friendRequest: UserProfile, userProfileViewModel: UserProf
                     style = MaterialTheme.typography.titleMedium,
                     modifier =
                         Modifier.padding(bottom = AppDimensions.smallPadding)
-                            .testTag("friendRequestName#${friendRequest.uid}"))
+                            .testTag("friendRequestName#${friendRequest.uid}"),
+                    color = MaterialTheme.colorScheme.primary)
                 // Friend's Bio
                 Text(
                     text = friendRequest.bio ?: "No bio available",
