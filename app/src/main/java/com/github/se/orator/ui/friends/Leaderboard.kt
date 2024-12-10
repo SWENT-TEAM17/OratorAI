@@ -120,15 +120,21 @@ fun LeaderboardScreen(
                     modifier = Modifier.testTag("leaderboardLazyColumn")) {
                       if (currentRankMetric.value == "Ratio") {
                         itemsIndexed(leaderboardEntriesRatio) { index, profile ->
-                          LeaderboardItem(rank = index + 1, profile = profile)
+                          LeaderboardItem(
+                              rank = index + 1, profile = profile, "Ratio", userProfileViewModel)
                         }
                       } else if (currentRankMetric.value == "Success") {
                         itemsIndexed(leaderboardEntriesSuccess) { index, profile ->
-                          LeaderboardItem(rank = index + 1, profile = profile)
+                          LeaderboardItem(
+                              rank = index + 1, profile = profile, "Success", userProfileViewModel)
                         }
                       } else {
                         itemsIndexed(leaderboardEntriesImprovement) { index, profile ->
-                          LeaderboardItem(rank = index + 1, profile = profile)
+                          LeaderboardItem(
+                              rank = index + 1,
+                              profile = profile,
+                              "Improvement",
+                              userProfileViewModel)
                         }
                       }
                     }
@@ -199,7 +205,12 @@ fun PracticeModeSelector() {
  * @param profile The [UserProfile] object containing user information and improvement statistics.
  */
 @Composable
-fun LeaderboardItem(rank: Int, profile: UserProfile) {
+fun LeaderboardItem(
+    rank: Int,
+    profile: UserProfile,
+    selectedMetric: String,
+    userProfileViewModel: UserProfileViewModel
+) {
   Surface(
       modifier =
           Modifier.fillMaxWidth()
@@ -220,8 +231,21 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary)
             // Display user's improvement statistics
+            // Display the selected metric's value
+            val metricValue =
+                when (selectedMetric) {
+                  "Ratio" ->
+                      "Success Ratio: ${
+                      userProfileViewModel.getSuccessRatioForMode(profile.statistics, currentPracticeMode.value)
+                  }"
+                  "Success" ->
+                      "Success: ${
+                      userProfileViewModel.getSuccessForMode(profile.statistics, currentPracticeMode.value)
+                  }"
+                  else -> "Improvement: ${profile.statistics.improvement}"
+                }
             Text(
-                text = "Improvement: ${profile.statistics.improvement}",
+                text = metricValue,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
