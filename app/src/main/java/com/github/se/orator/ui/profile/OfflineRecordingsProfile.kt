@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen

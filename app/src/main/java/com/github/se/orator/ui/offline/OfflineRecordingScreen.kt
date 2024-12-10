@@ -139,10 +139,9 @@ fun OfflineRecordingScreen(
                                   recorder.stopRecording()
                                 }
                             analysisState.value = SpeakingRepository.AnalysisState.FINISHED
+                          } else {
+                            Log.d("offline recording screen issue", "Unrecognized analysis state!")
                           }
-                            else {
-                                Log.d("offline recording screen issue", "Unrecognized analysis state!")
-                            }
                         })
                   }
 
