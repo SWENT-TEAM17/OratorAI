@@ -155,6 +155,7 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
                         .getJSONObject("sentiment")
                         .getJSONObject("polarity")
                         .getDouble("score")))
+        Log.d("in symblai", "What you said is: $sentimentJson.getJSONArray(\"messages\")")
       } else {
         onFailure(SpeakingError.NO_MESSAGES_FOUND_ERROR)
         Log.e(CLASS_LOG_ID, "No messages found in the response.")
