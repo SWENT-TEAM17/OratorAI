@@ -21,10 +21,14 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
   override val analysisState: StateFlow<SpeakingRepository.AnalysisState> = _analysisState
 
   // Functions to start and stop recording
-  override fun startRecording() {
+  override fun startRecording(audioFile: File) {
     _analysisState.value = SpeakingRepository.AnalysisState.RECORDING
-    audioRecorder.startRecording()
+    audioRecorder.startRecording(audioFile)
   }
+    override fun startRecording() { // this is where the bug is from
+        _analysisState.value = SpeakingRepository.AnalysisState.RECORDING
+        audioRecorder.startRecording(File(context.cacheDir, "audio_record.wav"))
+    }
 
   override fun startRecordingToFile(audioFile: File) {
     audioRecorder.startRecording(audioFile)

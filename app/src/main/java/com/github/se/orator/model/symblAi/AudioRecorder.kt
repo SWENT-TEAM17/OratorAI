@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -69,15 +70,36 @@ class AudioRecorder(
 
           outputStream.close()
           recordingListener?.onRecordingFinished(audioFile)
-        }
+      if (audioFile.exists()) {
+        Log.d("AudioRecorder", "File exists and is ready for playback.")
+      } else {
+        Log.e("AudioRecorder", "File does not exist after saving.")
+      }
+
+    }
         .start()
   }
 
   fun stopRecording() {
     isRecordingAudio = false
-    audioRecord?.stop()
-    audioRecord?.release()
-    audioRecord = null
+    // Ensure the thread has time to finish processing
+    audioRecord?.let {
+      try {
+        it.stop()
+        Log.d("AudioRecorder", "AudioRecord stopped successfully.")
+      } catch (e: IllegalStateException) {
+        Log.e("AudioRecorder", "Error stopping AudioRecord: ${e.message}", e)
+      }
+
+      try {
+        it.release()
+        audioRecord = null
+        Log.d("AudioRecorder", "AudioRecord released successfully.")
+      } catch (e: Exception) {
+        Log.e("AudioRecorder", "Error releasing AudioRecord: ${e.message}", e)
+      }
+
+    }
   }
 
   fun saveAsWavFile(audioData: ByteArray, audioFile: File) {
@@ -119,6 +141,7 @@ class AudioRecorder(
     wavFile.write(header)
     wavFile.write(audioData)
     wavFile.close()
+    Log.d("AudioRecorder", "File saved successfully: ${audioFile.absolutePath}")
   }
 
   // Helper functions to write data to header

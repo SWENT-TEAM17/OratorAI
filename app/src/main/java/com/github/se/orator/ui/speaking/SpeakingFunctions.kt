@@ -43,6 +43,7 @@ import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import kotlinx.coroutines.delay
+import java.io.File
 
 /**
  * A composable that visualizes audio amplitudes as a waveform.
@@ -85,7 +86,8 @@ fun MicrophoneButton(
     analysisState: State<SpeakingRepository.AnalysisState>,
     permissionGranted: MutableState<Boolean>,
     context: Context,
-    funRec: () -> Unit = {}
+    funRec: () -> Unit = {},
+    audioFile: File = File(context.cacheDir, "audio_record.wav")
 ) {
   val infiniteTransition = rememberInfiniteTransition(label = "")
   val requestPerms = remember { mutableStateOf(false) }
@@ -105,7 +107,7 @@ fun MicrophoneButton(
           Toast.makeText(context, "You need to allow permissions!", Toast.LENGTH_SHORT).show()
         }
         funRec()
-        viewModel.onMicButtonClicked(permissionGranted.value)
+        viewModel.onMicButtonClicked(permissionGranted.value, audioFile)
       },
       modifier =
           Modifier.size(AppDimensions.buttonSize)
