@@ -71,19 +71,7 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
       onSuccess: (AnalysisData) -> Unit,
       onFailure: (SpeakingError) -> Unit
   ) {
-    //        setupAnalysisResultsUsage(onSuccess, onFailure)
-    //
-    //        symblApiClient.getTranscription(audioFile,
-    //            onSuccess = { analysisData ->
-    //                Log.d("SymblApiClient", "Transcription successful:
-    // ${analysisData.transcription}")
-    //                onSuccess(analysisData)
-    //            },
-    //            onFailure = { error ->
-    //                Log.e("SymblApiClient", "Transcription failed: $error")
-    //                onFailure(error)
-    //            })
-    //    }
+
     CoroutineScope(Dispatchers.IO).launch {
       delay(5_000) // Delay for 10 seconds (10,000 milliseconds)
 

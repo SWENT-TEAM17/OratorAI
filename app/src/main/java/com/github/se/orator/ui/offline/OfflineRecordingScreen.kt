@@ -117,8 +117,7 @@ fun OfflineRecordingScreen(
                         context,
                         funRec = {
                           // what to do when user begins to record a file
-                          if (analysisState.value == SpeakingRepository.AnalysisState.IDLE ||
-                              analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
+                          if (analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
                             File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3")
                                 .also {
                                   recorder.startRecording(it)
@@ -141,6 +140,9 @@ fun OfflineRecordingScreen(
                                 }
                             analysisState.value = SpeakingRepository.AnalysisState.FINISHED
                           }
+                            else {
+                                Log.d("offline recording screen issue", "Unrecognized analysis state!")
+                            }
                         })
                   }
 

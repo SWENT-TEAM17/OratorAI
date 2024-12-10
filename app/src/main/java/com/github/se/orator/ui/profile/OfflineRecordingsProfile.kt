@@ -29,6 +29,7 @@ import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppTypography
 import loadPromptsFromFile
 
@@ -58,14 +59,14 @@ fun PromptCard(
             verticalArrangement = Arrangement.Center) {
               Text(
                   text = "Interview ${index + 1}",
-                  fontSize = 18.sp,
+                  fontSize = AppFontSizes.bodyLarge,
                   fontWeight = FontWeight.Bold,
                   modifier = Modifier.testTag("prompt_title_$index"))
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
               prompt.forEach { (key, value) ->
                 Text(
                     text = "Company: $value",
-                    fontSize = 14.sp,
+                    fontSize = AppFontSizes.bodySmall,
                     modifier = Modifier.testTag("prompt_detail_${index}_$key"))
               }
             }

@@ -54,7 +54,7 @@ class SpeakingViewModel(
         audioFile,
         onSuccess = { ad -> _offlineAnalysisData.value = ad },
         onFailure = { error -> _analysisError.value = error })
-    Log.d("cute", "smile")
+    Log.d("in speaking view model", "get transcript for offline mode has been called successfully")
     repository.startRecording()
     repository.stopRecording()
   }

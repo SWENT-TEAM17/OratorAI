@@ -90,7 +90,7 @@ fun PreviousRecordingsFeedbackScreen(
         prompts?.get("jobPosition") ?: "engineer")
     Log.d("testing offline chat view model", "the gpt model offline value response is $response")
     // Text(text = "What you said: ${what_has_been_said.value}")
-    Text(text = "Interviewer's response: $response", color = Color.Black)
+    Text(text = "Interviewer's response: $response", color = MaterialTheme.colorScheme.primary)
     Log.d("d", "Hello! This is has been said: ${offlineAnalysisData!!.transcription}")
   }
   // prompts?.get("targetPosition") ?: "Default Value"
@@ -109,7 +109,7 @@ fun PreviousRecordingsFeedbackScreen(
             onClick = { player.playFile(audioFile) },
             shape = AppShapes.circleShape,
             modifier = Modifier.testTag("play_button"),
-            colors = ButtonDefaults.buttonColors(Color.White),
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface),
             contentPadding = PaddingValues(0.dp)) {
               androidx.compose.material.Icon(
                   Icons.Outlined.PlayCircleOutline,

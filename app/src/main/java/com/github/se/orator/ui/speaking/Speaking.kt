@@ -131,30 +131,3 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
         }
       }
 }
-
-/// **
-// * A composable that visualizes audio amplitudes as a waveform.
-// *
-// * @param amplitudes A list of amplitude values to visualize.
-// */
-// @Composable
-// fun AudioVisualizer(amplitudes: List<Float>) {
-//  val color = MaterialTheme.colorScheme.onBackground
-//  Canvas(
-//      modifier =
-//          Modifier.fillMaxWidth()
-//              .height(AppDimensions.visualizerHeight)
-//              .testTag("audio_visualizer")) {
-//        val width = size.width
-//        val height = size.height
-//        val barWidth = width / amplitudes.size
-//        amplitudes.forEachIndexed { index, amplitude ->
-//          val barHeight = (amplitude / Short.MAX_VALUE) * height
-//          drawLine(
-//              color = color,
-//              start = Offset(x = index * barWidth, y = height / 2 - barHeight / 2),
-//              end = Offset(x = index * barWidth, y = height / 2 + barHeight / 2),
-//              strokeWidth = barWidth)
-//        }
-//      }
-// }
