@@ -46,24 +46,24 @@ fun LeaderboardScreen(
   val userProfile by userProfileViewModel.userProfile.collectAsState()
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
 
+  val usersForRanking = listOfNotNull(userProfile) + friendsProfiles
+
   // Combine and sort profiles by improvement for leaderboard display
   val leaderboardEntriesRatio =
       remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
-        (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
+        (usersForRanking).sortedByDescending {
           userProfileViewModel.getSuccessRatioForMode(it.statistics, currentPracticeMode.value)
         }
       }
   val leaderboardEntriesSuccess =
       remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
-        (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
+        (usersForRanking).sortedByDescending {
           userProfileViewModel.getSuccessForMode(it.statistics, currentPracticeMode.value)
         }
       }
   val leaderboardEntriesImprovement =
       remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
-        (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
-          it.statistics.improvement
-        }
+        (usersForRanking).sortedByDescending { it.statistics.improvement }
       }
 
   ProjectTheme {
