@@ -100,7 +100,7 @@ class AudioRecorderTest {
           }
           .thenReturn(PackageManager.PERMISSION_DENIED)
 
-      audioRecorder.startRecording()
+      audioRecorder.startRecording(File(context.cacheDir, "audio_record.wav"))
     }
   }
 

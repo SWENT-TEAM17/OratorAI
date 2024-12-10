@@ -43,6 +43,7 @@ fun OfflineRecordingScreen(
       mutableStateOf(false)
     } // Makes for easier testing
 ) {
+  val fileSaved = MutableStateFlow(false)
   val analysisState = remember {
     MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)
   } // viewModel.analysisState.collectAsState()
@@ -54,7 +55,6 @@ fun OfflineRecordingScreen(
   //        AndroidAudioPlayer(context)
   //    }
 
-  var audioFile: File? = null // Keep this!! It should not be greyed out (bug?)
   val permissionLauncher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
           isGranted ->
@@ -118,11 +118,9 @@ fun OfflineRecordingScreen(
                         funRec = {
                           // what to do when user begins to record a file
                           if (analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
-                            File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3")
-                                .also {
-                                  recorder.startRecording(it)
-                                  audioFile = it
-                                }
+                            recorder.startRecording(
+                                File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3"))
+
                             Log.d(
                                 "aa",
                                 "now transcribing to: ${viewModel.interviewPromptNb.value}.mp3")
@@ -137,12 +135,15 @@ fun OfflineRecordingScreen(
                                       "aall",
                                       " file saved to: \"${viewModel.interviewPromptNb.value}.mp3\"")
                                   recorder.stopRecording()
+                                  fileSaved.value = true
                                 }
                             analysisState.value = SpeakingRepository.AnalysisState.FINISHED
                           } else {
                             Log.d("offline recording screen issue", "Unrecognized analysis state!")
                           }
-                        })
+                        },
+                        audioFile =
+                            File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3"))
                   }
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
@@ -178,8 +179,11 @@ fun OfflineRecordingScreen(
               // button for user to click when he is done recording
               Button(
                   onClick = {
-                    viewModel.endAndSave()
-                    navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
+                    if (fileSaved.value) {
+                      viewModel.endAndSave()
+                      fileSaved.value = false
+                      navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
+                    }
                   },
                   modifier =
                       Modifier.fillMaxWidth(0.6f)

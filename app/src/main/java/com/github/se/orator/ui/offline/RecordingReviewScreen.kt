@@ -1,11 +1,13 @@
 package com.github.se.orator.ui.offline
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +21,7 @@ import com.github.se.orator.model.symblAi.AndroidAudioPlayer
 import com.github.se.orator.model.symblAi.AudioRecorder
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
 import java.io.File
 
@@ -35,6 +38,7 @@ fun RecordingReviewScreen(
 
   val audioFile: File = File(context.cacheDir, "${speakingViewModel.interviewPromptNb.value}.mp3")
 
+  Log.d("rec screen review", "the file that you shall play is $audioFile")
   Column(
       modifier =
           Modifier.fillMaxSize()
@@ -44,13 +48,30 @@ fun RecordingReviewScreen(
       horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             modifier = Modifier.testTag("hear_recording_button"),
+            colors =
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { player.playFile(audioFile) }) {
-              Text(text = "Hear recording")
+              Text(text = "Hear recording", color = MaterialTheme.colorScheme.surface)
             }
 
-        Button(modifier = Modifier.testTag("stop_recording_button"), onClick = { player.stop() }) {
-          Text(text = "Stop recording")
-        }
+        Button(
+            modifier = Modifier.testTag("stop_recording_button"),
+            colors =
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            onClick = { player.stop() }) {
+              Text(text = "Stop recording", color = MaterialTheme.colorScheme.surface)
+            }
+
+        Button(
+            modifier = Modifier.testTag("try_again"),
+            colors =
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            onClick = { navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE) }) {
+              Text(
+                  text = "Do another interview",
+                  color = MaterialTheme.colorScheme.surface,
+                  modifier = Modifier.testTag("text_try_again"))
+            }
 
         Row(
             modifier = Modifier.fillMaxWidth().testTag("Back"),

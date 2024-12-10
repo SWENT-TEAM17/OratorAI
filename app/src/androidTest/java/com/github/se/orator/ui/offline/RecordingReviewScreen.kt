@@ -45,5 +45,7 @@ class RecordingReviewScreen {
     composeTestRule.onNodeWithTag("Back").assertIsDisplayed()
     composeTestRule.onNodeWithTag("hear_recording_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("stop_recording_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("try_again").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("test_try_again").assertIsDisplayed()
   }
 }
