@@ -358,6 +358,9 @@ fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (
         if (granted && isCameraRequested) {
           isCameraRequested = false
           pendingImageUri?.let { uri -> takePictureLauncher.launch(uri) }
+              ?: run {
+                Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
+              }
         } else if (!granted && isCameraRequested) {
           isCameraRequested = false
           Toast.makeText(context, "Camera permission denied.", Toast.LENGTH_SHORT).show()
@@ -385,60 +388,74 @@ fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (
         buttons = {
           Column(
               modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmallMedium),
-          ) {
-            Button(
-                onClick = {
-                  onDismiss()
-                  // Check camera permission
-                  if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-                      PackageManager.PERMISSION_GRANTED) {
-                    // Launch camera with pendingImageUri
-                    val uri = createImageFileUri()
-                    if (uri != null) {
-                      pendingImageUri = uri
-                      takePictureLauncher.launch(uri)
-                    } else {
-                      Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT)
-                          .show()
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                // Take Photo Button
+                Button(
+                    onClick = {
+                      onDismiss()
+                      // Create the URI first
+                      val uri = createImageFileUri()
+                      if (uri != null) {
+                        pendingImageUri = uri
+                        // Check camera permission
+                        if (ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.CAMERA) ==
+                            PackageManager.PERMISSION_GRANTED) {
+                          // Launch camera
+                          takePictureLauncher.launch(uri)
+                        } else {
+                          // Request camera permission
+                          isCameraRequested = true
+                          cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                      } else {
+                        Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("PhotoOnTake"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.primary)) {
+                      Text(
+                          "Take Photo",
+                          color = MaterialTheme.colorScheme.onPrimary,
+                          modifier = Modifier.testTag("TakePhotoText"))
                     }
-                  } else {
-                    // Request camera permission
-                    isCameraRequested = true
-                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                  }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        backgroundColor = androidx.compose.material.MaterialTheme.colors.primary)) {
-                  Text(
-                      "Take Photo",
-                      color = androidx.compose.material.MaterialTheme.colors.onPrimary)
-                }
-            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-            Button(
-                onClick = {
-                  onDismiss()
-                  pickImageLauncher.launch("image/*")
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        backgroundColor = androidx.compose.material.MaterialTheme.colors.primary)) {
-                  Text(
-                      "Upload from Gallery",
-                      color = androidx.compose.material.MaterialTheme.colors.onPrimary)
-                }
-            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-            Button(
-                onClick = { onDismiss() },
-                modifier = Modifier.fillMaxWidth(),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        backgroundColor = androidx.compose.material.MaterialTheme.colors.surface)) {
-                  Text("Cancel", color = androidx.compose.material.MaterialTheme.colors.primary)
-                }
-          }
+
+                Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+
+                // Upload from Gallery Button
+                Button(
+                    onClick = {
+                      onDismiss()
+                      pickImageLauncher.launch("image/*")
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("PhotoOnPick"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.primary)) {
+                      Text(
+                          "Upload from Gallery",
+                          color = MaterialTheme.colorScheme.onPrimary,
+                          modifier = Modifier.testTag("UploadGalleryText"))
+                    }
+
+                Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+
+                // Cancel Button
+                Button(
+                    onClick = { onDismiss() },
+                    modifier = Modifier.fillMaxWidth().testTag("PhotoOnDismiss"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.surface)) {
+                      Text(
+                          "Cancel",
+                          color = MaterialTheme.colorScheme.primary,
+                          modifier = Modifier.testTag("CancelText"))
+                    }
+              }
         })
   }
 }
