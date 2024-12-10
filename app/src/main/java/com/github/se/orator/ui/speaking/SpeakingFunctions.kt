@@ -42,8 +42,8 @@ import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
-import kotlinx.coroutines.delay
 import java.io.File
+import kotlinx.coroutines.delay
 
 /**
  * A composable that visualizes audio amplitudes as a waveform.

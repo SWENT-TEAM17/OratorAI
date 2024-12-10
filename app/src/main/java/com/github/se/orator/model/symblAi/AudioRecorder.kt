@@ -70,13 +70,12 @@ class AudioRecorder(
 
           outputStream.close()
           recordingListener?.onRecordingFinished(audioFile)
-      if (audioFile.exists()) {
-        Log.d("AudioRecorder", "File exists and is ready for playback.")
-      } else {
-        Log.e("AudioRecorder", "File does not exist after saving.")
-      }
-
-    }
+          if (audioFile.exists()) {
+            Log.d("AudioRecorder", "File exists and is ready for playback.")
+          } else {
+            Log.e("AudioRecorder", "File does not exist after saving.")
+          }
+        }
         .start()
   }
 
@@ -98,7 +97,6 @@ class AudioRecorder(
       } catch (e: Exception) {
         Log.e("AudioRecorder", "Error releasing AudioRecord: ${e.message}", e)
       }
-
     }
   }
 

@@ -153,8 +153,7 @@ fun OratorApp(
   val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
   val apiLinkViewModel = ApiLinkViewModel()
   val speakingViewModel =
-      SpeakingViewModel(
-          SpeakingRepositoryRecord(context), apiLinkViewModel, userProfileViewModel)
+      SpeakingViewModel(SpeakingRepositoryRecord(context), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
   // Scaffold composable to provide basic layout structure for the app
@@ -184,8 +183,7 @@ fun OratorApp(
               arguments = listOf(navArgument("question") { type = NavType.StringType })) {
                   backStackEntry ->
                 val question = backStackEntry.arguments?.getString("question") ?: ""
-                OfflineRecordingScreen(
-                    context, navigationActions, question, speakingViewModel)
+                OfflineRecordingScreen(context, navigationActions, question, speakingViewModel)
               }
 
           // Online/auth flow

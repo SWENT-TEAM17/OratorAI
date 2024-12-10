@@ -8,7 +8,8 @@ interface SpeakingRepository {
   val analysisState: StateFlow<AnalysisState>
 
   fun startRecording(audioFile: File)
-    fun startRecording()
+
+  fun startRecording()
 
   fun getTranscript(
       audioFile: File,

@@ -38,7 +38,7 @@ fun RecordingReviewScreen(
 
   val audioFile: File = File(context.cacheDir, "${speakingViewModel.interviewPromptNb.value}.mp3")
 
-    Log.d("rec screen review", "the file that you shall play is $audioFile")
+  Log.d("rec screen review", "the file that you shall play is $audioFile")
   Column(
       modifier =
           Modifier.fillMaxSize()
@@ -48,24 +48,27 @@ fun RecordingReviewScreen(
       horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             modifier = Modifier.testTag("hear_recording_button"),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            colors =
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { player.playFile(audioFile) }) {
               Text(text = "Hear recording", color = MaterialTheme.colorScheme.surface)
             }
 
         Button(
             modifier = Modifier.testTag("stop_recording_button"),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            colors =
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { player.stop() }) {
-          Text(text = "Stop recording", color = MaterialTheme.colorScheme.surface)
-        }
+              Text(text = "Stop recording", color = MaterialTheme.colorScheme.surface)
+            }
 
-      Button(
-          modifier = Modifier.testTag("try_again"),
-          colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-          onClick = { navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)}) {
-          Text(text = "Do another interview", color = MaterialTheme.colorScheme.surface)
-      }
+        Button(
+            modifier = Modifier.testTag("try_again"),
+            colors =
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            onClick = { navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE) }) {
+              Text(text = "Do another interview", color = MaterialTheme.colorScheme.surface)
+            }
 
         Row(
             modifier = Modifier.fillMaxWidth().testTag("Back"),
