@@ -67,7 +67,10 @@ fun RecordingReviewScreen(
             colors =
                 ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE) }) {
-              Text(text = "Do another interview", color = MaterialTheme.colorScheme.surface)
+              Text(
+                  text = "Do another interview",
+                  color = MaterialTheme.colorScheme.surface,
+                  modifier = Modifier.testTag("text_try_again"))
             }
 
         Row(
