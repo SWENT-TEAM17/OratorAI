@@ -112,7 +112,8 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         profileViewModel.ensureListSizeTen(
                             profile.statistics.recentData.toList().map { data ->
                               data.talkTimeSeconds.toFloat()
-                            }))
+                            }),
+                        "talkTimeSecGraph")
                   }
 
               Column(
@@ -153,7 +154,8 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         profileViewModel.ensureListSizeTen(
                             profile.statistics.recentData.toList().map { data ->
                               data.talkTimePercentage.toFloat()
-                            }))
+                            }),
+                        "talkTimePercGraph")
                   }
 
               Column(
@@ -184,14 +186,15 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
 }
 
 @Composable
-fun LineChart(xValues: List<Int>, yValues: List<Float>) {
+fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
   require(xValues.size == yValues.size) { "X and Y values must have the same size." }
 
   Canvas(
       modifier =
           Modifier.width(graphWidth)
               .height(graphHeight)
-              .padding(start = paddingExtraLarge, top = paddingSmall)) {
+              .padding(start = paddingExtraLarge, top = paddingSmall)
+              .testTag(testTag)) {
         val maxX = xValues.maxOrNull()?.toFloat() ?: 1f
         val maxY = yValues.maxOrNull() ?: 1f
         val minY = yValues.minOrNull() ?: 0f
