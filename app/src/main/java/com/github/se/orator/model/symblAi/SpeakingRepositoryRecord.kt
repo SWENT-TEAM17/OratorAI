@@ -22,17 +22,20 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
 
   // Functions to start and stop recording
 
-  // Function to start recording to a specific file
-  override fun startRecording(audioFile: File) {
-    _analysisState.value = SpeakingRepository.AnalysisState.RECORDING
-    audioRecorder.startRecording(audioFile)
-  }
-
-  // Function to start recording to the default file kept for backwards compatibility
+  // Function to start recording to the default file "audio_record.wav" kept for backwards
+  // compatibility
   // with the speaking screens
   override fun startRecording() {
     _analysisState.value = SpeakingRepository.AnalysisState.RECORDING
     audioRecorder.startRecording(File(context.cacheDir, "audio_record.wav"))
+  }
+
+  // This overload of startRecording() allows specifying a custom audio file name.
+  // It was introduced to ensure that the recorded audio can be saved under a unique,
+  // caller-defined filename, preventing conflicts and issues in playback due to default names.
+  override fun startRecording(audioFile: File) {
+    _analysisState.value = SpeakingRepository.AnalysisState.RECORDING
+    audioRecorder.startRecording(audioFile)
   }
 
   override fun startRecordingToFile(audioFile: File) {

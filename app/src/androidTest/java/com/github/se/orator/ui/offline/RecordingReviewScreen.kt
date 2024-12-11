@@ -3,6 +3,7 @@ package com.github.se.orator.ui.offline
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -46,6 +47,6 @@ class RecordingReviewScreen {
     composeTestRule.onNodeWithTag("hear_recording_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("stop_recording_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("try_again").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("test_try_again").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Do another interview").assertIsDisplayed()
   }
 }
