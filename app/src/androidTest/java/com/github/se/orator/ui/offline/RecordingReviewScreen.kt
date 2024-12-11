@@ -55,6 +55,7 @@ class RecordingReviewScreen {
     composeTestRule.onNodeWithText("Stop recording").assertIsDisplayed()
   }
 
+  @Test
   fun testButtons() {
     composeTestRule.onNodeWithTag("try_again").performClick()
     verify(navigationActions).navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
