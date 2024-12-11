@@ -7,8 +7,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -212,7 +210,6 @@ object AppDimensions {
     @Composable get() = (scaleFactorWidth() * 107.0f).dp
   // Circle with background image and profile picture
 
-
   val slightlyLowerProfilePictureSize: Dp
     @Composable get() = (scaleFactorWidth() * 97.0f).dp
 
@@ -245,11 +242,11 @@ object AppDimensions {
   val jobDescriptionInputFieldHeight: Dp
     @Composable get() = (scaleFactorHeight() * 200.0f).dp
 
-    val graphHeight: Dp
-        @Composable get() = (scaleFactorHeight() * 200.0f).dp
+  val graphHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 150.0f).dp
 
-    val graphWidth: Dp
-        @Composable get() = (scaleFactorHeight() * 200.0f).dp
+  val graphWidth: Dp
+    @Composable get() = (scaleFactorHeight() * 200.0f).dp
 
   // Drawer Padding
   val drawerPadding: Dp
@@ -261,7 +258,6 @@ object AppDimensions {
 
   // Other Dimensions
   const val full: Float = 1f // Assuming this is a constant and doesn't need scaling
-
 }
 
 object AppShapes {

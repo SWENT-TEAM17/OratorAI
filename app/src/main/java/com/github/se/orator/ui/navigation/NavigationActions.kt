@@ -38,7 +38,6 @@ object Route {
 
   const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
   const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
-
 }
 
 object Screen {
@@ -69,7 +68,6 @@ object Screen {
 
   const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
   const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
-
 }
 
 data class TopLevelDestination(
