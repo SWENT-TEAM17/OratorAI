@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
+import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +15,10 @@ class SpeakingViewModel(
     private val apiLinkViewModel: ApiLinkViewModel,
     private val userProfileViewModel: UserProfileViewModel
 ) : ViewModel() {
+  /** The analysis data collected. It is not final as the user can still re-record another audio. */
+  private val _offlineAnalysisData = MutableStateFlow<AnalysisData?>(null)
+  val offlineAnalysisData: StateFlow<AnalysisData?> = _offlineAnalysisData.asStateFlow()
+  val interviewPromptNb = MutableStateFlow("")
 
   /** The analysis data collected. It is not final as the user can still re-record another audio. */
   private val _analysisData = MutableStateFlow<AnalysisData?>(null)
@@ -42,6 +47,16 @@ class SpeakingViewModel(
     }
     repository.resetRecorder()
     _analysisData.value = null
+  }
+
+  fun getTranscript(audioFile: File) {
+    repository.getTranscript(
+        audioFile,
+        onSuccess = { ad -> _offlineAnalysisData.value = ad },
+        onFailure = { error -> _analysisError.value = error })
+    Log.d("in speaking view model", "get transcript for offline mode has been called successfully")
+    repository.startRecording()
+    repository.stopRecording()
   }
 
   // Function to handle microphone button click
