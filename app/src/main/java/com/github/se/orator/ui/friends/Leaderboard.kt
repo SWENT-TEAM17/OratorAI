@@ -235,14 +235,27 @@ fun LeaderboardItem(
             val metricValue =
                 when (selectedMetric) {
                   "Ratio" ->
-                      "Success Ratio: ${
-                      userProfileViewModel.getSuccessRatioForMode(profile.statistics, currentPracticeMode.value)
-                  }"
+                      if (userProfileViewModel.getSuccessRatioForMode(
+                          profile.statistics, currentPracticeMode.value) >= 0) {
+                        "Success Ratio: ${userProfileViewModel.getSuccessRatioForMode(profile.statistics, currentPracticeMode.value)}"
+                      } else {
+                        "Sucess Ratio: Not Ranked"
+                      }
                   "Success" ->
-                      "Success: ${
-                      userProfileViewModel.getSuccessForMode(profile.statistics, currentPracticeMode.value)
-                  }"
-                  else -> "Improvement: ${profile.statistics.improvement}"
+                      if (userProfileViewModel.getSuccessForMode(
+                          profile.statistics, currentPracticeMode.value) >= 0) {
+                        "Success: ${
+                              userProfileViewModel.getSuccessForMode(profile.statistics, currentPracticeMode.value)
+                          }"
+                      } else {
+                        "Sucess: Not Ranked"
+                      }
+                  else ->
+                      if (profile.statistics.improvement >= 0) {
+                        "Improvement: ${profile.statistics.improvement}"
+                      } else {
+                        "Improvement: Not Ranked"
+                      }
                 }
             Text(
                 text = metricValue,
