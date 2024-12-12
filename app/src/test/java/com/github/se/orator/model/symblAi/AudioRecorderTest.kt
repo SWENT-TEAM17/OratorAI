@@ -100,7 +100,7 @@ class AudioRecorderTest {
           }
           .thenReturn(PackageManager.PERMISSION_DENIED)
 
-      audioRecorder.startRecording()
+      audioRecorder.startRecording(File(context.cacheDir, "audio_record.wav"))
     }
   }
 
@@ -124,5 +124,42 @@ class AudioRecorderTest {
     // Verify that AudioRecord stopped and released
     verify(mockAudioRecord).stop()
     verify(mockAudioRecord).release()
+  }
+
+  @Test
+  fun testSaveRecordingToCorrectFile() {
+    val audioData = ByteArray(1024) { 0x55 } // Sample audio data
+    val tempFile = File.createTempFile("test_audio_correct", ".wav")
+    tempFile.deleteOnExit()
+
+    // Save the audio data to the file
+    audioRecorder.saveAsWavFile(audioData, tempFile)
+
+    // Verify the file exists
+    assertTrue(tempFile.exists())
+
+    // Verify the file is not empty
+    assertTrue(tempFile.length() > 0)
+
+    // Verify the file path is correct
+    assertEquals(tempFile.absolutePath, tempFile.path)
+
+    // check the file size is correct
+    val fileBytes = tempFile.readBytes()
+    assertTrue(fileBytes.size == 44 + audioData.size) // Header + audio data
+
+    // Verify headers
+    assertEquals('R'.code.toByte(), fileBytes[0])
+    assertEquals('I'.code.toByte(), fileBytes[1])
+    assertEquals('F'.code.toByte(), fileBytes[2])
+    assertEquals('F'.code.toByte(), fileBytes[3])
+
+    // Verify WAVE header
+    assertEquals('W'.code.toByte(), fileBytes[8])
+    assertEquals('A'.code.toByte(), fileBytes[9])
+    assertEquals('V'.code.toByte(), fileBytes[10])
+    assertEquals('E'.code.toByte(), fileBytes[11])
+    val recordedAudioData = fileBytes.sliceArray(44 until fileBytes.size)
+    assertArrayEquals(audioData, recordedAudioData)
   }
 }

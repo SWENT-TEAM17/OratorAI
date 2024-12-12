@@ -154,13 +154,13 @@ fun OratorApp(
   val navController = rememberNavController()
   // Initialize NavigationActions to handle navigation events
   val navigationActions = NavigationActions(navController)
+  val context = LocalContext.current
 
   // Initialize required ViewModels using ViewModel.compose APIs
   val userProfileViewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModel.Factory)
   val apiLinkViewModel = ApiLinkViewModel()
   val speakingViewModel =
-      SpeakingViewModel(
-          SpeakingRepositoryRecord(LocalContext.current), apiLinkViewModel, userProfileViewModel)
+      SpeakingViewModel(SpeakingRepositoryRecord(context), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
   // Initialize BattleViewModel using the factory
@@ -200,8 +200,7 @@ fun OratorApp(
               arguments = listOf(navArgument("question") { type = NavType.StringType })) {
                   backStackEntry ->
                 val question = backStackEntry.arguments?.getString("question") ?: ""
-                OfflineRecordingScreen(
-                    LocalContext.current, navigationActions, question, speakingViewModel)
+                OfflineRecordingScreen(context, navigationActions, question, speakingViewModel)
               }
 
           // Online/auth flow
@@ -250,7 +249,7 @@ fun OratorApp(
 
             composable(Screen.FEEDBACK_SCREEN) {
               PreviousRecordingsFeedbackScreen(
-                  LocalContext.current, navigationActions, chatViewModel, speakingViewModel)
+                  context, navigationActions, chatViewModel, speakingViewModel)
             }
 
             composable(Screen.EDIT_PROFILE) {
