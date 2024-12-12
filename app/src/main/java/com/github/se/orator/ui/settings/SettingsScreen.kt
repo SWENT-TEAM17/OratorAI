@@ -33,8 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
@@ -60,7 +60,7 @@ fun TextButtonFun(settingBar: SettingBar, onClick: () -> Unit = {}) {
   TextButton(
       onClick = { onClick() },
       modifier = Modifier.fillMaxWidth().testTag(settingBar.testTag),
-      contentPadding = PaddingValues(0.dp) // Remove default padding
+      contentPadding = PaddingValues(AppDimensions.nullPadding) // Remove default padding
       ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
@@ -88,7 +88,8 @@ fun TextButtonFun(settingBar: SettingBar, onClick: () -> Unit = {}) {
 @Composable
 fun SettingsScreen(
     navigationActions: NavigationActions,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    themeViewModel: AppThemeViewModel? = null
 ) {
   val context = LocalContext.current
   Scaffold(
@@ -134,7 +135,12 @@ fun SettingsScreen(
                   context.startActivity(intent)
                 }
               }
-              item { TextButtonFun(listOfSettings[1]) { Log.d("SettingsScreen", "Theme switch") } }
+              item {
+                TextButtonFun(listOfSettings[1]) {
+                  themeViewModel?.switchTheme()
+                  Log.d("SettingsScreen", "Theme switch")
+                }
+              }
               item { TextButtonFun(listOfSettings[2]) { Log.d("SettingsScreen", "About") } }
             }
       }

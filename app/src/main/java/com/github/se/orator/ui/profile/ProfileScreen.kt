@@ -28,7 +28,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Edit
@@ -51,8 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
@@ -63,6 +60,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
 import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.COLOR_AMBER
@@ -162,13 +160,13 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                               Modifier.testTag("edit_button")
                                   .size(AppDimensions.spacingXLarge)
                                   .align(Alignment.TopEnd)
-                                  .offset(y = (-20).dp),
+                                  .offset(y = -AppDimensions.paddingMediumSmall),
                           // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
                           shape = AppShapes.circleShape,
                           colors =
                               ButtonDefaults.buttonColors(
                                   backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
-                          contentPadding = PaddingValues(0.dp)) {
+                          contentPadding = PaddingValues(AppDimensions.nullPadding)) {
                             Icon(
                                 Icons.Outlined.Edit,
                                 contentDescription = "Edit button",
@@ -178,8 +176,10 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
                       Column(
                           horizontalAlignment = Alignment.CenterHorizontally,
-                          modifier = Modifier.align(Alignment.TopCenter)) {
-                            Spacer(modifier = Modifier.height(AppDimensions.MediumSpacerHeight))
+                          modifier =
+                              Modifier.align(Alignment.TopCenter)
+                                  .padding(top = AppDimensions.paddingSmall)) {
+                            Spacer(modifier = Modifier.height(AppDimensions.mediumSpacerHeight))
 
                             // Box to hold username and streak
                             Box(
@@ -188,7 +188,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                   // Username remains centered
                                   Text(
                                       text = profile.name,
-                                      fontSize = 20.sp,
+                                      fontSize = AppFontSizes.titleMedium,
                                       fontWeight = FontWeight.Bold,
                                       modifier = Modifier.testTag("profile_name"),
                                       color = MaterialTheme.colorScheme.primary)
@@ -212,7 +212,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                         Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                                         Text(
                                             text = "${profile.currentStreak}",
-                                            fontSize = 20.sp,
+                                            fontSize = AppFontSizes.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = COLOR_AMBER,
                                             maxLines = 1,
@@ -221,7 +221,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                       }
                                 }
 
-                            Spacer(modifier = Modifier.height(AppDimensions.SmallSpacerHeight))
+                            Spacer(modifier = Modifier.height(AppDimensions.smallSpacerHeight))
 
                             Text(
                                 text =
@@ -229,7 +229,10 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                     else profile.bio,
                                 modifier =
                                     Modifier.padding(horizontal = AppDimensions.paddingMedium),
-                                color = MaterialTheme.colorScheme.onSurface)
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1, // Limit to one line
+                                overflow = TextOverflow.Ellipsis // Truncate with ellipsis
+                                )
                           }
                     }
 
@@ -249,7 +252,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 CardSection(
                     title = "Previous Recordings",
                     imageVector = Icons.Outlined.History,
-                    onClick = { /*TODO: Handle previous sessions click */},
+                    onClick = { navigationActions.navigateTo(Screen.OFFLINE_RECORDING_PROFILE) },
                     modifier = Modifier.testTag("previous_sessions_section"))
               }
                   ?: run {
@@ -346,7 +349,7 @@ fun CardSection(
               Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
               Text(
                   text = title,
-                  fontSize = 18.sp,
+                  fontSize = AppFontSizes.bodyLarge,
                   fontWeight = FontWeight.Bold,
                   modifier = Modifier.testTag("titleText"),
                   color = MaterialTheme.colorScheme.onSurfaceVariant)

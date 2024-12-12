@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import com.github.se.orator.model.profile.SessionType
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
@@ -22,8 +23,11 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.ProjectTheme
 
+var currentPracticeMode = mutableStateOf(SessionType.SPEECH)
+var currentRankMetric = mutableStateOf("Ratio")
 /**
  * Composable function that displays the "Leaderboard" screen, which shows a ranked list of friends
  * based on their improvement statistics. Users can also select different practice modes.
@@ -42,12 +46,24 @@ fun LeaderboardScreen(
   val userProfile by userProfileViewModel.userProfile.collectAsState()
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
 
+  val usersForRanking = listOfNotNull(userProfile) + friendsProfiles
+
   // Combine and sort profiles by improvement for leaderboard display
-  val leaderboardEntries =
-      remember(userProfile, friendsProfiles) {
-        (listOfNotNull(userProfile) + friendsProfiles).sortedByDescending {
-          it.statistics.improvement
+  val leaderboardEntriesRatio =
+      remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
+        (usersForRanking).sortedByDescending {
+          userProfileViewModel.getSuccessRatioForMode(it.statistics, currentPracticeMode.value)
         }
+      }
+  val leaderboardEntriesSuccess =
+      remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
+        (usersForRanking).sortedByDescending {
+          userProfileViewModel.getSuccessForMode(it.statistics, currentPracticeMode.value)
+        }
+      }
+  val leaderboardEntriesImprovement =
+      remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
+        (usersForRanking).sortedByDescending { it.statistics.improvement }
       }
 
   ProjectTheme {
@@ -93,7 +109,7 @@ fun LeaderboardScreen(
                       .testTag("leaderboardList"),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 // Dropdown selector for choosing practice mode
-                PracticeModeSelector()
+                ButtonRow()
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
@@ -102,8 +118,24 @@ fun LeaderboardScreen(
                     contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                     verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
                     modifier = Modifier.testTag("leaderboardLazyColumn")) {
-                      itemsIndexed(leaderboardEntries) { index, profile ->
-                        LeaderboardItem(rank = index + 1, profile = profile)
+                      if (currentRankMetric.value == "Ratio") {
+                        itemsIndexed(leaderboardEntriesRatio) { index, profile ->
+                          LeaderboardItem(
+                              rank = index + 1, profile = profile, "Ratio", userProfileViewModel)
+                        }
+                      } else if (currentRankMetric.value == "Success") {
+                        itemsIndexed(leaderboardEntriesSuccess) { index, profile ->
+                          LeaderboardItem(
+                              rank = index + 1, profile = profile, "Success", userProfileViewModel)
+                        }
+                      } else {
+                        itemsIndexed(leaderboardEntriesImprovement) { index, profile ->
+                          LeaderboardItem(
+                              rank = index + 1,
+                              profile = profile,
+                              "Improvement",
+                              userProfileViewModel)
+                        }
                       }
                     }
               }
@@ -129,8 +161,8 @@ fun PracticeModeSelector() {
               .testTag("practiceModeSelector"),
       contentAlignment = Alignment.Center) {
         Text(
-            text = selectedMode,
-            fontSize = AppDimensions.mediumText,
+            text = "Practice mode",
+            fontSize = AppFontSizes.subtitle, // 16.0sp
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("selectedMode"))
@@ -138,22 +170,29 @@ fun PracticeModeSelector() {
         // Dropdown menu options for selecting a practice mode
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
           DropdownMenuItem(
-              text = {
-                Text("Practice mode 1", color = MaterialTheme.colorScheme.onSecondaryContainer)
-              },
+              text = { Text("Interview", color = MaterialTheme.colorScheme.onSecondaryContainer) },
               onClick = {
                 selectedMode = "Practice mode 1"
+                currentPracticeMode.value = SessionType.INTERVIEW
                 expanded = false
               },
               modifier = Modifier.testTag("practiceModeOption1"))
           DropdownMenuItem(
-              text = { Text("Practice mode 2") },
+              text = { Text("Speech") },
               onClick = {
                 selectedMode = "Practice mode 2"
+                currentPracticeMode.value = SessionType.SPEECH
                 expanded = false
               },
               modifier = Modifier.testTag("practiceModeOption2"))
-          // Additional items can be added as needed
+          DropdownMenuItem(
+              text = { Text("Negotiation") },
+              onClick = {
+                selectedMode = "Practice mode 3"
+                currentPracticeMode.value = SessionType.NEGOTIATION
+                expanded = false
+              },
+              modifier = Modifier.testTag("practiceModeOption3"))
         }
       }
 }
@@ -166,7 +205,12 @@ fun PracticeModeSelector() {
  * @param profile The [UserProfile] object containing user information and improvement statistics.
  */
 @Composable
-fun LeaderboardItem(rank: Int, profile: UserProfile) {
+fun LeaderboardItem(
+    rank: Int,
+    profile: UserProfile,
+    selectedMetric: String,
+    userProfileViewModel: UserProfileViewModel
+) {
   Surface(
       modifier =
           Modifier.fillMaxWidth()
@@ -187,8 +231,34 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary)
             // Display user's improvement statistics
+            // Display the selected metric's value
+            val metricValue =
+                when (selectedMetric) {
+                  "Ratio" ->
+                      if (userProfileViewModel.getSuccessRatioForMode(
+                          profile.statistics, currentPracticeMode.value) >= 0) {
+                        "Success Ratio: ${userProfileViewModel.getSuccessRatioForMode(profile.statistics, currentPracticeMode.value)}"
+                      } else {
+                        "Sucess Ratio: Not Ranked"
+                      }
+                  "Success" ->
+                      if (userProfileViewModel.getSuccessForMode(
+                          profile.statistics, currentPracticeMode.value) >= 0) {
+                        "Success: ${
+                              userProfileViewModel.getSuccessForMode(profile.statistics, currentPracticeMode.value)
+                          }"
+                      } else {
+                        "Sucess: Not Ranked"
+                      }
+                  else ->
+                      if (profile.statistics.improvement >= 0) {
+                        "Improvement: ${profile.statistics.improvement}"
+                      } else {
+                        "Improvement: Not Ranked"
+                      }
+                }
             Text(
-                text = "Improvement: ${profile.statistics.improvement}",
+                text = metricValue,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
@@ -205,4 +275,78 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
               color = MaterialTheme.colorScheme.secondary)
         }
       }
+}
+
+/**
+ * Composable function that displays a dropdown menu for selecting different rank metrics. The
+ * selected metric is shown and can be changed by the user.
+ */
+@Composable
+fun RankMetricSelector() {
+  var expanded by remember { mutableStateOf(false) } // Controls dropdown menu visibility
+  var selectedMetric by remember { mutableStateOf("Ratio") } // Holds the selected metric
+
+  Box(
+      modifier =
+          Modifier.clip(RoundedCornerShape(AppDimensions.roundedCornerRadius))
+              .background(MaterialTheme.colorScheme.primaryContainer)
+              .clickable { expanded = true }
+              .padding(AppDimensions.paddingSmallMedium)
+              .testTag("rankMetricSelector"),
+      contentAlignment = Alignment.Center) {
+        Text(
+            text = "Rank metric",
+            fontSize = AppFontSizes.subtitle,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.testTag("selectedMetric"))
+
+        // Dropdown menu options for selecting a rank metric
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+          DropdownMenuItem(
+              text = {
+                Text("Success ratio", color = MaterialTheme.colorScheme.onSecondaryContainer)
+              },
+              onClick = {
+                selectedMetric = "Ratio"
+                currentRankMetric.value = "Ratio"
+                expanded = false
+              },
+              modifier = Modifier.testTag("rankMetricOption1"))
+          DropdownMenuItem(
+              text = { Text("Success") },
+              onClick = {
+                selectedMetric = "Success"
+                currentRankMetric.value = "Success"
+                expanded = false
+              },
+              modifier = Modifier.testTag("rankMetricOption2"))
+          DropdownMenuItem(
+              text = { Text("Improvement") },
+              onClick = {
+                selectedMetric = "Improvement"
+                currentRankMetric.value = "Improvement"
+                expanded = false
+              },
+              modifier = Modifier.testTag("rankMetricOption3"))
+        }
+      }
+}
+
+/**
+ * The implementation of the toolbar containing the practice mode button and the rank metric button
+ */
+@Composable
+fun ButtonRow() {
+  Row(
+      modifier =
+          Modifier.testTag("buttonRowLeaderboard")
+              .fillMaxWidth()
+              .padding(top = AppDimensions.paddingMedium),
+      horizontalArrangement =
+          Arrangement.spacedBy(AppDimensions.spacingXLarge, Alignment.CenterHorizontally),
+  ) {
+    PracticeModeSelector()
+    RankMetricSelector()
+  }
 }

@@ -1,8 +1,10 @@
 package com.github.se.orator.ui.profile
 
+import android.Manifest
+import android.content.Context
+import android.net.Uri
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -11,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.rule.GrantPermissionRule
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -18,11 +21,15 @@ import com.github.se.orator.model.profile.UserStatistics
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.navigation.TopLevelDestinations
+import io.mockk.MockKAnnotations
+import io.mockk.mockk
+import io.mockk.mockkStatic
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -34,6 +41,11 @@ class CreateAccountScreenTest {
   private lateinit var userProfileRepository: UserProfileRepository
 
   @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule
+  val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
+
+  private val fakeImageUri = Uri.parse("test_profile_image.jpeg")
+  private lateinit var mockContext: Context
 
   @Before
   fun setUp() {
@@ -41,6 +53,9 @@ class CreateAccountScreenTest {
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
     `when`(navigationActions.currentRoute()).thenReturn(Screen.HOME)
+    MockKAnnotations.init(this)
+    mockContext = mockk(relaxed = true)
+    mockkStatic("android.widget.Toast") // Mock Toast
   }
 
   @Test
@@ -105,17 +120,6 @@ class CreateAccountScreenTest {
   }
 
   @Test
-  fun profilePictureUploadClickOpensDialog() {
-    composeTestRule.setContent { CreateAccountScreen(navigationActions, userProfileViewModel) }
-
-    // Click on the upload profile picture button
-    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
-
-    // Check if the dialog is displayed
-    composeTestRule.onNodeWithTag("upload_dialog").assertIsDisplayed()
-  }
-
-  @Test
   fun backButtonNavigatesBack() {
     composeTestRule.setContent { CreateAccountScreen(navigationActions, userProfileViewModel) }
     composeTestRule.onNodeWithTag("back_button").performClick()
@@ -131,19 +135,25 @@ class CreateAccountScreenTest {
     composeTestRule
         .onNodeWithText("Select an option to update your profile picture.")
         .assertIsDisplayed()
-    composeTestRule.onNodeWithTag("upload_dialog").assertIsDisplayed()
     composeTestRule.onNodeWithText("Take Photo").assertIsDisplayed()
     composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
   }
 
   @Test
-  fun dialogBoxWorks() {
-    composeTestRule.setContent { CreateAccountScreen(navigationActions, userProfileViewModel) }
-    composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
-    composeTestRule.onNodeWithText("Take Photo").performClick()
-    composeTestRule.onNodeWithTag("upload_dialog").assertIsNotDisplayed()
+  fun createAccountScreen_uploadButton_opensImagePickerDialog() {
+    composeTestRule.setContent {
+      CreateAccountScreen(
+          navigationActions = navigationActions, userProfileViewModel = userProfileViewModel)
+    }
 
+    // Click the upload profile picture button
     composeTestRule.onNodeWithTag("upload_profile_picture").performClick()
+
+    // Verify that the ImagePicker dialog is displayed
+    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Take Photo").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Upload from Gallery").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Cancel").assertIsDisplayed()
   }
 }

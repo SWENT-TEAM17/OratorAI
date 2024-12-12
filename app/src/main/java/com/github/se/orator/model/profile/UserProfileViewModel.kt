@@ -46,6 +46,14 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
 
+  private val pendingBattles_ = MutableStateFlow<Map<String, String>>(emptyMap())
+  val pendingBattles: StateFlow<Map<String, String>> = pendingBattles_.asStateFlow()
+
+  private val friendsWithPendingBattles_ =
+      MutableStateFlow<List<Pair<UserProfile, String>>>(emptyList())
+  val friendsWithPendingBattles: StateFlow<List<Pair<UserProfile, String>>> =
+      friendsWithPendingBattles_.asStateFlow()
+
   // Queue of the last ten analysis data
   private val recentData_ = MutableStateFlow<ArrayDeque<AnalysisData>>(ArrayDeque())
   val recentData: StateFlow<ArrayDeque<AnalysisData>> = recentData_.asStateFlow()
@@ -629,5 +637,65 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     } else {
       Log.e("UserProfileViewModel", "Cannot update streak: User is not authenticated.")
     }
+  }
+
+  /**
+   * Fetches the name of a user based on their UID.
+   *
+   * @param uid The UID of the user.
+   * @return The name of the user.
+   */
+  fun getName(uid: String): String {
+    val profile = allProfiles_.value.find { it.uid == uid }
+    return profile?.name ?: "Unknown"
+  }
+
+  /**
+   * Calculates the success ratio for a given practice mode based on the user's statistics.
+   *
+   * The success ratio is computed as the ratio of successful sessions to total sessions for the
+   * specified practice mode. If the number of failed sessions is zero or the data for the practice
+   * mode is unavailable, the function returns -1.0.
+   *
+   * @param userStatistics The user's statistics containing session data.
+   * @param practiceMode The practice mode for which to calculate the success ratio.
+   * @return The success ratio as a [Double], or -1.0 if the ratio cannot be calculated.
+   */
+  fun getSuccessRatioForMode(userStatistics: UserStatistics, practiceMode: SessionType): Double {
+    if (userStatistics.successfulSessions.contains(practiceMode.toString())) {
+      val nbrSuccess = userStatistics.successfulSessions[practiceMode.toString()]
+      val totalNbrSessions = userStatistics.sessionsGiven[practiceMode.toString()]
+      if (nbrSuccess != null &&
+          totalNbrSessions != null &&
+          nbrSuccess >= 0 &&
+          totalNbrSessions > 0) {
+        return nbrSuccess.toDouble() / totalNbrSessions.toDouble()
+      }
+      return -1.0
+    } else {
+      return -1.0
+    }
+  }
+
+  /**
+   * Retrieves the number of successful sessions for a given practice mode from the user's
+   * statistics.
+   *
+   * If the data for the specified practice mode is unavailable or the number of successful sessions
+   * is null, the function returns -1.
+   *
+   * @param userStatistics The user's statistics containing session data.
+   * @param practiceMode The practice mode for which to retrieve the number of successful sessions.
+   * @return The number of successful sessions as an [Int], or -1 if the data is unavailable.
+   */
+  fun getSuccessForMode(userStatistics: UserStatistics, practiceMode: SessionType): Int {
+    if (userStatistics.successfulSessions.contains(practiceMode.toString())) {
+      val nbrSuccess = userStatistics.successfulSessions[practiceMode.toString()]
+      if (nbrSuccess != null) {
+        return nbrSuccess
+      }
+      return -1
+    }
+    return -1
   }
 }

@@ -2,72 +2,76 @@ package com.github.se.orator.ui.offline
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.github.se.orator.R
+import com.github.se.orator.model.symblAi.AudioRecorder
+import com.github.se.orator.model.symblAi.SpeakingError
+import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.speaking.MicrophoneButton
+import com.github.se.orator.ui.speaking.handleAudioRecording
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import java.io.File
+import kotlinx.coroutines.flow.MutableStateFlow
 
-@SuppressLint("MissingPermission")
+// TODO: remove this suppress and fix the permissions
+@SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
 @Composable
 fun OfflineRecordingScreen(
+    context: Context = LocalContext.current,
     navigationActions: NavigationActions,
     question: String,
-    speakingViewModel: SpeakingViewModel = viewModel()
+    viewModel: SpeakingViewModel = viewModel(),
+    permissionGranted: MutableState<Boolean> = remember {
+      mutableStateOf(false)
+    } // Makes for easier testing
 ) {
-  var permissionGranted by remember { mutableStateOf(false) }
+  val fileSaved = MutableStateFlow(false)
+  val analysisState = remember {
+    MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)
+  } // viewModel.analysisState.collectAsState()
+  val collState = analysisState.collectAsState()
+  // val analysisData by viewModel.analysisData.collectAsState()
+  val recorder by lazy { AudioRecorder(context = context) }
+
+  //    val player by lazy {
+  //        AndroidAudioPlayer(context)
+  //    }
+
   val permissionLauncher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
           isGranted ->
-        permissionGranted = isGranted
-        if (isGranted) {
-          speakingViewModel.onMicButtonClicked(true)
-        }
+        permissionGranted.value = isGranted
       }
-
-  val isRecording by speakingViewModel.isRecording.collectAsState()
-  val infiniteTransition = rememberInfiniteTransition()
-  val scale by
-      infiniteTransition.animateFloat(
-          initialValue = 1f,
-          targetValue = 1.3f,
-          animationSpec =
-              infiniteRepeatable(
-                  animation = tween(600, easing = LinearEasing), repeatMode = RepeatMode.Reverse))
 
   DisposableEffect(Unit) {
-    onDispose {
-      if (isRecording) {
-        speakingViewModel.endAndSave()
-      }
-    }
-  }
-  val colors = MaterialTheme.colorScheme
+    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
 
+    onDispose { viewModel.endAndSave() }
+  }
+
+  val colors = MaterialTheme.colorScheme
+  val amplitudes = remember { mutableStateListOf<Float>() }
+  handleAudioRecording(collState, permissionGranted, amplitudes)
+
+  // back button
   Column(
       modifier =
           Modifier.fillMaxSize()
@@ -75,7 +79,7 @@ fun OfflineRecordingScreen(
               .padding(WindowInsets.systemBars.asPaddingValues())
               .padding(horizontal = AppDimensions.paddingMedium)
               .testTag("OfflineRecordingScreen"),
-      verticalArrangement = Arrangement.Top,
+      verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             modifier =
@@ -94,11 +98,7 @@ fun OfflineRecordingScreen(
                   tint = colors.primary)
             }
 
-        Spacer(
-            modifier =
-                Modifier.height(
-                    AppDimensions.largeSpacerHeight)) // /// or   val buttonHeight = 48.dp
-
+        // Microphone UI and its functionality
         Column(
             modifier =
                 Modifier.fillMaxSize()
@@ -109,30 +109,64 @@ fun OfflineRecordingScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
               Box(
                   contentAlignment = Alignment.Center,
-                  modifier =
-                      Modifier.size(AppDimensions.logoSize)
-                          .testTag("MicIconContainer")) { // // should be 203.dp
-                    Image(
-                        painter = painterResource(id = R.drawable.bckgrnd_blobs),
-                        contentDescription = "Background",
-                        modifier = Modifier.size(AppDimensions.logoSize).testTag("BackgroundBlob"))
-                    Icon(
-                        imageVector = Icons.Filled.Mic,
-                        contentDescription = "Microphone",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeMic)
-                                .scale(if (isRecording) scale else 1f)
-                                .clickable {
-                                  if (permissionGranted) {
-                                    speakingViewModel.onMicButtonClicked(true)
-                                  } else {
-                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                  }
+                  modifier = Modifier.size(AppDimensions.logoSize).testTag("MicIconContainer")) {
+                    MicrophoneButton(
+                        viewModel,
+                        collState,
+                        permissionGranted,
+                        context,
+                        funRec = {
+                          // what to do when user begins to record a file
+                          if (analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
+                            recorder.startRecording(
+                                File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3"))
+
+                            Log.d(
+                                "aa",
+                                "now transcribing to: ${viewModel.interviewPromptNb.value}.mp3")
+                            analysisState.value = SpeakingRepository.AnalysisState.RECORDING
+                          }
+                          // what to do when user finishes recording a file
+                          else if (analysisState.value ==
+                              SpeakingRepository.AnalysisState.RECORDING) {
+                            File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3")
+                                .also {
+                                  Log.d(
+                                      "aall",
+                                      " file saved to: \"${viewModel.interviewPromptNb.value}.mp3\"")
+                                  recorder.stopRecording()
+                                  fileSaved.value = true
                                 }
-                                .testTag("MicIcon"),
-                        tint = colors.secondary)
+                            analysisState.value = SpeakingRepository.AnalysisState.FINISHED
+                          } else {
+                            Log.d("offline recording screen issue", "Unrecognized analysis state!")
+                          }
+                        },
+                        audioFile =
+                            File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3"))
                   }
 
+              Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
+              // Display feedback messages
+              val feedbackMessage =
+                  when (analysisState.value) {
+                    SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
+                    SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
+                    else ->
+                        when (viewModel.analysisError.value) {
+                          SpeakingError.NO_ERROR -> "Analysis finished."
+                          else -> "Finished recording"
+                        }
+                  }
+
+              Text(
+                  feedbackMessage,
+                  modifier = Modifier.testTag("mic_text"),
+                  fontSize = AppFontSizes.bodyLarge,
+                  color = colors.onSurface)
+
+              // question for user to remember
               Text(
                   text = question,
                   fontSize = AppFontSizes.bodyLarge,
@@ -142,10 +176,14 @@ fun OfflineRecordingScreen(
 
               Spacer(modifier = Modifier.weight(1f))
 
+              // button for user to click when he is done recording
               Button(
                   onClick = {
-                    speakingViewModel.endAndSave()
-                    navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
+                    if (fileSaved.value) {
+                      viewModel.endAndSave()
+                      fileSaved.value = false
+                      navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
+                    }
                   },
                   modifier =
                       Modifier.fillMaxWidth(0.6f)
