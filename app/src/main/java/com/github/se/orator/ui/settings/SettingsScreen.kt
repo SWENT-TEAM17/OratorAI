@@ -128,11 +128,10 @@ fun SettingsScreen(
               // Permissions
               item {
                 TextButtonFun(listOfSettings[0]) {
-                  val intent =
+                  context.startActivity(
                       Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                         data = Uri.fromParts("package", context.packageName, null)
-                      }
-                  context.startActivity(intent)
+                      })
                 }
               }
               item {
