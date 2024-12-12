@@ -190,7 +190,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.HOME)
+            selectedItem = Route.PROFILE)
       })
 }
 
