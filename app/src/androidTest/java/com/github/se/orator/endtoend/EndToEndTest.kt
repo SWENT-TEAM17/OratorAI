@@ -23,6 +23,9 @@ import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.offline.OfflinePracticeQuestionsScreen
+import com.github.se.orator.ui.offline.OfflineScreen
+import com.github.se.orator.ui.overview.OfflineInterviewModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
 import com.github.se.orator.ui.profile.ProfileScreen
@@ -39,22 +42,22 @@ class EndToEndAppTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-    @get:Rule
-    val permissionRule: GrantPermissionRule =
-        GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
+  @get:Rule
+  val permissionRule: GrantPermissionRule =
+      GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
 
-    private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationActions: NavigationActions
   private lateinit var userProfileRepository: UserProfileRepository
   private lateinit var userProfileViewModel: UserProfileViewModel
   private lateinit var mockThemeContext: Context
   private lateinit var appThemeViewModel: AppThemeViewModel
   private lateinit var mockSharedPreferences: SharedPreferences
   private lateinit var mockEditor: SharedPreferences.Editor
-    private lateinit var data: AnalysisData
-    private lateinit var speech: String
-    private lateinit var speakingRepository: SpeakingRepository
-    private lateinit var speakingViewModel: SpeakingViewModel
-    private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var data: AnalysisData
+  private lateinit var speech: String
+  private lateinit var speakingRepository: SpeakingRepository
+  private lateinit var speakingViewModel: SpeakingViewModel
+  private lateinit var apiLinkViewModel: ApiLinkViewModel
 
   private val bio = "Test bio"
   private val testUserProfile =
@@ -72,7 +75,12 @@ class EndToEndAppTest {
           Screen.FRIENDS,
           Screen.LEADERBOARD,
           Screen.CREATE_PROFILE,
-          Screen.SPEAKING)
+          Screen.SPEAKING,
+          Screen.OFFLINE,
+          Screen.OFFLINE_INTERVIEW_MODULE,
+          Screen.PRACTICE_QUESTIONS_SCREEN,
+          Screen.OFFLINE_RECORDING_SCREEN,
+          Screen.)
 
   @Before
   fun setUp() {
@@ -84,25 +92,25 @@ class EndToEndAppTest {
     mockThemeContext = mock(Context::class.java)
     mockEditor = mock(SharedPreferences.Editor::class.java)
     appThemeViewModel = AppThemeViewModel(mockThemeContext)
-      apiLinkViewModel = ApiLinkViewModel()
-      speakingRepository = mock(SpeakingRepository::class.java)
-      `when`(speakingRepository.analysisState)
-          .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
+    apiLinkViewModel = ApiLinkViewModel()
+    speakingRepository = mock(SpeakingRepository::class.java)
+    `when`(speakingRepository.analysisState)
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
 
-      speakingViewModel =
-          SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-      speech = "Hello! My name is John. I am an entrepreneur"
-      data = AnalysisData(speech, 5, 2.0, 1.0)
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    speech = "Hello! My name is John. I am an entrepreneur"
+    data = AnalysisData(speech, 5, 2.0, 1.0)
 
-      `when`(speakingRepository.setupAnalysisResultsUsage(
-          org.mockito.kotlin.any(),
-          org.mockito.kotlin.any()
-      )).thenAnswer { invocation ->
+    `when`(
+            speakingRepository.setupAnalysisResultsUsage(
+                org.mockito.kotlin.any(), org.mockito.kotlin.any()))
+        .thenAnswer { invocation ->
           // Extract the onSuccess callback and invoke it
           val onSuccessCallback = invocation.getArgument<(AnalysisData) -> Unit>(0)
           onSuccessCallback.invoke(data)
           null
-      }
+        }
 
     `when`(
             mockThemeContext.getSharedPreferences(
@@ -136,7 +144,6 @@ class EndToEndAppTest {
       `when`(navigationActions.navigateTo(screen)).then { navController?.navigate(screen) }
     }
 
-
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
     userProfileViewModel.getUserProfile(testUserProfile.uid)
   }
@@ -166,8 +173,22 @@ class EndToEndAppTest {
         composable(Screen.LEADERBOARD) {
           LeaderboardScreen(navigationActions, userProfileViewModel)
         }
-          composable(Screen.SPEAKING) {
+        composable(Screen.SPEAKING) {
+          SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
+        }
+
+        composable(Screen.OFFLINE) { OfflineScreen(navigationActions = navigationActions) }
+
+          composable(Screen.OFFLINE_INTERVIEW_MODULE) {
               SpeakingScreen(navigationActions = navigationActions, speakingViewModel)
+          }
+
+          composable(Screen.OFFLINE_INTERVIEW_MODULE) {
+              OfflineInterviewModule(navigationActions, speakingViewModel)
+          }
+
+          composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
+              OfflinePracticeQuestionsScreen(navigationActions)
           }
       }
     }
@@ -297,67 +318,158 @@ class EndToEndAppTest {
     // Step 7: Navigate back to Home from Friends
     composeTestRule.onNodeWithTag("Home").performClick() // Simulate clicking Home button
 
-      `when`(speakingRepository.analysisState)
-          .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
+    `when`(speakingRepository.analysisState)
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
 
-      // Step 8: Speaking screen
-      composeTestRule.runOnUiThread {
-          navController?.navigate(
-              Screen.SPEAKING) // forcing back to home where the user would be once he finishes creating his
-          // account
-      }
-      composeTestRule.onNodeWithTag("ui_column").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("mic_text").assertTextContains("Tap the mic to start recording.")
+    // Step 8: Speaking screen
+    composeTestRule.runOnUiThread {
+      navController?.navigate(
+          Screen
+              .SPEAKING) // forcing back to home where the user would be once he finishes creating
+                         // his
+      // account
+    }
+    composeTestRule.onNodeWithTag("ui_column").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Tap the mic to start recording.")
 
+    composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
+    composeTestRule.onNodeWithContentDescription("Start recording").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("ui_column").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("back_button").performClick()
+
+    verify(navigationActions).goBack()
+
+    `when`(speakingRepository.analysisState)
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.RECORDING))
+
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+
+    composeTestRule.runOnUiThread {
+      navController?.navigate(
+          Screen
+              .SPEAKING) // forcing back to home where the user would be once he finishes creating
+                         // his
+      // account
+    }
+    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Recording...")
+
+    composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
+    composeTestRule.onNodeWithContentDescription("Stop recording").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("mic_button").performClick()
+    //    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
+    composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
+
+    composeTestRule.onNodeWithText("Transcribed Text: $speech").assertExists()
+    composeTestRule.onNodeWithText("Sentiment Analysis: 1.0").assertIsDisplayed()
+
+    `when`(speakingRepository.analysisState)
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.FINISHED))
+
+    speakingViewModel =
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+
+    composeTestRule.runOnUiThread {
+      navController?.navigate(
+          Screen
+              .SPEAKING) // forcing back to home where the user would be once he finishes creating
+                         // his
+      // account
+    }
+    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
+
+    // Step 9: Offline mode:
+
+    composeTestRule.runOnUiThread {
+      navController?.navigate(
+          Screen
+              .OFFLINE) // forcing back to home where the user would be once he finishes creating
+                        // his
+      // account
+    }
+    composeTestRule.onNodeWithText("No Internet Connection").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText(
+            "It seems like you don't have any WiFi connection... You can still practice offline!")
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithText("Practice Offline").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Practice Offline").performClick()
+
+    verify(navigationActions).navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
+      composeTestRule.onNodeWithTag("company").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("jobInput").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("content").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("doneButton").assertIsDisplayed()
+
+      composeTestRule.onNodeWithText("Go to questions screen").assertIsDisplayed()
+
+      composeTestRule.onNodeWithTag("company").performTextInput("Apple")
+      composeTestRule.onNodeWithTag("jobInput").performTextInput("Engineer")
+
+      composeTestRule.onNodeWithTag("company").assertTextContains("Apple")
+      composeTestRule.onNodeWithTag("jobInput").assertTextContains("Engineer")
+
+      composeTestRule.onNodeWithTag("doneButton").performClick()
+      verify(navigationActions).navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
+
+      composeTestRule.onNodeWithTag("QuestionCard_0").performClick()
+      verify(navigationActions).goToOfflineRecording("What are your strengths?")
+
+      composeTestRule.onNodeWithTag("OfflinePracticeQuestionsScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("TitleText").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Choose your practice question").assertIsDisplayed()
+
+      composeTestRule.onNodeWithTag("QuestionCard_0")
+      composeTestRule.onNodeWithTag("QuestionCard_1")
+      composeTestRule.onNodeWithTag("QuestionCard_2")
+      composeTestRule.onNodeWithTag("QuestionCard_3")
+      composeTestRule.onNodeWithTag("QuestionCard_4")
+
+      composeTestRule.onNodeWithTag("QuestionText_0")
+      composeTestRule.onNodeWithTag("QuestionText_1")
+      composeTestRule.onNodeWithTag("QuestionText_2")
+      composeTestRule.onNodeWithTag("QuestionText_3")
+      composeTestRule.onNodeWithTag("QuestionText_4")
+
+      composeTestRule.onNodeWithTag("QuestionCard_0").performClick()
+      verify(navigationActions).goToOfflineRecording("What are your strengths?")
+
+
+      composeTestRule.onNodeWithTag("QuestionCard_1").performClick()
+      verify(navigationActions).goToOfflineRecording("Describe a challenging situation you've faced.")
+      composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
+
+      composeTestRule.onNodeWithTag("QuestionCard_2").performClick()
+      verify(navigationActions).goToOfflineRecording("Why do you want this position?")
+      composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
+
+      composeTestRule.onNodeWithTag("QuestionCard_3").performClick()
+      verify(navigationActions)
+          .goToOfflineRecording("Tell me about a time you demonstrated leadership.")
+      composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
+
+      composeTestRule.onNodeWithTag("QuestionCard_4").performClick()
+      verify(navigationActions).goToOfflineRecording("How do you handle conflict in a team?")
+
+      // offline recording screen
+      composeTestRule.onNodeWithTag("RecordingColumn").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("MicIconContainer").assertIsDisplayed()
       composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
-      composeTestRule.onNodeWithContentDescription("Start recording").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("QuestionText").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("DoneButton").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("OfflineRecordingScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("BackButtonRow").assertIsDisplayed()
+
+      composeTestRule.onNodeWithText("Done!").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("DoneButton").performClick()
+      verify(navigationActions).navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
 
 
-      composeTestRule.onNodeWithTag("ui_column").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("back_button").performClick()
-
-      verify(navigationActions).goBack()
-
-      `when`(speakingRepository.analysisState)
-          .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.RECORDING))
-
-      speakingViewModel =
-          SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-
-      composeTestRule.runOnUiThread {
-          navController?.navigate(
-              Screen.SPEAKING) // forcing back to home where the user would be once he finishes creating his
-          // account
-      }
-      composeTestRule.onNodeWithTag("mic_text").assertTextContains("Recording...")
-
-      composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
-      composeTestRule.onNodeWithContentDescription("Stop recording").assertIsDisplayed()
-
-      composeTestRule.onNodeWithTag("mic_button").performClick()
-      //    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
-      composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
-
-      composeTestRule.onNodeWithText("Transcribed Text: $speech").assertExists()
-      composeTestRule.onNodeWithText("Sentiment Analysis: 1.0").assertIsDisplayed()
-
-      `when`(speakingRepository.analysisState)
-          .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.FINISHED))
-
-      speakingViewModel =
-          SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-
-      composeTestRule.runOnUiThread {
-          navController?.navigate(
-              Screen.SPEAKING) // forcing back to home where the user would be once he finishes creating his
-          // account
-      }
-      composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
-
-
-      // Step 9: Offline mode:
 
 
   }
