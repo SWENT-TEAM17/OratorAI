@@ -123,6 +123,7 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
         }
   }
 
+  /** Converts a Firestore DocumentSnapshot to a SpeechBattle object. */
   private fun documentToSpeechBattle(document: DocumentSnapshot): SpeechBattle? {
     val data = document.data ?: return null
     return mapToSpeechBattle(data)
@@ -139,6 +140,13 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
         "focusArea" to interviewContext.focusArea)
   }
 
+  /**
+   * Fetches pending battles for a specific user.
+   *
+   * @param userUid The UID of the user.
+   * @param callback A callback function to handle the list of pending battles.
+   * @param onFailure A callback function to handle any errors that occur.
+   */
   override fun getPendingBattlesForUser(
       userUid: String,
       callback: (List<SpeechBattle>) -> Unit,
@@ -159,6 +167,13 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
         }
   }
 
+  /**
+   * Listens for updates to a specific battle.
+   *
+   * @param battleId The ID of the battle to listen for updates.
+   * @param callback A callback function to handle the updated SpeechBattle.
+   * @return A ListenerRegistration object to manage the listener.
+   */
   override fun listenToBattleUpdates(
       battleId: String,
       callback: (SpeechBattle?) -> Unit
