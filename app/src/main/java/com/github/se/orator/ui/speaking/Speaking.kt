@@ -14,16 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
-import com.github.se.orator.model.speaking.InterviewContext
-import com.github.se.orator.model.speaking.PublicSpeakingContext
-import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.model.symblAi.SpeakingError
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.Constants
 import kotlin.math.min
 import kotlinx.coroutines.delay
 
@@ -63,7 +60,7 @@ fun SpeakingScreen(
   // When entering PROCESSING state, pick a random tip
   LaunchedEffect(analysisState.value) {
     if (analysisState.value == SpeakingRepository.AnalysisState.PROCESSING) {
-      val tips = getTipsForModule(apiLinkViewModel)
+      val tips = apiLinkViewModel.getTipsForModule()
       currentTip = tips.random()
     } else {
       // Once we leave PROCESSING, clear the tip
@@ -83,8 +80,8 @@ fun SpeakingScreen(
       progress = 0f
       // While in PROCESSING, gradually increase the progress
       while (analysisState.value == SpeakingRepository.AnalysisState.PROCESSING && progress < 1f) {
-        progress += 0.01f
-        delay(200L) // Increment every 200ms
+        progress += Constants.PROCESSING_PROGRESS_INCREMENT
+        delay(Constants.PROCESSING_INCREMENT_DELAY_MS) // Increment every 200ms
       }
     }
   }
@@ -95,8 +92,8 @@ fun SpeakingScreen(
       // Processing finished, now fill the bar quickly from current progress to 1.0
       // but not too fast, so user can see it:
       while (progress < 1f) {
-        progress += 0.02f
-        delay(100L)
+        progress += Constants.QUICK_FILL_PROGRESS_INCREMENT
+        delay(Constants.QUICK_FILL_INCREMENT_DELAY_MS)
       }
       // Once fully filled, navigate back
       viewModel.endAndSave()
@@ -189,7 +186,9 @@ fun SpeakingScreen(
                         Column(
                             modifier =
                                 Modifier.padding(AppDimensions.paddingMedium)
-                                    .widthIn(min = 200.dp, max = 300.dp)
+                                    .widthIn(
+                                        min = AppDimensions.cardHeightmin,
+                                        max = AppDimensions.cardHeightmax)
                                     .testTag("tips_container"),
                             horizontalAlignment = Alignment.CenterHorizontally) {
                               Text(
@@ -216,51 +215,6 @@ fun SpeakingScreen(
                       }
                 }
           }
-    }
-  }
-}
-
-/**
- * Function to get tips based on the current practice context.
- *
- * @param apiLinkViewModel The view model for the API link.
- * @return A list of tips based on the current practice context.
- */
-fun getTipsForModule(apiLinkViewModel: ApiLinkViewModel): List<String> {
-  // Example tips for each module
-  val interviewTips =
-      listOf(
-          "Avoid filler words like 'um' or 'uh' to sound more confident.",
-          "Maintain a steady pace and organize your thoughts before speaking.",
-          "Research the company's culture and align your answers accordingly.",
-          "Highlight both technical and soft skills relevant to the role.",
-          "Demonstrate problem-solving abilities with concrete examples.")
-
-  val publicSpeakingTips =
-      listOf(
-          "Engage with your audience by varying your tone and volume.",
-          "Use a clear structure: introduction, main points, and conclusion.",
-          "Incorporate storytelling to make your speech memorable.",
-          "Practice your pacing to avoid rushing through key points.",
-          "Anticipate audience questions and prepare responses.")
-
-  val salesPitchTips =
-      listOf(
-          "Emphasize unique selling points that differentiate you from competitors.",
-          "Address potential objections head-on and confidently.",
-          "Focus on the client's needs rather than just product features.",
-          "Use concrete metrics and case studies to demonstrate value.",
-          "Show adaptability if the client raises unexpected concerns.")
-
-  val practiceContext = apiLinkViewModel.practiceContext.value
-
-  return when (practiceContext) {
-    is InterviewContext -> interviewTips
-    is PublicSpeakingContext -> publicSpeakingTips
-    is SalesPitchContext -> salesPitchTips
-    else -> {
-      // If no context or a different one is set, return a generic tip list
-      listOf("Stay calm, be clear, and remember your main goals!")
     }
   }
 }
