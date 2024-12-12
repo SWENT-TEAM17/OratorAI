@@ -7,6 +7,7 @@ enum class BattleStatus {
   PENDING,
   IN_PROGRESS,
   CANCELLED,
+  EVALUATING,
   COMPLETED
 }
 
