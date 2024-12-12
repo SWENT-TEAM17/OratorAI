@@ -7,5 +7,5 @@ interface OfflinePromptsRepoInterface {
     fun loadPromptsFromFile(context: Context): List<Map<String, String>>?
     fun createEmptyPromptFile(context: Context, ID: String)
     fun writeToPromptFile(context: Context, ID: String, prompt: String)
-    fun openPromptTextFile(context: Context, ID: String): String
+    fun readPromptTextFile(context: Context, ID: String): String
 }

@@ -82,7 +82,11 @@ fun PreviousRecordingsFeedbackScreen(
 
   val response by viewModel.response.collectAsState("")
 
-  LaunchedEffect(response) { Log.d("gpt said: ", "gpt said: $response") }
+  LaunchedEffect(response) {
+      Log.d("gpt said: ", "gpt said: $response")
+      offlinePromptsRepository.writeToPromptFile(context, ID, response)
+      Log.d("in previous recordings feedback: ", "inside the file : ${offlinePromptsRepository.readPromptTextFile(context, ID)}")
+  }
 
   if (offlineAnalysisData != null) {
     viewModel.offlineRequest(

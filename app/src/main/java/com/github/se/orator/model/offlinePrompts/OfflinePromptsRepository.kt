@@ -49,30 +49,26 @@ class OfflinePromptsRepository: OfflinePromptsRepoInterface {
         val fileName = "$ID.txt"
         val fileIsEmptyHeader = "0//!"
         val file = File(context.cacheDir, fileName)
-//        val writer = FileWriter(fileName)
-//        writer.write(fileIsEmptyHeader)
-//        writer.close()
         file.writeText(fileIsEmptyHeader)
     }
 
     override fun writeToPromptFile(context: Context, ID: String, prompt: String) {
         val fileName = "$ID.txt"
         val file = File(context.cacheDir, fileName)
-        val fileContents: String = file.reader().use{it.readText()}
-        if (fileContents == "0//!") {
-            val writer = FileWriter(fileName)
-            writer.write(prompt)
-            writer.close()
-        }
-        else {
-            Log.d("in writeToPromptFile function: ", "file is not empty!")
-        }
+        val fileContents: String = file.readText()
+        file.writeText(prompt)
+//        if (fileContents == "0//!") {
+//            file.writeText(prompt)
+//        }
+//        else {
+//            Log.d("in writeToPromptFile function: ", "file is not empty!")
+//        }
     }
 
-    override fun openPromptTextFile(context: Context, ID: String): String {
+    override fun readPromptTextFile(context: Context, ID: String): String {
         val fileName = "$ID.txt"
         val file = File(context.cacheDir, fileName)
-        val fileContents: String = file.reader().use{it.readText()}
+        val fileContents: String = file.readText()
 
         if (fileContents == "0//!") {
             return "Loading interviewer response..."

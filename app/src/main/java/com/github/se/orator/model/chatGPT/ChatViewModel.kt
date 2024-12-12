@@ -270,8 +270,6 @@ class ChatViewModel(
             _response.value = responseMessage.content
             has_responded.value = true
             Log.d("response in offline request in chatViewModel", "$responseMessage.content")
-
-
           }
         }
       } catch (e: Exception) {
