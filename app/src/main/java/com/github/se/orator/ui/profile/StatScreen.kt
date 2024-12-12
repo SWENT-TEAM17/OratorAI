@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,7 +71,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         .testTag("graphScreenTitle"),
                 text = "Statistics Graph",
                 style = AppTypography.mediumTitleStyle, // Apply custom style for title
-            )
+                color = MaterialTheme.colorScheme.onSurface)
 
             Text(
                 modifier =
@@ -79,7 +80,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         .testTag("talkTimeSecTitle"),
                 text = "Talk Time Seconds:",
                 style = AppTypography.smallTitleStyle, // Apply custom style for title
-            )
+                color = MaterialTheme.colorScheme.onSurface)
 
             Row() {
               Column(
@@ -110,7 +111,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                                 .testTag("talkTimeSecMeanTitle"),
                         text = "Mean: ${profile.statistics.talkTimeSecMean}",
                         style = AppTypography.smallTitleStyle, // Apply custom style for title
-                    )
+                        color = MaterialTheme.colorScheme.onSurface)
                   }
             }
 
@@ -121,7 +122,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         .testTag("talkTimePercTitle"),
                 text = "Talk Time Percentage:",
                 style = AppTypography.smallTitleStyle, // Apply custom style for title
-            )
+                color = MaterialTheme.colorScheme.onSurface)
 
             Row() {
               Column(
@@ -152,7 +153,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                                 .testTag("talkTimePercMeanTitle"),
                         text = "Mean: ${profile.statistics.talkTimePercMean}",
                         style = AppTypography.smallTitleStyle, // Apply custom style for title
-                    )
+                        color = MaterialTheme.colorScheme.onSurface)
                   }
             }
           }
