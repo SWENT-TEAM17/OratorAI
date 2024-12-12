@@ -54,6 +54,13 @@ class ApiLinkViewModel : ViewModel() {
   }
 
   /**
+   * Returns the current practice context, or null if not set.
+   */
+  fun getCurrentPracticeContext(): PracticeContext? {
+    return _practiceContext.value
+  }
+
+  /**
    * Resets all practice data fields to null. Useful to clear all fields when ending a practice
    * session.
    */
