@@ -39,7 +39,6 @@ class StatScreenTest {
     }
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
     userProfileViewModel.getUserProfile(testUserProfile.uid)
-    // `when`(userProfileViewModel.userProfile).thenReturn(MutableStateFlow(testUserProfile))
   }
 
   private val talkTimeSecMean =

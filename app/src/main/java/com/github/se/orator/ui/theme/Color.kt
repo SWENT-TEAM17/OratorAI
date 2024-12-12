@@ -39,6 +39,9 @@ object AppColors {
   val iconColor = Color.Black
   val visualizerBarColor = Color.Cyan
   val graphDots = Color.Red
+  val axisColor = Color.Black
+  val tickLabelColor = android.graphics.Color.BLACK
+  val tickLineColor = Color.Gray
   val amber = Color(0xFFFFA726) // Amber color
 
   // Gradients

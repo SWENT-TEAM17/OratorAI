@@ -639,7 +639,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    * the missing elements are filled with zeros. If the list has more than 10 elements, only the
    * first 10 elements are returned.
    *
-   * @param inputList The input list of integers to process.
+   * @param inputList The input list of floats to process.
    * @return A list of exactly 10 integers.
    */
   fun ensureListSizeTen(inputList: List<Float>): List<Float> {

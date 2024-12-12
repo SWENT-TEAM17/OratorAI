@@ -23,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.testTag
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -31,16 +30,26 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
+import com.github.se.orator.ui.theme.AppColors.axisColor
 import com.github.se.orator.ui.theme.AppColors.graphDots
 import com.github.se.orator.ui.theme.AppColors.secondaryColor
+import com.github.se.orator.ui.theme.AppColors.tickLabelColor
+import com.github.se.orator.ui.theme.AppColors.tickLineColor
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppDimensions.AXIS_STROKE_WIDTH
+import com.github.se.orator.ui.theme.AppDimensions.DRAW_TEXT_TICK_LABEL_OFFSET_VALUE_FOR_Y
+import com.github.se.orator.ui.theme.AppDimensions.DRAW_TEXT_TICK_LABEL_X
+import com.github.se.orator.ui.theme.AppDimensions.FULL
+import com.github.se.orator.ui.theme.AppDimensions.PLOT_LINE_STROKE_WIDTH
+import com.github.se.orator.ui.theme.AppDimensions.POINTS_RADIUS
+import com.github.se.orator.ui.theme.AppDimensions.TICK_LABEL_TEXT_SIZE
+import com.github.se.orator.ui.theme.AppDimensions.X_VALUE_FOR_OFFSET
+import com.github.se.orator.ui.theme.AppDimensions.ZERO
 import com.github.se.orator.ui.theme.AppDimensions.graphHeight
 import com.github.se.orator.ui.theme.AppDimensions.graphWidth
 import com.github.se.orator.ui.theme.AppDimensions.paddingExtraLarge
 import com.github.se.orator.ui.theme.AppDimensions.paddingSmall
 import com.github.se.orator.ui.theme.AppTypography
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -195,13 +204,13 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
               .height(graphHeight)
               .padding(start = paddingExtraLarge, top = paddingSmall)
               .testTag(testTag)) {
-        val maxX = xValues.maxOrNull()?.toFloat() ?: 1f
-        val maxY = yValues.maxOrNull() ?: 1f
-        val minY = yValues.minOrNull() ?: 0f
+        val maxX = xValues.maxOrNull()?.toFloat() ?: FULL // full being the const value for 1f
+        val maxY = yValues.maxOrNull() ?: FULL
+        val minY = yValues.minOrNull() ?: ZERO // zero for the value 0f
         val yRange = maxY - minY
 
         // Avoid division by zero: Assign a minimal range if all yValues are the same
-        val adjustedYRange = if (yRange == 0f) 1f else yRange
+        val adjustedYRange = if (yRange == ZERO) FULL else yRange
         val xStep = size.width / (xValues.size - 1)
         val yScale = size.height / adjustedYRange
 
@@ -216,35 +225,35 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
 
           // Draw tick line
           drawLine(
-              color = Color.Gray,
-              start = Offset(-20f, tickY),
+              color = tickLineColor,
+              start = Offset(X_VALUE_FOR_OFFSET, tickY),
               end = Offset(size.width, tickY),
-              strokeWidth = 1f)
+              strokeWidth = FULL)
 
           // Draw tick label
           drawContext.canvas.nativeCanvas.apply {
             drawText(
                 String.format("%.1f", tickValue),
-                -50f,
-                tickY + 10f,
+                DRAW_TEXT_TICK_LABEL_X,
+                tickY + DRAW_TEXT_TICK_LABEL_OFFSET_VALUE_FOR_Y,
                 android.graphics.Paint().apply {
-                  color = android.graphics.Color.BLACK
-                  textSize = 20f
+                  color = tickLabelColor
+                  textSize = TICK_LABEL_TEXT_SIZE
                 })
           }
         }
 
         // Draw Axes
         drawLine(
-            color = Color.Black,
-            start = Offset(0f, size.height),
+            color = axisColor,
+            start = Offset(ZERO, size.height),
             end = Offset(size.width, size.height),
-            strokeWidth = 10f)
+            strokeWidth = AXIS_STROKE_WIDTH)
         drawLine(
-            color = Color.Black,
-            start = Offset(0f, 0f),
-            end = Offset(0f, size.height),
-            strokeWidth = 10f)
+            color = axisColor,
+            start = Offset(ZERO, ZERO),
+            end = Offset(ZERO, size.height),
+            strokeWidth = AXIS_STROKE_WIDTH)
 
         // Plot Points and Lines
         for (i in 0 until xValues.size - 1) {
@@ -257,7 +266,7 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
               color = secondaryColor,
               start = Offset(startX, startY),
               end = Offset(endX, endY),
-              strokeWidth = 5f)
+              strokeWidth = PLOT_LINE_STROKE_WIDTH)
         }
 
         // Draw Points
@@ -265,7 +274,7 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
           val x = i * xStep
           val y = size.height - (yValues[i] - minY) * yScale
           drawCircle(
-              color = graphDots, center = Offset(x, y), radius = 7f // Smaller point size
+              color = graphDots, center = Offset(x, y), radius = POINTS_RADIUS // Smaller point size
               )
         }
       }

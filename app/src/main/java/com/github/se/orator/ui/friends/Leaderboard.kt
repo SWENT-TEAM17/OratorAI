@@ -195,7 +195,7 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
                 modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
           }
 
-          Spacer(modifier = Modifier.weight(AppDimensions.full))
+          Spacer(modifier = Modifier.weight(AppDimensions.FULL))
 
           // Display rank as a badge on the left side
           Text(
