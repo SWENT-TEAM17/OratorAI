@@ -206,7 +206,9 @@ fun OratorApp(
             composable(Screen.SPEAKING_SALES_PITCH) {
               SpeakingSalesPitchModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
-            composable(Screen.SPEAKING) { SpeakingScreen(navigationActions, speakingViewModel, apiLinkViewModel) }
+            composable(Screen.SPEAKING) {
+              SpeakingScreen(navigationActions, speakingViewModel, apiLinkViewModel)
+            }
             composable(Screen.CHAT_SCREEN) {
               ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
             }

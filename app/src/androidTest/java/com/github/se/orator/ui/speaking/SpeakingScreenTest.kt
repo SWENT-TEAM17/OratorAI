@@ -15,12 +15,10 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
-import com.github.se.orator.model.symblAi.SpeakingError
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
-import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
@@ -123,13 +121,12 @@ class SpeakingScreenTest {
     composeTestRule.onNodeWithText("Sentiment Analysis: 1.0").assertIsDisplayed()
   }
 
-
   @Test
   fun testProcessingMode() {
     `when`(speakingRepository.analysisState)
-      .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
     speakingViewModel =
-      SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(navigationActions = navigationActions, speakingViewModel, apiLinkViewModel)
@@ -148,7 +145,6 @@ class SpeakingScreenTest {
     // Check if progress bar is displayed using the assigned test tag
     composeTestRule.onNodeWithTag("progress_bar").assertExists().assertIsDisplayed()
   }
-
 
   @Test
   fun testTranscript() {
@@ -173,7 +169,8 @@ class SpeakingScreenTest {
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
-      SpeakingScreen(navigationActions = navigationActions, viewModel = speakingViewModel, apiLinkViewModel)
+      SpeakingScreen(
+          navigationActions = navigationActions, viewModel = speakingViewModel, apiLinkViewModel)
     }
 
     // Verify that the AudioVisualizer is displayed
@@ -184,9 +181,9 @@ class SpeakingScreenTest {
   fun testNoPracticeContextTips() {
     // If no practice context is set, we get the generic tips
     `when`(speakingRepository.analysisState)
-      .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
     speakingViewModel =
-      SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     // No context updated on apiLinkViewModel, so it should show generic tips
     composeTestRule.setContent {
@@ -206,16 +203,15 @@ class SpeakingScreenTest {
     // The @Before method already sets an InterviewContext in the apiLinkViewModel.
     // We just need to set the state to PROCESSING to show tips.
     `when`(speakingRepository.analysisState)
-      .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
     speakingViewModel =
-      SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(
-        navigationActions = navigationActions,
-        viewModel = speakingViewModel,
-        apiLinkViewModel = apiLinkViewModel
-      )
+          navigationActions = navigationActions,
+          viewModel = speakingViewModel,
+          apiLinkViewModel = apiLinkViewModel)
     }
 
     // Wait for the tips to appear
@@ -231,31 +227,28 @@ class SpeakingScreenTest {
   fun testPublicSpeakingContextTips() {
     // Set a PublicSpeakingContext by updating the practice context again
     apiLinkViewModel.updatePracticeContext(
-      PublicSpeakingContext(
-        occasion = "Conference",
-        purpose = "Inspire",
-        audienceSize = "Large",
-        audienceDemographic = "Professionals",
-        presentationStyle = "Formal",
-        mainPoints = listOf("Innovation", "Leadership"),
-        experienceLevel = "Experienced",
-        anticipatedChallenges = listOf("Technical Issues"),
-        focusArea = "Engagement Techniques",
-        feedbackType = "Body Language"
-      )
-    )
+        PublicSpeakingContext(
+            occasion = "Conference",
+            purpose = "Inspire",
+            audienceSize = "Large",
+            audienceDemographic = "Professionals",
+            presentationStyle = "Formal",
+            mainPoints = listOf("Innovation", "Leadership"),
+            experienceLevel = "Experienced",
+            anticipatedChallenges = listOf("Technical Issues"),
+            focusArea = "Engagement Techniques",
+            feedbackType = "Body Language"))
 
     `when`(speakingRepository.analysisState)
-      .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
     speakingViewModel =
-      SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(
-        navigationActions = navigationActions,
-        viewModel = speakingViewModel,
-        apiLinkViewModel = apiLinkViewModel
-      )
+          navigationActions = navigationActions,
+          viewModel = speakingViewModel,
+          apiLinkViewModel = apiLinkViewModel)
     }
 
     // Wait for the tips to show
@@ -271,28 +264,25 @@ class SpeakingScreenTest {
   fun testSalesPitchContextTips() {
     // Set a SalesPitchContext by updating the practice context again
     apiLinkViewModel.updatePracticeContext(
-      SalesPitchContext(
-        product = "Marketing Services",
-        targetAudience = "Potential Clients",
-        salesGoal = "Close the deal",
-        keyFeatures = listOf("Customized Strategies", "ROI Focused"),
-        anticipatedChallenges = listOf("Budget Constraints", "Competition"),
-        negotiationFocus = "Handling Objections",
-        feedbackType = "Persuasive Language"
-      )
-    )
+        SalesPitchContext(
+            product = "Marketing Services",
+            targetAudience = "Potential Clients",
+            salesGoal = "Close the deal",
+            keyFeatures = listOf("Customized Strategies", "ROI Focused"),
+            anticipatedChallenges = listOf("Budget Constraints", "Competition"),
+            negotiationFocus = "Handling Objections",
+            feedbackType = "Persuasive Language"))
 
     `when`(speakingRepository.analysisState)
-      .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
+        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.PROCESSING))
     speakingViewModel =
-      SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.setContent {
       SpeakingScreen(
-        navigationActions = navigationActions,
-        viewModel = speakingViewModel,
-        apiLinkViewModel = apiLinkViewModel
-      )
+          navigationActions = navigationActions,
+          viewModel = speakingViewModel,
+          apiLinkViewModel = apiLinkViewModel)
     }
 
     // Wait for the tips to show
@@ -303,5 +293,4 @@ class SpeakingScreenTest {
     // Verify that the tips container is displayed
     composeTestRule.onNodeWithTag("tips_container").assertIsDisplayed()
   }
-
 }

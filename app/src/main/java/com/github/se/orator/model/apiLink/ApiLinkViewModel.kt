@@ -53,9 +53,7 @@ class ApiLinkViewModel : ViewModel() {
     _practiceContext.value = null
   }
 
-  /**
-   * Returns the current practice context, or null if not set.
-   */
+  /** Returns the current practice context, or null if not set. */
   fun getCurrentPracticeContext(): PracticeContext? {
     return _practiceContext.value
   }
