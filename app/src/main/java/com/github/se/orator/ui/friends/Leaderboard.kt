@@ -24,7 +24,6 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
-import com.github.se.orator.ui.theme.ProjectTheme
 
 var currentPracticeMode = mutableStateOf(SessionType.SPEECH)
 var currentRankMetric = mutableStateOf("Ratio")
@@ -65,82 +64,79 @@ fun LeaderboardScreen(
       remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
         (usersForRanking).sortedByDescending { it.statistics.improvement }
       }
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = {
+              Text(
+                  "Leaderboard",
+                  modifier = Modifier.testTag("leaderboardTitle"),
+                  color = MaterialTheme.colorScheme.onSurface)
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = {
+                    navigationActions.goBack() // Navigate back
+                  },
+                  modifier = Modifier.testTag("leaderboardBackButton")) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.testTag("leaderboardBackIcon"),
+                        tint = MaterialTheme.colorScheme.onSurface)
+                  }
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer))
+      },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = Route.FRIENDS)
+      }) { innerPadding ->
+        Column(
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(
+                        horizontal = AppDimensions.paddingMedium,
+                        vertical = AppDimensions.paddingSmall)
+                    .testTag("leaderboardList"),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              // Dropdown selector for choosing practice mode
+              ButtonRow()
 
-  ProjectTheme {
-    Scaffold(
-        topBar = {
-          TopAppBar(
-              title = {
-                Text(
-                    "Leaderboard",
-                    modifier = Modifier.testTag("leaderboardTitle"),
-                    color = MaterialTheme.colorScheme.onSurface)
-              },
-              navigationIcon = {
-                IconButton(
-                    onClick = {
-                      navigationActions.goBack() // Navigate back
-                    },
-                    modifier = Modifier.testTag("leaderboardBackButton")) {
-                      Icon(
-                          Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = "Back",
-                          modifier = Modifier.testTag("leaderboardBackIcon"),
-                          tint = MaterialTheme.colorScheme.onSurface)
-                    }
-              },
-              colors =
-                  TopAppBarDefaults.topAppBarColors(
-                      containerColor = MaterialTheme.colorScheme.surfaceContainer))
-        },
-        bottomBar = {
-          BottomNavigationMenu(
-              onTabSelect = { route -> navigationActions.navigateTo(route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION,
-              selectedItem = Route.FRIENDS)
-        }) { innerPadding ->
-          Column(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .padding(innerPadding)
-                      .padding(
-                          horizontal = AppDimensions.paddingMedium,
-                          vertical = AppDimensions.paddingSmall)
-                      .testTag("leaderboardList"),
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                // Dropdown selector for choosing practice mode
-                ButtonRow()
+              Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-                Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-
-                // Leaderboard list displaying ranked profiles
-                LazyColumn(
-                    contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                    verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
-                    modifier = Modifier.testTag("leaderboardLazyColumn")) {
-                      if (currentRankMetric.value == "Ratio") {
-                        itemsIndexed(leaderboardEntriesRatio) { index, profile ->
-                          LeaderboardItem(
-                              rank = index + 1, profile = profile, "Ratio", userProfileViewModel)
-                        }
-                      } else if (currentRankMetric.value == "Success") {
-                        itemsIndexed(leaderboardEntriesSuccess) { index, profile ->
-                          LeaderboardItem(
-                              rank = index + 1, profile = profile, "Success", userProfileViewModel)
-                        }
-                      } else {
-                        itemsIndexed(leaderboardEntriesImprovement) { index, profile ->
-                          LeaderboardItem(
-                              rank = index + 1,
-                              profile = profile,
-                              "Improvement",
-                              userProfileViewModel)
-                        }
+              // Leaderboard list displaying ranked profiles
+              LazyColumn(
+                  contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                  verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
+                  modifier = Modifier.testTag("leaderboardLazyColumn")) {
+                    if (currentRankMetric.value == "Ratio") {
+                      itemsIndexed(leaderboardEntriesRatio) { index, profile ->
+                        LeaderboardItem(
+                            rank = index + 1, profile = profile, "Ratio", userProfileViewModel)
+                      }
+                    } else if (currentRankMetric.value == "Success") {
+                      itemsIndexed(leaderboardEntriesSuccess) { index, profile ->
+                        LeaderboardItem(
+                            rank = index + 1, profile = profile, "Success", userProfileViewModel)
+                      }
+                    } else {
+                      itemsIndexed(leaderboardEntriesImprovement) { index, profile ->
+                        LeaderboardItem(
+                            rank = index + 1,
+                            profile = profile,
+                            "Improvement",
+                            userProfileViewModel)
                       }
                     }
-              }
-        }
-  }
+                  }
+            }
+      }
 }
 
 /**
