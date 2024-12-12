@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -122,7 +123,7 @@ object AppTypography {
             fontFamily = poppinsBlackFontFamily,
             fontWeight = FontWeight.W600,
             lineHeight = AppFontSizes.poppinsHeightLarge, // Scaled line height
-            color = androidx.compose.ui.graphics.Color.Black,
+            color = MaterialTheme.colorScheme.,
             textAlign = TextAlign.Center)
 
   val mediumTitleStyle: TextStyle

@@ -63,8 +63,12 @@ fun PreviousRecordingsFeedbackScreen(
     val response by viewModel.response.collectAsState()
 
     LaunchedEffect(Unit) {
+        // clearing old display text
         offlinePromptsRepository.clearDisplayText()
+        // read the file containing interviewer's response
         offlinePromptsRepository.readPromptTextFile(context, ID)
+
+        // retrieve previous interviews mapping
         prompts =
             offlinePromptsRepository.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
 
@@ -72,17 +76,9 @@ fun PreviousRecordingsFeedbackScreen(
         audioFile = File(context.cacheDir, "$ID.mp3")
 
         Log.d("PreviousRecordingsFeedbackScreen", "Screen is opened, running code.")
-
-//            viewModel.offlineRequest(
-//                offlineAnalysisData!!.transcription.removePrefix("You said:").trim(),
-//                prompts?.get("targetCompany") ?: "Apple",
-//                prompts?.get("jobPosition") ?: "engineer",
-//                prompts?.get("ID") ?: "00000000")
-//            Log.d("testing offline chat view model", "the gpt model offline value response is $response")
-//            // Text(text = "What you said: ${what_has_been_said.value}")
-//            Log.d("d", "Hello! This is has been said: ${offlineAnalysisData!!.transcription}")
     }
 
+    // if there isn't already an interviewer response: transcribe text + request a gpt prompt
     if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
         LaunchedEffect(speakingViewModel.isTranscribing.value) {
             if (!speakingViewModel.isTranscribing.value)
@@ -96,6 +92,7 @@ fun PreviousRecordingsFeedbackScreen(
                     prompts?.get("jobPosition") ?: "engineer",
                     prompts?.get("ID") ?: "00000000"
                 )
+                // making sure the GPT response is what's being added
                 Log.d(
                     "testing offline chat view model",
                     "the gpt model offline value response is $response"
@@ -104,19 +101,23 @@ fun PreviousRecordingsFeedbackScreen(
         }
     }
 
+    // if a new response is added and there isn't already an interviewer response
+    // every time I open the screen the response changes (which i guess is normal) so I need to add an extra if condition
     LaunchedEffect(response) {
         if (response.isNotEmpty() && (fileData.isNullOrEmpty() || fileData == "Loading interviewer response..." )) {
             offlinePromptsRepository.writeToPromptFile(context, ID, response)
         }
     }
 
+    // text corresponding to interviewer's response
     val displayText = when {
         fileData == "Loading interviewer response..." || fileData.isNullOrEmpty() -> {
             "Processing your audio, please wait..."
         }
-        else -> fileData
+        else -> "Interviewer's response: $fileData"
     }
 
+    // rest of UI elements
     Column(
         modifier = Modifier
             .fillMaxSize()
