@@ -110,6 +110,12 @@ object AppDimensions {
   val buttonHeightLarge: Dp
     @Composable get() = (scaleFactorHeight() * 50.0f).dp
 
+  val cardHeightmin: Dp
+    @Composable get() = (scaleFactorHeight() * 200.0f).dp
+
+  val cardHeightmax: Dp
+    @Composable get() = (scaleFactorHeight() * 300.0f).dp
+
   val buttonHeightRounded: Dp
     @Composable get() = buttonHeightLarge
 
@@ -266,6 +272,16 @@ object AppDimensions {
   const val AXIS_STROKE_WIDTH: Float = 10f
   const val PLOT_LINE_STROKE_WIDTH: Float = 5f
   const val POINTS_RADIUS: Float = 7f
+}
+
+object Constants {
+  // Progress Delay
+  const val PROCESSING_INCREMENT_DELAY_MS: Long = 200L
+  const val QUICK_FILL_INCREMENT_DELAY_MS: Long = 100L
+
+  // Progress Increments
+  const val PROCESSING_PROGRESS_INCREMENT: Float = 0.01f
+  const val QUICK_FILL_PROGRESS_INCREMENT: Float = 0.02f
 }
 
 object AppShapes {
