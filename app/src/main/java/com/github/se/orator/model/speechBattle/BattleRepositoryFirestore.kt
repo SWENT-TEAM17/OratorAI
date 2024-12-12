@@ -1,9 +1,9 @@
 package com.github.se.orator.model.speechBattle
 
 import android.util.Log
-import com.github.se.orator.model.profile.UserProfileRepositoryFirestore
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.network.Message
+import com.github.se.orator.utils.mapToSpeechBattle
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -23,33 +23,33 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
    * @param callback A callback function to indicate success or failure.
    */
   override fun storeBattleRequest(speechBattle: SpeechBattle, callback: (Boolean) -> Unit) {
-      // Serialize the InterviewContext
-      val interviewContextMap = interviewContextToMap(speechBattle.context)
+    // Serialize the InterviewContext
+    val interviewContextMap = interviewContextToMap(speechBattle.context)
 
-      // Create a map to represent the battle data
-      val battleMap = hashMapOf(
-          "battleId" to speechBattle.battleId,
-          "challenger" to speechBattle.challenger,
-          "opponent" to speechBattle.opponent,
-          "status" to speechBattle.status.name,
-          "interviewContext" to interviewContextMap
-          // Exclude "evaluationResult" as they are not set initially
-      )
+    // Create a map to represent the battle data
+    val battleMap =
+        hashMapOf(
+            "battleId" to speechBattle.battleId,
+            "challenger" to speechBattle.challenger,
+            "opponent" to speechBattle.opponent,
+            "status" to speechBattle.status.name,
+            "interviewContext" to interviewContextMap
+            // Exclude "evaluationResult" as they are not set initially
+            )
 
-      // Store the battle in the "battles" collection
-      db.collection("battles")
-          .document(speechBattle.battleId)
-          .set(battleMap)
-          .addOnSuccessListener { callback(true) }
-          .addOnFailureListener { e ->
-              // Handle the error
-              Log.e("BattleRepository", "Error storing battle request", e)
-              callback(false)
-          }
+    // Store the battle in the "battles" collection
+    db.collection("battles")
+        .document(speechBattle.battleId)
+        .set(battleMap)
+        .addOnSuccessListener { callback(true) }
+        .addOnFailureListener { e ->
+          // Handle the error
+          Log.e("BattleRepository", "Error storing battle request", e)
+          callback(false)
+        }
   }
 
-
-    /**
+  /**
    * Listens for pending battles for a specific user.
    *
    * @param userUid The UID of the user.
@@ -123,49 +123,12 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
         }
   }
 
-    private fun documentToSpeechBattle(document: DocumentSnapshot): SpeechBattle? {
-        val data = document.data ?: return null
+  private fun documentToSpeechBattle(document: DocumentSnapshot): SpeechBattle? {
+    val data = document.data ?: return null
+    return mapToSpeechBattle(data)
+  }
 
-        // Extract basic battle information
-        val battleId = data["battleId"] as? String ?: return null
-        val challenger = data["challenger"] as? String ?: return null
-        val opponent = data["opponent"] as? String ?: return null
-        val statusString = data["status"] as? String ?: return null
-        val status = BattleStatus.valueOf(statusString)
-
-        // Convert InterviewContext
-        val userProfileRepository = UserProfileRepositoryFirestore(db)
-        val interviewContextMap = data["interviewContext"] as? Map<String, Any> ?: return null
-        val interviewContext = userProfileRepository.convertInterviewContext(interviewContextMap) ?: return null
-
-        // Extract the challengerCompleted and opponentCompleted fields
-        val challengerCompleted = data["challengerCompleted"] as? Boolean ?: false
-        val opponentCompleted = data["opponentCompleted"] as? Boolean ?: false
-
-        // Extract challengerData and opponentData
-        val challengerDataList = (data["challengerData"] as? List<Map<String, String>>)?.mapNotNull { messageFromMap(it) } ?: emptyList()
-        val opponentDataList = (data["opponentData"] as? List<Map<String, String>>)?.mapNotNull { messageFromMap(it) } ?: emptyList()
-
-        // Extract evaluationResult if available
-        val evaluationMap = data["evaluationResult"] as? Map<String, Any>
-        val evaluationResult = evaluationMap?.let { evaluationResultFromMap(it) }
-
-        return SpeechBattle(
-            battleId = battleId,
-            challenger = challenger,
-            opponent = opponent,
-            status = status,
-            context = interviewContext,
-            challengerCompleted = challengerCompleted,
-            opponentCompleted = opponentCompleted,
-            challengerData = challengerDataList,
-            opponentData = opponentDataList,
-            evaluationResult = evaluationResult
-        )
-    }
-
-
-    /** Serializes an InterviewContext to a Map. */
+  /** Serializes an InterviewContext to a Map. */
   private fun interviewContextToMap(interviewContext: InterviewContext): Map<String, Any> {
     return mapOf(
         "targetPosition" to interviewContext.targetPosition,
@@ -332,59 +295,36 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
         }
   }
 
-    /** Converts EvaluationResult to a Firestore-friendly map */
-    private fun evaluationResultToMap(evaluation: EvaluationResult): Map<String, Any> {
-        return mapOf(
-            "winnerUid" to evaluation.winnerUid,
-            "winnerMessage" to evaluation.winnerMessage.toMap(),
-            "loserMessage" to evaluation.loserMessage.toMap()
-        )
-    }
+  /** Converts EvaluationResult to a Firestore-friendly map */
+  private fun evaluationResultToMap(evaluation: EvaluationResult): Map<String, Any> {
+    return mapOf(
+        "winnerUid" to evaluation.winnerUid,
+        "winnerMessage" to evaluation.winnerMessage.toMap(),
+        "loserMessage" to evaluation.loserMessage.toMap())
+  }
 
-    /** Converts a Firestore map to EvaluationResult */
-    private fun evaluationResultFromMap(data: Map<String, Any>): EvaluationResult? {
-        val winnerUid = data["winnerUid"] as? String ?: return null
-        val winnerMessageMap = data["winnerMessage"] as? Map<String, String> ?: return null
-        val loserMessageMap = data["loserMessage"] as? Map<String, String> ?: return null
-
-        val winnerMessage = messageFromMap(winnerMessageMap) ?: return null
-        val loserMessage = messageFromMap(loserMessageMap) ?: return null
-
-        return EvaluationResult(
-            winnerUid = winnerUid,
-            winnerMessage = winnerMessage,
-            loserMessage = loserMessage
-        )
-    }
-
-    /**
-     * Updates the evaluation result for a given battle.
-     * This sets the status to COMPLETED, sets the winner, and stores the evaluation result.
-     */
-    fun updateEvaluationResult(
-        battleId: String,
-        evaluation: EvaluationResult,
-        callback: (Boolean) -> Unit
-    ) {
-        val battleRef = db.collection("battles").document(battleId)
-        val updates = mapOf(
+  /**
+   * Updates the evaluation result for a given battle. This sets the status to COMPLETED, sets the
+   * winner, and stores the evaluation result.
+   */
+  fun updateEvaluationResult(
+      battleId: String,
+      evaluation: EvaluationResult,
+      callback: (Boolean) -> Unit
+  ) {
+    val battleRef = db.collection("battles").document(battleId)
+    val updates =
+        mapOf(
             "evaluationResult" to evaluationResultToMap(evaluation),
             "status" to BattleStatus.COMPLETED.name,
-            "winner" to evaluation.winnerUid
-        )
+            "winner" to evaluation.winnerUid)
 
-        battleRef.update(updates)
-            .addOnSuccessListener { callback(true) }
-            .addOnFailureListener { e ->
-                Log.e("BattleRepository", "Error updating evaluation result", e)
-                callback(false)
-            }
-    }
-
-    /** Converts a Firestore map to a Message object */
-    fun messageFromMap(map: Map<String, String>): Message? {
-        val role = map["role"] ?: return null
-        val content = map["content"] ?: return null
-        return Message(role, content)
-    }
+    battleRef
+        .update(updates)
+        .addOnSuccessListener { callback(true) }
+        .addOnFailureListener { e ->
+          Log.e("BattleRepository", "Error updating evaluation result", e)
+          callback(false)
+        }
+  }
 }
