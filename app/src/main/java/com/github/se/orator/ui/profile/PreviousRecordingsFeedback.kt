@@ -31,6 +31,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepoInterface
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepository
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
 import com.github.se.orator.model.symblAi.AudioPlayer
 import com.github.se.orator.model.symblAi.SpeakingViewModel
@@ -39,7 +41,6 @@ import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import java.io.File
-import loadPromptsFromFile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
@@ -49,14 +50,15 @@ fun PreviousRecordingsFeedbackScreen(
     navigationActions: NavigationActions,
     viewModel: ChatViewModel,
     speakingViewModel: SpeakingViewModel,
-    player: AudioPlayer = AndroidAudioPlayer(context)
+    player: AudioPlayer = AndroidAudioPlayer(context),
+    offlinePromptsRepository: OfflinePromptsRepoInterface
 ) {
 
   // val recorder by lazy { AudioRecorder(context = context) }
 
   // val player by lazy { AndroidAudioPlayer(context) }
   var prompts: Map<String, String>? =
-      loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
+      offlinePromptsRepository.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
   var ID: String = prompts?.get("ID") ?: "audio.mp3"
   var audioFile: File = File(context.cacheDir, "$ID.mp3")
 
@@ -64,7 +66,7 @@ fun PreviousRecordingsFeedbackScreen(
 
   LaunchedEffect(Unit) {
     prompts =
-        loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
+        offlinePromptsRepository.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
 
     ID = prompts?.get("ID") ?: "audio.mp3"
 
@@ -86,7 +88,8 @@ fun PreviousRecordingsFeedbackScreen(
     viewModel.offlineRequest(
         offlineAnalysisData!!.transcription.removePrefix("You said:").trim(),
         prompts?.get("targetCompany") ?: "Apple",
-        prompts?.get("jobPosition") ?: "engineer")
+        prompts?.get("jobPosition") ?: "engineer",
+        prompts?.get("ID") ?: "00000000")
     Log.d("testing offline chat view model", "the gpt model offline value response is $response")
     // Text(text = "What you said: ${what_has_been_said.value}")
     Text(text = "Interviewer's response: $response", color = MaterialTheme.colorScheme.primary)

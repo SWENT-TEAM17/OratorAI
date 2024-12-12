@@ -245,7 +245,7 @@ class ChatViewModel(
    *
    * @param msg: What the user said and wishes to get feedback on
    */
-  fun offlineRequest(msg: String, company: String, position: String) {
+  fun offlineRequest(msg: String, company: String, position: String, interviewID: String) {
     Log.d("ChatViewModel", "Getting next GPT response")
     viewModelScope.launch {
       try {
@@ -269,7 +269,9 @@ class ChatViewModel(
           response.choices.firstOrNull()?.message?.let { responseMessage ->
             _response.value = responseMessage.content
             has_responded.value = true
-            Log.d("aa", "$responseMessage.content")
+            Log.d("response in offline request in chatViewModel", "$responseMessage.content")
+
+
           }
         }
       } catch (e: Exception) {

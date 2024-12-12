@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
@@ -156,6 +157,8 @@ fun OratorApp(
       SpeakingViewModel(SpeakingRepositoryRecord(context), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
+  val offlinePromptsRepository = OfflinePromptsRepository()
+
   // Scaffold composable to provide basic layout structure for the app
   Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
     // NavHost composable manages navigation between screens
@@ -172,10 +175,10 @@ fun OratorApp(
             RecordingReviewScreen(navigationActions, speakingViewModel)
           }
           composable(Screen.OFFLINE_RECORDING_PROFILE) {
-            OfflineRecordingsProfileScreen(navigationActions, speakingViewModel)
+            OfflineRecordingsProfileScreen(navigationActions, speakingViewModel, offlinePromptsRepository)
           }
           composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-            OfflineInterviewModule(navigationActions, speakingViewModel)
+            OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsRepository)
           }
 
           composable(
@@ -232,7 +235,7 @@ fun OratorApp(
 
             composable(Screen.FEEDBACK_SCREEN) {
               PreviousRecordingsFeedbackScreen(
-                  context, navigationActions, chatViewModel, speakingViewModel)
+                  context, navigationActions, chatViewModel, speakingViewModel, offlinePromptsRepository =  offlinePromptsRepository)
             }
 
             composable(Screen.EDIT_PROFILE) {
