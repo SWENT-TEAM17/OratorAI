@@ -169,63 +169,28 @@ fun PracticeModeSelector() {
 
         // Dropdown menu options for selecting a practice mode
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-          DropdownMenuItem(
-              text = {
-                Text(
-                    "Interview",
-                    color =
-                        if (currentPracticeMode.value == SessionType.INTERVIEW) {
-                          MaterialTheme.colorScheme.primary
-                        } else MaterialTheme.colorScheme.onSecondaryContainer)
-              },
-              onClick = {
-                currentPracticeMode.value = SessionType.INTERVIEW
-                selectedMode =
-                    currentPracticeMode.value
-                        .toString()
-                        .lowercase(Locale.ROOT)
-                        .capitalize(Locale.ROOT)
+          practiceModeDropDownMenuCustomItem(
+              sessionType = SessionType.INTERVIEW,
+              onClickSet = {
+                selectedMode = it
                 expanded = false
               },
-              modifier = Modifier.testTag("practiceModeOption1"))
-          DropdownMenuItem(
-              text = {
-                Text(
-                    "Speech",
-                    color =
-                        if (currentPracticeMode.value == SessionType.SPEECH) {
-                          MaterialTheme.colorScheme.primary
-                        } else MaterialTheme.colorScheme.onSecondaryContainer)
-              },
-              onClick = {
-                currentPracticeMode.value = SessionType.SPEECH
-                selectedMode =
-                    currentPracticeMode.value
-                        .toString()
-                        .lowercase(Locale.ROOT)
-                        .capitalize(Locale.ROOT)
+              testTag = "practiceModeOption1")
+
+          practiceModeDropDownMenuCustomItem(
+              sessionType = SessionType.SPEECH,
+              onClickSet = {
+                selectedMode = it
                 expanded = false
               },
-              modifier = Modifier.testTag("practiceModeOption2"))
-          DropdownMenuItem(
-              text = {
-                Text(
-                    "Negotiation",
-                    color =
-                        if (currentPracticeMode.value == SessionType.NEGOTIATION) {
-                          MaterialTheme.colorScheme.primary
-                        } else MaterialTheme.colorScheme.onSecondaryContainer)
-              },
-              onClick = {
-                currentPracticeMode.value = SessionType.NEGOTIATION
-                selectedMode =
-                    currentPracticeMode.value
-                        .toString()
-                        .lowercase(Locale.ROOT)
-                        .capitalize(Locale.ROOT)
+              testTag = "practiceModeOption2")
+          practiceModeDropDownMenuCustomItem(
+              sessionType = SessionType.NEGOTIATION,
+              onClickSet = {
+                selectedMode = it
                 expanded = false
               },
-              modifier = Modifier.testTag("practiceModeOption3"))
+              testTag = "practiceModeOption3")
         }
       }
 }
@@ -338,51 +303,30 @@ fun RankMetricSelector() {
 
         // Dropdown menu options for selecting a rank metric
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-          DropdownMenuItem(
-              text = {
-                Text(
-                    "Success ratio",
-                    color =
-                        if (currentRankMetric.value == "Ratio") {
-                          MaterialTheme.colorScheme.primary
-                        } else MaterialTheme.colorScheme.onSecondaryContainer)
-              },
-              onClick = {
+          metricDropDownMenuCustomItem(
+              text = "Success ratio",
+              metric = "Ratio",
+              onClickSet = {
                 selectedMetric = "Ratio"
-                currentRankMetric.value = "Ratio"
                 expanded = false
               },
-              modifier = Modifier.testTag("rankMetricOption1"))
-          DropdownMenuItem(
-              text = {
-                Text(
-                    "Success",
-                    color =
-                        if (currentRankMetric.value == "Success") {
-                          MaterialTheme.colorScheme.primary
-                        } else MaterialTheme.colorScheme.onSecondaryContainer)
-              },
-              onClick = {
+              testTag = "rankMetricOption1")
+          metricDropDownMenuCustomItem(
+              text = "Success",
+              metric = "Success",
+              onClickSet = {
                 selectedMetric = "Success"
-                currentRankMetric.value = "Success"
                 expanded = false
               },
-              modifier = Modifier.testTag("rankMetricOption2"))
-          DropdownMenuItem(
-              text = {
-                Text(
-                    "Improvement",
-                    color =
-                        if (currentRankMetric.value == "Improvement") {
-                          MaterialTheme.colorScheme.primary
-                        } else MaterialTheme.colorScheme.onSecondaryContainer)
-              },
-              onClick = {
+              testTag = "rankMetricOption2")
+          metricDropDownMenuCustomItem(
+              text = "Improvement",
+              metric = "Improvement",
+              onClickSet = {
                 selectedMetric = "Improvement"
-                currentRankMetric.value = "Improvement"
                 expanded = false
               },
-              modifier = Modifier.testTag("rankMetricOption3"))
+              testTag = "rankMetricOption3")
         }
       }
 }
@@ -403,4 +347,65 @@ fun ButtonRow() {
     PracticeModeSelector()
     RankMetricSelector()
   }
+}
+
+/**
+ * Custom dropdown menu item for selecting a practice mode
+ *
+ * @param sessionType The session type to set when the item is clicked
+ * @param onClickSet The function to call when the item is clicked
+ * @param testTag The test tag for the dropdown menu item
+ */
+@Composable
+private fun practiceModeDropDownMenuCustomItem(
+    sessionType: SessionType,
+    onClickSet: (String) -> Unit,
+    testTag: String
+) {
+  DropdownMenuItem(
+      text = {
+        Text(
+            sessionType.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT),
+            color =
+                if (currentPracticeMode.value == sessionType) {
+                  MaterialTheme.colorScheme.primary
+                } else MaterialTheme.colorScheme.onSecondaryContainer)
+      },
+      onClick = {
+        currentPracticeMode.value = sessionType
+        onClickSet(
+            currentPracticeMode.value.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT))
+      },
+      modifier = Modifier.testTag(testTag))
+}
+
+/**
+ * Custom dropdown menu item for selecting a rank metric
+ *
+ * @param text The text to display in the dropdown menu item
+ * @param metric The metric to set when the item is clicked
+ * @param onClickSet The function to call when the item is clicked
+ * @param testTag The test tag for the dropdown menu item
+ */
+@Composable
+private fun metricDropDownMenuCustomItem(
+    text: String,
+    metric: String,
+    onClickSet: () -> Unit,
+    testTag: String
+) {
+  DropdownMenuItem(
+      text = {
+        Text(
+            text,
+            color =
+                if (currentRankMetric.value == metric) {
+                  MaterialTheme.colorScheme.primary
+                } else MaterialTheme.colorScheme.onSecondaryContainer)
+      },
+      onClick = {
+        currentRankMetric.value = metric
+        onClickSet()
+      },
+      modifier = Modifier.testTag(testTag))
 }
