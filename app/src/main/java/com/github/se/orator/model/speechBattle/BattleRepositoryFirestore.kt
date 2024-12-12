@@ -305,7 +305,11 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
 
   /**
    * Updates the evaluation result for a given battle. This sets the status to COMPLETED, sets the
-   * winner, and stores the evaluation result.
+   * winner, and stores the evaluation on firebase.
+   *
+   * @param battleId The ID of the battle.
+   * @param evaluation The evaluation result.
+   * @param callback A callback function to execute.
    */
   fun updateEvaluationResult(
       battleId: String,
