@@ -51,7 +51,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   val recentData: StateFlow<ArrayDeque<AnalysisData>> = recentData_.asStateFlow()
 
   // Max size for a recentData queue
-  private val maxRecentDataQueueSize = 10
+  private val MAX_RECENT_DATA_QUEUE_SIZE = 10
 
   // Init block to fetch user profile automatically after authentication
   init {
@@ -507,7 +507,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     // Add data to the queue while maintaining a maximum size of 10
     val updatedQueue =
         queue.value.apply {
-          if (size >= maxRecentDataQueueSize) {
+          if (size >= MAX_RECENT_DATA_QUEUE_SIZE ) {
             removeFirst() // Remove the oldest element if the queue is full
           }
           addLast(value) // Add the new data to the end of the queue
@@ -644,11 +644,11 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    */
   fun ensureListSizeTen(inputList: List<Float>): List<Float> {
     // Calculate the number of missing elements to make the list size 10
-    val missingElements = maxRecentDataQueueSize - inputList.size
+    val missingElements = MAX_RECENT_DATA_QUEUE_SIZE - inputList.size
 
     // If the list already has 10 or more elements, return the first 10 elements
     if (missingElements <= 0) {
-      return inputList.take(maxRecentDataQueueSize)
+      return inputList.take(MAX_RECENT_DATA_QUEUE_SIZE)
     }
     // Otherwise, append the required number of zeros
     return inputList + List(missingElements) { 0f }
