@@ -154,7 +154,7 @@ class WaitingForCompletionScreenTest {
   }
 
   /**
-   * Test navigation when the friend completes the battle. We simulate a battle update where the
+   * Test navigation when the other user completes the battle. We simulate a battle update where the
    * opponentCompleted is now true.
    */
   @Test
