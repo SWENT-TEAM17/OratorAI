@@ -42,7 +42,6 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -55,7 +54,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -190,26 +188,26 @@ fun ViewFriendsScreen(
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
-                TopAppBar(
-                    modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-                    title = {
-                      Text(
-                          "My Friends",
-                          modifier = Modifier.testTag("myFriendsTitle"),
-                          color = MaterialTheme.colorScheme.onSurface)
-                    },
-                    navigationIcon = {
-                      IconButton(
-                          onClick = { scope.launch { drawerState.open() } },
-                          modifier = Modifier.testTag("viewFriendsMenuButton")) {
-                            Icon(
-                                Icons.Default.Menu,
-                                contentDescription = "Menu",
-                                tint = MaterialTheme.colorScheme.onSurface)
-                          }
-                    },
-                    backgroundColor = MaterialTheme.colorScheme.surface)
-                HorizontalDivider()
+              TopAppBar(
+                  modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+                  title = {
+                    Text(
+                        "My Friends",
+                        modifier = Modifier.testTag("myFriendsTitle"),
+                        color = MaterialTheme.colorScheme.onSurface)
+                  },
+                  navigationIcon = {
+                    IconButton(
+                        onClick = { scope.launch { drawerState.open() } },
+                        modifier = Modifier.testTag("viewFriendsMenuButton")) {
+                          Icon(
+                              Icons.Default.Menu,
+                              contentDescription = "Menu",
+                              tint = MaterialTheme.colorScheme.onSurface)
+                        }
+                  },
+                  backgroundColor = MaterialTheme.colorScheme.surface)
+              HorizontalDivider()
             },
             bottomBar = {
               BottomNavigationMenu(

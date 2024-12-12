@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -96,30 +95,28 @@ fun AddFriendsScreen(
 
   Scaffold(
       topBar = {
-          TopAppBar(
-              title = {
-                  Text(
-                      "Add a friend",
-                      modifier = Modifier.testTag("addFriendTitle"),
-                      color = MaterialTheme.colorScheme.onSurface
-                  )
-              },
-              navigationIcon = {
-                  IconButton(
-                      onClick = {
-                          navigationActions.goBack() // Navigate back
-                      },
-                      modifier = Modifier.testTag("addFriendBackButton")) {
-                      Icon(
-                          Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = "Back",
-                          tint = MaterialTheme.colorScheme.onSurface
-                      )
+        TopAppBar(
+            title = {
+              Text(
+                  "Add a friend",
+                  modifier = Modifier.testTag("addFriendTitle"),
+                  color = MaterialTheme.colorScheme.onSurface)
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = {
+                    navigationActions.goBack() // Navigate back
+                  },
+                  modifier = Modifier.testTag("addFriendBackButton")) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
-              },
-              colors =
-              TopAppBarDefaults.topAppBarColors(
-                  containerColor = MaterialTheme.colorScheme.surfaceContainer))
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer))
       },
       bottomBar = {
         BottomNavigationMenu(
@@ -145,9 +142,12 @@ fun AddFriendsScreen(
                             .wrapContentHeight()
                             .focusRequester(focusRequester)
                             .testTag("addFriendSearchField"),
-                    label = { Text("Username",
-                        modifier = Modifier.testTag("searchFieldLabel"),
-                        color = MaterialTheme.colorScheme.onSurface) },
+                    label = {
+                      Text(
+                          "Username",
+                          modifier = Modifier.testTag("searchFieldLabel"),
+                          color = MaterialTheme.colorScheme.onSurface)
+                    },
                     leadingIcon = {
                       Icon(
                           Icons.Default.Search,
