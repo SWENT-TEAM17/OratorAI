@@ -261,7 +261,11 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             // Extract 'battleStats' list
             val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
             val battleStats =
-                battleStatsList?.mapNotNull { battle -> mapToSpeechBattle(battle) } ?: emptyList()
+                battleStatsList?.mapNotNull { battle -> mapToSpeechBattle(battle) }
+                    ?: run {
+                      Log.e("BattleMapper", "battleStatsList is null. Returning an empty list.")
+                      emptyList()
+                    }
 
             UserStatistics(
                 sessionsGiven = sessionsGiven,
