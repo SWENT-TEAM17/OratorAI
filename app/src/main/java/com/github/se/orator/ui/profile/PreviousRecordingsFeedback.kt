@@ -40,8 +40,8 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
-
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @Composable
@@ -53,88 +53,115 @@ fun PreviousRecordingsFeedbackScreen(
     player: AudioPlayer = AndroidAudioPlayer(context),
     offlinePromptsRepository: OfflinePromptsRepoInterface
 ) {
-
-  // val recorder by lazy { AudioRecorder(context = context) }
-
-  // val player by lazy { AndroidAudioPlayer(context) }
-  var prompts: Map<String, String>? =
-      offlinePromptsRepository.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
-  var ID: String = prompts?.get("ID") ?: "audio.mp3"
-  var audioFile: File = File(context.cacheDir, "$ID.mp3")
-
-  val offlineAnalysisData by speakingViewModel.offlineAnalysisData.collectAsState()
-
-  LaunchedEffect(Unit) {
-    prompts =
+    var prompts: Map<String, String>? =
         offlinePromptsRepository.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
+    var ID: String = prompts?.get("ID") ?: "audio.mp3"
+    var audioFile: File = File(context.cacheDir, "$ID.mp3")
 
-    ID = prompts?.get("ID") ?: "audio.mp3"
+    val offlineAnalysisData by speakingViewModel.offlineAnalysisData.collectAsState()
+    val fileData by offlinePromptsRepository.fileData.collectAsState()
+    val response by viewModel.response.collectAsState()
 
-    audioFile = File(context.cacheDir, "$ID.mp3")
+    LaunchedEffect(Unit) {
+        offlinePromptsRepository.clearDisplayText()
+        offlinePromptsRepository.readPromptTextFile(context, ID)
+        prompts =
+            offlinePromptsRepository.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
 
-    Log.d("PreviousRecordingsFeedbackScreen", "Screen is opened, running code.")
-    // Call necessary methods or logic when the screen is opened
-    speakingViewModel.getTranscript(audioFile)
-    // Any other initialization logic
-    Log.d("prompts are: ", prompts?.get("targetPosition") ?: "Default Value")
-    viewModel.resetResponse()
-  }
+        ID = prompts?.get("ID") ?: "audio.mp3"
+        audioFile = File(context.cacheDir, "$ID.mp3")
 
-  val response by viewModel.response.collectAsState("")
+        Log.d("PreviousRecordingsFeedbackScreen", "Screen is opened, running code.")
 
-  LaunchedEffect(response) {
-      Log.d("gpt said: ", "gpt said: $response")
-      offlinePromptsRepository.writeToPromptFile(context, ID, response)
-      Log.d("in previous recordings feedback: ", "inside the file : ${offlinePromptsRepository.readPromptTextFile(context, ID)}")
-  }
+//            viewModel.offlineRequest(
+//                offlineAnalysisData!!.transcription.removePrefix("You said:").trim(),
+//                prompts?.get("targetCompany") ?: "Apple",
+//                prompts?.get("jobPosition") ?: "engineer",
+//                prompts?.get("ID") ?: "00000000")
+//            Log.d("testing offline chat view model", "the gpt model offline value response is $response")
+//            // Text(text = "What you said: ${what_has_been_said.value}")
+//            Log.d("d", "Hello! This is has been said: ${offlineAnalysisData!!.transcription}")
+    }
 
-  if (offlineAnalysisData != null) {
-    viewModel.offlineRequest(
-        offlineAnalysisData!!.transcription.removePrefix("You said:").trim(),
-        prompts?.get("targetCompany") ?: "Apple",
-        prompts?.get("jobPosition") ?: "engineer",
-        prompts?.get("ID") ?: "00000000")
-    Log.d("testing offline chat view model", "the gpt model offline value response is $response")
-    // Text(text = "What you said: ${what_has_been_said.value}")
-    Text(text = "Interviewer's response: $response", color = MaterialTheme.colorScheme.primary)
-    Log.d("d", "Hello! This is has been said: ${offlineAnalysisData!!.transcription}")
-  }
-  // prompts?.get("targetPosition") ?: "Default Value"
-  // val jobPosition = prompts?.get("jobPosition")
+    if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
+        LaunchedEffect(speakingViewModel.isTranscribing.value) {
+            if (!speakingViewModel.isTranscribing.value)
+                speakingViewModel.getTranscript(audioFile)
+            }
+        LaunchedEffect(speakingViewModel.offlineAnalysisData.collectAsState().value) {
+            speakingViewModel.offlineAnalysisData.value?.let { analysisData ->
+                viewModel.offlineRequest(
+                    analysisData.transcription.removePrefix("You said:").trim(),
+                    prompts?.get("targetCompany") ?: "Apple",
+                    prompts?.get("jobPosition") ?: "engineer",
+                    prompts?.get("ID") ?: "00000000"
+                )
+                Log.d(
+                    "testing offline chat view model",
+                    "the gpt model offline value response is $response"
+                )
+            }
+        }
+    }
 
-  // val chatMessages by chatViewModel.chatMessages.collectAsState()
+    LaunchedEffect(response) {
+        if (response.isNotEmpty() && (fileData.isNullOrEmpty() || fileData == "Loading interviewer response..." )) {
+            offlinePromptsRepository.writeToPromptFile(context, ID, response)
+        }
+    }
 
-  Column(
-      modifier =
-          Modifier.fillMaxSize()
-              .padding(AppDimensions.paddingMedium)
-              .testTag("RecordingReviewScreen"),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally) {
+    val displayText = when {
+        fileData == "Loading interviewer response..." || fileData.isNullOrEmpty() -> {
+            "Processing your audio, please wait..."
+        }
+        else -> fileData
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(AppDimensions.paddingMedium)
+            .testTag("RecordingReviewScreen"),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = displayText ?: "",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.testTag("ResponseText")
+        )
+
         Button(
             onClick = { player.playFile(audioFile) },
             shape = AppShapes.circleShape,
             modifier = Modifier.testTag("play_button"),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface),
-            contentPadding = PaddingValues(0.dp)) {
-              androidx.compose.material.Icon(
-                  Icons.Outlined.PlayCircleOutline,
-                  contentDescription = "Play button",
-                  modifier = Modifier.size(30.dp),
-                  tint = AppColors.primaryColor)
-            }
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Icon(
+                Icons.Outlined.PlayCircleOutline,
+                contentDescription = "Play button",
+                modifier = Modifier.size(30.dp),
+                tint = AppColors.primaryColor
+            )
+        }
 
         Row(
-            modifier = Modifier.fillMaxWidth().testTag("Back"),
-            verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  imageVector = Icons.Filled.ArrowBack,
-                  contentDescription = "Back",
-                  modifier =
-                      Modifier.size(AppDimensions.iconSizeSmall)
-                          .clickable { navigationActions.goBack() }
-                          .testTag("BackButton"),
-                  tint = MaterialTheme.colorScheme.primary)
-            }
-      }
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("Back"),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier
+                    .size(AppDimensions.iconSizeSmall)
+                    .clickable {
+                        navigationActions.goBack() }
+                    .testTag("BackButton"),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
 }

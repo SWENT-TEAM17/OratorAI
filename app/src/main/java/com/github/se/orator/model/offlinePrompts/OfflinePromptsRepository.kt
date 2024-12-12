@@ -2,11 +2,18 @@ package com.github.se.orator.model.offlinePrompts
 
 import android.content.Context
 import android.util.Log
+import com.github.se.orator.model.speaking.AnalysisData
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 import java.io.FileWriter
 
 class OfflinePromptsRepository: OfflinePromptsRepoInterface {
+
+    private val _fileData = MutableStateFlow<String?>("")
+    override val fileData: StateFlow<String?> = _fileData.asStateFlow()
 
     /**
      * Helper function that allows to save offline recording context
@@ -55,8 +62,9 @@ class OfflinePromptsRepository: OfflinePromptsRepoInterface {
     override fun writeToPromptFile(context: Context, ID: String, prompt: String) {
         val fileName = "$ID.txt"
         val file = File(context.cacheDir, fileName)
-        val fileContents: String = file.readText()
         file.writeText(prompt)
+        _fileData.value = prompt
+        Log.d("wrote to file $fileName", "$prompt")
 //        if (fileContents == "0//!") {
 //            file.writeText(prompt)
 //        }
@@ -65,16 +73,22 @@ class OfflinePromptsRepository: OfflinePromptsRepoInterface {
 //        }
     }
 
-    override fun readPromptTextFile(context: Context, ID: String): String {
+    override fun readPromptTextFile(context: Context, ID: String) {
         val fileName = "$ID.txt"
+        Log.d("repo readptf", "inside the txt file $fileName")
         val file = File(context.cacheDir, fileName)
         val fileContents: String = file.readText()
 
-        if (fileContents == "0//!") {
-            return "Loading interviewer response..."
+        if (fileContents == "0//!" || fileContents == "") {
+            _fileData.value = "Loading interviewer response..."
         }
         else {
-            return fileContents
+            _fileData.value = fileContents
+            Log.d("off prompt", "file name: $fileName; repo stuff $fileContents")
         }
+    }
+
+    override fun clearDisplayText() {
+        _fileData.value = ""
     }
 }

@@ -33,6 +33,9 @@ class SpeakingViewModel(
 
   private val _isRecording = MutableStateFlow(false)
 
+  private val _isTranscribing = MutableStateFlow(false)
+  val isTranscribing = _isTranscribing.asStateFlow()
+
   /** True if the user is currently recording their speech, false otherwise. */
   val isRecording: StateFlow<Boolean> = _isRecording
 
@@ -50,6 +53,7 @@ class SpeakingViewModel(
   }
 
   fun getTranscript(audioFile: File) {
+    _isTranscribing.value = true
     repository.getTranscript(
         audioFile,
         onSuccess = { ad -> _offlineAnalysisData.value = ad },
@@ -57,6 +61,7 @@ class SpeakingViewModel(
     Log.d("in speaking view model", "get transcript for offline mode has been called successfully")
     repository.startRecording()
     repository.stopRecording()
+    _isTranscribing.value = false
   }
 
   // Function to handle microphone button click
