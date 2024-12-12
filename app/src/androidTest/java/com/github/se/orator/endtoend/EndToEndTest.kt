@@ -2,6 +2,8 @@ package com.github.se.orator.endtoend
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.NavHostController
@@ -10,11 +12,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.test.rule.GrantPermissionRule
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.profile.UserStatistics
 import com.github.se.orator.model.speaking.AnalysisData
+import com.github.se.orator.model.symblAi.AudioPlayer
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.model.theme.AppThemeViewModel
@@ -23,15 +27,20 @@ import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.offline.OfflinePracticeQuestionsScreen
+import com.github.se.orator.ui.offline.OfflineRecordingScreen
 import com.github.se.orator.ui.offline.OfflineScreen
+import com.github.se.orator.ui.offline.RecordingReviewScreen
 import com.github.se.orator.ui.overview.OfflineInterviewModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
+import com.github.se.orator.ui.profile.PreviousRecordingsFeedbackScreen
 import com.github.se.orator.ui.profile.ProfileScreen
 import com.github.se.orator.ui.settings.SettingsScreen
 import com.github.se.orator.ui.speaking.SpeakingScreen
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,6 +55,7 @@ class EndToEndAppTest {
   val permissionRule: GrantPermissionRule =
       GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
 
+    // repository, viewmodel, and data mocks that will be used in the tests
   private lateinit var navigationActions: NavigationActions
   private lateinit var userProfileRepository: UserProfileRepository
   private lateinit var userProfileViewModel: UserProfileViewModel
@@ -58,7 +68,11 @@ class EndToEndAppTest {
   private lateinit var speakingRepository: SpeakingRepository
   private lateinit var speakingViewModel: SpeakingViewModel
   private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var chatGPTService: ChatGPTService
+  private lateinit var chatViewModel: ChatViewModel
+  private lateinit var mockPlayer: AudioPlayer
 
+  // hardcoded values used in tests
   private val bio = "Test bio"
   private val testUserProfile =
       UserProfile(uid = "testUid", name = "", age = 25, statistics = UserStatistics(), bio = bio)
@@ -66,6 +80,7 @@ class EndToEndAppTest {
   private val profile1 = UserProfile("1", "John Doe", 99, statistics = UserStatistics())
   private val profile2 = UserProfile("2", "Jane Doe", 100, statistics = UserStatistics())
 
+    // list of screens needed in the end 2 end tests : useful to see what screens have been tested this far!
   private val screenList =
       listOf(
           Screen.HOME,
@@ -80,10 +95,13 @@ class EndToEndAppTest {
           Screen.OFFLINE_INTERVIEW_MODULE,
           Screen.PRACTICE_QUESTIONS_SCREEN,
           Screen.OFFLINE_RECORDING_SCREEN,
-          Screen.)
+          Screen.OFFLINE_RECORDING_REVIEW_SCREEN,
+          Screen.FEEDBACK_SCREEN,
+          Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
 
   @Before
   fun setUp() {
+      // mocking all the aforementioned variables
     navigationActions = mock(NavigationActions::class.java)
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
@@ -99,9 +117,12 @@ class EndToEndAppTest {
 
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+      chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
     speech = "Hello! My name is John. I am an entrepreneur"
     data = AnalysisData(speech, 5, 2.0, 1.0)
 
+      // hardcoded repository function returns to allow more dynamic testing
     `when`(
             speakingRepository.setupAnalysisResultsUsage(
                 org.mockito.kotlin.any(), org.mockito.kotlin.any()))
@@ -189,6 +210,21 @@ class EndToEndAppTest {
 
           composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
               OfflinePracticeQuestionsScreen(navigationActions)
+          }
+          composable(Screen.OFFLINE_RECORDING_SCREEN) {
+              OfflineRecordingScreen(navigationActions = navigationActions,
+                  question = "How do you handle conflict in a team?",
+                  viewModel = speakingViewModel)
+          }
+
+          composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
+              RecordingReviewScreen(navigationActions, speakingViewModel)
+          }
+
+          composable(Screen.FEEDBACK_SCREEN) {
+              PreviousRecordingsFeedbackScreen(navigationActions = navigationActions,
+                  viewModel = chatViewModel, speakingViewModel =  speakingViewModel,
+                  player = mockPlayer)
           }
       }
     }
@@ -287,6 +323,10 @@ class EndToEndAppTest {
     verify(navigationActions).goBack()
     clearInvocations(navigationActions)
 
+      // checking the previous recordings card in the profile screen
+    composeTestRule.onNodeWithTag("previous_sessions_section").performClick()
+    // add tests later 
+
     // navigate from profile to friends
     composeTestRule.onNodeWithTag("Friends").performClick()
     composeTestRule.runOnUiThread { navController?.navigate(Screen.FRIENDS) }
@@ -352,8 +392,7 @@ class EndToEndAppTest {
       navController?.navigate(
           Screen
               .SPEAKING) // forcing back to home where the user would be once he finishes creating
-                         // his
-      // account
+                         // his account
     }
     composeTestRule.onNodeWithTag("mic_text").assertTextContains("Recording...")
 
@@ -377,8 +416,7 @@ class EndToEndAppTest {
       navController?.navigate(
           Screen
               .SPEAKING) // forcing back to home where the user would be once he finishes creating
-                         // his
-      // account
+                         // his account
     }
     composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
 
@@ -388,8 +426,7 @@ class EndToEndAppTest {
       navController?.navigate(
           Screen
               .OFFLINE) // forcing back to home where the user would be once he finishes creating
-                        // his
-      // account
+                        // his account
     }
     composeTestRule.onNodeWithText("No Internet Connection").assertIsDisplayed()
     composeTestRule
@@ -469,8 +506,14 @@ class EndToEndAppTest {
       composeTestRule.onNodeWithTag("DoneButton").performClick()
       verify(navigationActions).navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
 
+      // offline recording review screen
+      composeTestRule.onNodeWithTag("RecordingReviewScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("Back").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("hear_recording_button").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("stop_recording_button").assertIsDisplayed()
 
-
-
+      composeTestRule.onNodeWithTag("BackButton").performClick()
+      verify(navigationActions).goBack()
   }
 }
