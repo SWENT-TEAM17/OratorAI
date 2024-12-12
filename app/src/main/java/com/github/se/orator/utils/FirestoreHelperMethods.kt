@@ -59,10 +59,11 @@ fun mapToSpeechBattle(data: Map<String, Any>): SpeechBattle? {
 }
 
 /**
- * Converts a map to an InterviewContext object.
+ * Converts a map representation of an interview context into an InterviewContext object.
  *
- * @param contextMap The map representation of an InterviewContext.
- * @return The corresponding InterviewContext object, or null if conversion fails.
+ * @param contextMap The map containing the key-value pairs that represent the interview context.
+ * @return An InterviewContext object with the corresponding values from the map, or null if the map
+ *   is null. Missing or invalid values are replaced with empty strings.
  */
 private fun convertInterviewContext(contextMap: Map<String, Any>?): InterviewContext? {
   return contextMap?.let {
