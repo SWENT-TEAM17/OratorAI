@@ -187,6 +187,7 @@ class ChatViewModel(
 
         """
                   .trimIndent()
+          // Add cases for other context types like SalesPitchContext
           else -> "You are assisting the user with their speaking practice."
         }
 
@@ -288,37 +289,6 @@ class ChatViewModel(
     isConversationInitialized = false
     apiLinkViewModel.clearAnalysisData() // because I don t want to reset before generating Feedback
   }
-
-  /*fun requestFeedback() {
-    val analysisSummary = generateAnalysisSummary(collectedAnalysisData)
-
-    val feedbackRequestMessage =
-        Message(
-            role = "user",
-            content =
-                """
-                The interview is now over. Please provide feedback on my performance, considering the following analysis of my responses:
-
-                $analysisSummary
-            """
-                    .trimIndent())
-
-    _chatMessages.value += feedbackRequestMessage
-
-    getNextGPTResponse()
-  }*/
-
-  //    fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
-  //        val userMessage = Message(
-  //            role = "user",
-  //            content = transcript
-  //        )
-  //        _chatMessages.value = _chatMessages.value + userMessage
-  //
-  //        collectedAnalysisData.add(analysisData)
-  //
-  //        getNextGPTResponse()
-  //    }
 
   private fun getAnalysisSummary(): String {
     return generateAnalysisSummary(_collectedAnalysisData.value)
@@ -511,5 +481,42 @@ The session is now over. According to the initial instructions, you can now brea
         }
       }
     }
+  }
+
+  /**
+   * Initializes the conversation for a battle session.
+   *
+   * @param battleId The unique ID of the battle.
+   * @param friendName The UID of the friend participating in the battle.
+   */
+  fun initializeBattleConversation(battleId: String, friendName: String) {
+    if (isConversationInitialized) return
+    isConversationInitialized = true
+
+    _collectedAnalysisData.value = emptyList() // Reset the analysis data history
+    val practiceContextAsValue =
+        (apiLinkViewModel.practiceContext.value ?: return) as InterviewContext
+
+    val systemMessageContent =
+        """
+                    You are engaged in a battle against $friendName a ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.targetPosition} at ${practiceContextAsValue.companyName}. 
+                    Focus on the following areas: ${practiceContextAsValue.focusArea}. 
+                    Ask questions one at a time and wait for the user's response before proceeding. 
+                    Do not provide feedback until the end.
+                """
+            .trimIndent()
+
+    val systemMessage = Message(role = "system", content = systemMessageContent)
+
+    val userStartMessage =
+        Message(role = "user", content = "I'm ready to begin the battle session.")
+
+    _chatMessages.value = listOf(systemMessage, userStartMessage)
+
+    getNextGPTResponse()
+  }
+
+  private fun messagesToTranscript(messages: List<Message>): String {
+    return messages.filter { it.role == "user" }.joinToString("\n") { it.content }
   }
 }

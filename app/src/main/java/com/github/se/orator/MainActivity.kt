@@ -30,12 +30,19 @@ import androidx.navigation.navArgument
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speechBattle.BattleViewModel
+import com.github.se.orator.model.speechBattle.BattleViewModelFactory
 import com.github.se.orator.model.symblAi.SpeakingRepositoryRecord
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.network.NetworkConnectivityObserver
 import com.github.se.orator.network.OfflineViewModel
 import com.github.se.orator.ui.authentification.SignInScreen
+import com.github.se.orator.ui.battle.BattleChatScreen
+import com.github.se.orator.ui.battle.BattleRequestSentScreen
+import com.github.se.orator.ui.battle.BattleScreen
+import com.github.se.orator.ui.battle.EvaluationScreen
+import com.github.se.orator.ui.battle.WaitingForCompletionScreen
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
@@ -156,6 +163,16 @@ fun OratorApp(
       SpeakingViewModel(SpeakingRepositoryRecord(context), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
+  // Initialize BattleViewModel using the factory
+  val battleViewModel: BattleViewModel =
+      viewModel(
+          factory =
+              BattleViewModelFactory(
+                  userProfileViewModel = userProfileViewModel,
+                  navigationActions = navigationActions,
+                  apiLinkViewModel = apiLinkViewModel,
+                  chatViewModel = chatViewModel))
+
   // Scaffold composable to provide basic layout structure for the app
   Scaffold(modifier = Modifier.fillMaxSize().testTag("oratorScaffold")) {
     // NavHost composable manages navigation between screens
@@ -222,7 +239,7 @@ fun OratorApp(
           // Friends flow
           navigation(startDestination = Screen.FRIENDS, route = Route.FRIENDS) {
             composable(Screen.FRIENDS) {
-              ViewFriendsScreen(navigationActions, userProfileViewModel)
+              ViewFriendsScreen(navigationActions, userProfileViewModel, battleViewModel)
             }
           }
 
@@ -248,6 +265,74 @@ fun OratorApp(
               SettingsScreen(navigationActions, userProfileViewModel, themeViewModel)
             }
           }
+
+          // Battle screen integration
+          composable(
+              route = "${Route.BATTLE_SEND}/{friendUid}",
+              arguments = listOf(navArgument("friendUid") { type = NavType.StringType })) {
+                  backStackEntry ->
+                val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
+                BattleScreen(
+                    friendUid = friendUid,
+                    userProfileViewModel = userProfileViewModel,
+                    navigationActions = navigationActions,
+                    battleViewModel = battleViewModel)
+              }
+
+          // Battle Request Sent Screen
+          composable(
+              route = "${Route.BATTLE_REQUEST_SENT}/{battleId}/{friendUid}",
+              arguments =
+                  listOf(
+                      navArgument("battleId") { type = NavType.StringType },
+                      navArgument("friendUid") { type = NavType.StringType },
+                  )) { backStackEntry ->
+                val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
+                val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
+                BattleRequestSentScreen(
+                    friendUid = friendUid,
+                    battleId = battleId, // Pass battleId to the screen
+                    navigationActions = navigationActions,
+                    userProfileViewModel = userProfileViewModel,
+                    battleViewModel = battleViewModel)
+              }
+
+          // Battle Chat Screen
+          composable(
+              route = "${Route.BATTLE_CHAT}/{battleId}/{userId}",
+              arguments =
+                  listOf(
+                      navArgument("battleId") { type = NavType.StringType },
+                      navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
+                val userId = userProfileViewModel.userProfile.value?.uid ?: ""
+                BattleChatScreen(
+                    battleId = battleId,
+                    userId = userId,
+                    navigationActions = navigationActions,
+                    battleViewModel = battleViewModel,
+                    chatViewModel = chatViewModel,
+                    userProfileViewModel = userProfileViewModel)
+              }
+
+          composable(
+              route = "${Route.WAITING_FOR_COMPLETION}/{battleId}",
+              arguments = listOf(navArgument("battleId") { type = NavType.StringType })) {
+                  backStackEntry ->
+                val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
+                WaitingForCompletionScreen(
+                    battleId = battleId,
+                    navigationActions = navigationActions,
+                    battleViewModel = battleViewModel,
+                    userId = userProfileViewModel.userProfile.value?.uid ?: "")
+              }
+          composable(
+              route = "${Route.EVALUATION}/{battleId}",
+              arguments = listOf(navArgument("battleId") { type = NavType.StringType })) {
+                  backStackEntry ->
+                val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
+                EvaluationScreen(battleId = battleId, navigationActions = navigationActions)
+              }
         }
 
     // Handle transitions based on network status and ensure smooth navigation.

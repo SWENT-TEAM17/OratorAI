@@ -46,6 +46,14 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
 
+  private val pendingBattles_ = MutableStateFlow<Map<String, String>>(emptyMap())
+  val pendingBattles: StateFlow<Map<String, String>> = pendingBattles_.asStateFlow()
+
+  private val friendsWithPendingBattles_ =
+      MutableStateFlow<List<Pair<UserProfile, String>>>(emptyList())
+  val friendsWithPendingBattles: StateFlow<List<Pair<UserProfile, String>>> =
+      friendsWithPendingBattles_.asStateFlow()
+
   // Queue of the last ten analysis data
   private val recentData_ = MutableStateFlow<ArrayDeque<AnalysisData>>(ArrayDeque())
   val recentData: StateFlow<ArrayDeque<AnalysisData>> = recentData_.asStateFlow()
@@ -629,6 +637,17 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     } else {
       Log.e("UserProfileViewModel", "Cannot update streak: User is not authenticated.")
     }
+  }
+
+  /**
+   * Fetches the name of a user based on their UID.
+   *
+   * @param uid The UID of the user.
+   * @return The name of the user.
+   */
+  fun getName(uid: String): String {
+    val profile = allProfiles_.value.find { it.uid == uid }
+    return profile?.name ?: "Unknown"
   }
 
   /**
