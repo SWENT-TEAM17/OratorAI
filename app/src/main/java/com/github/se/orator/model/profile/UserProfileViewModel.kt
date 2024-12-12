@@ -507,7 +507,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     // Add data to the queue while maintaining a maximum size of 10
     val updatedQueue =
         queue.value.apply {
-          if (size >= MAX_RECENT_DATA_QUEUE_SIZE ) {
+          if (size >= MAX_RECENT_DATA_QUEUE_SIZE) {
             removeFirst() // Remove the oldest element if the queue is full
           }
           addLast(value) // Add the new data to the end of the queue

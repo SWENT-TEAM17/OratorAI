@@ -8,16 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.testTag
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.ui.friends.TitleAppBar
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -63,29 +57,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Statistics",
-                  modifier = Modifier.testTag("statTitle"),
-                  color = MaterialTheme.colorScheme.onSurface)
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = {
-                    navigationActions.goBack() // Navigate back
-                  },
-                  modifier = Modifier.testTag("statBackButton")) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.testTag("statBackIcon"),
-                        tint = MaterialTheme.colorScheme.onSurface)
-                  }
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer))
+        TitleAppBar(navigationActions, "Statistics", "statTitle", "statBackButton", "statBackIcon")
       },
       modifier = Modifier.fillMaxSize(),
       content = { padding ->

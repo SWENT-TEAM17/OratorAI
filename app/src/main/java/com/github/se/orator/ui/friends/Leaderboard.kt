@@ -54,29 +54,12 @@ fun LeaderboardScreen(
   ProjectTheme {
     Scaffold(
         topBar = {
-          TopAppBar(
-              title = {
-                Text(
-                    "Leaderboard",
-                    modifier = Modifier.testTag("leaderboardTitle"),
-                    color = MaterialTheme.colorScheme.onSurface)
-              },
-              navigationIcon = {
-                IconButton(
-                    onClick = {
-                      navigationActions.goBack() // Navigate back
-                    },
-                    modifier = Modifier.testTag("leaderboardBackButton")) {
-                      Icon(
-                          Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = "Back",
-                          modifier = Modifier.testTag("leaderboardBackIcon"),
-                          tint = MaterialTheme.colorScheme.onSurface)
-                    }
-              },
-              colors =
-                  TopAppBarDefaults.topAppBarColors(
-                      containerColor = MaterialTheme.colorScheme.surfaceContainer))
+          TitleAppBar(
+              navigationActions,
+              "Leaderboard",
+              "leaderboardTitle",
+              "leaderboardBackButton",
+              "leaderboardBackIcon")
         },
         bottomBar = {
           BottomNavigationMenu(
@@ -206,4 +189,38 @@ fun LeaderboardItem(rank: Int, profile: UserProfile) {
               color = MaterialTheme.colorScheme.secondary)
         }
       }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TitleAppBar(
+    navigationActions: NavigationActions,
+    title: String,
+    titleTestTAg: String,
+    buttonTestTag: String,
+    iconTestTag: String
+) {
+  TopAppBar(
+      title = {
+        Text(
+            title,
+            modifier = Modifier.testTag(titleTestTAg),
+            color = MaterialTheme.colorScheme.onSurface)
+      },
+      navigationIcon = {
+        IconButton(
+            onClick = {
+              navigationActions.goBack() // Navigate back
+            },
+            modifier = Modifier.testTag(buttonTestTag)) {
+              Icon(
+                  Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = "Back",
+                  modifier = Modifier.testTag(iconTestTag),
+                  tint = MaterialTheme.colorScheme.onSurface)
+            }
+      },
+      colors =
+          TopAppBarDefaults.topAppBarColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainer))
 }
