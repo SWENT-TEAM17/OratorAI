@@ -26,14 +26,6 @@ import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
 
-/**
- * Composable function to display the feedback screen.
- *
- * @param chatViewModel The view model for chat interactions.
- * @param userProfileViewModel The view model for user profiles.
- * @param apiLinkViewModel The view model for API links.
- * @param navigationActions The actions used for navigation.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedbackScreen(
@@ -42,7 +34,6 @@ fun FeedbackScreen(
     apiLinkViewModel: ApiLinkViewModel,
     navigationActions: NavigationActions
 ) {
-  // State variables for feedback message, decision, loading status, and error message.
   var feedbackMessage by remember { mutableStateOf<String?>(null) }
   var decisionResult by remember { mutableStateOf<ChatViewModel.DecisionResult?>(null) }
   var isLoading by remember { mutableStateOf(true) }
@@ -50,6 +41,7 @@ fun FeedbackScreen(
 
   val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
   val userProfile by userProfileViewModel.userProfile.collectAsState()
+  val latestAnalysisData = userProfile?.statistics?.recentData?.lastOrNull()
 
   val sessionType =
       when (practiceContext) {
@@ -59,7 +51,6 @@ fun FeedbackScreen(
         else -> null
       }
 
-  // Retrieve the number of successful sessions
   val successfulSessionsCount =
       sessionType?.let { userProfile?.statistics?.successfulSessions?.get(it.name) ?: 0 } ?: 0
 
@@ -68,8 +59,6 @@ fun FeedbackScreen(
       feedbackMessage = chatViewModel.generateFeedback()
       feedbackMessage?.let {
         decisionResult = parseDecisionFromFeedback(it, sessionType)
-
-        // Update user statistics based on the decision and session type
         if (decisionResult != null && sessionType != null) {
           userProfileViewModel.updateSessionResult(
               isSuccess = decisionResult!!.isSuccess, sessionType = sessionType)
@@ -155,7 +144,6 @@ fun FeedbackScreen(
                                 .weight(1f)
                                 .verticalScroll(rememberScrollState())
                                 .testTag("feedbackMessage")) {
-                          // Display the decision prominently.
                           decisionResult?.message?.let { decisionText ->
                             Text(
                                 text = decisionText,
@@ -170,29 +158,56 @@ fun FeedbackScreen(
                           Text(
                               text =
                                   "You have successfully completed $successfulSessionsCount ${
-                                when (sessionType) {
-                                    SessionType.SPEECH -> "speeches"
-                                    SessionType.INTERVIEW -> "interviews"
-                                    SessionType.NEGOTIATION -> "negotiations"
-                                    else -> "sessions"
-                                }
-                            } so far!",
+                                        when (sessionType) {
+                                            SessionType.SPEECH -> "speeches"
+                                            SessionType.INTERVIEW -> "interviews"
+                                            SessionType.NEGOTIATION -> "negotiations"
+                                            else -> "sessions"
+                                        }
+                                    } so far!",
                               style = AppTypography.bodyLargeStyle,
                               modifier =
                                   Modifier.align(Alignment.CenterHorizontally)
                                       .padding(AppDimensions.paddingMedium)
                                       .testTag("successfulSessionsText"),
                               color = MaterialTheme.colorScheme.tertiary)
-                          // Display the detailed feedback message.
                           ChatMessageItem(
                               message = Message(content = feedbackMessage!!, role = "assistant"))
+
+                          Log.d("FeedbackScreen", "latestAnalysis: $latestAnalysisData")
+
+                          if (latestAnalysisData != null) {
+                            Text(
+                                text = "Your Latest Performance Stats:",
+                                style = AppTypography.mediumTitleStyle,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(AppDimensions.paddingMedium))
+                            Text(text = "Transcription: ${latestAnalysisData.transcription}")
+                            Text(text = "Filler Words: ${latestAnalysisData.fillerWordsCount}")
+                            Text(
+                                text =
+                                    "Average Pause Duration: ${"%.2f".format(latestAnalysisData.averagePauseDuration)}")
+                            Text(
+                                text =
+                                    "Sentiment Score: ${"%.2f".format(latestAnalysisData.sentimentScore)}")
+                            Text(
+                                text =
+                                    "Talk Time Percentage: ${"%.2f".format(latestAnalysisData.talkTimePercentage)}%")
+                            Text(
+                                text =
+                                    "Talk Time Seconds: ${"%.2f".format(latestAnalysisData.talkTimeSeconds)}")
+                            Text(text = "Pace: ${latestAnalysisData.pace}")
+                          } else {
+                            Text(text = "No analysis data available.")
+                          }
                         }
                   }
                   else -> {
                     Text(
                         text = "No feedback available.",
                         style = AppTypography.bodyLargeStyle,
-                        color = MaterialTheme.colorScheme.secondary)
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.testTag("feedbackNoMessage"))
                   }
                 }
 
@@ -223,13 +238,6 @@ fun FeedbackScreen(
       })
 }
 
-/**
- * Function to parse the decision from the feedback message.
- *
- * @param feedback The feedback message.
- * @param sessionType The type of session.
- * @return The decision result.
- */
 private fun parseDecisionFromFeedback(
     feedback: String,
     sessionType: SessionType?
