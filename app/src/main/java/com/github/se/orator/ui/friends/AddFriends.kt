@@ -22,7 +22,17 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,28 +96,30 @@ fun AddFriendsScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Add a Friend",
-                  modifier = Modifier.testTag("addFriendTitle"),
-                  color = MaterialTheme.colorScheme.onSurface)
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("addFriendBackButton")) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onSurface)
+          TopAppBar(
+              title = {
+                  Text(
+                      "Add a friend",
+                      modifier = Modifier.testTag("addFriendTitle"),
+                      color = MaterialTheme.colorScheme.onSurface
+                  )
+              },
+              navigationIcon = {
+                  IconButton(
+                      onClick = {
+                          navigationActions.goBack() // Navigate back
+                      },
+                      modifier = Modifier.testTag("addFriendBackButton")) {
+                      Icon(
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = MaterialTheme.colorScheme.onSurface
+                      )
                   }
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ))
-        Divider()
+              },
+              colors =
+              TopAppBarDefaults.topAppBarColors(
+                  containerColor = MaterialTheme.colorScheme.surfaceContainer))
       },
       bottomBar = {
         BottomNavigationMenu(
@@ -133,12 +145,15 @@ fun AddFriendsScreen(
                             .wrapContentHeight()
                             .focusRequester(focusRequester)
                             .testTag("addFriendSearchField"),
-                    label = { Text("Username", modifier = Modifier.testTag("searchFieldLabel")) },
+                    label = { Text("Username",
+                        modifier = Modifier.testTag("searchFieldLabel"),
+                        color = MaterialTheme.colorScheme.onSurface) },
                     leadingIcon = {
                       Icon(
                           Icons.Default.Search,
                           contentDescription = "Search Icon",
-                          modifier = Modifier.testTag("searchIcon"))
+                          modifier = Modifier.testTag("searchIcon"),
+                          tint = MaterialTheme.colorScheme.primary)
                     },
                     trailingIcon = {
                       if (query.isNotEmpty()) {
@@ -183,7 +198,8 @@ fun AddFriendsScreen(
                         Text(
                             text = "Sent Friend Requests",
                             style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.weight(1f).testTag("sentFriendRequestsHeader"))
+                            modifier = Modifier.weight(1f).testTag("sentFriendRequestsHeader"),
+                            color = MaterialTheme.colorScheme.onSurface)
                         IconButton(
                             onClick = { isSentRequestsExpanded = !isSentRequestsExpanded },
                             modifier = Modifier.testTag("toggleSentRequestsButton")) {
@@ -193,7 +209,8 @@ fun AddFriendsScreen(
                                       else Icons.Default.ExpandMore,
                                   contentDescription =
                                       if (isSentRequestsExpanded) "Collapse Sent Requests"
-                                      else "Expand Sent Requests")
+                                      else "Expand Sent Requests",
+                                  tint = MaterialTheme.colorScheme.onSurface)
                             }
                       }
                 }
@@ -283,7 +300,8 @@ fun SentFriendRequestItem(sentRequest: UserProfile, userProfileViewModel: UserPr
                         style = MaterialTheme.typography.titleMedium,
                         modifier =
                             Modifier.padding(bottom = AppDimensions.smallPadding)
-                                .testTag("sentFriendRequestName#${sentRequest.uid}"))
+                                .testTag("sentFriendRequestName#${sentRequest.uid}"),
+                        color = MaterialTheme.colorScheme.primary)
                     // Friend's Bio
                     Text(
                         text = sentRequest.bio ?: "No bio available",

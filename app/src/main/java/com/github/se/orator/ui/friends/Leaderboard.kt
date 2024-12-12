@@ -24,6 +24,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import java.util.Locale
 
 var currentPracticeMode = mutableStateOf(SessionType.SPEECH)
 var currentRankMetric = mutableStateOf("Ratio")
@@ -146,7 +147,9 @@ fun LeaderboardScreen(
 @Composable
 fun PracticeModeSelector() {
   var expanded by remember { mutableStateOf(false) } // Controls dropdown menu visibility
-  var selectedMode by remember { mutableStateOf("Practice mode 1") } // Holds the selected mode
+  var selectedMode by remember { mutableStateOf(
+        currentPracticeMode.value.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT)
+  ) } // Holds the selected mode
 
   Box(
       modifier =
@@ -166,26 +169,37 @@ fun PracticeModeSelector() {
         // Dropdown menu options for selecting a practice mode
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
           DropdownMenuItem(
-              text = { Text("Interview", color = MaterialTheme.colorScheme.onSecondaryContainer) },
+              text = { Text("Interview", color =
+              if (currentPracticeMode.value == SessionType.INTERVIEW) {
+                MaterialTheme.colorScheme.primary
+              }else MaterialTheme.colorScheme.onSecondaryContainer) },
               onClick = {
-                selectedMode = "Practice mode 1"
                 currentPracticeMode.value = SessionType.INTERVIEW
+                  selectedMode = currentPracticeMode.value.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT)
                 expanded = false
               },
               modifier = Modifier.testTag("practiceModeOption1"))
           DropdownMenuItem(
-              text = { Text("Speech") },
+              text = { Text("Speech",
+                  color =
+                      if (currentPracticeMode.value == SessionType.SPEECH) {
+                          MaterialTheme.colorScheme.primary
+                      }else MaterialTheme.colorScheme.onSecondaryContainer) },
               onClick = {
-                selectedMode = "Practice mode 2"
                 currentPracticeMode.value = SessionType.SPEECH
+                  selectedMode = currentPracticeMode.value.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT)
                 expanded = false
               },
               modifier = Modifier.testTag("practiceModeOption2"))
           DropdownMenuItem(
-              text = { Text("Negotiation") },
+              text = { Text("Negotiation",
+                  color =
+                  if (currentPracticeMode.value == SessionType.NEGOTIATION) {
+                      MaterialTheme.colorScheme.primary
+                  }else MaterialTheme.colorScheme.onSecondaryContainer) },
               onClick = {
-                selectedMode = "Practice mode 3"
                 currentPracticeMode.value = SessionType.NEGOTIATION
+                  selectedMode = currentPracticeMode.value.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT)
                 expanded = false
               },
               modifier = Modifier.testTag("practiceModeOption3"))
@@ -280,7 +294,7 @@ fun LeaderboardItem(
 @Composable
 fun RankMetricSelector() {
   var expanded by remember { mutableStateOf(false) } // Controls dropdown menu visibility
-  var selectedMetric by remember { mutableStateOf("Ratio") } // Holds the selected metric
+  var selectedMetric by remember { mutableStateOf(currentRankMetric.value) } // Holds the selected metric
 
   Box(
       modifier =
@@ -301,7 +315,11 @@ fun RankMetricSelector() {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
           DropdownMenuItem(
               text = {
-                Text("Success ratio", color = MaterialTheme.colorScheme.onSecondaryContainer)
+                Text("Success ratio",
+                    color =
+                        if (currentRankMetric.value == "Ratio") {
+                            MaterialTheme.colorScheme.primary
+                        }else MaterialTheme.colorScheme.onSecondaryContainer)
               },
               onClick = {
                 selectedMetric = "Ratio"
@@ -310,7 +328,11 @@ fun RankMetricSelector() {
               },
               modifier = Modifier.testTag("rankMetricOption1"))
           DropdownMenuItem(
-              text = { Text("Success") },
+              text = { Text("Success",
+                  color =
+                      if (currentRankMetric.value == "Success") {
+                          MaterialTheme.colorScheme.primary
+                      }else MaterialTheme.colorScheme.onSecondaryContainer) },
               onClick = {
                 selectedMetric = "Success"
                 currentRankMetric.value = "Success"
@@ -318,7 +340,11 @@ fun RankMetricSelector() {
               },
               modifier = Modifier.testTag("rankMetricOption2"))
           DropdownMenuItem(
-              text = { Text("Improvement") },
+              text = { Text("Improvement",
+                  color =
+                      if (currentRankMetric.value == "Improvement") {
+                          MaterialTheme.colorScheme.primary
+                      }else MaterialTheme.colorScheme.onSecondaryContainer) },
               onClick = {
                 selectedMetric = "Improvement"
                 currentRankMetric.value = "Improvement"
