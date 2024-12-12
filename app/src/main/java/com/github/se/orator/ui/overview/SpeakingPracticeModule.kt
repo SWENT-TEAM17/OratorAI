@@ -43,7 +43,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SpeakingPracticeModule(
     navigationActions: NavigationActions,
-    screenTitle: String,
+    screenTitle: String = "",
     headerText: String,
     inputs: List<InputFieldData>,
     onClick: () -> Unit,
@@ -79,9 +79,9 @@ fun SpeakingPracticeModule(
                   }
             },
             colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface))
+            TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ))
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
