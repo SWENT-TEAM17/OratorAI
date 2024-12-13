@@ -2,9 +2,11 @@ package com.github.se.orator.ui.profile
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -74,7 +76,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         .testTag("graphScreenTitle"),
                 text = "Statistics Graph",
                 style = AppTypography.mediumTitleStyle, // Apply custom style for title
-                color = MaterialTheme.colorScheme.onSurface)
+                color = MaterialTheme.colorScheme.primary)
 
             Text(
                 modifier =
@@ -159,6 +161,46 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         color = MaterialTheme.colorScheme.onSurface)
                   }
             }
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth().padding(horizontal = AppDimensions.paddingMedium),
+                horizontalArrangement = Arrangement.SpaceEvenly) {
+                  Column {
+                    PracticeModeTitle("InterviewTitle", "Interview")
+                    StatDisplay(
+                        "totalSessionsInterviewTitle",
+                        "Sessions: ",
+                        "${profile.statistics.sessionsGiven["INTERVIEW"]}")
+                    StatDisplay(
+                        "successSessionsInterviewTitle",
+                        "Successful: ",
+                        "${profile.statistics.successfulSessions["INTERVIEW"]}")
+                  }
+
+                  Column {
+                    PracticeModeTitle("speechTitle", "Speech")
+                    StatDisplay(
+                        "totalSessionsSpeechTitle",
+                        "Sessions: ",
+                        "${profile.statistics.sessionsGiven["SPEECH"]}")
+                    StatDisplay(
+                        "successSessionsSpeechTitle",
+                        "Successful: ",
+                        "${profile.statistics.successfulSessions["SPEECH"]}")
+                  }
+
+                  Column {
+                    PracticeModeTitle("negotiationTitle", "Negotiation")
+                    StatDisplay(
+                        "totalSessionsNegotiationTitle",
+                        "Sessions: ",
+                        "${profile.statistics.sessionsGiven["NEGOTIATION"]}")
+                    StatDisplay(
+                        "successSessionsNegotiationTitle",
+                        "Successful: ",
+                        "${profile.statistics.successfulSessions["NEGOTIATION"]}")
+                  }
+                }
           }
         }
       },
@@ -252,4 +294,30 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
               )
         }
       }
+}
+
+/** Composable for practice mode title displays on the stats screen */
+@Composable
+fun PracticeModeTitle(modeTitleTEstTag: String, mode: String) {
+  androidx.compose.material3.Text(
+      modifier =
+          Modifier.padding(start = AppDimensions.paddingSmall)
+              .padding(top = AppDimensions.paddingXXLarge)
+              .testTag(modeTitleTEstTag),
+      text = mode,
+      style = AppTypography.smallTitleStyle, // Apply custom style for title
+      color = MaterialTheme.colorScheme.primary)
+}
+
+/** Composable for stats displays on the stats screen */
+@Composable
+fun StatDisplay(statTestTag: String, stat: String, statValue: String) {
+  androidx.compose.material3.Text(
+      modifier =
+          Modifier.padding(start = AppDimensions.paddingSmall)
+              .padding(top = AppDimensions.paddingSmall)
+              .testTag(statTestTag),
+      text = stat + statValue,
+      style = AppTypography.xSmallTitleStyle, // Apply custom style for title
+      color = MaterialTheme.colorScheme.onSurface)
 }
