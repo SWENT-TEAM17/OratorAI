@@ -10,6 +10,7 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
+import com.github.se.orator.model.speechBattle.EvaluationResult
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
@@ -516,7 +517,97 @@ The session is now over. According to the initial instructions, you can now brea
     getNextGPTResponse()
   }
 
-  private fun messagesToTranscript(messages: List<Message>): String {
-    return messages.filter { it.role == "user" }.joinToString("\n") { it.content }
+  /**
+   * Evaluates the battle candidates and provides feedback to the winner and loser.
+   *
+   * @param userUid The UID of the user.
+   * @param messages The messages of that user
+   */
+  private fun messagesToTranscript(userUid: String, messages: List<Message>): String {
+    return messages.joinToString("\n") {
+      if (it.role == "user") "$userUid: ${it.content}" else "Interviewer: ${it.content}"
+    }
+  }
+
+  /**
+   * Evaluates the battle candidates, determines the winner of the battle and provides feedback to
+   * the winner and loser.
+   *
+   * @param user1Uid The UID of the first user.
+   * @param user2Uid The UID of the second user.
+   * @param user1messages The messages of the first user.
+   * @param user2messages The messages of the second user.
+   */
+  suspend fun evaluateBattleCandidates(
+      user1Uid: String,
+      user2Uid: String,
+      user1messages: List<Message>,
+      user2messages: List<Message>
+  ): EvaluationResult {
+    val user1Transcript = messagesToTranscript(user1Uid, user1messages)
+    val user2Transcript = messagesToTranscript(user2Uid, user2messages)
+
+    val prompt =
+        """
+        You are simulating a highly strict recruiter deciding between two candidates, $user1Uid and $user2Uid.
+        
+        You have all their Q&A transcripts:
+        
+        $user1Uid's transcript:
+        $user1Transcript
+
+        $user2Uid's transcript:
+        $user2Transcript
+
+        Please determine who performed better and explicitly state: "The winner is $user1Uid" or "The winner is $user2Uid".
+        Then, provide a message addressed to the winner, highlighting why they won (max one paragraph).
+        Also, provide a message addressed to the loser, highlighting what they did wrong and where they can improve (max one paragraph).
+
+        Format your answer as:
+        The winner is: <winnerUid>
+        Winner message: <short message>
+        Loser message: <short message>
+        """
+
+    val request =
+        ChatRequest(
+            model = "gpt-3.5-turbo",
+            messages =
+                listOf(
+                    Message(role = "system", content = "You are an unbiased strict recruiter."),
+                    Message(role = "user", content = prompt)))
+
+    val response = chatGPTService.getChatCompletion(request)
+    val content =
+        response.choices.firstOrNull()?.message?.content
+            ?: throw IllegalStateException("No response from ChatGPT")
+
+    // Example expected format:
+    // The winner is: user1Uid
+    // Winner message: Congratulations user1Uid, you showed...
+    // Loser message: user2Uid, you lacked clarity...
+
+    val winnerRegex = Regex("The winner is:\\s*(\\S+)")
+    val winnerMatch =
+        winnerRegex.find(content) ?: throw IllegalStateException("No winner found in the response")
+
+    val winnerUid = winnerMatch.groupValues[1]
+
+    val winnerMessageRegex =
+        Regex("Winner message:\\s*(.*?)(?=Loser message:|$)", RegexOption.DOT_MATCHES_ALL)
+    val loserMessageRegex = Regex("Loser message:\\s*(.*)", RegexOption.DOT_MATCHES_ALL)
+
+    val winnerMessageText =
+        winnerMessageRegex.find(content)?.groups?.get(1)?.value?.trim()
+            ?: "No winner message found."
+    val loserMessageText =
+        loserMessageRegex.find(content)?.groups?.get(1)?.value?.trim() ?: "No loser message found."
+
+    // Create Message objects for winnerMessage and loserMessage
+    val winnerMessage = Message(role = "assistant", content = winnerMessageText)
+    val loserMessage = Message(role = "assistant", content = loserMessageText)
+
+    return EvaluationResult(
+        winnerUid = winnerUid, winnerMessage = winnerMessage, loserMessage = loserMessage)
   }
 }
