@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
@@ -31,10 +32,12 @@ fun WaitingForCompletionScreen(
     battleId: String,
     friendUid: String,
     navigationActions: NavigationActions,
-    battleViewModel: BattleViewModel
+    battleViewModel: BattleViewModel,
+    userProfileViewModel: UserProfileViewModel
 ) {
   // State to observe the battle status
   val battle by battleViewModel.getBattleByIdFlow(battleId).collectAsState(initial = null)
+  val friendName = userProfileViewModel.getName(friendUid)
 
   // LaunchedEffect to check both users' completion statuses and navigate accordingly
   LaunchedEffect(battle) {
@@ -64,7 +67,7 @@ fun WaitingForCompletionScreen(
                     .testTag("waitingForCompletionScreen"),
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
-                  text = "You have completed your interview. Waiting for the other user to finish.",
+                  text = "You have completed your interview. Waiting for $friendName to finish.",
                   style = MaterialTheme.typography.bodyLarge,
                   textAlign = TextAlign.Center,
                   modifier =
