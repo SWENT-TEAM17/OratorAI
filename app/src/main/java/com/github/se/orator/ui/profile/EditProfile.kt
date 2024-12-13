@@ -1,5 +1,7 @@
 package com.github.se.orator.ui.profile
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -29,7 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.PhotoCamera
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme // Changed from material3 to material
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,7 +43,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
@@ -51,6 +54,7 @@ import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
+import java.io.File
 
 /**
  * Composable function for editing the user profile.
@@ -75,12 +79,6 @@ fun EditProfileScreen(
   var newProfilePicUri by remember { mutableStateOf<Uri?>(null) }
 
   val context = LocalContext.current
-
-  // Create a launcher for picking an image from the gallery
-  val pickImageLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { newProfilePicUri = it }
-      }
 
   Scaffold(
       topBar = {
@@ -138,19 +136,19 @@ fun EditProfileScreen(
                     profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
                     onClick = { isDialogOpen = true })
 
-                // edit profile picture button
+                // Edit profile picture button
                 Button(
                     onClick = { isDialogOpen = true },
                     modifier =
                         Modifier.testTag("upload_profile_picture_button")
-                            .width(40.dp)
-                            .height(40.dp)
+                            .width(AppDimensions.spacingXLarge)
+                            .height(AppDimensions.spacingXLarge)
                             .align(Alignment.BottomEnd),
                     shape = AppShapes.circleShape,
                     colors =
                         ButtonDefaults.buttonColors(
                             backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
-                    contentPadding = PaddingValues(0.dp)) {
+                    contentPadding = PaddingValues(AppDimensions.nullPadding)) {
                       Icon(
                           Icons.Outlined.PhotoCamera,
                           contentDescription = "Edit button",
@@ -181,6 +179,7 @@ fun EditProfileScreen(
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
 
+              // Bio Input Field
               OutlinedTextField(
                   value = updatedBio,
                   onValueChange = { newBio -> updatedBio = newBio },
@@ -236,21 +235,16 @@ fun EditProfileScreen(
                         color = MaterialTheme.colorScheme.onSurface)
                   }
             }
-      }
 
-  // Dialog for choosing between camera and gallery
-  if (isDialogOpen) {
-    ChoosePictureDialog(
-        onDismiss = { isDialogOpen = false },
-        onTakePhoto = {
-          isDialogOpen = false
-          Toast.makeText(context, "Taking a photo is not supported yet.", Toast.LENGTH_SHORT).show()
-        },
-        onPickFromGallery = {
-          isDialogOpen = false
-          pickImageLauncher.launch("image/*")
-        })
-  }
+        // Integrate the ImagePicker
+        ImagePicker(
+            isDialogOpen = isDialogOpen,
+            onDismiss = { isDialogOpen = false },
+            onImageSelected = { uri ->
+              newProfilePicUri = uri
+              Toast.makeText(context, "Profile picture updated.", Toast.LENGTH_SHORT).show()
+            })
+      }
 }
 
 /**
@@ -293,7 +287,7 @@ fun ChoosePictureDialog(
                   modifier = Modifier.testTag("PhotoOnTake"),
                   colors =
                       ButtonDefaults.buttonColors(
-                          backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+                          backgroundColor = MaterialTheme.colorScheme.primary)) {
                     Text(
                         "Take Photo",
                         modifier = Modifier.testTag("TakePhotoText"),
@@ -305,7 +299,7 @@ fun ChoosePictureDialog(
                   modifier = Modifier.testTag("PhotoOnPick"),
                   colors =
                       ButtonDefaults.buttonColors(
-                          backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+                          backgroundColor = MaterialTheme.colorScheme.primary)) {
                     Text(
                         "Upload from Gallery",
                         modifier = Modifier.testTag("UploadGalleryText"),
@@ -325,4 +319,143 @@ fun ChoosePictureDialog(
                   }
             }
       })
+}
+
+/**
+ * A reusable composable that handles image picking from the gallery or capturing a photo using the
+ * camera.
+ *
+ * @param isDialogOpen Controls the visibility of the image selection dialog.
+ * @param onDismiss Callback to dismiss the dialog.
+ * @param onImageSelected Callback with the selected image URI.
+ */
+@Composable
+fun ImagePicker(isDialogOpen: Boolean, onDismiss: () -> Unit, onImageSelected: (Uri) -> Unit) {
+  val context = LocalContext.current
+  var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
+  var isCameraRequested by remember { mutableStateOf(false) }
+
+  // Launcher for picking an image from the gallery
+  val pickImageLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { onImageSelected(it) }
+      }
+
+  // Launcher to take a picture using the camera
+  val takePictureLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+          pendingImageUri?.let { onImageSelected(it) }
+          pendingImageUri = null
+        } else {
+          Toast.makeText(context, "Failed to capture image.", Toast.LENGTH_SHORT).show()
+        }
+      }
+
+  // Request camera permission launcher
+  val cameraPermissionLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted && isCameraRequested) {
+          isCameraRequested = false
+          pendingImageUri?.let { uri -> takePictureLauncher.launch(uri) }
+              ?: run {
+                Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
+              }
+        } else if (!granted && isCameraRequested) {
+          isCameraRequested = false
+          Toast.makeText(context, "Camera permission denied.", Toast.LENGTH_SHORT).show()
+        }
+      }
+
+  // Function to create a URI for the image file where the camera app will save the photo
+  fun createImageFileUri(): Uri? {
+    return try {
+      val imageFileName = "profile_picture_${System.currentTimeMillis()}.jpg"
+      val storageDir = File(context.filesDir, "images").apply { if (!exists()) mkdirs() }
+      val imageFile = File(storageDir, imageFileName)
+      FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  if (isDialogOpen) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text("Choose Profile Picture") },
+        text = { Text("Select an option to update your profile picture.") },
+        buttons = {
+          Column(
+              modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmallMedium),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                // Take Photo Button
+                Button(
+                    onClick = {
+                      onDismiss()
+                      // Create the URI first
+                      val uri = createImageFileUri()
+                      if (uri != null) {
+                        pendingImageUri = uri
+                        // Check camera permission
+                        if (ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.CAMERA) ==
+                            PackageManager.PERMISSION_GRANTED) {
+                          // Launch camera
+                          takePictureLauncher.launch(uri)
+                        } else {
+                          // Request camera permission
+                          isCameraRequested = true
+                          cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                      } else {
+                        Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("PhotoOnTake"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.primary)) {
+                      Text(
+                          "Take Photo",
+                          color = MaterialTheme.colorScheme.onPrimary,
+                          modifier = Modifier.testTag("TakePhotoText"))
+                    }
+
+                Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+
+                // Upload from Gallery Button
+                Button(
+                    onClick = {
+                      onDismiss()
+                      pickImageLauncher.launch("image/*")
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("PhotoOnPick"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.primary)) {
+                      Text(
+                          "Upload from Gallery",
+                          color = MaterialTheme.colorScheme.onPrimary,
+                          modifier = Modifier.testTag("UploadGalleryText"))
+                    }
+
+                Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+
+                // Cancel Button
+                Button(
+                    onClick = { onDismiss() },
+                    modifier = Modifier.fillMaxWidth().testTag("PhotoOnDismiss"),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.surface)) {
+                      Text(
+                          "Cancel",
+                          color = MaterialTheme.colorScheme.primary,
+                          modifier = Modifier.testTag("CancelText"))
+                    }
+              }
+        })
+  }
 }

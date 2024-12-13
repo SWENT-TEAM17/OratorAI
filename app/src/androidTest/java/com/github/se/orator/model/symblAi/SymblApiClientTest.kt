@@ -15,7 +15,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert
 import org.junit.Before
@@ -216,7 +215,7 @@ class SymblApiClientTest {
                 .protocol(Protocol.HTTP_1_1)
                 .code(200)
                 .message("OK")
-                .body(ResponseBody.create("application/json".toMediaType(), "Invalid JSON"))
+                .body("Invalid JSON".toResponseBody("application/json".toMediaType()))
                 .build())
 
     `when`(okHttpClient.newCall(any())).thenReturn(call)

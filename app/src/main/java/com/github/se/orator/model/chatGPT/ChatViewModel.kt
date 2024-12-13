@@ -14,6 +14,7 @@ import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -40,6 +41,11 @@ class ChatViewModel(
   val collectedAnalysisData = _collectedAnalysisData.asStateFlow()
 
   private val practiceContext = apiLinkViewModel.practiceContext
+
+  private val has_responded = MutableStateFlow(false)
+  private val _response = MutableStateFlow("")
+  val response: StateFlow<String>
+    get() = _response
 
   data class DecisionResult(val message: String, val isSuccess: Boolean)
 
@@ -111,6 +117,7 @@ class ChatViewModel(
                   .trimIndent()
           is PublicSpeakingContext ->
               """
+
                 You are a professional public speaking coach assisting an advanced AI system preparing a speech for ${practiceContextAsValue.occasion} with the purpose to ${practiceContextAsValue.purpose}. 
     The audience is a ${practiceContextAsValue.audienceSize} group of ${practiceContextAsValue.audienceDemographic}. 
     Although the candidate is an AI, treat it as you would a human speaker who can reason and adapt, but maintain a high standard and challenging approach.
@@ -143,10 +150,12 @@ class ChatViewModel(
        - Only after the user explicitly states the session is over and requests feedback should you break the no-feedback rule and provide a detailed assessment.
 
     Begin by introducing yourself, clarifying the goals for the session, and setting high expectations. Do not simply affirm their initial ideas; push them to articulate and justify every choice.
+
         """
                   .trimIndent()
           is SalesPitchContext ->
               """
+
                 You are simulating a challenging and realistic sales negotiation practice session for an advanced AI system preparing to pitch "${practiceContextAsValue.product}" to ${practiceContextAsValue.targetAudience}. 
     The primary goal is to ${practiceContextAsValue.salesGoal}.
 
@@ -175,8 +184,10 @@ class ChatViewModel(
        - Only after the user explicitly states that the session is over and requests final feedback should you break from this no-feedback rule and provide a detailed assessment.
 
     Start by setting a challenging scene and initiating the conversation. Ask initial questions that probe the candidate's understanding of the client’s needs and how their solution meets those needs. If the candidate’s answers are too easy or generic, persistently request deeper, more reasoned responses.
+
         """
                   .trimIndent()
+          // Add cases for other context types like SalesPitchContext
           else -> "You are assisting the user with their speaking practice."
         }
 
@@ -187,6 +198,11 @@ class ChatViewModel(
     _chatMessages.value = listOf(systemMessage, userStartMessage)
 
     getNextGPTResponse()
+  }
+
+  fun resetResponse() {
+    _response.value = ""
+    has_responded.value = false
   }
 
   fun sendUserResponse(transcript: String, analysisData: AnalysisData) {
@@ -216,6 +232,46 @@ class ChatViewModel(
               TextToSpeech.QUEUE_FLUSH,
               null,
               "5x7CCx")
+        }
+      } catch (e: Exception) {
+        handleError(e)
+      } finally {
+        _isLoading.value = false
+      }
+    }
+  }
+
+  /**
+   * Function to send individual requests to GPT to get feedback for the offline queries
+   *
+   * @param msg: What the user said and wishes to get feedback on
+   */
+  fun offlineRequest(msg: String, company: String, position: String) {
+    Log.d("ChatViewModel", "Getting next GPT response")
+    viewModelScope.launch {
+      try {
+        _isLoading.value = true
+
+        val gptQuery =
+            "For the upcoming query you will respond as if you are a very strict interviewer who is interviewing someone applying for a $position position at $company that is very competitive. " +
+                "For example if the user only gives a few strengths you will tell him to cite more. If his strengths don't aline with a job as a $position or are off topic you will mention that." +
+                "Do not ask questions for the user to provide more skills or strengths. Assume this is a one time exchange where you can only give remarks without expecting any more messages." +
+                "The query the interviewee has said that you will critique is: $msg"
+        Log.d("mr smith", gptQuery)
+
+        val request =
+            ChatRequest(
+                model = "gpt-3.5-turbo",
+                messages = listOf(Message(role = "system", content = gptQuery)))
+
+        val response = chatGPTService.getChatCompletion(request)
+
+        if (!has_responded.value) {
+          response.choices.firstOrNull()?.message?.let { responseMessage ->
+            _response.value = responseMessage.content
+            has_responded.value = true
+            Log.d("aa", "$responseMessage.content")
+          }
         }
       } catch (e: Exception) {
         handleError(e)
@@ -425,5 +481,42 @@ The session is now over. According to the initial instructions, you can now brea
         }
       }
     }
+  }
+
+  /**
+   * Initializes the conversation for a battle session.
+   *
+   * @param battleId The unique ID of the battle.
+   * @param friendName The UID of the friend participating in the battle.
+   */
+  fun initializeBattleConversation(battleId: String, friendName: String) {
+    if (isConversationInitialized) return
+    isConversationInitialized = true
+
+    _collectedAnalysisData.value = emptyList() // Reset the analysis data history
+    val practiceContextAsValue =
+        (apiLinkViewModel.practiceContext.value ?: return) as InterviewContext
+
+    val systemMessageContent =
+        """
+                    You are engaged in a battle against $friendName a ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.targetPosition} at ${practiceContextAsValue.companyName}. 
+                    Focus on the following areas: ${practiceContextAsValue.focusArea}. 
+                    Ask questions one at a time and wait for the user's response before proceeding. 
+                    Do not provide feedback until the end.
+                """
+            .trimIndent()
+
+    val systemMessage = Message(role = "system", content = systemMessageContent)
+
+    val userStartMessage =
+        Message(role = "user", content = "I'm ready to begin the battle session.")
+
+    _chatMessages.value = listOf(systemMessage, userStartMessage)
+
+    getNextGPTResponse()
+  }
+
+  private fun messagesToTranscript(messages: List<Message>): String {
+    return messages.filter { it.role == "user" }.joinToString("\n") { it.content }
   }
 }

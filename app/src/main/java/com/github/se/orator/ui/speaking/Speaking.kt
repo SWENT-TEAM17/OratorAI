@@ -2,68 +2,35 @@ package com.github.se.orator.ui.speaking
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.media.AudioFormat
-import android.media.AudioRecord
-import android.media.MediaRecorder
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Card
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.symblAi.SpeakingError
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.AppShapes
+import com.github.se.orator.ui.theme.Constants
+import kotlin.math.min
 import kotlinx.coroutines.delay
 
-/**
- * The SpeakingScreen composable displays the speaking screen.
- *
- * @param viewModel The view model for the speaking screen.
- * @param navigationActions The NavigationActions instance to navigate between screens.
- */
 @SuppressLint("SuspiciousIndentation", "StateFlowValueCalledInComposition", "MissingPermission")
 @Composable
-fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingViewModel) {
-
+fun SpeakingScreen(
+    navigationActions: NavigationActions,
+    viewModel: SpeakingViewModel,
+    apiLinkViewModel: ApiLinkViewModel,
+) {
   // State variables
   val analysisState = viewModel.analysisState.collectAsState()
   val analysisData by viewModel.analysisData.collectAsState()
@@ -71,186 +38,183 @@ fun SpeakingScreen(navigationActions: NavigationActions, viewModel: SpeakingView
   val textColor = MaterialTheme.colorScheme.onBackground
 
   // Permission handling
-  var permissionGranted by remember { mutableStateOf(false) }
+  val permissionGranted = remember { mutableStateOf(false) }
+
   val permissionLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.RequestPermission(),
-          onResult = { isGranted -> permissionGranted = isGranted })
+          onResult = { isGranted -> permissionGranted.value = isGranted })
 
   DisposableEffect(Unit) {
     permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-
     onDispose { viewModel.endAndSave() }
   }
 
   // State for amplitudes
   val amplitudes = remember { mutableStateListOf<Float>() }
+  handleAudioRecording(analysisState, permissionGranted, amplitudes)
 
-  // Audio recording and amplitude collection
-  LaunchedEffect(analysisState.value, permissionGranted) {
-    if (permissionGranted && analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-      val sampleRateInHz = 44100
-      val channelConfig = AudioFormat.CHANNEL_IN_MONO
-      val audioFormat = AudioFormat.ENCODING_PCM_16BIT
+  // State to hold the current tip
+  var currentTip by remember { mutableStateOf<String?>(null) }
 
-      val bufferSize = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat)
-      val audioRecord =
-          AudioRecord(
-              MediaRecorder.AudioSource.MIC, sampleRateInHz, channelConfig, audioFormat, bufferSize)
-      audioRecord.startRecording()
-      val buffer = ShortArray(bufferSize)
-      try {
-        while (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-          val readSize = audioRecord.read(buffer, 0, bufferSize)
-          if (readSize > 0) {
-            val max = buffer.take(readSize).maxOrNull()?.toFloat() ?: 0f
-            amplitudes.add(max)
-            if (amplitudes.size > 100) {
-              amplitudes.removeFirst()
-            }
-          }
-          delay(16L) // Approximately 60 fps
-        }
-      } catch (e: Exception) {
-        e.printStackTrace()
-      } finally {
-        audioRecord.stop()
-        audioRecord.release()
-      }
+  // When entering PROCESSING state, pick a random tip
+  LaunchedEffect(analysisState.value) {
+    if (analysisState.value == SpeakingRepository.AnalysisState.PROCESSING) {
+      val tips = apiLinkViewModel.getTipsForModule()
+      currentTip = tips.random()
     } else {
-      amplitudes.clear()
+      // Once we leave PROCESSING, clear the tip
+      if (analysisState.value != SpeakingRepository.AnalysisState.PROCESSING) {
+        currentTip = null
+      }
     }
   }
 
-  // UI Components
-  Column(
-      modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium).testTag("ui_column"),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally) {
-        // Animated recording indicator
-        val infiniteTransition = rememberInfiniteTransition()
+  // Add a progress value for the bar
+  var progress by remember { mutableStateOf(0f) }
 
-        // Animation for pulsing effect during recording
-        val scale by
-            infiniteTransition.animateFloat(
-                initialValue = 1f,
-                targetValue = 1.5f,
-                animationSpec =
-                    infiniteRepeatable(
-                        animation = tween(500, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse),
-                label = "")
+  // This handles the slow increment during PROCESSING
+  LaunchedEffect(analysisState.value) {
+    if (analysisState.value == SpeakingRepository.AnalysisState.PROCESSING) {
+      // Reset and start incrementing the progress
+      progress = 0f
+      // While in PROCESSING, gradually increase the progress
+      while (analysisState.value == SpeakingRepository.AnalysisState.PROCESSING && progress < 1f) {
+        progress += Constants.PROCESSING_PROGRESS_INCREMENT
+        delay(Constants.PROCESSING_INCREMENT_DELAY_MS) // Increment every 200ms
+      }
+    }
+  }
 
-        // Microphone button with animation
-        Button(
-            onClick = { viewModel.onMicButtonClicked(permissionGranted) },
-            modifier =
-                Modifier.size(AppDimensions.buttonSize)
-                    .scale(
-                        if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) scale
-                        else 1f)
-                    .testTag("mic_button"),
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.primary),
-            shape = AppShapes.circleShape,
-            border =
-                BorderStroke(
-                    width = AppDimensions.borderStrokeWidth,
-                    color = MaterialTheme.colorScheme.outline)) {
-              Icon(
-                  imageVector =
-                      if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING)
-                          Icons.Filled.Mic
-                      else Icons.Filled.MicOff,
-                  contentDescription =
-                      if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING)
-                          "Stop recording"
-                      else "Start recording",
-                  modifier = Modifier.size(AppDimensions.iconSizeMic),
-                  tint = MaterialTheme.colorScheme.primary)
-            }
+  // This handles the quick fill once processing ends
+  LaunchedEffect(analysisState.value) {
+    if (analysisState.value != SpeakingRepository.AnalysisState.PROCESSING && currentTip != null) {
+      // Processing finished, now fill the bar quickly from current progress to 1.0
+      // but not too fast, so user can see it:
+      while (progress < 1f) {
+        progress += Constants.QUICK_FILL_PROGRESS_INCREMENT
+        delay(Constants.QUICK_FILL_INCREMENT_DELAY_MS)
+      }
+      // Once fully filled, navigate back
+      viewModel.endAndSave()
+      navigationActions.goBack()
+    }
+  }
 
-        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+  Box(modifier = Modifier.fillMaxSize().testTag("main_box")) {
+    // UI Components
+    Column(
+        modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium).testTag("ui_column"),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally) {
 
-        // Display feedback messages
-        val feedbackMessage =
-            when (analysisState.value) {
-              SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
-              SpeakingRepository.AnalysisState.PROCESSING -> "Processing..."
-              SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
-              else ->
-                  when (viewModel.analysisError.value) {
-                    SpeakingError.NO_ERROR -> "Analysis finished."
-                    else -> "Error : ${viewModel.analysisError.value}"
-                  }
-            }
-        Text(feedbackMessage, modifier = Modifier.testTag("mic_text"), color = textColor)
+          // Microphone button with animation
+          MicrophoneButton(viewModel, analysisState, permissionGranted, LocalContext.current)
 
-        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-
-        // Add the AudioVisualizer when recording
-        if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-          AudioVisualizer(amplitudes = amplitudes)
           Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-        }
 
-        // Display transcribed text
-        if (analysisData != null) {
-          Text("Transcribed Text: ${analysisData!!.transcription}", color = textColor)
-          Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
-
-          // Display sentiment analysis result
-          Text("Sentiment Analysis: ${analysisData!!.sentimentScore}", color = textColor)
-          Spacer(
-              modifier = Modifier.height(AppDimensions.paddingMedium).testTag("sentiment_analysis"))
-        }
-
-        Row {
-          Button(
-              onClick = {
-                viewModel.endAndSave() // end the recording
-                navigationActions.goBack()
-              },
-              modifier = Modifier.testTag("back_button"),
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                      contentColor = MaterialTheme.colorScheme.primary),
-              border =
-                  BorderStroke(
-                      width = AppDimensions.borderStrokeWidth,
-                      color = MaterialTheme.colorScheme.outline)) {
-                Text("Back", color = MaterialTheme.colorScheme.primary)
+          // Display feedback messages
+          val feedbackMessage =
+              when (analysisState.value) {
+                SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
+                SpeakingRepository.AnalysisState.PROCESSING -> "Processing..."
+                SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
+                else ->
+                    when (viewModel.analysisError.value) {
+                      SpeakingError.NO_ERROR -> "Analysis finished."
+                      else -> "Error : ${viewModel.analysisError.value}"
+                    }
               }
-        }
-      }
-}
+          Text(feedbackMessage, modifier = Modifier.testTag("mic_text"), color = textColor)
 
-/**
- * A composable that visualizes audio amplitudes as a waveform.
- *
- * @param amplitudes A list of amplitude values to visualize.
- */
-@Composable
-fun AudioVisualizer(amplitudes: List<Float>) {
-  val color = MaterialTheme.colorScheme.onBackground
-  Canvas(
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(AppDimensions.visualizerHeight)
-              .testTag("audio_visualizer")) {
-        val width = size.width
-        val height = size.height
-        val barWidth = width / amplitudes.size
-        amplitudes.forEachIndexed { index, amplitude ->
-          val barHeight = (amplitude / Short.MAX_VALUE) * height
-          drawLine(
-              color = color,
-              start = Offset(x = index * barWidth, y = height / 2 - barHeight / 2),
-              end = Offset(x = index * barWidth, y = height / 2 + barHeight / 2),
-              strokeWidth = barWidth)
+          Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
+          // Add the AudioVisualizer when recording
+          if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
+            AudioVisualizer(amplitudes = amplitudes)
+            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+          }
+
+          // Display transcribed text
+          if (analysisData != null) {
+            Text("Transcribed Text: ${analysisData!!.transcription}", color = textColor)
+            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
+
+            // Display sentiment analysis result
+            Text("Sentiment Analysis: ${analysisData!!.sentimentScore}", color = textColor)
+            Spacer(
+                modifier =
+                    Modifier.height(AppDimensions.paddingMedium).testTag("sentiment_analysis"))
+          }
+
+          Row {
+            Button(
+                onClick = {
+                  viewModel.endAndSave() // end the recording
+                  navigationActions.goBack()
+                },
+                modifier = Modifier.testTag("back_button"),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        contentColor = MaterialTheme.colorScheme.primary),
+                border =
+                    BorderStroke(
+                        width = AppDimensions.borderStrokeWidth,
+                        color = MaterialTheme.colorScheme.outline)) {
+                  Text("Back", color = MaterialTheme.colorScheme.primary)
+                }
+          }
         }
-      }
+
+    // Overlay if we are processing (or just finished and doing the final fill)
+    if (currentTip != null &&
+        (analysisState.value == SpeakingRepository.AnalysisState.PROCESSING || progress < 1f)) {
+      // Semi-transparent overlay
+      Box(
+          modifier =
+              Modifier.fillMaxSize()
+                  .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))) {
+            // Card with the tip
+            Column(
+                modifier = Modifier.align(Alignment.Center).padding(AppDimensions.paddingMedium),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  Card(
+                      modifier = Modifier.testTag("tips_card"),
+                      backgroundColor = MaterialTheme.colorScheme.surface,
+                      elevation = AppDimensions.elevationSmall) {
+                        Column(
+                            modifier =
+                                Modifier.padding(AppDimensions.paddingMedium)
+                                    .widthIn(
+                                        min = AppDimensions.cardHeightmin,
+                                        max = AppDimensions.cardHeightmax)
+                                    .testTag("tips_container"),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                              Text(
+                                  text = "Processing your speech...",
+                                  style =
+                                      MaterialTheme.typography.titleMedium.copy(
+                                          color = MaterialTheme.colorScheme.onSurface),
+                                  modifier = Modifier.padding(bottom = AppDimensions.paddingSmall))
+                              Text(
+                                  text = currentTip!!,
+                                  style =
+                                      MaterialTheme.typography.bodyMedium.copy(
+                                          color = MaterialTheme.colorScheme.onSurfaceVariant),
+                                  modifier = Modifier.padding(AppDimensions.paddingSmall))
+                              Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
+                              // LinearProgressIndicator showing current progress
+                              LinearProgressIndicator(
+                                  progress = progress,
+                                  modifier = Modifier.fillMaxWidth().testTag("progress_bar"),
+                                  color = MaterialTheme.colorScheme.primary,
+                                  trackColor = MaterialTheme.colorScheme.surfaceVariant)
+                            }
+                      }
+                }
+          }
+    }
+  }
 }

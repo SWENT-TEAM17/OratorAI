@@ -2,9 +2,11 @@ package com.github.se.orator.model.profile
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.speechBattle.BattleStatus
+import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -217,40 +219,58 @@ class UserProfileRepositoryFirestoreTest {
 
     // Prepare sessionsGivenMap and successfulSessionsMap
     val sessionsGivenMap = mapOf("SPEECH" to 10L, "INTERVIEW" to 5L, "NEGOTIATION" to 3L)
-
     val successfulSessionsMap = mapOf("SPEECH" to 7L, "INTERVIEW" to 2L, "NEGOTIATION" to 1L)
 
-    // Prepare the statisticsMap
+    // Prepare the statisticsMap with battleStats
+    val battleStatsList =
+        listOf(
+            mapOf(
+                "battleId" to "battle1",
+                "challenger" to "user1",
+                "opponent" to "user2",
+                "status" to "COMPLETED",
+                "interviewContext" to
+                    mapOf(
+                        "targetPosition" to "Developer",
+                        "companyName" to "TechCorp",
+                        "interviewType" to "Technical",
+                        "experienceLevel" to "Junior",
+                        "jobDescription" to "Develop software",
+                        "focusArea" to "Backend"),
+                "challengerCompleted" to true,
+                "opponentCompleted" to true,
+                "challengerData" to listOf(mapOf("role" to "user", "content" to "Hello")),
+                "opponentData" to listOf(mapOf("role" to "user", "content" to "Hi")),
+                "evaluationResult" to
+                    mapOf(
+                        "winnerUid" to "user1",
+                        "winnerMessage" to
+                            mapOf(
+                                "role" to "assistant",
+                                "content" to "Congratulations! You won the battle."),
+                        "loserMessage" to
+                            mapOf(
+                                "role" to "assistant",
+                                "content" to "You lost the battle. Better luck next time."))))
     val statisticsMap =
         mapOf(
             "sessionsGiven" to sessionsGivenMap,
             "successfulSessions" to successfulSessionsMap,
             "improvement" to 4.5f,
-            "previousRuns" to
-                listOf(
-                    mapOf(
-                        "title" to "Speech 1",
-                        "duration" to 5L,
-                        "date" to Timestamp.now(), // Use a valid Timestamp
-                        "accuracy" to 85.0f,
-                        "wordsPerMinute" to 120L),
-                    mapOf(
-                        "title" to "Speech 2",
-                        "duration" to 7L,
-                        "date" to Timestamp.now(), // Use a valid Timestamp
-                        "accuracy" to 90.0f,
-                        "wordsPerMinute" to 110L)))
+            "battleStats" to battleStatsList)
 
+    // Mock the statistics field in the DocumentSnapshot
     `when`(mockDocumentSnapshot.get("statistics")).thenReturn(statisticsMap)
 
     // Simulate a successful Firestore query with Tasks.forResult()
     val mockTask = Tasks.forResult(mockDocumentSnapshot)
-    `when`(mockFirestore.collection(anyString()).document(anyString()).get()).thenReturn(mockTask)
+    `when`(mockDocumentReference.get()).thenReturn(mockTask)
 
+    // Call the method under test
     repository.getUserProfile(
         "testUid",
         onSuccess = { userProfile ->
-          // Assertions using the Kotlin assert function
+          // Assertions for UserProfile
           assert(userProfile != null)
           assert(userProfile?.uid == "testUid")
           assert(userProfile?.name == "Test User")
@@ -274,19 +294,13 @@ class UserProfileRepositoryFirestoreTest {
 
           assert(statistics?.improvement == 4.5f)
 
-          // Assertions for previous runs in UserStatistics
-          assert(statistics?.previousRuns?.size == 2)
-          val firstRun = statistics?.previousRuns?.get(0)
-          assert(firstRun?.title == "Speech 1")
-          assert(firstRun?.duration == 5)
-          assert(firstRun?.accuracy == 85.0f)
-          assert(firstRun?.wordsPerMinute == 120)
-
-          val secondRun = statistics?.previousRuns?.get(1)
-          assert(secondRun?.title == "Speech 2")
-          assert(secondRun?.duration == 7)
-          assert(secondRun?.accuracy == 90.0f)
-          assert(secondRun?.wordsPerMinute == 110)
+          // Assertions for battleStats in UserStatistics
+          assert(statistics?.battleStats?.size == 1)
+          val battle = statistics?.battleStats?.first()
+          assert(battle?.battleId == "battle1")
+          assert(battle?.challenger == "user1")
+          assert(battle?.opponent == "user2")
+          assert(battle?.status == BattleStatus.COMPLETED)
         },
         onFailure = { fail("Failure callback should not be called") })
 
@@ -294,7 +308,66 @@ class UserProfileRepositoryFirestoreTest {
     shadowOf(Looper.getMainLooper()).idle()
 
     // Verify that the Firestore document was fetched
-    verify(mockFirestore.collection(anyString()).document(anyString())).get()
+    verify(mockDocumentReference).get()
+  }
+
+  @Test
+  fun updateUserProfile_withNewBattleStats_shouldUpdateFirestore() {
+    // Mock user data
+    val testUid = "testUid"
+    val newBattle =
+        SpeechBattle(
+            battleId = "battle2",
+            challenger = "user3",
+            opponent = "user4",
+            status = BattleStatus.PENDING,
+            context =
+                InterviewContext(
+                    targetPosition = "",
+                    companyName = "",
+                    interviewType = "",
+                    experienceLevel = "",
+                    jobDescription = "",
+                    focusArea = ""),
+        )
+
+    // Create an existing user profile with existing stats
+    val userProfile =
+        UserProfile(
+            uid = testUid,
+            name = "Test User",
+            age = 25,
+            statistics =
+                UserStatistics(
+                    sessionsGiven = mapOf("SPEECH" to 5),
+                    successfulSessions = mapOf("SPEECH" to 3),
+                    improvement = 1.5f,
+                    battleStats = listOf() // Initially empty
+                    ),
+            friends = listOf("friend1", "friend2"),
+            bio = "Test bio")
+
+    // Simulate adding the new battle to the list
+    val updatedProfile =
+        userProfile.copy(
+            statistics =
+                userProfile.statistics.copy(
+                    battleStats = userProfile.statistics.battleStats + newBattle))
+
+    // Mock Firestore's set method to simulate success
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+
+    // Call the updateUserProfile method
+    repository.updateUserProfile(
+        updatedProfile,
+        onSuccess = { assert(true) }, // Verify that onSuccess is called
+        onFailure = { fail("Failure callback should not be called") })
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify that the updated user profile was sent to Firestore
+    verify(mockDocumentReference).set(updatedProfile)
   }
 
   /**

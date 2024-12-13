@@ -2,6 +2,9 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import com.github.se.orator.model.speaking.AnalysisData
+import com.github.se.orator.ui.friends.currentPracticeMode
+import com.github.se.orator.ui.friends.currentRankMetric
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.*
@@ -213,6 +216,108 @@ class UserProfileViewModelTest {
   }
 
   @Test
+  fun `leaderboard should sort by ratio for selected practice mode`() = runTest {
+    // Mock statistics for users
+    val userStats1 =
+        UserStatistics(
+            successfulSessions = mapOf("SPEECH" to 3), sessionsGiven = mapOf("SPEECH" to 5))
+    val userStats2 =
+        UserStatistics(
+            successfulSessions = mapOf("SPEECH" to 4), sessionsGiven = mapOf("SPEECH" to 6))
+    val user1 = UserProfile(uid = "user1", name = "User 1", statistics = userStats1, age = 25)
+    val user2 = UserProfile(uid = "user2", name = "User 2", statistics = userStats2, age = 25)
+
+    // Set up mocked repository
+    doAnswer {
+          val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+          onSuccess(listOf(user1, user2))
+          null
+        }
+        .`when`(repository)
+        .getFriendsProfiles(any(), any(), any())
+
+    // Fetch user profiles
+    viewModel.getUserProfile(testUid)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Set practice mode and rank metric
+    currentPracticeMode.value = SessionType.SPEECH
+    currentRankMetric.value = "Ratio"
+
+    // Wait for updates
+    val leaderboard = viewModel.friendsProfiles.first()
+    val sortedLeaderboard =
+        leaderboard.sortedByDescending {
+          viewModel.getSuccessRatioForMode(it.statistics, currentPracticeMode.value)
+        }
+
+    // Verify ranking
+    Assert.assertEquals("User 2", sortedLeaderboard[0].name)
+    Assert.assertEquals("User 1", sortedLeaderboard[1].name)
+  }
+
+  @Test
+  fun `leaderboard should sort by success for selected practice mode`() = runTest {
+    val userStats1 =
+        UserStatistics(
+            successfulSessions = mapOf("INTERVIEW" to 5), sessionsGiven = mapOf("INTERVIEW" to 10))
+    val userStats2 =
+        UserStatistics(
+            successfulSessions = mapOf("INTERVIEW" to 8), sessionsGiven = mapOf("INTERVIEW" to 12))
+    val user1 = UserProfile(uid = "user1", name = "User 1", statistics = userStats1, age = 25)
+    val user2 = UserProfile(uid = "user2", name = "User 2", statistics = userStats2, age = 25)
+
+    doAnswer {
+          val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+          onSuccess(listOf(user1, user2))
+          null
+        }
+        .`when`(repository)
+        .getFriendsProfiles(any(), any(), any())
+
+    viewModel.getUserProfile(testUid)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    currentPracticeMode.value = SessionType.INTERVIEW
+    currentRankMetric.value = "Success"
+
+    val leaderboard = viewModel.friendsProfiles.first()
+    val sortedLeaderboard =
+        leaderboard.sortedByDescending {
+          viewModel.getSuccessForMode(it.statistics, currentPracticeMode.value)
+        }
+
+    Assert.assertEquals("User 2", sortedLeaderboard[0].name)
+    Assert.assertEquals("User 1", sortedLeaderboard[1].name)
+  }
+
+  @Test
+  fun `leaderboard should sort by improvement for all practice modes`() = runTest {
+    val userStats1 = UserStatistics(improvement = 12.0f)
+    val userStats2 = UserStatistics(improvement = 20.0f)
+    val user1 = UserProfile(uid = "user1", name = "User 1", statistics = userStats1, age = 25)
+    val user2 = UserProfile(uid = "user2", name = "User 2", statistics = userStats2, age = 25)
+
+    doAnswer {
+          val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+          onSuccess(listOf(user1, user2))
+          null
+        }
+        .`when`(repository)
+        .getFriendsProfiles(any(), any(), any())
+
+    viewModel.getUserProfile(testUid)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    currentRankMetric.value = "Improvement"
+
+    val leaderboard = viewModel.friendsProfiles.first()
+    val sortedLeaderboard = leaderboard.sortedByDescending { it.statistics.improvement }
+
+    Assert.assertEquals("User 2", sortedLeaderboard[0].name)
+    Assert.assertEquals("User 1", sortedLeaderboard[1].name)
+  }
+
   fun `addNewestData should add new data to recentData and update user profile`() = runTest {
     // Arrange
     val newAnalysisData =
@@ -448,5 +553,29 @@ class UserProfileViewModelTest {
     updatedUserProfile?.statistics?.talkTimePercMean?.let { Assert.assertEquals(0.0, it, 0.001) }
 
     verify(repository).updateUserProfile(any(), any(), any())
+  }
+
+  @Test
+  fun `ensureListSizeTen with fewer than 10 elements`() {
+    val inputList = listOf(1f, 2f, 3f)
+    val expectedOutput = listOf(1f, 2f, 3f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
+    val actualOutput = viewModel.ensureListSizeTen(inputList)
+    assertEquals(expectedOutput, actualOutput)
+  }
+
+  @Test
+  fun `ensureListSizeTen with exactly 10 elements`() {
+    val inputList = listOf(1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f)
+    val expectedOutput = inputList // Should return the same list
+    val actualOutput = viewModel.ensureListSizeTen(inputList)
+    assertEquals(expectedOutput, actualOutput)
+  }
+
+  @Test
+  fun `ensureListSizeTen with more than 10 elements`() {
+    val inputList = listOf(1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f)
+    val expectedOutput = listOf(1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f)
+    val actualOutput = viewModel.ensureListSizeTen(inputList)
+    assertEquals(expectedOutput, actualOutput)
   }
 }

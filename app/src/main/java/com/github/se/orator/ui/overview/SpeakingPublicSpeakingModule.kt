@@ -164,10 +164,9 @@ fun SpeakingPublicSpeakingModule(
    */
   SpeakingPracticeModule(
       navigationActions = navigationActions,
-      screenTitle = "Public Speaking",
       headerText = "Make your speech memorable",
       inputs = inputFields,
-      onGetStarted = {
+      onClick = {
         // Create a PublicSpeakingContext object with the user's inputs
         val publicSpeakingContext =
             PublicSpeakingContext(

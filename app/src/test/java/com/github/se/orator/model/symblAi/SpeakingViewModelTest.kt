@@ -1,8 +1,10 @@
 package com.github.se.orator.model.symblAi
 
+import android.content.Context
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
+import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import org.junit.*
@@ -14,6 +16,7 @@ class SpeakingViewModelTest {
   private lateinit var apiLinkViewModel: ApiLinkViewModel
   private lateinit var speakingViewModel: SpeakingViewModel
   private lateinit var userProfileViewModel: UserProfileViewModel
+  private lateinit var context: Context
   private val testDispatcher = UnconfinedTestDispatcher()
 
   @Before
@@ -21,6 +24,8 @@ class SpeakingViewModelTest {
     speakingRepository = mock()
     apiLinkViewModel = mock()
     userProfileViewModel = mock()
+    context = mock()
+
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
   }
@@ -29,10 +34,10 @@ class SpeakingViewModelTest {
   fun `onMicButtonClicked starts recording and sets isRecording to true when permission is granted`() =
       runTest {
         // Act
-        speakingViewModel.onMicButtonClicked(true)
+        speakingViewModel.onMicButtonClicked(true, File(context.cacheDir, "audio_record.wav"))
         // Assert
         verify(speakingRepository).setupAnalysisResultsUsage(any(), any())
-        verify(speakingRepository).startRecording()
+        verify(speakingRepository).startRecording(any())
         Assert.assertTrue(speakingViewModel.isRecording.value)
       }
 
@@ -42,10 +47,12 @@ class SpeakingViewModelTest {
         // Arrange
         speakingViewModel =
             SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-        speakingViewModel.onMicButtonClicked(true) // Start recording
+        speakingViewModel.onMicButtonClicked(
+            true, File(context.cacheDir, "audio_record.wav")) // Start recording
         reset(speakingRepository) // Reset to verify stopRecording
         // Act
-        speakingViewModel.onMicButtonClicked(true) // Stop recording
+        speakingViewModel.onMicButtonClicked(
+            true, File(context.cacheDir, "audio_record.wav")) // Stop recording
         // Assert
         verify(speakingRepository).stopRecording()
         Assert.assertFalse(speakingViewModel.isRecording.value)
@@ -60,7 +67,7 @@ class SpeakingViewModelTest {
       onSuccess(analysisData) // Simulate success callback
     }
     // Act
-    speakingViewModel.onMicButtonClicked(true)
+    speakingViewModel.onMicButtonClicked(true, File(context.cacheDir, "audio_record.wav"))
     // Assert
     assert(speakingViewModel.analysisData.value == analysisData)
   }
@@ -71,10 +78,23 @@ class SpeakingViewModelTest {
     // Initial state: not recording
     Assert.assertFalse(speakingViewModel.isRecording.value)
     // Act: Start recording
-    speakingViewModel.onMicButtonClicked(true)
+    speakingViewModel.onMicButtonClicked(true, File(context.cacheDir, "audio_record.wav"))
     Assert.assertTrue(speakingViewModel.isRecording.value)
     // Act: Stop recording
-    speakingViewModel.onMicButtonClicked(true)
+    speakingViewModel.onMicButtonClicked(true, File(context.cacheDir, "audio_record.wav"))
     Assert.assertFalse(speakingViewModel.isRecording.value)
+  }
+
+  @Test
+  fun `getTranscript starts and stops recording`() = runTest {
+    // Arrange
+    val mockFile = mock<File>()
+
+    // Act
+    speakingViewModel.getTranscript(mockFile)
+
+    // Assert
+    verify(speakingRepository).startRecording()
+    verify(speakingRepository).stopRecording()
   }
 }

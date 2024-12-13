@@ -28,7 +28,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Edit
@@ -244,7 +243,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 CardSection(
                     title = "My stats",
                     imageVector = Icons.Outlined.QueryStats,
-                    onClick = { /*TODO: Handle achievements click */},
+                    onClick = { navigationActions.navigateTo(Screen.STAT) },
                     modifier = Modifier.testTag("statistics_section"))
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
@@ -253,7 +252,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 CardSection(
                     title = "Previous Recordings",
                     imageVector = Icons.Outlined.History,
-                    onClick = { /*TODO: Handle previous sessions click */},
+                    onClick = { navigationActions.navigateTo(Screen.OFFLINE_RECORDING_PROFILE) },
                     modifier = Modifier.testTag("previous_sessions_section"))
               }
                   ?: run {

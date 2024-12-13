@@ -2,9 +2,11 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
+import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.utils.formatDate
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.mapToSpeechBattle
 import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
@@ -13,6 +15,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
+import java.util.ArrayDeque
 import java.util.Date
 
 /**
@@ -227,31 +230,33 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       val uid = document.id
       val name = document.getString("name") ?: return null
       val age = document.getLong("age")?.toInt() ?: return null
-      val lastLoginDate = document.getString("lastLoginDate")
+      val lastLoginDate = document.getString("lastLoginDate") ?: "1970-01-01"
       val currentStreak = document.getLong("currentStreak") ?: 0L
 
-      // Retrieve the 'statistics' map from the document
-      val statisticsMap = document.get("statistics") as? Map<*, *>
+      // Retrieve 'statistics' map
+      val statisticsMap = document.get("statistics") as? Map<String, Any>
       val statistics =
           statisticsMap?.let {
-            // Extract 'sessionsGiven' map and convert values to Int
-            val sessionsGivenMapAny = it["sessionsGiven"] as? Map<String, Any>
-            val sessionsGiven =
-                sessionsGivenMapAny
-                    ?.mapValues { entry -> (entry.value as? Number)?.toInt() ?: 0 }
-                    ?.toMutableMap() ?: mutableMapOf()
-
-            // Extract 'successfulSessions' map and convert values to Int
-            val successfulSessionsMapAny = it["successfulSessions"] as? Map<String, Any>
-            val successfulSessions =
-                successfulSessionsMapAny
-                    ?.mapValues { entry -> (entry.value as? Number)?.toInt() ?: 0 }
-                    ?.toMutableMap() ?: mutableMapOf()
-
-            // Extract 'improvement' value
             val improvement = (it["improvement"] as? Number)?.toFloat() ?: 0.0f
 
-            // Extract 'previousRuns' list and map each entry to 'SpeechStats'
+            // Extract 'sessionsGiven' map
+            val sessionsGivenMap = it["sessionsGiven"] as? Map<String, Long> ?: emptyMap()
+            val sessionsGiven = sessionsGivenMap.mapValues { entry -> entry.value.toInt() }
+
+            // Extract 'successfulSessions' map
+            val successfulSessionsMap = it["successfulSessions"] as? Map<String, Long> ?: emptyMap()
+            val successfulSessions =
+                successfulSessionsMap.mapValues { entry -> entry.value.toInt() }
+
+            // Extract 'recentData' queue
+            val recentData =
+                it["recentData"] as? kotlin.collections.ArrayDeque<AnalysisData>
+                    ?: kotlin.collections.ArrayDeque<AnalysisData>()
+            // Extract means
+            val talkTimeSecMean = (it["talkTimeSecMean"] as? Number)?.toDouble() ?: 0.0
+            val talkTimePercMean = (it["talkTimePercMean"] as? Number)?.toDouble() ?: 0.0
+
+            // Extract 'previousRuns' list
             val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
             val previousRuns =
                 previousRunsList?.map { run ->
@@ -263,13 +268,25 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
                       wordsPerMinute = (run["wordsPerMinute"] as? Number)?.toInt() ?: 0)
                 } ?: emptyList()
 
-            // Construct the 'UserStatistics' object
+            // Extract 'battleStats' list
+            val battleStatsList = it["battleStats"] as? List<Map<String, Any>>
+            val battleStats =
+                battleStatsList?.mapNotNull { battle -> mapToSpeechBattle(battle) }
+                    ?: run {
+                      Log.e("BattleMapper", "battleStatsList is null. Returning an empty list.")
+                      emptyList()
+                    }
+
             UserStatistics(
                 sessionsGiven = sessionsGiven,
                 successfulSessions = successfulSessions,
                 improvement = improvement,
-                previousRuns = previousRuns)
-          } ?: UserStatistics() // Default to an empty 'UserStatistics' if none found
+                previousRuns = previousRuns,
+                recentData = recentData,
+                talkTimeSecMean = talkTimeSecMean,
+                talkTimePercMean = talkTimePercMean,
+                battleStats = battleStats)
+          } ?: UserStatistics()
 
       // Retrieve other fields from the document
       val friends = document.get("friends") as? List<String> ?: emptyList()

@@ -33,6 +33,14 @@ object Route {
   const val PRACTICE_QUESTIONS = "PracticeQuestions"
   const val OFFLINE_RECORDING = "OfflineRecording"
   const val OFFLINE_RECORDING_REVIEW = "OfflineRecordingReview"
+  const val STAT = "Statistics"
+  const val BATTLE_SEND = "BattleSendScreen"
+  const val BATTLE_REQUEST_SENT = "BattleRequestSentScreen"
+  const val BATTLE_CHAT = "BattleChatScreen"
+  const val WAITING_FOR_COMPLETION = "WaitingForCompletionScreen"
+  const val EVALUATION = "EvaluationScreen"
+  const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
+  const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
 }
 
 object Screen {
@@ -52,11 +60,21 @@ object Screen {
   const val LEADERBOARD = "LeaderBoard Screen"
   const val FEEDBACK = "Feedback Screen"
   const val CHAT_SCREEN = "chat_screen"
+  const val FEEDBACK_SCREEN = "feedback_screen" // this one is the offline mode one !!!!
   const val SPEAKING = "Speaking"
   const val PRACTICE_QUESTIONS_SCREEN = "PracticeQuestions Screen"
   const val OFFLINE = "Offline Screen"
   const val OFFLINE_RECORDING_SCREEN = "OfflineRecording Screen"
   const val OFFLINE_RECORDING_REVIEW_SCREEN = "OfflineRecordingReview Screen"
+
+  const val STAT = "Statistics screen"
+  const val BATTLE_SEND_SCREEN = "Battle Send Screen"
+  const val BATTLE_REQUEST_SENT_SCREEN = "Battle Request Sent Screen"
+  const val BATTLE_CHAT_SCREEN = "Battle Chat Screen"
+  const val WAITING_FOR_COMPLETION_SCREEN = "Waiting for Completion Screen"
+  const val EVALUATION_SCREEN = "Evaluation Waiting Screen"
+  const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
+  const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
 }
 
 data class TopLevelDestination(
@@ -155,5 +173,51 @@ open class NavigationActions(
   // and verifying in tests.
   open fun goToOfflineRecording(question: String) {
     navigateToOfflineRecording(question)
+  }
+
+  /**
+   * Navigate to the Battle Screen, passing the friend's UID as an argument.
+   *
+   * @param friendUid The UID of the friend to battle with.
+   */
+  open fun navigateToSendBattleScreen(friendUid: String) {
+    navController.navigate("${Route.BATTLE_SEND}/$friendUid")
+  }
+
+  /**
+   * Navigate to the Battle Request Sent Screen, passing the friend's UID as an argument.
+   *
+   * @param friendUid The UID of the friend.
+   * @param battleId The ID of the battle.
+   */
+  open fun navigateToBattleRequestSentScreen(friendUid: String, battleId: String) {
+    navController.navigate("${Route.BATTLE_REQUEST_SENT}/$battleId/$friendUid")
+  }
+
+  /**
+   * Navigate to the Battle Screen, passing the friend's UID as an argument.
+   *
+   * @param battleId The ID of the battle.
+   */
+  open fun navigateToBattleScreen(battleId: String, friendUid: String) {
+    navController.navigate("${Route.BATTLE_CHAT}/$battleId/$friendUid")
+  }
+
+  /**
+   * Navigate to the Waiting for Completion Screen, passing the battle ID as an argument.
+   *
+   * @param battleId The ID of the battle.
+   */
+  open fun navigateToWaitingForCompletion(battleId: String, friendUid: String) {
+    navController.navigate("${Route.WAITING_FOR_COMPLETION}/$battleId/$friendUid")
+  }
+
+  /**
+   * Navigate to the Evaluation Screen, passing the battle ID as an argument.
+   *
+   * @param battleId The ID of the battle.
+   */
+  open fun navigateToEvaluationScreen(battleId: String) {
+    navController.navigate("${Route.EVALUATION}/$battleId")
   }
 }
