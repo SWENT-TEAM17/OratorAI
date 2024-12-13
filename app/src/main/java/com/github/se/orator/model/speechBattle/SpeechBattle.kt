@@ -4,10 +4,11 @@ import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.ui.network.Message
 
 enum class BattleStatus {
-  PENDING,
+  PENDING, // The battle request has been sent but not accepted by the other user
   IN_PROGRESS,
   CANCELLED,
-  COMPLETED
+  EVALUATING, // The battle has been completed and is being evaluated
+  COMPLETED // The battle has been completed and evaluated
 }
 
 data class SpeechBattle(
@@ -16,9 +17,15 @@ data class SpeechBattle(
     val opponent: String,
     val status: BattleStatus,
     val context: InterviewContext,
-    val winner: String = "", // User ID of the winner
     val challengerCompleted: Boolean = false,
     val opponentCompleted: Boolean = false,
     val challengerData: List<Message> = emptyList(),
-    val opponentData: List<Message> = emptyList()
+    val opponentData: List<Message> = emptyList(),
+    val evaluationResult: EvaluationResult? = null
+)
+
+data class EvaluationResult(
+    val winnerUid: String,
+    val winnerMessage: Message,
+    val loserMessage: Message
 )
