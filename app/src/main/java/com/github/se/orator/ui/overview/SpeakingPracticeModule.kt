@@ -117,7 +117,7 @@ fun SpeakingPracticeModule(
                         question = input.question,
                         placeholder = input.placeholder,
                         testTag = input.testTag,
-                        dropdownItems = input.dropdownItems)
+                        dropdownItems = input.dropdownItems,)
                   } else {
                     // Display question as Text
                     Text(
@@ -327,7 +327,7 @@ fun FocusAreaDropdown(
             modifier = Modifier.testTag("$testTag-DropdownMenu")) {
               dropdownItems.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(text = item) },
+                    text = { Text(text = item,color = MaterialTheme.colorScheme.onSurface) },
                     onClick = {
                       onFocusAreaSelected(item)
                       expanded = false
