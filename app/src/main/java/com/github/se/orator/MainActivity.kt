@@ -192,7 +192,8 @@ fun OratorApp(
             RecordingReviewScreen(navigationActions, speakingViewModel)
           }
           composable(Screen.OFFLINE_RECORDING_PROFILE) {
-            OfflineRecordingsProfileScreen(navigationActions, speakingViewModel, offlinePromptsFunctions)
+            OfflineRecordingsProfileScreen(
+                navigationActions, speakingViewModel, offlinePromptsFunctions)
           }
           composable(Screen.OFFLINE_INTERVIEW_MODULE) {
             OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsFunctions)
@@ -254,7 +255,11 @@ fun OratorApp(
 
             composable(Screen.FEEDBACK_SCREEN) {
               PreviousRecordingsFeedbackScreen(
-                  context, navigationActions, chatViewModel, speakingViewModel, offlinePromptsFunctions =  offlinePromptsFunctions)
+                  context,
+                  navigationActions,
+                  chatViewModel,
+                  speakingViewModel,
+                  offlinePromptsFunctions = offlinePromptsFunctions)
             }
 
             composable(Screen.EDIT_PROFILE) {

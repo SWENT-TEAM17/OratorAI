@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -35,6 +34,7 @@ import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import kotlin.random.Random
+
 fun generateRandomString(length: Int = 8): String {
   val charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
   return (1..length).map { charset[Random.nextInt(charset.length)] }.joinToString("")
@@ -111,7 +111,7 @@ fun OfflineInterviewModule(
                           "jobPosition" to jobPosition,
                           "ID" to ID),
               )
-                offlinePromptsFunctions.createEmptyPromptFile(context, ID)
+              offlinePromptsFunctions.createEmptyPromptFile(context, ID)
               speakingViewModel.interviewPromptNb.value = ID
               navigationActions.navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
             },

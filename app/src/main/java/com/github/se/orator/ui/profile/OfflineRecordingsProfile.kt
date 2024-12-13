@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -80,7 +79,8 @@ fun PromptCardsSection(
     speakingViewModel: SpeakingViewModel,
     offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-  val prompts = offlinePromptsFunctions.loadPromptsFromFile(context) // Load the prompts from the file
+  val prompts =
+      offlinePromptsFunctions.loadPromptsFromFile(context) // Load the prompts from the file
 
   Column(
       modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium),
