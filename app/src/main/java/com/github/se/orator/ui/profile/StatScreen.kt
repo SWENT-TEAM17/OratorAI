@@ -284,9 +284,7 @@ fun StatDisplay(statTestTag: String, stat: String, statValue: String) {
       color = MaterialTheme.colorScheme.onSurface)
 }
 
-/**
- * Row that contains the titles and stats for each mode, side by side
- */
+/** Row that contains the titles and stats for each mode, side by side */
 @Composable
 fun TitleAndStatsRow(profile: UserProfile) {
   Row(
