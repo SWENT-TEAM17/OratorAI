@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -28,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -139,32 +139,35 @@ fun SettingsScreen(
 ) {
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Settings",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.testTag("SettingsText"))
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("back_button")) {
-                    androidx.compose.material.Icon(
-                        Icons.Outlined.ArrowBackIosNew,
-                        contentDescription = "Back button",
-                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                        tint = MaterialTheme.colorScheme.onSurface)
-                  }
-            },
-            colors =
-                TopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ))
+        Column {
+          CenterAlignedTopAppBar(
+              title = {
+                androidx.compose.material.Text(
+                    "Settings",
+                    modifier = Modifier.testTag("SettingsText"),
+                    color = MaterialTheme.colorScheme.onSurface)
+              },
+              navigationIcon = {
+                IconButton(
+                    onClick = { navigationActions.goBack() },
+                    modifier = Modifier.testTag("back_button")) {
+                      androidx.compose.material.Icon(
+                          Icons.Outlined.ArrowBackIosNew,
+                          contentDescription = "Back button",
+                          modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                          tint = MaterialTheme.colorScheme.onSurface)
+                    }
+              },
+              colors =
+                  TopAppBarColors(
+                      containerColor = MaterialTheme.colorScheme.surface,
+                      scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                      navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                      titleContentColor = MaterialTheme.colorScheme.onSurface,
+                      actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                  ))
+          HorizontalDivider()
+        }
       },
       content = { padding ->
         Column(

@@ -56,7 +56,10 @@ fun WaitingForCompletionScreen(
   }
 
   Scaffold(
-      topBar = { TopAppBar(title = { Text("Waiting for Completion") }) },
+      topBar = {
+        TopAppBar(
+            title = { Text("Waiting for Completion", color = MaterialTheme.colorScheme.onSurface) })
+      },
       content = { innerPadding ->
         Column(
             modifier =
@@ -70,6 +73,7 @@ fun WaitingForCompletionScreen(
                   text = "You have completed your interview. Waiting for $friendName to finish.",
                   style = MaterialTheme.typography.bodyLarge,
                   textAlign = TextAlign.Center,
+                  color = MaterialTheme.colorScheme.onSurface,
                   modifier =
                       Modifier.padding(bottom = AppDimensions.paddingMedium).testTag("waitingText"))
 

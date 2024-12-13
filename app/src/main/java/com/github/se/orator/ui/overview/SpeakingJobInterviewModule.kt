@@ -102,7 +102,6 @@ fun SpeakingJobInterviewModule(
    */
   SpeakingPracticeModule(
       navigationActions = navigationActions,
-      screenTitle = "Job Interview",
       headerText = "Ace your next job interview",
       inputs = inputFields,
       onClick = {
