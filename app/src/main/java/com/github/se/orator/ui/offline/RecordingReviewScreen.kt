@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -77,7 +77,7 @@ fun RecordingReviewScreen(
             modifier = Modifier.fillMaxWidth().testTag("Back"),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  imageVector = Icons.Filled.ArrowBack,
+                  imageVector = Icons.Outlined.ArrowBackIosNew,
                   contentDescription = "Back",
                   modifier =
                       Modifier.size(AppDimensions.iconSizeSmall)

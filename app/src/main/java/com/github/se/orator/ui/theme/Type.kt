@@ -123,7 +123,7 @@ object AppTypography {
             fontFamily = poppinsBlackFontFamily,
             fontWeight = FontWeight.W600,
             lineHeight = AppFontSizes.poppinsHeightLarge, // Scaled line height
-            color = MaterialTheme.colorScheme.,
+            color = androidx.compose.ui.graphics.Color.Black,
             textAlign = TextAlign.Center)
 
   val mediumTitleStyle: TextStyle
