@@ -1,10 +1,14 @@
 package com.github.se.orator.model.chatGPT
 
+import android.content.Context
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.SessionType
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
@@ -22,7 +26,8 @@ import kotlinx.coroutines.launch
 class ChatViewModel(
     private val chatGPTService: ChatGPTService,
     private val apiLinkViewModel: ApiLinkViewModel,
-    private val textToSpeech: TextToSpeech? = null
+    private val textToSpeech: TextToSpeech? = null,
+    private val offlinePromptsFunctions: OfflinePromptsFunctionsInterface = OfflinePromptsFunctions()
 ) : ViewModel() {
 
   var isConversationInitialized = false
@@ -243,10 +248,10 @@ class ChatViewModel(
 
   /**
    * Function to send individual requests to GPT to get feedback for the offline queries
-   *
+   * Saves the queries into the interviewID file
    * @param msg: What the user said and wishes to get feedback on
    */
-  fun offlineRequest(msg: String, company: String, position: String, interviewID: String) {
+  fun offlineRequest(msg: String, company: String, position: String, interviewID: String, context: Context) {
     Log.d("ChatViewModel", "Getting next GPT response")
     viewModelScope.launch {
       try {
@@ -271,6 +276,7 @@ class ChatViewModel(
             _response.value = responseMessage.content
             has_responded.value = true
             Log.d("response in offline request in chatViewModel", "$responseMessage.content")
+              offlinePromptsFunctions.writeToPromptFile(context, interviewID, _response.value)
           }
         }
       } catch (e: Exception) {

@@ -2,15 +2,13 @@ package com.github.se.orator.model.offlinePrompts
 
 import android.content.Context
 import android.util.Log
-import com.github.se.orator.model.speaking.AnalysisData
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
-import java.io.FileWriter
 
-class OfflinePromptsRepository: OfflinePromptsRepoInterface {
+class OfflinePromptsFunctions: OfflinePromptsFunctionsInterface {
 
     private val _fileData = MutableStateFlow<String?>("")
     override val fileData: StateFlow<String?> = _fileData.asStateFlow()

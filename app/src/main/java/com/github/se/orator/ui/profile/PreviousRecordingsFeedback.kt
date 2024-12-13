@@ -31,8 +31,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.chatGPT.ChatViewModel
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepoInterface
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepository
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
 import com.github.se.orator.model.symblAi.AudioPlayer
 import com.github.se.orator.model.symblAi.SpeakingViewModel
@@ -51,26 +51,26 @@ fun PreviousRecordingsFeedbackScreen(
     viewModel: ChatViewModel,
     speakingViewModel: SpeakingViewModel,
     player: AudioPlayer = AndroidAudioPlayer(context),
-    offlinePromptsRepository: OfflinePromptsRepoInterface
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
     var prompts: Map<String, String>? =
-        offlinePromptsRepository.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
+        offlinePromptsFunctions.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
     var ID: String = prompts?.get("ID") ?: "audio.mp3"
     var audioFile: File = File(context.cacheDir, "$ID.mp3")
 
     val offlineAnalysisData by speakingViewModel.offlineAnalysisData.collectAsState()
-    val fileData by offlinePromptsRepository.fileData.collectAsState()
+    val fileData by offlinePromptsFunctions.fileData.collectAsState()
     val response by viewModel.response.collectAsState()
 
     LaunchedEffect(Unit) {
         // clearing old display text
-        offlinePromptsRepository.clearDisplayText()
+        offlinePromptsFunctions.clearDisplayText()
         // read the file containing interviewer's response
-        offlinePromptsRepository.readPromptTextFile(context, ID)
+        offlinePromptsFunctions.readPromptTextFile(context, ID)
 
         // retrieve previous interviews mapping
         prompts =
-            offlinePromptsRepository.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
+            offlinePromptsFunctions.loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
 
         ID = prompts?.get("ID") ?: "audio.mp3"
         audioFile = File(context.cacheDir, "$ID.mp3")
@@ -80,33 +80,11 @@ fun PreviousRecordingsFeedbackScreen(
 
     // if there isn't already an interviewer response: transcribe text + request a gpt prompt
     if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
+        Log.d("in pre ", "file data is null! $fileData")
         LaunchedEffect(speakingViewModel.isTranscribing.value) {
             if (!speakingViewModel.isTranscribing.value)
-                speakingViewModel.getTranscript(audioFile)
+                speakingViewModel.getTranscriptAndGetGPTResponse(audioFile, prompts, viewModel, context, offlinePromptsFunctions)
             }
-        LaunchedEffect(speakingViewModel.offlineAnalysisData.collectAsState().value) {
-            speakingViewModel.offlineAnalysisData.value?.let { analysisData ->
-                viewModel.offlineRequest(
-                    analysisData.transcription.removePrefix("You said:").trim(),
-                    prompts?.get("targetCompany") ?: "Apple",
-                    prompts?.get("jobPosition") ?: "engineer",
-                    prompts?.get("ID") ?: "00000000"
-                )
-                // making sure the GPT response is what's being added
-                Log.d(
-                    "testing offline chat view model",
-                    "the gpt model offline value response is $response"
-                )
-            }
-        }
-    }
-
-    // if a new response is added and there isn't already an interviewer response
-    // every time I open the screen the response changes (which i guess is normal) so I need to add an extra if condition
-    LaunchedEffect(response) {
-        if (response.isNotEmpty() && (fileData.isNullOrEmpty() || fileData == "Loading interviewer response..." )) {
-            offlinePromptsRepository.writeToPromptFile(context, ID, response)
-        }
     }
 
     // text corresponding to interviewer's response

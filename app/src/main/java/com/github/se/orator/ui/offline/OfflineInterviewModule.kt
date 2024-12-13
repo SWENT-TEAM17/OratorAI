@@ -26,7 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepoInterface
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
@@ -51,7 +52,7 @@ fun generateRandomString(length: Int = 8): String {
 fun OfflineInterviewModule(
     navigationActions: NavigationActions,
     speakingViewModel: SpeakingViewModel,
-    offlinePromptsRepoInterface: OfflinePromptsRepoInterface
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
   var targetCompany by remember { mutableStateOf("") }
   var jobPosition by remember { mutableStateOf("") }
@@ -102,7 +103,7 @@ fun OfflineInterviewModule(
         Button(
             onClick = {
               // this is for the profile screen to see previous interviews
-              offlinePromptsRepoInterface.savePromptsToFile(
+              offlinePromptsFunctions.savePromptsToFile(
                   context = context,
                   prompts =
                       mapOf(
@@ -110,7 +111,7 @@ fun OfflineInterviewModule(
                           "jobPosition" to jobPosition,
                           "ID" to ID),
               )
-                offlinePromptsRepoInterface.createEmptyPromptFile(context, ID)
+                offlinePromptsFunctions.createEmptyPromptFile(context, ID)
               speakingViewModel.interviewPromptNb.value = ID
               navigationActions.navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
             },

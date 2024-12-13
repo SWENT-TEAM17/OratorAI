@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepoInterface
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepository
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
@@ -39,8 +39,7 @@ fun PromptCard(
     index: Int,
     navigationActions: NavigationActions,
     speakingViewModel: SpeakingViewModel,
-    promptID: String,
-    offlinePromptsRepository: OfflinePromptsRepoInterface
+    promptID: String
 ) {
   Card(
       modifier =
@@ -79,9 +78,9 @@ fun PromptCardsSection(
     context: Context,
     navigationActions: NavigationActions,
     speakingViewModel: SpeakingViewModel,
-    offlinePromptsRepository: OfflinePromptsRepoInterface
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-  val prompts = offlinePromptsRepository.loadPromptsFromFile(context) // Load the prompts from the file
+  val prompts = offlinePromptsFunctions.loadPromptsFromFile(context) // Load the prompts from the file
 
   Column(
       modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium),
@@ -97,7 +96,7 @@ fun PromptCardsSection(
           prompts.forEachIndexed { index, prompt ->
             val promptID = prompt.get("ID") ?: "audio.mp3"
             PromptCard(
-                prompt = prompt, index = index, navigationActions, speakingViewModel, promptID, offlinePromptsRepository)
+                prompt = prompt, index = index, navigationActions, speakingViewModel, promptID)
             Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
           }
         }
@@ -109,7 +108,7 @@ fun PromptCardsSection(
 fun OfflineRecordingsProfileScreen(
     navigationActions: NavigationActions,
     speakingViewModel: SpeakingViewModel,
-    offlinePromptsRepository: OfflinePromptsRepoInterface
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
   val context = LocalContext.current
   Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
@@ -129,6 +128,6 @@ fun OfflineRecordingsProfileScreen(
               }
         })
     Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-    PromptCardsSection(context, navigationActions, speakingViewModel, offlinePromptsRepository)
+    PromptCardsSection(context, navigationActions, speakingViewModel, offlinePromptsFunctions)
   }
 }

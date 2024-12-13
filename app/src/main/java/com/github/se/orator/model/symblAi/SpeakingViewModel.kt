@@ -1,14 +1,23 @@
 package com.github.se.orator.model.symblAi
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
+import kotlinx.coroutines.Dispatchers
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SpeakingViewModel(
     private val repository: SpeakingRepository,
@@ -51,17 +60,47 @@ class SpeakingViewModel(
     repository.resetRecorder()
     _analysisData.value = null
   }
-
-  fun getTranscript(audioFile: File) {
+  // Suspend function to handle transcript fetching
+  suspend fun getTranscript(audioFile: File, offlinePromptsFunctions: OfflinePromptsFunctionsInterface) {
     _isTranscribing.value = true
-    repository.getTranscript(
+
+    // Suspend until the transcript is available
+    withContext(Dispatchers.IO) {
+      repository.getTranscript(
         audioFile,
         onSuccess = { ad -> _offlineAnalysisData.value = ad },
-        onFailure = { error -> _analysisError.value = error })
+        onFailure = { error -> _analysisError.value = error
+        offlinePromptsFunctions.clearDisplayText()}
+      )
+    }
+
     Log.d("in speaking view model", "get transcript for offline mode has been called successfully")
     repository.startRecording()
     repository.stopRecording()
+
+    // Suspend until _offlineAnalysisData.value is not null
+    _offlineAnalysisData.first { it != null }
     _isTranscribing.value = false
+  }
+
+  fun getTranscriptAndGetGPTResponse(audioFile: File, prompts: Map<String, String>?, viewModel: ChatViewModel, context: Context, offlinePromptsFunctions: OfflinePromptsFunctionsInterface) {
+    // Launch a coroutine
+    viewModelScope.launch {
+      // Wait for the transcript
+      getTranscript(audioFile, offlinePromptsFunctions)
+      Log.d("finished transcript", "finished transcript of file: ${_offlineAnalysisData.value?.transcription}")
+      val ID = prompts?.get("ID") ?: "00000000"
+      _offlineAnalysisData.value?.transcription?.removePrefix("You said:")?.let {
+        viewModel.resetResponse()
+        viewModel.offlineRequest(
+          it.trim(),
+          prompts?.get("targetCompany") ?: "Apple",
+          prompts?.get("jobPosition") ?: "engineer",
+          ID,
+          context
+        )
+      }
+    }
   }
 
   // Function to handle microphone button click

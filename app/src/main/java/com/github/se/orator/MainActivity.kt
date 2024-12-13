@@ -29,7 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsRepository
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModelFactory
@@ -164,7 +164,7 @@ fun OratorApp(
       SpeakingViewModel(SpeakingRepositoryRecord(context), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
-  val offlinePromptsRepository = OfflinePromptsRepository()
+  val offlinePromptsFunctions = OfflinePromptsFunctions()
 
   // Initialize BattleViewModel using the factory
   val battleViewModel: BattleViewModel =
@@ -192,10 +192,10 @@ fun OratorApp(
             RecordingReviewScreen(navigationActions, speakingViewModel)
           }
           composable(Screen.OFFLINE_RECORDING_PROFILE) {
-            OfflineRecordingsProfileScreen(navigationActions, speakingViewModel, offlinePromptsRepository)
+            OfflineRecordingsProfileScreen(navigationActions, speakingViewModel, offlinePromptsFunctions)
           }
           composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-            OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsRepository)
+            OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsFunctions)
           }
 
           composable(
@@ -254,7 +254,7 @@ fun OratorApp(
 
             composable(Screen.FEEDBACK_SCREEN) {
               PreviousRecordingsFeedbackScreen(
-                  context, navigationActions, chatViewModel, speakingViewModel, offlinePromptsRepository =  offlinePromptsRepository)
+                  context, navigationActions, chatViewModel, speakingViewModel, offlinePromptsFunctions =  offlinePromptsFunctions)
             }
 
             composable(Screen.EDIT_PROFILE) {
