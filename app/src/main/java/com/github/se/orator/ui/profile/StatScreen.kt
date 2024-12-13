@@ -47,6 +47,9 @@ import com.github.se.orator.ui.theme.AppDimensions.paddingSmall
 import com.github.se.orator.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
+// Number of ticks to show on the Y-axis
+const val TICK_COUNT = 5
+
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
@@ -187,12 +190,10 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
         val xStep = size.width / (xValues.size - 1)
         val yScale = size.height / adjustedYRange
 
-        // Number of ticks to show on the Y-axis
-        val tickCount = 5
-        val tickInterval = adjustedYRange / tickCount
+        val tickInterval = adjustedYRange / TICK_COUNT
 
         // Draw Y-axis ticks and labels
-        for (i in 0..tickCount) {
+        for (i in 0..TICK_COUNT) {
           val tickValue = minY + i * tickInterval
           val tickY = size.height - (tickValue - minY) * yScale
 
