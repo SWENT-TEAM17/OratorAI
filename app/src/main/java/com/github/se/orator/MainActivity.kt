@@ -329,7 +329,8 @@ fun OratorApp(
                     friendUid = friendUid,
                     battleId = battleId,
                     navigationActions = navigationActions,
-                    battleViewModel = battleViewModel)
+                    battleViewModel = battleViewModel,
+                    userProfileViewModel = userProfileViewModel)
               }
           composable(
               route = "${Route.EVALUATION}/{battleId}",
