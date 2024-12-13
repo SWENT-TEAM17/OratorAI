@@ -47,7 +47,6 @@ fun BattleRequestSentScreen(
     if (battleStatus == BattleStatus.IN_PROGRESS) {
       Log.d("BattleRequestSentScreen", "Battle in progress")
       // Navigate to the battle screen
-      // navigationActions.navigateToBattleScreen(battleId, friendUid)
       battleViewModel.startBattle(battleId)
     }
   }
