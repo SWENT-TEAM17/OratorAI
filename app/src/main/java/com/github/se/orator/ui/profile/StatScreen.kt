@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.friends.TitleAppBar
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
@@ -161,46 +162,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         color = MaterialTheme.colorScheme.onSurface)
                   }
             }
-            Row(
-                modifier =
-                    Modifier.fillMaxWidth().padding(horizontal = AppDimensions.paddingMedium),
-                horizontalArrangement = Arrangement.SpaceEvenly) {
-                  Column {
-                    PracticeModeTitle("InterviewTitle", "Interview")
-                    StatDisplay(
-                        "totalSessionsInterviewTitle",
-                        "Sessions: ",
-                        "${profile.statistics.sessionsGiven["INTERVIEW"]}")
-                    StatDisplay(
-                        "successSessionsInterviewTitle",
-                        "Successful: ",
-                        "${profile.statistics.successfulSessions["INTERVIEW"]}")
-                  }
-
-                  Column {
-                    PracticeModeTitle("speechTitle", "Speech")
-                    StatDisplay(
-                        "totalSessionsSpeechTitle",
-                        "Sessions: ",
-                        "${profile.statistics.sessionsGiven["SPEECH"]}")
-                    StatDisplay(
-                        "successSessionsSpeechTitle",
-                        "Successful: ",
-                        "${profile.statistics.successfulSessions["SPEECH"]}")
-                  }
-
-                  Column {
-                    PracticeModeTitle("negotiationTitle", "Negotiation")
-                    StatDisplay(
-                        "totalSessionsNegotiationTitle",
-                        "Sessions: ",
-                        "${profile.statistics.sessionsGiven["NEGOTIATION"]}")
-                    StatDisplay(
-                        "successSessionsNegotiationTitle",
-                        "Successful: ",
-                        "${profile.statistics.successfulSessions["NEGOTIATION"]}")
-                  }
-                }
+            TitleAndStatsRow(profile)
           }
         }
       },
@@ -320,4 +282,50 @@ fun StatDisplay(statTestTag: String, stat: String, statValue: String) {
       text = stat + statValue,
       style = AppTypography.xSmallTitleStyle, // Apply custom style for title
       color = MaterialTheme.colorScheme.onSurface)
+}
+
+/**
+ * Row that contains the titles and stats for each mode, side by side
+ */
+@Composable
+fun TitleAndStatsRow(profile: UserProfile) {
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = AppDimensions.paddingMedium),
+      horizontalArrangement = Arrangement.SpaceEvenly) {
+        Column {
+          PracticeModeTitle("InterviewTitle", "Interview")
+          StatDisplay(
+              "totalSessionsInterviewTitle",
+              "Sessions: ",
+              "${profile.statistics.sessionsGiven["INTERVIEW"]}")
+          StatDisplay(
+              "successSessionsInterviewTitle",
+              "Successful: ",
+              "${profile.statistics.successfulSessions["INTERVIEW"]}")
+        }
+
+        Column {
+          PracticeModeTitle("speechTitle", "Speech")
+          StatDisplay(
+              "totalSessionsSpeechTitle",
+              "Sessions: ",
+              "${profile.statistics.sessionsGiven["SPEECH"]}")
+          StatDisplay(
+              "successSessionsSpeechTitle",
+              "Successful: ",
+              "${profile.statistics.successfulSessions["SPEECH"]}")
+        }
+
+        Column {
+          PracticeModeTitle("negotiationTitle", "Negotiation")
+          StatDisplay(
+              "totalSessionsNegotiationTitle",
+              "Sessions: ",
+              "${profile.statistics.sessionsGiven["NEGOTIATION"]}")
+          StatDisplay(
+              "successSessionsNegotiationTitle",
+              "Successful: ",
+              "${profile.statistics.successfulSessions["NEGOTIATION"]}")
+        }
+      }
 }

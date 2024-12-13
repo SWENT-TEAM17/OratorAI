@@ -2,6 +2,7 @@ package com.github.se.orator.ui.profile
 
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -55,7 +56,9 @@ class StatScreenTest {
               UserStatistics(
                   recentData = mockedRecentData,
                   talkTimeSecMean = talkTimeSecMean,
-                  talkTimePercMean = talkTimePercMean),
+                  talkTimePercMean = talkTimePercMean,
+                  sessionsGiven = mapOf("INTERVIEW" to 10, "SPEECH" to 5, "NEGOTIATION" to 8),
+                  successfulSessions = mapOf("INTERVIEW" to 7, "SPEECH" to 3, "NEGOTIATION" to 4)),
           friends = listOf("friend1", "friend2"),
           bio = "Test bio")
 
@@ -117,6 +120,70 @@ class StatScreenTest {
         .onNodeWithTag("talkTimePercMeanTitle")
         .assertIsDisplayed()
         .assert(hasText("Mean: ${talkTimePercMean}"))
+  }
+
+  @Test
+  fun testTitleAndStatsRow_InterviewSection_DisplayedCorrectly() {
+
+    // When the composable is shown
+    composeTestRule.setContent { TitleAndStatsRow(profile = testUserProfile) }
+
+    // Then check that Interview title and stats are displayed
+    composeTestRule
+        .onNodeWithTag("InterviewTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Interview")
+
+    composeTestRule
+        .onNodeWithTag("totalSessionsInterviewTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Sessions: 10")
+
+    composeTestRule
+        .onNodeWithTag("successSessionsInterviewTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Successful: 7")
+  }
+
+  @Test
+  fun testTitleAndStatsRow_SpeechSection_DisplayedCorrectly() {
+
+    composeTestRule.setContent { TitleAndStatsRow(profile = testUserProfile) }
+
+    // Check Speech section
+    composeTestRule.onNodeWithTag("speechTitle").assertIsDisplayed().assertTextEquals("Speech")
+
+    composeTestRule
+        .onNodeWithTag("totalSessionsSpeechTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Sessions: 5")
+
+    composeTestRule
+        .onNodeWithTag("successSessionsSpeechTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Successful: 3")
+  }
+
+  @Test
+  fun testTitleAndStatsRow_NegotiationSection_DisplayedCorrectly() {
+
+    composeTestRule.setContent { TitleAndStatsRow(profile = testUserProfile) }
+
+    // Check Negotiation section
+    composeTestRule
+        .onNodeWithTag("negotiationTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Negotiation")
+
+    composeTestRule
+        .onNodeWithTag("totalSessionsNegotiationTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Sessions: 8")
+
+    composeTestRule
+        .onNodeWithTag("successSessionsNegotiationTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Successful: 4")
   }
 }
 
