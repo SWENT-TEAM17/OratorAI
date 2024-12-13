@@ -522,7 +522,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
         }
 
     // Update the MutableStateFlow with the new queue
-    queue.value = updatedQueue
+    recentData_.value = updatedQueue
 
     return updatedQueue
   }
