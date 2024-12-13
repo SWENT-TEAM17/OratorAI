@@ -1,11 +1,16 @@
 package com.github.se.orator.model.symblAi
 
 import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
+import kotlinx.coroutines.Dispatchers
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
 import org.junit.*
 import org.mockito.kotlin.*
@@ -25,6 +30,7 @@ class SpeakingViewModelTest {
     apiLinkViewModel = mock()
     userProfileViewModel = mock()
     context = mock()
+    Dispatchers.setMain(testDispatcher)
 
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
@@ -97,4 +103,41 @@ class SpeakingViewModelTest {
     verify(speakingRepository).startRecording()
     verify(speakingRepository).stopRecording()
   }
+
+  @Test
+  fun `getTranscriptAndGetGPTResponse requests GPT response after transcript`() = runTest(testDispatcher) {
+    // mocking
+    val audioFile = mock<File>()
+    val prompts = mapOf("ID" to "00000000", "targetCompany" to "google", "jobPosition" to "researcher")
+    val chatViewModel = mock<ChatViewModel> {
+      on { isLoading }.thenReturn(MutableStateFlow(false))
+    }
+    val offlinePromptsFunctions = mock<OfflinePromptsFunctionsInterface>()
+
+    whenever(chatViewModel.isLoading).thenReturn(MutableStateFlow(false))
+
+    whenever(speakingRepository.getTranscript(eq(audioFile), any(), any())).thenAnswer {
+      val onSuccess = it.arguments[1] as (AnalysisData) -> Unit
+      onSuccess(mock<AnalysisData>().apply { whenever(transcription).thenReturn("Test transcription") })
+    }
+
+    // calling get transcript and then gpt response
+    speakingViewModel.getTranscriptAndGetGPTResponse(audioFile, prompts, chatViewModel, context, offlinePromptsFunctions)
+
+    // waiting for isLoading to be checked since it's in a separate thread
+    advanceUntilIdle()
+    advanceUntilIdle()
+    advanceUntilIdle()
+    advanceUntilIdle()
+    // assert the function is being called
+    verify(chatViewModel).offlineRequest(
+      any(),
+      eq("google"),
+      eq("researcher"),
+      eq("00000000"),
+      any()
+    )
+  }
+
+
 }

@@ -1,5 +1,6 @@
 package com.github.se.orator.model.chatGPT
 
+import android.content.Context
 import android.speech.tts.TextToSpeech
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.profile.SessionType
@@ -42,6 +43,7 @@ class ChatViewModelTest {
   @Mock private lateinit var apiLinkViewModel: ApiLinkViewModel
 
   private lateinit var chatViewModel: ChatViewModel
+  private lateinit var context: Context
 
   private val testDispatcher = StandardTestDispatcher() // Using a test dispatcher
 
@@ -169,6 +171,7 @@ class ChatViewModelTest {
   fun setUp() {
     Dispatchers.setMain(testDispatcher) // Set the test dispatcher
 
+      context = mock(Context::class.java)
     chatGPTService = mock(ChatGPTService::class.java)
     apiLinkViewModel = mock(ApiLinkViewModel::class.java)
 
@@ -471,7 +474,7 @@ class ChatViewModelTest {
     `when`(chatGPTService.getChatCompletion(any())).thenReturn(mockResponse)
 
     // Act
-    chatViewModel.offlineRequest(message, company, position)
+    chatViewModel.offlineRequest(message, company, position, "000000000", context)
     advanceUntilIdle()
 
     // Assert
@@ -489,7 +492,7 @@ class ChatViewModelTest {
     `when`(chatGPTService.getChatCompletion(any())).thenThrow(RuntimeException("Error"))
 
     // Act
-    chatViewModel.offlineRequest(message, company, position)
+    chatViewModel.offlineRequest(message, company, position, "00000000", context)
     advanceUntilIdle()
 
     // Assert

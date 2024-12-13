@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
@@ -62,7 +63,7 @@ class SpeakingViewModel(
   // Suspend function to handle transcript fetching
   suspend fun getTranscript(
       audioFile: File,
-      offlinePromptsFunctions: OfflinePromptsFunctionsInterface
+      offlinePromptsFunctions: OfflinePromptsFunctionsInterface = OfflinePromptsFunctions()
   ) {
     _isTranscribing.value = true
 
@@ -89,6 +90,11 @@ class SpeakingViewModel(
   /**
    * Function that allows to get transcript and subsequently get a gpt response It is in this view
    * model because it is necessary to modify private variables in this view model for this to work
+   *
+   * @param audioFile : The audio file to transcript - corresponds to the offline mode recording
+   * @param prompts : String -> String mapping that maps the interviews to the companies, target job position, and interview ID
+   * @param viewModel : chat view model that is needed to get the GPT response
+   * @param offlinePromptsFunctions : offline prompt functions and variables needed to write to files
    */
   fun getTranscriptAndGetGPTResponse(
       audioFile: File,
@@ -105,8 +111,10 @@ class SpeakingViewModel(
           "finished transcript",
           "finished transcript of file: ${_offlineAnalysisData.value?.transcription}")
       val ID = prompts?.get("ID") ?: "00000000"
+        // wait for GPT response to finish loading
       viewModel.isLoading.first { !it }
 
+        // if the transcription did not fail then request a prompt for feedback
       _offlineAnalysisData.value?.transcription?.removePrefix("You said:")?.let {
         viewModel.offlineRequest(
             it.trim(),

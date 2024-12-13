@@ -251,6 +251,10 @@ class ChatViewModel(
    * queries into the interviewID file
    *
    * @param msg: What the user said and wishes to get feedback on
+   * @param company : target company
+   * @param position : target job position
+   * @param interviewID : interview's ID
+   * @param context : context
    */
   fun offlineRequest(
       msg: String,
@@ -278,13 +282,13 @@ class ChatViewModel(
 
         val response = chatGPTService.getChatCompletion(request)
 
+          // if the response is not empty then write to the file
         if (!has_responded.value) {
           response.choices.firstOrNull()?.message?.let { responseMessage ->
             _response.value = responseMessage.content
             has_responded.value = true
             Log.d("response in offline request in chatViewModel", "$responseMessage.content")
             offlinePromptsFunctions.writeToPromptFile(context, interviewID, _response.value)
-            resetResponse()
           }
         }
       } catch (e: Exception) {
