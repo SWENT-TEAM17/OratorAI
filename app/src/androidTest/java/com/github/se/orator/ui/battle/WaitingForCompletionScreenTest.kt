@@ -139,7 +139,8 @@ class WaitingForCompletionScreenTest {
           battleId = testBattleId,
           friendUid = testFriendUid, // Corrected parameter
           navigationActions = mockNavigationActions,
-          battleViewModel = battleViewModel)
+          battleViewModel = battleViewModel,
+          userProfileViewModel = userProfileViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -164,7 +165,8 @@ class WaitingForCompletionScreenTest {
           battleId = testBattleId,
           friendUid = testFriendUid, // Corrected parameter
           navigationActions = mockNavigationActions,
-          battleViewModel = battleViewModel)
+          battleViewModel = battleViewModel,
+          userProfileViewModel = userProfileViewModel)
     }
 
     composeTestRule.waitForIdle()
