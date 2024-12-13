@@ -346,4 +346,41 @@ class BattleRepositoryFirestore(private val db: FirebaseFirestore) : BattleRepos
           callback(false)
         }
   }
+
+  /**
+   * Completes a battle by updating the status and storing the evaluation result.
+   *
+   * @param battleId The ID of the battle.
+   * @param evaluationResult The evaluation result.
+   * @param callback A callback function to execute.
+   */
+  override fun completeBattle(
+      battleId: String,
+      evaluationResult: EvaluationResult,
+      callback: (Boolean) -> Unit
+  ) {
+    val evaluationMap =
+        mapOf(
+            "winnerUid" to evaluationResult.winnerUid,
+            "winnerMessage" to
+                mapOf(
+                    "role" to evaluationResult.winnerMessage.role,
+                    "content" to evaluationResult.winnerMessage.content),
+            "loserMessage" to
+                mapOf(
+                    "role" to evaluationResult.loserMessage.role,
+                    "content" to evaluationResult.loserMessage.content))
+
+    val updates =
+        mapOf("status" to BattleStatus.COMPLETED.name, "evaluationResult" to evaluationMap)
+
+    db.collection("battles")
+        .document(battleId)
+        .update(updates)
+        .addOnSuccessListener { callback(true) }
+        .addOnFailureListener { e ->
+          Log.e("BattleRepository", "Error completing battle: $e")
+          callback(false)
+        }
+  }
 }

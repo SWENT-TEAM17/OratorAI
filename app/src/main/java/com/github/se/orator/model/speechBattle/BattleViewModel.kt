@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -13,6 +14,7 @@ import com.github.se.orator.ui.network.Message
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel for managing speech battles.
@@ -274,6 +276,45 @@ class BattleViewModel(
             battleId, userProfileViewModel.userProfile.value?.uid ?: "")
       } else {
         Log.e("BattleViewModel", "Failed to update battle status to IN_PROGRESS.")
+      }
+    }
+  }
+
+  fun evaluateBattle(battleId: String, onFailure: (Exception) -> Unit) {
+    val currentUserUid = userProfileViewModel.userProfile.value?.uid ?: return
+
+    getBattleById(battleId) { battle ->
+      if (battle == null) {
+        onFailure(IllegalStateException("Battle not found"))
+        return@getBattleById
+      }
+
+      // Only challenger triggers the evaluation
+      if (battle.challenger != currentUserUid) {
+        // This user is not the challenger, do nothing special here.
+        return@getBattleById
+      }
+
+      // Evaluate the battle candidates
+      viewModelScope.launch {
+        try {
+          val evaluationResult =
+              chatViewModel.evaluateBattleCandidates(
+                  user1Uid = battle.challenger,
+                  user2Uid = battle.opponent,
+                  user1messages = battle.challengerData,
+                  user2messages = battle.opponentData)
+
+          battleRepository.completeBattle(battleId, evaluationResult) { success ->
+            if (!success) {
+              onFailure(Exception("Failed to complete the battle in Firestore"))
+            }
+            // Once completed, status becomes COMPLETED and evaluationResult is available for both
+            // users.
+          }
+        } catch (e: Exception) {
+          onFailure(e)
+        }
       }
     }
   }
