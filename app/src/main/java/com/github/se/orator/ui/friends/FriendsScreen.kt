@@ -139,12 +139,7 @@ fun ViewFriendsScreen(
   // New state variable for Friend Requests expansion
   var isFriendRequestsExpanded by remember { mutableStateOf(true) }
 
-  LaunchedEffect(Unit) {
-    userProfileViewModel.userProfile.value?.uid?.let { uid ->
-      userProfileViewModel.startListeningToUserProfile(uid)
-    }
-    battleViewModel?.fetchPendingBattlesForUser()
-  }
+  LaunchedEffect(Unit) { battleViewModel?.fetchPendingBattlesForUser() }
 
   // Collect the pending battles as state, fallback to an empty list if battleViewModel is null
   val pendingBattles by
