@@ -581,7 +581,7 @@ class UserProfileViewModelTest {
     assertEquals(expectedOutput, actualOutput)
   }
 
-  /** Test that [startListeningToUserProfile] handles errors by invoking the onError callback. */
+  /** Test that startListeningToUserProfile handles errors by invoking the onError callback. */
   @Test
   fun `startListeningToUserProfile handles errors correctly`() = runTest {
     // Arrange
@@ -610,6 +610,11 @@ class UserProfileViewModelTest {
     assertEquals(testUserProfile, currentProfile)
   }
 
+  /**
+   * Tests that when a user's profile is updated via startListeningToUserProfile, the ViewModel
+   * updates userProfile_ and fetches the related friends, received requests, and sent requests
+   * accordingly
+   */
   @Test
   fun `startListeningToUserProfile updates friends recReq and sentReq after profile update`() =
       runTest {
