@@ -721,6 +721,16 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     return -1
   }
 
+  /**
+   * Initiates a real-time listener for the specified user's profile.
+   *
+   * This function sets up a continuous listener on the user's profile document in Firestore.
+   * Whenever the user's profile data changes (e.g., friend requests, friends list), the listener
+   * will automatically update the local state flows (`userProfile_`, `friendsProfiles_`,
+   * `recReqProfiles_`, and `sentReqProfiles_`) to reflect the latest data.
+   *
+   * @param uid The unique identifier (UID) of the user whose profile is to be monitored.
+   */
   fun startListeningToUserProfile(uid: String) {
     repository.listenToUserProfile(
         uid = uid,

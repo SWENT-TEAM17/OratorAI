@@ -721,22 +721,51 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           onFailure()
         }
   }
-
+  /**
+   * Sets up a real-time listener for a user's profile in Firestore.
+   *
+   * This function attaches a snapshot listener to the specified user's profile document. It
+   * continuously monitors the document for any changes. When changes occur, it converts the updated
+   * document into a [UserProfile] object and invokes the [onProfileChanged] callback with the new
+   * data. In case of an error during listening, it invokes the [onError] callback with the
+   * encountered exception.
+   *
+   * @param uid The unique identifier (UID) of the user whose profile is to be listened to.
+   * @param onProfileChanged A callback function that is invoked with the updated [UserProfile]
+   *   whenever the user's profile data changes. If the document does not exist, [UserProfile?] will
+   *   be `null`.
+   * @param onError A callback function that is invoked with an [Exception] if an error occurs while
+   *   listening to the profile updates.
+   */
   override fun listenToUserProfile(
       uid: String,
       onProfileChanged: (UserProfile?) -> Unit,
       onError: (Exception) -> Unit
   ) {
     val docRef = db.collection(collectionPath).document(uid)
+
+    // Attach a snapshot listener to the user's document
+
     docRef.addSnapshotListener { snapshot, e ->
       if (e != null) {
+        // Check if an error occurred while listening
+
         onError(e)
         return@addSnapshotListener
       }
+      // Check if the snapshot exists and contains data
+
       if (snapshot != null && snapshot.exists()) {
+        // Convert the Firestore document snapshot to a UserProfile object
+
         val updatedProfile = documentToUserProfile(snapshot)
+        // Invoke the onProfileChanged callback with the updated UserProfile
+
         onProfileChanged(updatedProfile)
       } else {
+        // If the snapshot does not exist (e.g., the document was deleted), invoke the callback with
+        // null
+
         onProfileChanged(null)
       }
     }
