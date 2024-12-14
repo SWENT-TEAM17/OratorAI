@@ -560,8 +560,11 @@ The session is now over. According to the initial instructions, you can now brea
         $user2Transcript
 
         Please determine who performed better and explicitly state: "The winner is $user1Uid" or "The winner is $user2Uid".
-        Then, provide a message addressed to the winner, highlighting why they won (max one paragraph).
+        Then, provide a message addressed to the winner, highlighting why they won (max one paragraph). 
         Also, provide a message addressed to the loser, highlighting what they did wrong and where they can improve (max one paragraph).
+        For both messages focus on the quality of the answers, clarity, and overall performance. And address both users as "you". 
+        Don't over compliment the winner because he might have also made mistakes, make sure to stay neutral and professional. 
+        
 
         Format your answer as:
         The winner is: <winnerUid>
