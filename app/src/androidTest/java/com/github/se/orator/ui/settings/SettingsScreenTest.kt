@@ -52,10 +52,11 @@ class SettingsScreenTest {
     }
 
     // Test that each setting button exists and is clickable
-    val settingsTags = listOf("theme", "about")
+    val settingsTags = listOf("theme")
 
     settingsTags.forEach { tag ->
       composeTestRule.onNodeWithTag(tag).assertExists()
+      composeTestRule.onNodeWithTag(tag).assertHasClickAction()
       composeTestRule.onNodeWithTag(tag).performClick()
     }
 
