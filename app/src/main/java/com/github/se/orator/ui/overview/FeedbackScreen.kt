@@ -183,7 +183,6 @@ fun FeedbackScreen(
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(AppDimensions.paddingMedium))
                             Text(text = "Transcription: ${latestAnalysisData.transcription}")
-                            Text(text = "Filler Words: ${latestAnalysisData.fillerWordsCount}")
                             Text(
                                 text =
                                     "Average Pause Duration: ${"%.2f".format(latestAnalysisData.averagePauseDuration)}")
