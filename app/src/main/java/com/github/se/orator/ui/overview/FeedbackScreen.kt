@@ -34,131 +34,131 @@ fun FeedbackScreen(
     apiLinkViewModel: ApiLinkViewModel,
     navigationActions: NavigationActions
 ) {
-    var feedbackMessage by remember { mutableStateOf<String?>(null) }
-    var decisionResult by remember { mutableStateOf<ChatViewModel.DecisionResult?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+  var feedbackMessage by remember { mutableStateOf<String?>(null) }
+  var decisionResult by remember { mutableStateOf<ChatViewModel.DecisionResult?>(null) }
+  var isLoading by remember { mutableStateOf(true) }
+  var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
-    val userProfile by userProfileViewModel.userProfile.collectAsState()
-    val talkTimePercentageMean = userProfile?.statistics?.talkTimePercMean
-    val talkTimeSecondsMean = userProfile?.statistics?.talkTimeSecMean
+  val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
+  val userProfile by userProfileViewModel.userProfile.collectAsState()
+  val talkTimePercentageMean = userProfile?.statistics?.talkTimePercMean
+  val talkTimeSecondsMean = userProfile?.statistics?.talkTimeSecMean
 
-    val sessionType =
-        when (practiceContext) {
-            is InterviewContext -> SessionType.INTERVIEW
-            is PublicSpeakingContext -> SessionType.SPEECH
-            is SalesPitchContext -> SessionType.NEGOTIATION
-            else -> null
+  val sessionType =
+      when (practiceContext) {
+        is InterviewContext -> SessionType.INTERVIEW
+        is PublicSpeakingContext -> SessionType.SPEECH
+        is SalesPitchContext -> SessionType.NEGOTIATION
+        else -> null
+      }
+
+  val successfulSessionsCount =
+      sessionType?.let { userProfile?.statistics?.successfulSessions?.get(it.name) ?: 0 } ?: 0
+
+  LaunchedEffect(Unit) {
+    try {
+      feedbackMessage = chatViewModel.generateFeedback()
+      feedbackMessage?.let {
+        decisionResult = parseDecisionFromFeedback(it, sessionType)
+        if (decisionResult != null && sessionType != null) {
+          userProfileViewModel.updateSessionResult(
+              isSuccess = decisionResult!!.isSuccess, sessionType = sessionType)
+        } else {
+          Log.e("FeedbackScreen", "Session type or decision result is null.")
         }
-
-    val successfulSessionsCount =
-        sessionType?.let { userProfile?.statistics?.successfulSessions?.get(it.name) ?: 0 } ?: 0
-
-    LaunchedEffect(Unit) {
-        try {
-            feedbackMessage = chatViewModel.generateFeedback()
-            feedbackMessage?.let {
-                decisionResult = parseDecisionFromFeedback(it, sessionType)
-                if (decisionResult != null && sessionType != null) {
-                    userProfileViewModel.updateSessionResult(
-                        isSuccess = decisionResult!!.isSuccess, sessionType = sessionType)
-                } else {
-                    Log.e("FeedbackScreen", "Session type or decision result is null.")
-                }
-            }
-        } catch (e: Exception) {
-            errorMessage = e.localizedMessage
-        } finally {
-            isLoading = false
-        }
+      }
+    } catch (e: Exception) {
+      errorMessage = e.localizedMessage
+    } finally {
+      isLoading = false
     }
+  }
 
-    DisposableEffect(Unit) { onDispose { chatViewModel.endConversation() } }
+  DisposableEffect(Unit) { onDispose { chatViewModel.endConversation() } }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
-                title = {
-                    Text(
-                        text = "Feedback",
-                        modifier = Modifier.testTag("FeedbackText"),
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface)
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navigationActions.goBack() },
-                        modifier = Modifier.testTag("back_button")) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                            tint = MaterialTheme.colorScheme.onSurface)
-                    }
-                },
-                colors =
+  Scaffold(
+      modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
+      topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
+            title = {
+              Text(
+                  text = "Feedback",
+                  modifier = Modifier.testTag("FeedbackText"),
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface)
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                        tint = MaterialTheme.colorScheme.onSurface)
+                  }
+            },
+            colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer))
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("feedbackContent"),
-            ) {
-                HorizontalDivider()
-                Column(
-                    modifier =
-                    Modifier.fillMaxSize()
-                        .padding(horizontal = AppDimensions.paddingMedium)
-                        .padding(top = AppDimensions.paddingSmall)
-                        .testTag("feedbackTitle"),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(modifier = Modifier.fillMaxWidth().testTag("feedbackSubtitle")) {
-                        ChatMessageItem(
-                            message =
-                            Message(
-                                content = "Here's what you did well and where you can improve:",
-                                role = "assistant"))
-                    }
+      },
+      content = { paddingValues ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("feedbackContent"),
+        ) {
+          HorizontalDivider()
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(horizontal = AppDimensions.paddingMedium)
+                      .padding(top = AppDimensions.paddingSmall)
+                      .testTag("feedbackTitle"),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(modifier = Modifier.fillMaxWidth().testTag("feedbackSubtitle")) {
+                  ChatMessageItem(
+                      message =
+                          Message(
+                              content = "Here's what you did well and where you can improve:",
+                              role = "assistant"))
+                }
 
-                    when {
-                        isLoading -> {
-                            CircularProgressIndicator(
-                                modifier =
-                                Modifier.align(Alignment.CenterHorizontally)
-                                    .padding(AppDimensions.paddingMedium)
-                                    .testTag("loadingIndicator"),
-                                color = MaterialTheme.colorScheme.onBackground)
-                        }
-                        errorMessage != null -> {
+                when {
+                  isLoading -> {
+                    CircularProgressIndicator(
+                        modifier =
+                            Modifier.align(Alignment.CenterHorizontally)
+                                .padding(AppDimensions.paddingMedium)
+                                .testTag("loadingIndicator"),
+                        color = MaterialTheme.colorScheme.onBackground)
+                  }
+                  errorMessage != null -> {
+                    Text(
+                        text = "Error: $errorMessage",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.testTag("errorText"))
+                  }
+                  feedbackMessage != null -> {
+                    Column(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState())
+                                .testTag("feedbackMessage")) {
+                          decisionResult?.message?.let { decisionText ->
                             Text(
-                                text = "Error: $errorMessage",
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.testTag("errorText"))
-                        }
-                        feedbackMessage != null -> {
-                            Column(
+                                text = decisionText,
+                                style = AppTypography.largeTitleStyle,
+                                color = MaterialTheme.colorScheme.secondary,
                                 modifier =
-                                Modifier.fillMaxWidth()
-                                    .weight(1f)
-                                    .verticalScroll(rememberScrollState())
-                                    .testTag("feedbackMessage")) {
-                                decisionResult?.message?.let { decisionText ->
-                                    Text(
-                                        text = decisionText,
-                                        style = AppTypography.largeTitleStyle,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        modifier =
-                                        Modifier.align(Alignment.CenterHorizontally)
-                                            .padding(AppDimensions.paddingMedium)
-                                            .testTag("decisionText"))
-                                }
+                                    Modifier.align(Alignment.CenterHorizontally)
+                                        .padding(AppDimensions.paddingMedium)
+                                        .testTag("decisionText"))
+                          }
 
-                                Text(
-                                    text =
-                                    "You have successfully completed $successfulSessionsCount ${
+                          Text(
+                              text =
+                                  "You have successfully completed $successfulSessionsCount ${
                                         when (sessionType) {
                                             SessionType.SPEECH -> "speeches"
                                             SessionType.INTERVIEW -> "interviews"
@@ -166,54 +166,51 @@ fun FeedbackScreen(
                                             else -> "sessions"
                                         }
                                     } so far!",
-                                    style = AppTypography.bodyLargeStyle,
-                                    modifier =
-                                    Modifier.align(Alignment.CenterHorizontally)
-                                        .padding(AppDimensions.paddingMedium)
-                                        .testTag("successfulSessionsText"),
-                                    color = MaterialTheme.colorScheme.tertiary)
-                                ChatMessageItem(
-                                    message = Message(content = feedbackMessage!!, role = "assistant"))
+                              style = AppTypography.bodyLargeStyle,
+                              modifier =
+                                  Modifier.align(Alignment.CenterHorizontally)
+                                      .padding(AppDimensions.paddingMedium)
+                                      .testTag("successfulSessionsText"),
+                              color = MaterialTheme.colorScheme.tertiary)
+                          ChatMessageItem(
+                              message = Message(content = feedbackMessage!!, role = "assistant"))
 
+                          Text(
+                              text = "Your Performance Metrics:",
+                              style = AppTypography.mediumTitleStyle,
+                              modifier =
+                                  Modifier.padding(AppDimensions.paddingMedium)
+                                      .testTag("performanceMetricsTitle"))
 
-                                Text(
-                                    text = "Your Performance Metrics:",
-                                    style = AppTypography.mediumTitleStyle,
-                                    modifier = Modifier
-                                        .padding(AppDimensions.paddingMedium)
-                                        .testTag("performanceMetricsTitle")
-                                )
+                          // Display Talk Time Seconds
+                          MetricDisplayItem(
+                              title = "Talk Time (Seconds)",
+                              value = talkTimeSecondsMean?.let { "%.2f".format(it) } ?: "No data",
+                              testTag = "talkTimeSeconds")
 
-                                // Display Talk Time Seconds
-                                MetricDisplayItem(
-                                    title = "Talk Time (Seconds)",
-                                    value = talkTimeSecondsMean?.let { "%.2f".format(it) } ?: "No data",
-                                    testTag = "talkTimeSeconds"
-                                )
-
-                                // Display Talk Time Percentage
-                                MetricDisplayItem(
-                                    title = "Talk Time (Percentage)",
-                                    value = talkTimePercentageMean?.let { "%.2f%%".format(it) } ?: "No data",
-                                    testTag = "talkTimePercentage"
-                                )
-                            }
+                          // Display Talk Time Percentage
+                          MetricDisplayItem(
+                              title = "Talk Time (Percentage)",
+                              value =
+                                  talkTimePercentageMean?.let { "%.2f%%".format(it) } ?: "No data",
+                              testTag = "talkTimePercentage")
                         }
-                        else -> {
-                            Text(
-                                text = "No feedback available.",
-                                style = AppTypography.bodyLargeStyle,
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.testTag("feedbackNoMessage"))
-                        }
-                    }
+                  }
+                  else -> {
+                    Text(
+                        text = "No feedback available.",
+                        style = AppTypography.bodyLargeStyle,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.testTag("feedbackNoMessage"))
+                  }
+                }
 
-                    Button(
-                        onClick = {
-                            chatViewModel.resetPracticeContext()
-                            navigationActions.navigateTo(TopLevelDestinations.HOME)
-                        },
-                        modifier =
+                Button(
+                    onClick = {
+                      chatViewModel.resetPracticeContext()
+                      navigationActions.navigateTo(TopLevelDestinations.HOME)
+                    },
+                    modifier =
                         Modifier.fillMaxWidth()
                             .padding(top = AppDimensions.paddingMedium)
                             .border(
@@ -221,53 +218,46 @@ fun FeedbackScreen(
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                                 shape = MaterialTheme.shapes.medium)
                             .testTag("retryButton"),
-                        enabled = !isLoading,
-                        colors =
+                    enabled = !isLoading,
+                    colors =
                         ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
-                        Text(
-                            text = "Try Again",
-                            modifier = Modifier.testTag("retryButtonText"),
-                            color = MaterialTheme.colorScheme.primary)
+                      Text(
+                          text = "Try Again",
+                          modifier = Modifier.testTag("retryButtonText"),
+                          color = MaterialTheme.colorScheme.primary)
                     }
-                }
-            }
-        })
+              }
+        }
+      })
 }
 
 @Composable
 fun MetricDisplayItem(title: String, value: String, testTag: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(AppDimensions.paddingSmall)
-            .testTag(testTag)
-    ) {
-        Text(
-            text = title,
-            style = AppTypography.smallTitleStyle,
-            modifier = Modifier.padding(bottom = AppDimensions.paddingSmall)
-        )
-        Text(
-            text = value,
-            style = AppTypography.smallTitleStyle,
-            modifier = Modifier.padding(bottom = AppDimensions.paddingSmall)
-        )
-    }
+  Column(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall).testTag(testTag)) {
+    Text(
+        text = title,
+        style = AppTypography.smallTitleStyle,
+        modifier = Modifier.padding(bottom = AppDimensions.paddingSmall))
+    Text(
+        text = value,
+        style = AppTypography.smallTitleStyle,
+        modifier = Modifier.padding(bottom = AppDimensions.paddingSmall))
+  }
 }
 
 private fun parseDecisionFromFeedback(
     feedback: String,
     sessionType: SessionType?
 ): ChatViewModel.DecisionResult? {
-    if (sessionType == null) return null
+  if (sessionType == null) return null
 
-    val feedbackLower = feedback.lowercase()
-    return when {
-        sessionType.positiveResponse.lowercase() in feedbackLower ->
-            ChatViewModel.DecisionResult(sessionType.successMessage, true)
-        sessionType.negativeResponse.lowercase() in feedbackLower ->
-            ChatViewModel.DecisionResult(sessionType.failureMessage, false)
-        else -> null
-    }
+  val feedbackLower = feedback.lowercase()
+  return when {
+    sessionType.positiveResponse.lowercase() in feedbackLower ->
+        ChatViewModel.DecisionResult(sessionType.successMessage, true)
+    sessionType.negativeResponse.lowercase() in feedbackLower ->
+        ChatViewModel.DecisionResult(sessionType.failureMessage, false)
+    else -> null
+  }
 }

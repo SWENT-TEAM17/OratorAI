@@ -146,48 +146,44 @@ class FeedbackScreenTest {
         .assertIsDisplayed()
   }
 
-    @Test
-    fun performanceMetricsTitlesAreDisplayed() = runTest {
-        // Mock chatGPTService to return a ChatResponse with feedback message
-        `when`(chatGPTService.getChatCompletion(any()))
-            .thenReturn(
-                ChatResponse(
-                    "id",
-                    "object",
-                    0,
-                    "model",
-                    listOf(Choice(0, Message("assistant", "Great job! Keep it up."), null)),
-                    Usage(0, 0, 0)
-                )
-            )
+  @Test
+  fun performanceMetricsTitlesAreDisplayed() = runTest {
+    // Mock chatGPTService to return a ChatResponse with feedback message
+    `when`(chatGPTService.getChatCompletion(any()))
+        .thenReturn(
+            ChatResponse(
+                "id",
+                "object",
+                0,
+                "model",
+                listOf(Choice(0, Message("assistant", "Great job! Keep it up."), null)),
+                Usage(0, 0, 0)))
 
-        // Initialize ChatViewModel
-        chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+    // Initialize ChatViewModel
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
-        // Generate feedback with the mocked response
-        chatViewModel.generateFeedback()
+    // Generate feedback with the mocked response
+    chatViewModel.generateFeedback()
 
-        // Advance coroutine until idle
-        advanceUntilIdle()
+    // Advance coroutine until idle
+    advanceUntilIdle()
 
-        // Set the content with FeedbackScreen
-        composeTestRule.setContent {
-            FeedbackScreen(
-                chatViewModel = chatViewModel,
-                userProfileViewModel = userProfileViewModel,
-                apiLinkViewModel = apiLinkViewModel,
-                navigationActions = navigationActions
-            )
-        }
-
-        // Assert that the performance metrics title is displayed
-        composeTestRule.onNodeWithTag("performanceMetricsTitle")
-            .assertExists()
-            .assertIsDisplayed()
-            .assertTextContains("Your Performance Metrics:")
+    // Set the content with FeedbackScreen
+    composeTestRule.setContent {
+      FeedbackScreen(
+          chatViewModel = chatViewModel,
+          userProfileViewModel = userProfileViewModel,
+          apiLinkViewModel = apiLinkViewModel,
+          navigationActions = navigationActions)
     }
 
-    
+    // Assert that the performance metrics title is displayed
+    composeTestRule
+        .onNodeWithTag("performanceMetricsTitle")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextContains("Your Performance Metrics:")
+  }
 
   @Test
   fun clickingTheTryAgainButtonRedirectsToHomeScreen() = runTest {
@@ -204,7 +200,6 @@ class FeedbackScreenTest {
 
     verify(navigationActions).navigateTo(TopLevelDestinations.HOME)
   }
-
 
   @Test
   fun feedbackMessageIsShownWhenThereIsOne() = runTest {
