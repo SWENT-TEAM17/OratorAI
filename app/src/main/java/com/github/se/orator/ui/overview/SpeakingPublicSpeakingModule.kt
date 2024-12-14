@@ -164,7 +164,6 @@ fun SpeakingPublicSpeakingModule(
    */
   SpeakingPracticeModule(
       navigationActions = navigationActions,
-      screenTitle = "Public Speaking",
       headerText = "Make your speech memorable",
       inputs = inputFields,
       onClick = {

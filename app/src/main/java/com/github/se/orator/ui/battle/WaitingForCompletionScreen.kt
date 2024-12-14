@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
+import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
@@ -29,19 +30,21 @@ import com.github.se.orator.ui.theme.AppDimensions
 @Composable
 fun WaitingForCompletionScreen(
     battleId: String,
-    userId: String,
+    friendUid: String,
     navigationActions: NavigationActions,
-    battleViewModel: BattleViewModel
+    battleViewModel: BattleViewModel,
+    userProfileViewModel: UserProfileViewModel
 ) {
   // State to observe the battle status
   val battle by battleViewModel.getBattleByIdFlow(battleId).collectAsState(initial = null)
+  val friendName = userProfileViewModel.getName(friendUid)
 
   // LaunchedEffect to check both users' completion statuses and navigate accordingly
   LaunchedEffect(battle) {
     battle?.let {
       // Check if the other user has completed
       val otherUserCompleted =
-          if (userId == it.challenger) it.opponentCompleted else it.challengerCompleted
+          if (friendUid == it.opponent) it.opponentCompleted else it.challengerCompleted
 
       if (otherUserCompleted) {
         // Navigate directly to the evaluation screen
@@ -53,7 +56,10 @@ fun WaitingForCompletionScreen(
   }
 
   Scaffold(
-      topBar = { TopAppBar(title = { Text("Waiting for Completion") }) },
+      topBar = {
+        TopAppBar(
+            title = { Text("Waiting for Completion", color = MaterialTheme.colorScheme.onSurface) })
+      },
       content = { innerPadding ->
         Column(
             modifier =
@@ -64,9 +70,10 @@ fun WaitingForCompletionScreen(
                     .testTag("waitingForCompletionScreen"),
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
-                  text = "You have completed your interview. Waiting for the other user to finish.",
+                  text = "You have completed your interview. Waiting for $friendName to finish.",
                   style = MaterialTheme.typography.bodyLarge,
                   textAlign = TextAlign.Center,
+                  color = MaterialTheme.colorScheme.onSurface,
                   modifier =
                       Modifier.padding(bottom = AppDimensions.paddingMedium).testTag("waitingText"))
 

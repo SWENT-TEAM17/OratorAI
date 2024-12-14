@@ -238,12 +238,11 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Log.d("scn", "bio is: ${profile.bio}")
-
                 // stats section
                 CardSection(
                     title = "My stats",
                     imageVector = Icons.Outlined.QueryStats,
-                    onClick = { /*TODO: Handle achievements click */},
+                    onClick = { navigationActions.navigateTo(Screen.STAT) },
                     modifier = Modifier.testTag("statistics_section"))
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
