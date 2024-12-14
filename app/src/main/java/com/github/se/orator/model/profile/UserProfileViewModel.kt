@@ -158,7 +158,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    *
    * @param friendUids List of UIDs of the friends to be retrieved.
    */
-  private fun fetchFriendsProfiles(friendUids: List<String>) {
+  fun fetchFriendsProfiles(friendUids: List<String>) {
     repository.getFriendsProfiles(
         friendUids = friendUids,
         onSuccess = { profiles -> friendsProfiles_.value = profiles },
@@ -173,7 +173,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    *
    * @param recReqUIds List of UIDs of the friends to be retrieved.
    */
-  private fun fetchRecReqProfiles(recReqUIds: List<String>) {
+  fun fetchRecReqProfiles(recReqUIds: List<String>) {
     repository.getRecReqProfiles(
         recReqUIds = recReqUIds,
         onSuccess = { profiles -> recReqProfiles_.value = profiles },
@@ -187,7 +187,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    *
    * @param friendUids List of UIDs of the friends to be retrieved.
    */
-  private fun fetchSentReqProfiles(friendUids: List<String>) {
+  fun fetchSentReqProfiles(friendUids: List<String>) {
     repository.getSentReqProfiles(
         sentReqProfiles = friendUids,
         onSuccess = { profiles -> sentReqProfiles_.value = profiles },

@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 import org.mockito.*
 import org.mockito.Mockito.*
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.robolectric.RobolectricTestRunner
 
@@ -577,5 +578,38 @@ class UserProfileViewModelTest {
     val expectedOutput = listOf(1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f)
     val actualOutput = viewModel.ensureListSizeTen(inputList)
     assertEquals(expectedOutput, actualOutput)
+  }
+
+  /** Test that [startListeningToUserProfile] handles errors by invoking the onError callback. */
+  @Test
+  fun `startListeningToUserProfile handles errors correctly`() = runTest {
+    // Arrange
+    val testException = Exception("Firestore error")
+
+    // Capture the callbacks passed to listenToUserProfile
+    val onProfileChangedCaptor = argumentCaptor<(UserProfile?) -> Unit>()
+    val onErrorCaptor = argumentCaptor<(Exception) -> Unit>()
+
+    // Act
+    viewModel.startListeningToUserProfile(testUid)
+
+    // Verify that listenToUserProfile was called with correct parameters and capture callbacks
+    verify(repository)
+        .listenToUserProfile(eq(testUid), onProfileChangedCaptor.capture(), onErrorCaptor.capture())
+
+    // Simulate an error by invoking the captured onError callback
+    onErrorCaptor.firstValue.invoke(testException)
+
+    // Advance coroutine until idle to process updates
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    // userProfile should remain unchanged
+    val currentProfile = viewModel.userProfile.first()
+    assertEquals(testUserProfile, currentProfile)
+
+    // Optionally, verify that error handling mechanisms are triggered (e.g., logging)
+    // This depends on your implementation; for example, you might verify log statements or error
+    // state changes
   }
 }
