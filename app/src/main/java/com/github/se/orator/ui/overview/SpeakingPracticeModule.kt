@@ -43,7 +43,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SpeakingPracticeModule(
     navigationActions: NavigationActions,
-    screenTitle: String,
+    screenTitle: String = "",
     headerText: String,
     inputs: List<InputFieldData>,
     onClick: () -> Unit,
@@ -80,8 +80,7 @@ fun SpeakingPracticeModule(
             },
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface))
+                    containerColor = MaterialTheme.colorScheme.surface))
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -117,7 +116,8 @@ fun SpeakingPracticeModule(
                         question = input.question,
                         placeholder = input.placeholder,
                         testTag = input.testTag,
-                        dropdownItems = input.dropdownItems)
+                        dropdownItems = input.dropdownItems,
+                    )
                   } else {
                     // Display question as Text
                     Text(
@@ -227,6 +227,9 @@ fun SpeakingPracticeModule(
                                   unfocusedPlaceholderColor =
                                       MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                               ),
+                          textStyle =
+                              LocalTextStyle.current.copy(
+                                  color = MaterialTheme.colorScheme.onSurface),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Next))
                     }
@@ -327,7 +330,7 @@ fun FocusAreaDropdown(
             modifier = Modifier.testTag("$testTag-DropdownMenu")) {
               dropdownItems.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(text = item) },
+                    text = { Text(text = item, color = MaterialTheme.colorScheme.onSurface) },
                     onClick = {
                       onFocusAreaSelected(item)
                       expanded = false

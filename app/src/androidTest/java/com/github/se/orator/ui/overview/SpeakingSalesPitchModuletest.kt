@@ -106,7 +106,6 @@ class SpeakingSalesPitchModuleTest {
 
     // topAppBar and screenTitle are likely at the top and may not need scrolling
     composeTestRule.onNodeWithTag("topAppBar", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("screenTitle", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("content").assertIsDisplayed()
 
     // Verify back button and its functionality
