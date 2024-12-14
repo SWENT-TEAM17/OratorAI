@@ -232,6 +232,23 @@ fun FeedbackScreen(
       })
 }
 
+/**
+ * A reusable composable function to display a performance metric.
+ *
+ * @param title The title of the metric, typically describing what the metric represents. Example:
+ *   "Talk Time (Seconds)" or "Talk Time (Percentage)".
+ * @param value The value of the metric, formatted as a string for display. Example: "120.00" or
+ *   "75.50%".
+ * @param testTag A test tag assigned to the composable for UI testing purposes.
+ *
+ * Functionality:
+ * - Displays a metric with its title and value in a column layout.
+ * - Applies consistent padding and styling to ensure visual alignment with other UI components.
+ * - Includes a test tag for accessibility and testing frameworks.
+ *
+ * Usage: Call this function with appropriate parameters to render a performance metric anywhere in
+ * the UI.
+ */
 @Composable
 fun MetricDisplayItem(title: String, value: String, testTag: String) {
   Column(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall).testTag(testTag)) {
@@ -246,6 +263,13 @@ fun MetricDisplayItem(title: String, value: String, testTag: String) {
   }
 }
 
+/**
+ * Parses the decision from the feedback message.
+ *
+ * @param feedback The feedback message.
+ * @param sessionType The session type.
+ * @return The decision result.
+ */
 private fun parseDecisionFromFeedback(
     feedback: String,
     sessionType: SessionType?
