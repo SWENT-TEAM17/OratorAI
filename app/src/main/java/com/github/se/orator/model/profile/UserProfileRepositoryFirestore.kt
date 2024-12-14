@@ -2,6 +2,7 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
+import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.utils.formatDate
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
@@ -14,6 +15,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
+import java.util.ArrayDeque
 import java.util.Date
 
 /**
@@ -246,6 +248,14 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             val successfulSessions =
                 successfulSessionsMap.mapValues { entry -> entry.value.toInt() }
 
+            // Extract 'recentData' queue
+            val recentData =
+                it["recentData"] as? kotlin.collections.ArrayDeque<AnalysisData>
+                    ?: kotlin.collections.ArrayDeque<AnalysisData>()
+            // Extract means
+            val talkTimeSecMean = (it["talkTimeSecMean"] as? Number)?.toDouble() ?: 0.0
+            val talkTimePercMean = (it["talkTimePercMean"] as? Number)?.toDouble() ?: 0.0
+
             // Extract 'previousRuns' list
             val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
             val previousRuns =
@@ -272,6 +282,9 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
                 successfulSessions = successfulSessions,
                 improvement = improvement,
                 previousRuns = previousRuns,
+                recentData = recentData,
+                talkTimeSecMean = talkTimeSecMean,
+                talkTimePercMean = talkTimePercMean,
                 battleStats = battleStats)
           } ?: UserStatistics()
 

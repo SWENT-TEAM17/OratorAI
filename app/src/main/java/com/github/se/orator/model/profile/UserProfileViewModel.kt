@@ -522,7 +522,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
         }
 
     // Update the MutableStateFlow with the new queue
-    queue.value = updatedQueue
+    recentData_.value = updatedQueue
 
     return updatedQueue
   }
@@ -541,7 +541,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
 
       // Create a new statistics object with the updated queue
       val updatedStats = currentStats.copy(recentData = updatedQueue)
-
       // Create a new profile object with the updated queue
       val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
 
