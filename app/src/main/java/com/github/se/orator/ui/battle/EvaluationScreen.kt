@@ -2,6 +2,7 @@ package com.github.se.orator.ui.battle
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,9 +23,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
+import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
@@ -84,38 +87,60 @@ fun EvaluationScreen(
                         modifier =
                             Modifier.size(AppDimensions.loadingIndicatorSize)
                                 .testTag("loadingIndicator"))
-                    Text("EVALUATING PERFORMANCE AND DETERMINING THE WINNER")
+                    Text(
+                        "EVALUATING PERFORMANCE AND DETERMINING THE WINNER",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface)
                   }
                 }
           }
           battle!!.status == BattleStatus.COMPLETED && battle!!.evaluationResult != null -> {
             // Battle is completed, show the results
-            val result = battle!!.evaluationResult
-            val userIsWinner = result!!.winnerUid == userId
-            val message =
-                if (userIsWinner) result.winnerMessage.content else result.loserMessage.content
-            val resultText = if (userIsWinner) "You Won!" else "You Lost."
-
-            Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                contentAlignment = Alignment.Center) {
-                  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(resultText, style = MaterialTheme.typography.titleLarge)
-                    Spacer(modifier = Modifier.size(16.dp))
-                    Text(message)
-                    Spacer(modifier = Modifier.size(24.dp))
-                    Text("You can now return to the main screen.")
-                      //TODO: implement navigation or retry mechanism
-                  }
-                }
+            DisplayResultAndFeedback(battle, userId, paddingValues)
           }
           else -> {
             Box(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 contentAlignment = Alignment.Center) {
-                  Text("Waiting for evaluation to start...")
+                  Text(
+                      "Waiting for evaluation to start...",
+                      color = MaterialTheme.colorScheme.onSurface,
+                      textAlign = TextAlign.Center,
+                      style = MaterialTheme.typography.bodyLarge)
                 }
           }
         }
       })
+}
+
+@Composable
+fun DisplayResultAndFeedback(battle: SpeechBattle?, userId: String, paddingValues: PaddingValues) {
+  val result = battle!!.evaluationResult
+  val userIsWinner = result!!.winnerUid == userId
+  val message = if (userIsWinner) result.winnerMessage.content else result.loserMessage.content
+  val resultText = if (userIsWinner) "You Won!" else "You Lost."
+
+  Box(
+      modifier = Modifier.fillMaxSize().padding(paddingValues),
+      contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+          Text(
+              resultText,
+              style = MaterialTheme.typography.titleLarge,
+              color = MaterialTheme.colorScheme.onSurface,
+              textAlign = TextAlign.Center,
+              modifier = Modifier.padding(horizontal = 16.dp).testTag("resultText"))
+          Spacer(modifier = Modifier.size(16.dp))
+          Text(
+              message,
+              style = MaterialTheme.typography.bodyLarge,
+              color = MaterialTheme.colorScheme.primary,
+              textAlign = TextAlign.Center,
+              modifier = Modifier.padding(horizontal = 16.dp).testTag("message"))
+          Spacer(modifier = Modifier.size(24.dp))
+          Text("You can now return to the main screen.")
+          // TODO: implement navigation or retry mechanism
+        }
+      }
 }
