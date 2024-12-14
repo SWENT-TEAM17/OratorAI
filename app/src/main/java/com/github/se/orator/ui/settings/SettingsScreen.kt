@@ -50,9 +50,10 @@ data class SettingBar(
 // creating a list of all settings to implement them with a simple loop
 val listOfSettings =
     listOf(
+        // Redirects to the app's page in the device settings.
         SettingBar("Permissions", "permissions", Icons.Outlined.Lock, "lock icon"),
-        SettingBar("Theme", "theme", Icons.Outlined.DarkMode, "theme"),
-        SettingBar("About", "about", Icons.Outlined.Info, "info icon"))
+        // Switches the app's theme between light and dark mode.
+        SettingBar("Theme", "theme", Icons.Outlined.DarkMode, "theme"))
 
 // reusable function that is called to add a section to settings
 @Composable
@@ -140,7 +141,6 @@ fun SettingsScreen(
                   Log.d("SettingsScreen", "Theme switch")
                 }
               }
-              item { TextButtonFun(listOfSettings[2]) { Log.d("SettingsScreen", "About") } }
             }
       }
 }
