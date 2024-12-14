@@ -123,63 +123,43 @@ class StatScreenTest {
   }
 
   @Test
-  fun testTitleAndStatsRow_InterviewSection_DisplayedCorrectly() {
-
-    // When the composable is shown
+  fun titleAndStatsRow_displaysCorrectStats() {
     composeTestRule.setContent { TitleAndStatsRow(profile = testUserProfile) }
 
-    // Then check that Interview title and stats are displayed
+    // Check Interview Stats
     composeTestRule
         .onNodeWithTag("InterviewTitle")
         .assertIsDisplayed()
         .assertTextEquals("Interview")
-
     composeTestRule
         .onNodeWithTag("totalSessionsInterviewTitle")
         .assertIsDisplayed()
         .assertTextEquals("Sessions: 10")
-
     composeTestRule
         .onNodeWithTag("successSessionsInterviewTitle")
         .assertIsDisplayed()
         .assertTextEquals("Successful: 7")
-  }
 
-  @Test
-  fun testTitleAndStatsRow_SpeechSection_DisplayedCorrectly() {
-
-    composeTestRule.setContent { TitleAndStatsRow(profile = testUserProfile) }
-
-    // Check Speech section
-    composeTestRule.onNodeWithTag("speechTitle").assertIsDisplayed().assertTextEquals("Speech")
-
+    // Check Speech Stats
+    composeTestRule.onNodeWithTag("SpeechTitle").assertIsDisplayed().assertTextEquals("Speech")
     composeTestRule
         .onNodeWithTag("totalSessionsSpeechTitle")
         .assertIsDisplayed()
         .assertTextEquals("Sessions: 5")
-
     composeTestRule
         .onNodeWithTag("successSessionsSpeechTitle")
         .assertIsDisplayed()
         .assertTextEquals("Successful: 3")
-  }
 
-  @Test
-  fun testTitleAndStatsRow_NegotiationSection_DisplayedCorrectly() {
-
-    composeTestRule.setContent { TitleAndStatsRow(profile = testUserProfile) }
-
-    // Check Negotiation section
+    // Check Negotiation Stats
     composeTestRule
-        .onNodeWithTag("negotiationTitle")
+        .onNodeWithTag("NegotiationTitle")
         .assertIsDisplayed()
         .assertTextEquals("Negotiation")
-
     composeTestRule
         .onNodeWithTag("totalSessionsNegotiationTitle")
         .assertIsDisplayed()
         .assertTextEquals("Sessions: 8")
-
     composeTestRule
         .onNodeWithTag("successSessionsNegotiationTitle")
         .assertIsDisplayed()
