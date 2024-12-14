@@ -1,6 +1,7 @@
 package com.github.se.orator.ui.overview
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -145,6 +146,49 @@ class FeedbackScreenTest {
         .assertIsDisplayed()
   }
 
+    @Test
+    fun performanceMetricsTitlesAreDisplayed() = runTest {
+        // Mock chatGPTService to return a ChatResponse with feedback message
+        `when`(chatGPTService.getChatCompletion(any()))
+            .thenReturn(
+                ChatResponse(
+                    "id",
+                    "object",
+                    0,
+                    "model",
+                    listOf(Choice(0, Message("assistant", "Great job! Keep it up."), null)),
+                    Usage(0, 0, 0)
+                )
+            )
+
+        // Initialize ChatViewModel
+        chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+        // Generate feedback with the mocked response
+        chatViewModel.generateFeedback()
+
+        // Advance coroutine until idle
+        advanceUntilIdle()
+
+        // Set the content with FeedbackScreen
+        composeTestRule.setContent {
+            FeedbackScreen(
+                chatViewModel = chatViewModel,
+                userProfileViewModel = userProfileViewModel,
+                apiLinkViewModel = apiLinkViewModel,
+                navigationActions = navigationActions
+            )
+        }
+
+        // Assert that the performance metrics title is displayed
+        composeTestRule.onNodeWithTag("performanceMetricsTitle")
+            .assertExists()
+            .assertIsDisplayed()
+            .assertTextContains("Your Performance Metrics:")
+    }
+
+    
+
   @Test
   fun clickingTheTryAgainButtonRedirectsToHomeScreen() = runTest {
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
@@ -160,6 +204,7 @@ class FeedbackScreenTest {
 
     verify(navigationActions).navigateTo(TopLevelDestinations.HOME)
   }
+
 
   @Test
   fun feedbackMessageIsShownWhenThereIsOne() = runTest {
