@@ -260,12 +260,12 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
 
 /** Composable for practice mode title displays on the stats screen */
 @Composable
-fun PracticeModeTitle(modeTitleTEstTag: String, mode: String) {
+fun PracticeModeTitle(modeTitleTestTag: String, mode: String) {
   androidx.compose.material3.Text(
       modifier =
           Modifier.padding(start = AppDimensions.paddingSmall)
               .padding(top = AppDimensions.paddingXXLarge)
-              .testTag(modeTitleTEstTag),
+              .testTag(modeTitleTestTag),
       text = mode,
       style = AppTypography.smallTitleStyle, // Apply custom style for title
       color = MaterialTheme.colorScheme.primary)
@@ -284,46 +284,30 @@ fun StatDisplay(statTestTag: String, stat: String, statValue: String) {
       color = MaterialTheme.colorScheme.onSurface)
 }
 
+/** Composable for a single mode's stats and title */
+@Composable
+fun ModeStatsColumn(titleTestTag: String, mode: String, profile: UserProfile) {
+  val modeKey = mode.uppercase()
+  Column {
+    PracticeModeTitle(titleTestTag, mode)
+    StatDisplay(
+        statTestTag = "totalSessions${mode}Title",
+        stat = "Sessions: ",
+        statValue = profile.statistics.sessionsGiven[modeKey]?.toString() ?: "0")
+    StatDisplay(
+        statTestTag = "successSessions${mode}Title",
+        stat = "Successful: ",
+        statValue = profile.statistics.successfulSessions[modeKey]?.toString() ?: "0")
+  }
+}
 /** Row that contains the titles and stats for each mode, side by side */
 @Composable
 fun TitleAndStatsRow(profile: UserProfile) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = AppDimensions.paddingMedium),
       horizontalArrangement = Arrangement.SpaceEvenly) {
-        Column {
-          PracticeModeTitle("InterviewTitle", "Interview")
-          StatDisplay(
-              "totalSessionsInterviewTitle",
-              "Sessions: ",
-              "${profile.statistics.sessionsGiven["INTERVIEW"]}")
-          StatDisplay(
-              "successSessionsInterviewTitle",
-              "Successful: ",
-              "${profile.statistics.successfulSessions["INTERVIEW"]}")
-        }
-
-        Column {
-          PracticeModeTitle("speechTitle", "Speech")
-          StatDisplay(
-              "totalSessionsSpeechTitle",
-              "Sessions: ",
-              "${profile.statistics.sessionsGiven["SPEECH"]}")
-          StatDisplay(
-              "successSessionsSpeechTitle",
-              "Successful: ",
-              "${profile.statistics.successfulSessions["SPEECH"]}")
-        }
-
-        Column {
-          PracticeModeTitle("negotiationTitle", "Negotiation")
-          StatDisplay(
-              "totalSessionsNegotiationTitle",
-              "Sessions: ",
-              "${profile.statistics.sessionsGiven["NEGOTIATION"]}")
-          StatDisplay(
-              "successSessionsNegotiationTitle",
-              "Successful: ",
-              "${profile.statistics.successfulSessions["NEGOTIATION"]}")
-        }
+        ModeStatsColumn("InterviewTitle", "Interview", profile)
+        ModeStatsColumn("SpeechTitle", "Speech", profile)
+        ModeStatsColumn("NegotiationTitle", "Negotiation", profile)
       }
 }
