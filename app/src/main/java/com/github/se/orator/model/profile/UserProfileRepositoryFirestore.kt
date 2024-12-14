@@ -721,4 +721,24 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
           onFailure()
         }
   }
+
+  override fun listenToUserProfile(
+      uid: String,
+      onProfileChanged: (UserProfile?) -> Unit,
+      onError: (Exception) -> Unit
+  ) {
+    val docRef = db.collection(collectionPath).document(uid)
+    docRef.addSnapshotListener { snapshot, e ->
+      if (e != null) {
+        onError(e)
+        return@addSnapshotListener
+      }
+      if (snapshot != null && snapshot.exists()) {
+        val updatedProfile = documentToUserProfile(snapshot)
+        onProfileChanged(updatedProfile)
+      } else {
+        onProfileChanged(null)
+      }
+    }
+  }
 }

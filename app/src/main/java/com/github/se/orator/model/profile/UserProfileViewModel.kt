@@ -720,4 +720,19 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
     return -1
   }
+
+  fun startListeningToUserProfile(uid: String) {
+    repository.listenToUserProfile(
+        uid = uid,
+        onProfileChanged = { profile ->
+          userProfile_.value = profile
+          profile?.let {
+            // Re-fetch friend requests on every profile update
+            fetchFriendsProfiles(it.friends)
+            fetchRecReqProfiles(it.recReq)
+            fetchSentReqProfiles(it.sentReq)
+          }
+        },
+        onError = { Log.e("UserProfileViewModel", "Error listening to user profile updates", it) })
+  }
 }

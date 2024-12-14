@@ -231,4 +231,10 @@ interface UserProfileRepository {
    * @param onFailure Callback invoked on failure.
    */
   fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit)
+
+  fun listenToUserProfile(
+      uid: String,
+      onProfileChanged: (UserProfile?) -> Unit,
+      onError: (Exception) -> Unit
+  )
 }
