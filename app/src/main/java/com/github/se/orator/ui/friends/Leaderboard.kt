@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import com.github.se.orator.model.profile.SessionType
@@ -161,7 +162,7 @@ fun PracticeModeSelector() {
               .testTag("practiceModeSelector"),
       contentAlignment = Alignment.Center) {
         Text(
-            text = "Practice mode",
+            text = "Mode : $selectedMode",
             fontSize = AppFontSizes.subtitle, // 16.0sp
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -169,7 +170,7 @@ fun PracticeModeSelector() {
 
         // Dropdown menu options for selecting a practice mode
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-          practiceModeDropDownMenuCustomItem(
+          PracticeModeDropDownMenuCustomItem(
               sessionType = SessionType.INTERVIEW,
               onClickSet = {
                 selectedMode = it
@@ -177,14 +178,14 @@ fun PracticeModeSelector() {
               },
               testTag = "practiceModeOption1")
 
-          practiceModeDropDownMenuCustomItem(
+          PracticeModeDropDownMenuCustomItem(
               sessionType = SessionType.SPEECH,
               onClickSet = {
                 selectedMode = it
                 expanded = false
               },
               testTag = "practiceModeOption2")
-          practiceModeDropDownMenuCustomItem(
+          PracticeModeDropDownMenuCustomItem(
               sessionType = SessionType.NEGOTIATION,
               onClickSet = {
                 selectedMode = it
@@ -295,7 +296,7 @@ fun RankMetricSelector() {
               .testTag("rankMetricSelector"),
       contentAlignment = Alignment.Center) {
         Text(
-            text = "Rank metric",
+            text = "Metric : $selectedMetric",
             fontSize = AppFontSizes.subtitle,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -303,15 +304,15 @@ fun RankMetricSelector() {
 
         // Dropdown menu options for selecting a rank metric
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-          metricDropDownMenuCustomItem(
-              text = "Success ratio",
+          MetricDropDownMenuCustomItem(
+              text = "Ratio",
               metric = "Ratio",
               onClickSet = {
                 selectedMetric = "Ratio"
                 expanded = false
               },
               testTag = "rankMetricOption1")
-          metricDropDownMenuCustomItem(
+          MetricDropDownMenuCustomItem(
               text = "Success",
               metric = "Success",
               onClickSet = {
@@ -319,7 +320,7 @@ fun RankMetricSelector() {
                 expanded = false
               },
               testTag = "rankMetricOption2")
-          metricDropDownMenuCustomItem(
+          MetricDropDownMenuCustomItem(
               text = "Improvement",
               metric = "Improvement",
               onClickSet = {
@@ -357,7 +358,7 @@ fun ButtonRow() {
  * @param testTag The test tag for the dropdown menu item
  */
 @Composable
-private fun practiceModeDropDownMenuCustomItem(
+private fun PracticeModeDropDownMenuCustomItem(
     sessionType: SessionType,
     onClickSet: (String) -> Unit,
     testTag: String
@@ -366,17 +367,19 @@ private fun practiceModeDropDownMenuCustomItem(
       text = {
         Text(
             sessionType.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT),
-            color =
-                if (currentPracticeMode.value == sessionType) {
-                  MaterialTheme.colorScheme.primary
-                } else MaterialTheme.colorScheme.onSecondaryContainer)
+            color = colorWhenSelected(currentPracticeMode.value == sessionType))
       },
       onClick = {
         currentPracticeMode.value = sessionType
         onClickSet(
             currentPracticeMode.value.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT))
       },
-      modifier = Modifier.testTag(testTag))
+      modifier =
+          Modifier.testTag(testTag)
+              .background(
+                  color =
+                      MaterialTheme.colorScheme.primary.copy(
+                          alpha = if (currentPracticeMode.value == sessionType) 0.4f else 0.0f)))
 }
 
 /**
@@ -388,24 +391,38 @@ private fun practiceModeDropDownMenuCustomItem(
  * @param testTag The test tag for the dropdown menu item
  */
 @Composable
-private fun metricDropDownMenuCustomItem(
+private fun MetricDropDownMenuCustomItem(
     text: String,
     metric: String,
     onClickSet: () -> Unit,
     testTag: String
 ) {
   DropdownMenuItem(
-      text = {
-        Text(
-            text,
-            color =
-                if (currentRankMetric.value == metric) {
-                  MaterialTheme.colorScheme.primary
-                } else MaterialTheme.colorScheme.onSecondaryContainer)
-      },
+      text = { Text(text, color = colorWhenSelected(currentRankMetric.value == metric)) },
       onClick = {
         currentRankMetric.value = metric
         onClickSet()
       },
-      modifier = Modifier.testTag(testTag))
+      modifier =
+          Modifier.testTag(testTag)
+              .background(
+                  color =
+                      MaterialTheme.colorScheme.primary.copy(
+                          alpha = if (currentRankMetric.value == metric) 0.4f else 0.0f)))
+}
+
+/**
+ * Composable function that returns the primary app color when the item is selected, and the
+ * onSecondaryContainer color when it is not selected.
+ *
+ * @param selected The boolean value that determines if the item is selected
+ * @return The color to use for the item
+ */
+@Composable
+private fun colorWhenSelected(selected: Boolean): Color {
+  return if (selected) {
+    MaterialTheme.colorScheme.primary
+  } else {
+    MaterialTheme.colorScheme.onSecondaryContainer
+  }
 }
