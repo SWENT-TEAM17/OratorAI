@@ -169,7 +169,7 @@ fun CreateAccountScreen(
                   singleLine = true,
                   colors =
                       TextFieldDefaults.textFieldColors(
-                          textColor = AppColors.textColor, // Text color
+                          textColor = AppColors.textColor,
                           placeholderColor = AppColors.placeholderColor, // Placeholder text color
                           backgroundColor =
                               AppColors.placeholderColor, // Background color of the TextField
