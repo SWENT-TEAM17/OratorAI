@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,8 +34,10 @@ import androidx.compose.ui.platform.testTag
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import com.github.se.orator.ui.theme.AppTypography
 
 // class for all that is needed about a section for settings
 data class SettingBar(
@@ -94,32 +95,27 @@ fun SettingsScreen(
   val context = LocalContext.current
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Settings",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.testTag("SettingsText"))
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("back_button")) {
-                    androidx.compose.material.Icon(
-                        Icons.Outlined.ArrowBackIosNew,
-                        contentDescription = "Back button",
-                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                        tint = MaterialTheme.colorScheme.onSurface)
+          TopNavigationMenu(
+              title = {
+                  Text(
+                      "Settings",
+                      modifier = Modifier.testTag("SettingsText"),
+                      color = MaterialTheme.colorScheme.onSurface,
+                      style = AppTypography.mediumTopBarStyle
+                  )
+              },
+              navigationIcon = {
+                  IconButton(
+                      onClick = { navigationActions.goBack() },
+                      modifier = Modifier.testTag("back_button")) {
+                      androidx.compose.material.Icon(
+                          Icons.Outlined.ArrowBackIosNew,
+                          contentDescription = "Back button",
+                          modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                          tint = MaterialTheme.colorScheme.onSurface)
                   }
-            },
-            colors =
-                TopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ))
+              },
+          )
       }) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding).testTag("settingsScreen"),

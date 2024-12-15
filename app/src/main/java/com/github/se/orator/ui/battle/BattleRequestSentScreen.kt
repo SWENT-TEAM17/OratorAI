@@ -17,8 +17,10 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * Composable function that displays a message indicating that the battle request has been sent, and
@@ -53,18 +55,25 @@ fun BattleRequestSentScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Battle Request Sent") },
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(
-                    Icons.Outlined.ArrowBackIosNew,
-                    contentDescription = "Back",
-                    modifier = Modifier.size(AppDimensions.iconSizeMedium).testTag("backButton"),
-                    tint = MaterialTheme.colorScheme.onSurface)
-              }
-            },
-            modifier = Modifier.testTag("topAppBar"))
+          TopNavigationMenu(
+              testTag = "topAppBar",
+              title = {
+                  Text(
+                      "Battle Request Sent",
+                      color = MaterialTheme.colorScheme.onSurface,
+                      style = AppTypography.mediumTopBarStyle
+                  )
+              },
+              navigationIcon = {
+                  IconButton(onClick = { navigationActions.goBack() }) {
+                      Icon(
+                          Icons.Outlined.ArrowBackIosNew,
+                          contentDescription = "Back",
+                          modifier = Modifier.size(AppDimensions.iconSizeMedium).testTag("backButton"),
+                          tint = MaterialTheme.colorScheme.onSurface)
+                  }
+              },
+          )
       },
       content = { innerPadding ->
         Column(

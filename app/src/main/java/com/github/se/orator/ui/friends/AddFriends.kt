@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -49,6 +48,7 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
@@ -97,33 +97,28 @@ fun AddFriendsScreen(
 
   Scaffold(
       topBar = {
-        Column {
-          CenterAlignedTopAppBar(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .statusBarsPadding()
-                      .shadow(elevation = AppDimensions.elevationSmall),
+          TopNavigationMenu(
               title = {
-                Text(
-                    "Add a friend",
-                    modifier = Modifier.testTag("addFriendTitle"),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = AppTypography.mediumTopBarStyle)
+                  Text(
+                      "Add a friend",
+                      modifier = Modifier.testTag("addFriendTitle"),
+                      color = MaterialTheme.colorScheme.onSurface,
+                      style = AppTypography.mediumTopBarStyle
+                  )
               },
               navigationIcon = {
-                IconButton(
-                    onClick = {
-                      navigationActions.goBack() // Navigate back
-                    },
-                    modifier = Modifier.testTag("addFriendBackButton")) {
+                  IconButton(
+                      onClick = {
+                          navigationActions.goBack() // Navigate back
+                      },
+                      modifier = Modifier.testTag("addFriendBackButton")) {
                       Icon(
                           Icons.AutoMirrored.Filled.ArrowBack,
                           contentDescription = "Back",
                           tint = MaterialTheme.colorScheme.onSurface)
-                    }
-              })
-          HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-        }
+                  }
+              }
+          )
       },
       bottomBar = {
         BottomNavigationMenu(

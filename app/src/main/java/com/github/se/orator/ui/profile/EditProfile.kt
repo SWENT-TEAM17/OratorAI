@@ -26,7 +26,6 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
@@ -51,9 +50,11 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
+import com.github.se.orator.ui.theme.AppTypography
 import java.io.File
 
 /**
@@ -82,39 +83,39 @@ fun EditProfileScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("edit_profile_app_bar"),
-            backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
-            elevation = AppDimensions.elevationSmall,
-            title = {
-              Text(
-                  modifier = Modifier.testTag("edit_profile_title"),
-                  text = "Edit Profile",
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.onSurface,
-              )
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("back_button")) {
-                    Icon(
-                        Icons.Outlined.ArrowBackIosNew,
-                        contentDescription = "Back arrow",
-                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                        tint = MaterialTheme.colorScheme.onSurface)
+          TopNavigationMenu(
+              title = {
+                  Text(
+                      modifier = Modifier.testTag("edit_profile_title"),
+                      text = "Edit Profile",
+                      fontWeight = FontWeight.Bold,
+                      color = MaterialTheme.colorScheme.onSurface,
+                      style = AppTypography.mediumTopBarStyle
+                  )
+              },
+              navigationIcon = {
+                  IconButton(
+                      onClick = { navigationActions.goBack() },
+                      modifier = Modifier.testTag("back_button")) {
+                      Icon(
+                          Icons.Outlined.ArrowBackIosNew,
+                          contentDescription = "Back arrow",
+                          modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                          tint = MaterialTheme.colorScheme.onSurface)
                   }
-            },
-            actions = {
-              IconButton(
-                  onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
-                  modifier = Modifier.testTag("settings_button")) {
-                    Icon(
-                        Icons.Filled.Settings,
-                        contentDescription = "Logout icon",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+              },
+              actions = {
+                  IconButton(
+                      onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
+                      modifier = Modifier.testTag("settings_button")) {
+                      Icon(
+                          Icons.Filled.Settings,
+                          contentDescription = "Logout icon",
+                          tint = MaterialTheme.colorScheme.onSurfaceVariant)
                   }
-            })
+              }
+
+          )
       },
       bottomBar = {
         BottomNavigationMenu(

@@ -33,7 +33,6 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +61,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
@@ -83,53 +83,48 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   Scaffold(
       topBar = {
-        Column {
-          CenterAlignedTopAppBar(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .statusBarsPadding()
-                      .shadow(elevation = AppDimensions.elevationSmall),
+          TopNavigationMenu(
               title = {
-                Text(
-                    text = "Profile",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.testTag("profile_title"),
-                    style = AppTypography.mediumTopBarStyle,
-                )
+                  Text(
+                      text = "Profile",
+                      color = MaterialTheme.colorScheme.onSurface,
+                      modifier = Modifier.testTag("profile_title"),
+                      style = AppTypography.mediumTopBarStyle,
+                  )
               },
               actions = {
-                IconButton(
-                    onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
-                    modifier = Modifier.testTag("settings_button")) {
+                  IconButton(
+                      onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
+                      modifier = Modifier.testTag("settings_button")) {
                       Icon(
                           Icons.Outlined.Settings,
                           contentDescription = "Settings",
                           modifier =
-                              Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"),
+                          Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"),
                           tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                  }
               },
               navigationIcon = {
-                IconButton(
-                    onClick = {
-                      // Sign out the user
-                      FirebaseAuth.getInstance().signOut()
-                      // Display a toast message
-                      Toast.makeText(context, "Logout successful!", Toast.LENGTH_SHORT).show()
-                      // Navigate to the sign in screen
-                      navigationActions.navigateTo(Screen.AUTH)
-                    },
-                    modifier = Modifier.testTag("sign_out_button")) {
+                  IconButton(
+                      onClick = {
+                          // Sign out the user
+                          FirebaseAuth.getInstance().signOut()
+                          // Display a toast message
+                          Toast.makeText(context, "Logout successful!", Toast.LENGTH_SHORT).show()
+                          // Navigate to the sign in screen
+                          navigationActions.navigateTo(Screen.AUTH)
+                      },
+                      modifier = Modifier.testTag("sign_out_button")) {
                       Icon(
                           Icons.AutoMirrored.Filled.Logout,
                           contentDescription = "Sign out",
                           modifier =
-                              Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"),
+                          Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"),
                           tint = MaterialTheme.colorScheme.onSurface)
-                    }
-              })
-          HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-        }
+                  }
+              }
+
+          )
       },
       bottomBar = {
         BottomNavigationMenu(

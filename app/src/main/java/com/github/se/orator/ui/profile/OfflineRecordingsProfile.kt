@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppTypography
@@ -110,25 +111,27 @@ fun OfflineRecordingsProfileScreen(
 ) {
   val context = LocalContext.current
   Column {
-    CenterAlignedTopAppBar(
-        title = {
-          Text(
-              "Previous sessions",
-              modifier = Modifier.testTag("previous_sessions_test"),
-              style = AppTypography.mediumTopBarStyle)
-        },
-        navigationIcon = {
-          IconButton(
-              onClick = { navigationActions.goBack() },
-              modifier = Modifier.testTag("back_button")) {
-                androidx.compose.material.Icon(
-                    Icons.Outlined.ArrowBackIosNew,
-                    contentDescription = "Back button",
-                    modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                    tint = Color.Black)
+      TopNavigationMenu(
+          title = {
+              Text(
+                  "Previous sessions",
+                  modifier = Modifier.testTag("previous_sessions_test"),
+                  color = MaterialTheme.colorScheme.onSurface,
+                  style = AppTypography.mediumTopBarStyle)
+          },
+          navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                  androidx.compose.material.Icon(
+                      Icons.Outlined.ArrowBackIosNew,
+                      contentDescription = "Back button",
+                      modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                      tint = Color.Black)
               }
-        })
-    HorizontalDivider()
+          }
+      )
+
     Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
       Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
       PromptCardsSection(context, navigationActions, speakingViewModel)

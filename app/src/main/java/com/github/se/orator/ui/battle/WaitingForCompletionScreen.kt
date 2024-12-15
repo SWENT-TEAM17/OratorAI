@@ -23,8 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,8 +59,12 @@ fun WaitingForCompletionScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Waiting for Completion", color = MaterialTheme.colorScheme.onSurface) })
+          TopNavigationMenu(
+              title = { Text("Waiting for Completion",
+                  color = MaterialTheme.colorScheme.onSurface,
+                  style = AppTypography.mediumTopBarStyle)
+              }
+          )
       },
       content = { innerPadding ->
         Column(

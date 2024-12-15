@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
 import kotlin.math.roundToInt
@@ -54,33 +55,30 @@ fun SpeakingPracticeModule(
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
-        // Use CenterAlignedTopAppBar for consistency
-        TopAppBar(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .padding(top = AppDimensions.statusBarPadding)
-                    .testTag("topAppBar"),
-            title = {
-              Text(
-                  text = screenTitle,
-                  style = AppTypography.appBarTitleStyle.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.testTag("screenTitle"))
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("back_button")) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                        tint = MaterialTheme.colorScheme.onSurface)
+          TopNavigationMenu(
+              testTag = "topAppBar",
+              title = {
+                  Text(
+                      text = screenTitle,
+                      style = AppTypography.mediumTopBarStyle,
+                      color = MaterialTheme.colorScheme.onSurface,
+                      modifier = Modifier.testTag("screenTitle")
+                  )
+              },
+              navigationIcon = {
+                  IconButton(
+                      onClick = { navigationActions.goBack() },
+                      modifier = Modifier.testTag("back_button")
+                  ) {
+                      Icon(
+                          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                          tint = MaterialTheme.colorScheme.onSurface
+                      )
                   }
-            },
-            colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface))
+              }
+          )
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {

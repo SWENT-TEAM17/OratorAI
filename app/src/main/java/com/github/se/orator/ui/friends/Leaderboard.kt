@@ -23,6 +23,7 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppTypography
@@ -270,30 +271,28 @@ fun TitleAppBar(
     buttonTestTag: String,
     iconTestTag: String
 ) {
-  Column {
-    CenterAlignedTopAppBar(
+    TopNavigationMenu(
         title = {
-          Text(
-              title,
-              modifier = Modifier.testTag(titleTestTAg),
-              color = MaterialTheme.colorScheme.onSurface,
-              style = AppTypography.mediumTopBarStyle)
+            Text(
+                title,
+                modifier = Modifier.testTag(titleTestTAg),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = AppTypography.mediumTopBarStyle)
         },
         navigationIcon = {
-          IconButton(
-              onClick = {
-                navigationActions.goBack() // Navigate back
-              },
-              modifier = Modifier.testTag(buttonTestTag)) {
+            IconButton(
+                onClick = {
+                    navigationActions.goBack() // Navigate back
+                },
+                modifier = Modifier.testTag(buttonTestTag)) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.testTag(iconTestTag),
                     tint = MaterialTheme.colorScheme.onSurface)
-              }
-        })
-    HorizontalDivider()
-  }
+            }
+        }
+    )
 }
 
 /**

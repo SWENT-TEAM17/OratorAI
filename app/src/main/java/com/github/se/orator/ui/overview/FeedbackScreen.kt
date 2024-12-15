@@ -22,6 +22,7 @@ import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
@@ -89,30 +90,30 @@ fun FeedbackScreen(
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
       topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("feedbackTopAppBar"),
-            title = {
-              Text(
-                  text = "Feedback",
-                  modifier = Modifier.testTag("FeedbackText"),
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.onSurface)
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("back_button")) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                        tint = MaterialTheme.colorScheme.onSurface)
+          TopNavigationMenu(
+              testTag = "feedbackTopAppBar",
+              title = {
+                  Text(
+                      text = "Feedback",
+                      modifier = Modifier.testTag("FeedbackText"),
+                      color = MaterialTheme.colorScheme.onSurface,
+                      style = AppTypography.mediumTopBarStyle
+                  )
+              },
+              navigationIcon = {
+                  IconButton(
+                      onClick = { navigationActions.goBack() },
+                      modifier = Modifier.testTag("back_button")) {
+                      Icon(
+                          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                          tint = MaterialTheme.colorScheme.onSurface)
                   }
-            },
-            colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer))
-      },
+              },
+
+          )
+               },
       content = { paddingValues ->
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("feedbackContent"),

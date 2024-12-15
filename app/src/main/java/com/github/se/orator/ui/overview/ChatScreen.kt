@@ -18,8 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * Enum class representing the different types of buttons that can be displayed in the chat screen.
@@ -85,34 +87,32 @@ fun ChatScreen(
   Scaffold(
       // Top app bar with a centered title and a back button.
       topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-              Text(
-                  text = "Chat Screen",
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.onSurface, // Use theme color for text
-                  modifier = Modifier.testTag("chat_screen_title"))
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = {
-                    navigationActions.goBack()
-                    chatViewModel.toggleTextToSpeech(false)
-                    chatViewModel.resetPracticeContext()
-                    chatViewModel.endConversation()
-                  },
-                  modifier = Modifier.testTag("back_button")) {
-                    Icon(
-                        imageVector = Icons.Outlined.ArrowBackIosNew,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                        tint = MaterialTheme.colorScheme.onSurface) // Use theme color for icon
+          TopNavigationMenu(
+              title = {
+                  Text(
+                      text = "Chat Screen",
+                      fontWeight = FontWeight.Bold,
+                      color = MaterialTheme.colorScheme.onSurface, // Use theme color for text
+                      style = AppTypography.mediumTopBarStyle,
+                      modifier = Modifier.testTag("chat_screen_title"))
+              },
+              navigationIcon = {
+                  IconButton(
+                      onClick = {
+                          navigationActions.goBack()
+                          chatViewModel.toggleTextToSpeech(false)
+                          chatViewModel.resetPracticeContext()
+                          chatViewModel.endConversation()
+                      },
+                      modifier = Modifier.testTag("back_button")) {
+                      Icon(
+                          imageVector = Icons.Outlined.ArrowBackIosNew,
+                          contentDescription = "Back",
+                          modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                          tint = MaterialTheme.colorScheme.onSurface) // Use theme color for icon
+                  }
               }
-            },
-            colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer),
-            modifier = Modifier.testTag("top_app_bar"))
+          )
       },
       content = { paddingValues ->
         Column(
