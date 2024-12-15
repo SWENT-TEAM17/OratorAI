@@ -193,7 +193,7 @@ class BattleViewModel(
 
             if (otherUserCompleted) {
               // Both users are now completed. Update status to COMPLETED.
-              battleRepository.updateBattleStatus(battleId, BattleStatus.COMPLETED) { statusSuccess
+              battleRepository.updateBattleStatus(battleId, BattleStatus.EVALUATING) { statusSuccess
                 ->
                 if (statusSuccess) {
                   navigationActions.navigateToEvaluationScreen(battleId)
