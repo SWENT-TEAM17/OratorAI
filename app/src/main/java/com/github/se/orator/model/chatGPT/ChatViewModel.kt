@@ -565,13 +565,14 @@ The session is now over. According to the initial instructions, you can now brea
         Then, provide a message addressed to the winner, highlighting why they won (max one paragraph). 
         Also, provide a message addressed to the loser, highlighting what they did wrong and where they can improve (max one paragraph).
         For both messages focus on the quality of the answers, clarity, and overall performance.
+        Address both users as you so that we can directly display the feedback message on their screens.
         Don't over compliment the winner because he might have also made mistakes, make sure to stay neutral and professional: a strict interviewer. 
         
 
         Format your answer as:
         The winner is: <winnerUid>
         Winner message: <short message>
-        Loser message: <short message>
+        Loser message: <short message> 
         """
 
     val request =
