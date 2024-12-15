@@ -25,6 +25,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import com.github.se.orator.ui.theme.AppTypography
 import java.util.Locale
 
 var currentPracticeMode = mutableStateOf(SessionType.SPEECH)
@@ -269,29 +270,30 @@ fun TitleAppBar(
     buttonTestTag: String,
     iconTestTag: String
 ) {
-  TopAppBar(
-      title = {
-        Text(
-            title,
-            modifier = Modifier.testTag(titleTestTAg),
-            color = MaterialTheme.colorScheme.onSurface)
-      },
-      navigationIcon = {
-        IconButton(
-            onClick = {
-              navigationActions.goBack() // Navigate back
-            },
-            modifier = Modifier.testTag(buttonTestTag)) {
-              Icon(
-                  Icons.AutoMirrored.Filled.ArrowBack,
-                  contentDescription = "Back",
-                  modifier = Modifier.testTag(iconTestTag),
-                  tint = MaterialTheme.colorScheme.onSurface)
-            }
-      },
-      colors =
-          TopAppBarDefaults.topAppBarColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainer))
+  Column {
+    CenterAlignedTopAppBar(
+        title = {
+          Text(
+              title,
+              modifier = Modifier.testTag(titleTestTAg),
+              color = MaterialTheme.colorScheme.onSurface,
+              style = AppTypography.mediumTopBarStyle)
+        },
+        navigationIcon = {
+          IconButton(
+              onClick = {
+                navigationActions.goBack() // Navigate back
+              },
+              modifier = Modifier.testTag(buttonTestTag)) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.testTag(iconTestTag),
+                    tint = MaterialTheme.colorScheme.onSurface)
+              }
+        })
+    HorizontalDivider()
+  }
 }
 
 /**

@@ -32,12 +32,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -98,31 +97,33 @@ fun AddFriendsScreen(
 
   Scaffold(
       topBar = {
-          Column {
-              CenterAlignedTopAppBar(
-                  title = {
-                      Text(
-                          "Add a friend",
-                          modifier = Modifier.testTag("addFriendTitle"),
-                          color = MaterialTheme.colorScheme.onSurface,
-                          style = AppTypography.mediumTopBarStyle)
-                  },
-                  navigationIcon = {
-                      IconButton(
-                          onClick = {
-                              navigationActions.goBack() // Navigate back
-                          },
-                          modifier = Modifier.testTag("addFriendBackButton")) {
-                          Icon(
-                              Icons.AutoMirrored.Filled.ArrowBack,
-                              contentDescription = "Back",
-                              tint = MaterialTheme.colorScheme.onSurface)
-                      }
-                  }
-
-              )
-              HorizontalDivider()
-          }
+        Column {
+          CenterAlignedTopAppBar(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .statusBarsPadding()
+                      .shadow(elevation = AppDimensions.elevationSmall),
+              title = {
+                Text(
+                    "Add a friend",
+                    modifier = Modifier.testTag("addFriendTitle"),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = AppTypography.mediumTopBarStyle)
+              },
+              navigationIcon = {
+                IconButton(
+                    onClick = {
+                      navigationActions.goBack() // Navigate back
+                    },
+                    modifier = Modifier.testTag("addFriendBackButton")) {
+                      Icon(
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = MaterialTheme.colorScheme.onSurface)
+                    }
+              })
+          HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
+        }
       },
       bottomBar = {
         BottomNavigationMenu(

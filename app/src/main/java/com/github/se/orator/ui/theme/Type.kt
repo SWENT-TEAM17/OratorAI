@@ -105,17 +105,17 @@ object AppTypography {
   val poppinsBlackFontFamily = FontFamily(Font(R.font.poppins_black))
   val poppinsRegularFontFamily = FontFamily(Font(R.font.poppins_regular))
 
-    val mediumTopBarStyle: TextStyle
-        @Composable
-        get() =
-            TextStyle(
-                fontSize = AppFontSizes.poppinsSizeLarge,
-                fontFamily = manropeFontFamily,
-                fontWeight = FontWeight.W600,
-                lineHeight = AppFontSizes.poppinsHeightLarge,
-                color = androidx.compose.ui.graphics.Color.Black,
-                textAlign = TextAlign.Center,
-            )
+  val mediumTopBarStyle: TextStyle
+    @Composable
+    get() =
+        TextStyle(
+            fontSize = AppFontSizes.poppinsSizeLarge,
+            fontFamily = manropeFontFamily,
+            fontWeight = FontWeight.W600,
+            lineHeight = AppFontSizes.poppinsHeightLarge,
+            color = androidx.compose.ui.graphics.Color.Black,
+            textAlign = TextAlign.Center,
+        )
 
   val bigTitleStyle: TextStyle
     @Composable
