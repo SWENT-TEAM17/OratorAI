@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.profile.SessionType
@@ -90,30 +89,28 @@ fun FeedbackScreen(
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("feedbackScreen"),
       topBar = {
-          TopNavigationMenu(
-              testTag = "feedbackTopAppBar",
-              title = {
-                  Text(
-                      text = "Feedback",
-                      modifier = Modifier.testTag("FeedbackText"),
-                      color = MaterialTheme.colorScheme.onSurface,
-                      style = AppTypography.mediumTopBarStyle
-                  )
-              },
-              navigationIcon = {
-                  IconButton(
-                      onClick = { navigationActions.goBack() },
-                      modifier = Modifier.testTag("back_button")) {
-                      Icon(
-                          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = "Back",
-                          modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                          tint = MaterialTheme.colorScheme.onSurface)
+        TopNavigationMenu(
+            testTag = "feedbackTopAppBar",
+            title = {
+              Text(
+                  text = "Feedback",
+                  modifier = Modifier.testTag("FeedbackText"),
+                  color = MaterialTheme.colorScheme.onSurface,
+                  style = AppTypography.mediumTopBarStyle)
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
-              },
-
-          )
-               },
+            },
+        )
+      },
       content = { paddingValues ->
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("feedbackContent"),

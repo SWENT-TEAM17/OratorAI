@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -111,26 +110,25 @@ fun OfflineRecordingsProfileScreen(
 ) {
   val context = LocalContext.current
   Column {
-      TopNavigationMenu(
-          title = {
-              Text(
-                  "Previous sessions",
-                  modifier = Modifier.testTag("previous_sessions_test"),
-                  color = MaterialTheme.colorScheme.onSurface,
-                  style = AppTypography.mediumTopBarStyle)
-          },
-          navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("back_button")) {
-                  androidx.compose.material.Icon(
-                      Icons.Outlined.ArrowBackIosNew,
-                      contentDescription = "Back button",
-                      modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                      tint = Color.Black)
+    TopNavigationMenu(
+        title = {
+          Text(
+              "Previous sessions",
+              modifier = Modifier.testTag("previous_sessions_test"),
+              color = MaterialTheme.colorScheme.onSurface,
+              style = AppTypography.mediumTopBarStyle)
+        },
+        navigationIcon = {
+          IconButton(
+              onClick = { navigationActions.goBack() },
+              modifier = Modifier.testTag("back_button")) {
+                androidx.compose.material.Icon(
+                    Icons.Outlined.ArrowBackIosNew,
+                    contentDescription = "Back button",
+                    modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                    tint = Color.Black)
               }
-          }
-      )
+        })
 
     Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
       Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))

@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,27 +94,26 @@ fun SettingsScreen(
   val context = LocalContext.current
   Scaffold(
       topBar = {
-          TopNavigationMenu(
-              title = {
-                  Text(
-                      "Settings",
-                      modifier = Modifier.testTag("SettingsText"),
-                      color = MaterialTheme.colorScheme.onSurface,
-                      style = AppTypography.mediumTopBarStyle
-                  )
-              },
-              navigationIcon = {
-                  IconButton(
-                      onClick = { navigationActions.goBack() },
-                      modifier = Modifier.testTag("back_button")) {
-                      androidx.compose.material.Icon(
-                          Icons.Outlined.ArrowBackIosNew,
-                          contentDescription = "Back button",
-                          modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                          tint = MaterialTheme.colorScheme.onSurface)
+        TopNavigationMenu(
+            title = {
+              Text(
+                  "Settings",
+                  modifier = Modifier.testTag("SettingsText"),
+                  color = MaterialTheme.colorScheme.onSurface,
+                  style = AppTypography.mediumTopBarStyle)
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    androidx.compose.material.Icon(
+                        Icons.Outlined.ArrowBackIosNew,
+                        contentDescription = "Back button",
+                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
-              },
-          )
+            },
+        )
       }) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding).testTag("settingsScreen"),

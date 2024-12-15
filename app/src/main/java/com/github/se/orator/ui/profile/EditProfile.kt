@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -83,39 +82,36 @@ fun EditProfileScreen(
 
   Scaffold(
       topBar = {
-          TopNavigationMenu(
-              title = {
-                  Text(
-                      modifier = Modifier.testTag("edit_profile_title"),
-                      text = "Edit Profile",
-                      fontWeight = FontWeight.Bold,
-                      color = MaterialTheme.colorScheme.onSurface,
-                      style = AppTypography.mediumTopBarStyle
-                  )
-              },
-              navigationIcon = {
-                  IconButton(
-                      onClick = { navigationActions.goBack() },
-                      modifier = Modifier.testTag("back_button")) {
-                      Icon(
-                          Icons.Outlined.ArrowBackIosNew,
-                          contentDescription = "Back arrow",
-                          modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                          tint = MaterialTheme.colorScheme.onSurface)
+        TopNavigationMenu(
+            title = {
+              Text(
+                  modifier = Modifier.testTag("edit_profile_title"),
+                  text = "Edit Profile",
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface,
+                  style = AppTypography.mediumTopBarStyle)
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Icon(
+                        Icons.Outlined.ArrowBackIosNew,
+                        contentDescription = "Back arrow",
+                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
-              },
-              actions = {
-                  IconButton(
-                      onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
-                      modifier = Modifier.testTag("settings_button")) {
-                      Icon(
-                          Icons.Filled.Settings,
-                          contentDescription = "Logout icon",
-                          tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            },
+            actions = {
+              IconButton(
+                  onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
+                  modifier = Modifier.testTag("settings_button")) {
+                    Icon(
+                        Icons.Filled.Settings,
+                        contentDescription = "Logout icon",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                   }
-              }
-
-          )
+            })
       },
       bottomBar = {
         BottomNavigationMenu(

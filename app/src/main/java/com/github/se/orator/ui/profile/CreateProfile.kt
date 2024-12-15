@@ -78,36 +78,28 @@ fun CreateAccountScreen(
 
   Scaffold(
       topBar = {
-          TopNavigationMenu(
-              title = {
-                  Text(
-                      "Create your Orator profile",
-                      modifier = Modifier.testTag("createProfileTitle"),
-                      color = MaterialTheme.colorScheme.onSurface,
-                      style = AppTypography.mediumTopBarStyle
-                  )
-              },
-              navigationIcon = {
-                  IconButton(
-                      onClick = { navigationActions.goBack() },
-                      modifier = Modifier.testTag("back_button")) {
-                      Image(
-                          painter = painterResource(id = R.drawable.chevron_left),
-                          contentDescription = "Back",
-                          modifier =
-                          Modifier.size(AppDimensions.iconSizeSmall)
-                              .testTag("BackImage")
-                      )
+        TopNavigationMenu(
+            title = {
+              Text(
+                  "Create your Orator profile",
+                  modifier = Modifier.testTag("createProfileTitle"),
+                  color = MaterialTheme.colorScheme.onSurface,
+                  style = AppTypography.mediumTopBarStyle)
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.chevron_left),
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall).testTag("BackImage"))
                   }
-              }
-          )
+            })
       },
       content = {
         Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(it)
-                    .padding(AppDimensions.paddingMedium),
+            modifier = Modifier.fillMaxSize().padding(it).padding(AppDimensions.paddingMedium),
             horizontalAlignment = Alignment.CenterHorizontally) {
 
               // Profile Picture

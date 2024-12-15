@@ -87,32 +87,31 @@ fun ChatScreen(
   Scaffold(
       // Top app bar with a centered title and a back button.
       topBar = {
-          TopNavigationMenu(
-              title = {
-                  Text(
-                      text = "Chat Screen",
-                      fontWeight = FontWeight.Bold,
-                      color = MaterialTheme.colorScheme.onSurface, // Use theme color for text
-                      style = AppTypography.mediumTopBarStyle,
-                      modifier = Modifier.testTag("chat_screen_title"))
-              },
-              navigationIcon = {
-                  IconButton(
-                      onClick = {
-                          navigationActions.goBack()
-                          chatViewModel.toggleTextToSpeech(false)
-                          chatViewModel.resetPracticeContext()
-                          chatViewModel.endConversation()
-                      },
-                      modifier = Modifier.testTag("back_button")) {
-                      Icon(
-                          imageVector = Icons.Outlined.ArrowBackIosNew,
-                          contentDescription = "Back",
-                          modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                          tint = MaterialTheme.colorScheme.onSurface) // Use theme color for icon
-                  }
+        TopNavigationMenu(
+            title = {
+              Text(
+                  text = "Chat Screen",
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface, // Use theme color for text
+                  style = AppTypography.mediumTopBarStyle,
+                  modifier = Modifier.testTag("chat_screen_title"))
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = {
+                    navigationActions.goBack()
+                    chatViewModel.toggleTextToSpeech(false)
+                    chatViewModel.resetPracticeContext()
+                    chatViewModel.endConversation()
+                  },
+                  modifier = Modifier.testTag("back_button")) {
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowBackIosNew,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                        tint = MaterialTheme.colorScheme.onSurface) // Use theme color for icon
               }
-          )
+            })
       },
       content = { paddingValues ->
         Column(

@@ -55,30 +55,26 @@ fun SpeakingPracticeModule(
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
-          TopNavigationMenu(
-              testTag = "topAppBar",
-              title = {
-                  Text(
-                      text = screenTitle,
-                      style = AppTypography.mediumTopBarStyle,
-                      color = MaterialTheme.colorScheme.onSurface,
-                      modifier = Modifier.testTag("screenTitle")
-                  )
-              },
-              navigationIcon = {
-                  IconButton(
-                      onClick = { navigationActions.goBack() },
-                      modifier = Modifier.testTag("back_button")
-                  ) {
-                      Icon(
-                          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = "Back",
-                          modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                          tint = MaterialTheme.colorScheme.onSurface
-                      )
+        TopNavigationMenu(
+            testTag = "topAppBar",
+            title = {
+              Text(
+                  text = screenTitle,
+                  style = AppTypography.mediumTopBarStyle,
+                  color = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.testTag("screenTitle"))
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("back_button")) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                        tint = MaterialTheme.colorScheme.onSurface)
                   }
-              }
-          )
+            })
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {

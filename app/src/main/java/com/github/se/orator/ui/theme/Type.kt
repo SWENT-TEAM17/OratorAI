@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -110,10 +111,10 @@ object AppTypography {
     get() =
         TextStyle(
             fontSize = AppFontSizes.poppinsSizeLarge,
-            fontFamily = manropeFontFamily,
-            fontWeight = FontWeight.W600,
+            fontFamily = poppinsBlackFontFamily,
+            fontWeight = FontWeight.Bold,
             lineHeight = AppFontSizes.poppinsHeightLarge,
-            color = androidx.compose.ui.graphics.Color.Black,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
 

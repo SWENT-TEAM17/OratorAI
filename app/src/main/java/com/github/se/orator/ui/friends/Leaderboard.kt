@@ -271,28 +271,27 @@ fun TitleAppBar(
     buttonTestTag: String,
     iconTestTag: String
 ) {
-    TopNavigationMenu(
-        title = {
-            Text(
-                title,
-                modifier = Modifier.testTag(titleTestTAg),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = AppTypography.mediumTopBarStyle)
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    navigationActions.goBack() // Navigate back
-                },
-                modifier = Modifier.testTag(buttonTestTag)) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.testTag(iconTestTag),
-                    tint = MaterialTheme.colorScheme.onSurface)
+  TopNavigationMenu(
+      title = {
+        Text(
+            title,
+            modifier = Modifier.testTag(titleTestTAg),
+            color = MaterialTheme.colorScheme.onSurface,
+            style = AppTypography.mediumTopBarStyle)
+      },
+      navigationIcon = {
+        IconButton(
+            onClick = {
+              navigationActions.goBack() // Navigate back
+            },
+            modifier = Modifier.testTag(buttonTestTag)) {
+              Icon(
+                  Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = "Back",
+                  modifier = Modifier.testTag(iconTestTag),
+                  tint = MaterialTheme.colorScheme.onSurface)
             }
-        }
-    )
+      })
 }
 
 /**

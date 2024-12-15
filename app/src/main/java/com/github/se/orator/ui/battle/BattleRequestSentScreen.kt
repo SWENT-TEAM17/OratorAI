@@ -55,25 +55,24 @@ fun BattleRequestSentScreen(
 
   Scaffold(
       topBar = {
-          TopNavigationMenu(
-              testTag = "topAppBar",
-              title = {
-                  Text(
-                      "Battle Request Sent",
-                      color = MaterialTheme.colorScheme.onSurface,
-                      style = AppTypography.mediumTopBarStyle
-                  )
-              },
-              navigationIcon = {
-                  IconButton(onClick = { navigationActions.goBack() }) {
-                      Icon(
-                          Icons.Outlined.ArrowBackIosNew,
-                          contentDescription = "Back",
-                          modifier = Modifier.size(AppDimensions.iconSizeMedium).testTag("backButton"),
-                          tint = MaterialTheme.colorScheme.onSurface)
-                  }
-              },
-          )
+        TopNavigationMenu(
+            testTag = "topAppBar",
+            title = {
+              Text(
+                  "Battle Request Sent",
+                  color = MaterialTheme.colorScheme.onSurface,
+                  style = AppTypography.mediumTopBarStyle)
+            },
+            navigationIcon = {
+              IconButton(onClick = { navigationActions.goBack() }) {
+                Icon(
+                    Icons.Outlined.ArrowBackIosNew,
+                    contentDescription = "Back",
+                    modifier = Modifier.size(AppDimensions.iconSizeMedium).testTag("backButton"),
+                    tint = MaterialTheme.colorScheme.onSurface)
+              }
+            },
+        )
       },
       content = { innerPadding ->
         Column(

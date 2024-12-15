@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,7 +42,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -188,25 +186,24 @@ fun ViewFriendsScreen(
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
-                TopNavigationMenu(
-                    title = {
-                        Text(
-                            "My Friends",
-                            modifier = Modifier.testTag("myFriendsTitle"),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = AppTypography.mediumTopBarStyle)
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { scope.launch { drawerState.open() } },
-                            modifier = Modifier.testTag("viewFriendsMenuButton")) {
-                            Icon(
-                                Icons.Default.Menu,
-                                contentDescription = "Menu",
-                                tint = MaterialTheme.colorScheme.onSurface)
+              TopNavigationMenu(
+                  title = {
+                    Text(
+                        "My Friends",
+                        modifier = Modifier.testTag("myFriendsTitle"),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = AppTypography.mediumTopBarStyle)
+                  },
+                  navigationIcon = {
+                    IconButton(
+                        onClick = { scope.launch { drawerState.open() } },
+                        modifier = Modifier.testTag("viewFriendsMenuButton")) {
+                          Icon(
+                              Icons.Default.Menu,
+                              contentDescription = "Menu",
+                              tint = MaterialTheme.colorScheme.onSurface)
                         }
-                    }
-                )
+                  })
             },
             bottomBar = {
               BottomNavigationMenu(
