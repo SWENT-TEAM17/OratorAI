@@ -344,7 +344,8 @@ fun OratorApp(
                     userId = userId,
                     battleId = battleId,
                     navigationActions = navigationActions,
-                    battleViewModel = battleViewModel)
+                    battleViewModel = battleViewModel,
+                    chatViewModel = chatViewModel)
               }
         }
 

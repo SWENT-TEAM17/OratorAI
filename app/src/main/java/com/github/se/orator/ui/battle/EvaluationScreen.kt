@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
@@ -51,7 +52,8 @@ fun EvaluationScreen(
     userId: String,
     battleId: String,
     navigationActions: NavigationActions,
-    battleViewModel: BattleViewModel
+    battleViewModel: BattleViewModel,
+    chatViewModel: ChatViewModel
 ) {
   val battle by battleViewModel.getBattleByIdFlow(battleId).collectAsState(initial = null)
   var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -135,7 +137,8 @@ fun EvaluationScreen(
             if (battle!!.evaluationResult != null) {
               // Battle is completed, show the results
               Log.d("EvalScreen", "Battle completed")
-              DisplayResultAndFeedback(battle, userId, paddingValues, navigationActions)
+              DisplayResultAndFeedback(
+                  battle, userId, paddingValues, navigationActions, chatViewModel)
             } else {
               // EvaluationResult not yet available
               Log.d("EvalScreen", "Battle is COMPLETED but evaluationResult is null")
@@ -181,7 +184,8 @@ fun DisplayResultAndFeedback(
     battle: SpeechBattle?,
     userId: String,
     paddingValues: PaddingValues,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    chatViewModel: ChatViewModel
 ) {
 
   val result = battle!!.evaluationResult
@@ -235,7 +239,10 @@ fun DisplayResultAndFeedback(
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
-          ActionButton(text = "Return to Home") { navigationActions.navigateTo(Screen.HOME) }
+          ActionButton(text = "Return to Home") {
+            chatViewModel.resetPracticeContext()
+            navigationActions.navigateTo(Screen.HOME)
+          }
         }
       }
 }
