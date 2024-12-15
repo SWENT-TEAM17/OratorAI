@@ -34,6 +34,9 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,12 +47,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
@@ -66,6 +71,7 @@ import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.google.firebase.auth.FirebaseAuth
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
   // Get the context
@@ -79,47 +85,55 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            title = {
-              Text(
-                  modifier = Modifier.testTag("profile_title"),
-                  text = "Profile",
-                  color = MaterialTheme.colorScheme.onSurface)
-            },
-            backgroundColor = MaterialTheme.colorScheme.surface,
-            actions = {
-              IconButton(
-                  onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
-                  modifier = Modifier.testTag("settings_button")) {
-                    Icon(
-                        Icons.Outlined.Settings,
-                        contentDescription = "Settings",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                  }
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = {
-                    // Sign out the user
-                    FirebaseAuth.getInstance().signOut()
-                    // Display a toast message
-                    Toast.makeText(context, "Logout successful!", Toast.LENGTH_SHORT).show()
-                    // Navigate to the sign in screen
-                    navigationActions.navigateTo(Screen.AUTH)
+          Column {
+              CenterAlignedTopAppBar(
+                  modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+                  title = {
+                      Text(
+                          text = "Profile",
+                          color = MaterialTheme.colorScheme.onSurface,
+                          modifier = Modifier
+                              .testTag("profile_title"),
+                          style = AppTypography.mediumTopBarStyle,
+                      )
                   },
-                  modifier = Modifier.testTag("sign_out_button")) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.Logout,
-                        contentDescription = "Sign out",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"),
-                        tint = MaterialTheme.colorScheme.onSurface)
+                  actions = {
+                      IconButton(
+                          onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
+                          modifier = Modifier.testTag("settings_button")) {
+                          Icon(
+                              Icons.Outlined.Settings,
+                              contentDescription = "Settings",
+                              modifier =
+                              Modifier.size(AppDimensions.iconSizeMedium).testTag("settings_icon"),
+                              tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                      }
+                  },
+                  navigationIcon = {
+                      IconButton(
+                          onClick = {
+                              // Sign out the user
+                              FirebaseAuth.getInstance().signOut()
+                              // Display a toast message
+                              Toast.makeText(context, "Logout successful!", Toast.LENGTH_SHORT).show()
+                              // Navigate to the sign in screen
+                              navigationActions.navigateTo(Screen.AUTH)
+                          },
+                          modifier = Modifier.testTag("sign_out_button")) {
+                          Icon(
+                              Icons.AutoMirrored.Filled.Logout,
+                              contentDescription = "Sign out",
+                              modifier =
+                              Modifier.size(AppDimensions.iconSizeMedium).testTag("sign_out_icon"),
+                              tint = MaterialTheme.colorScheme.onSurface)
+                      }
                   }
-            })
+              )
+              HorizontalDivider()
+          }
+
       },
+
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
