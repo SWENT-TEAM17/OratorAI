@@ -232,15 +232,16 @@ fun DisplayResultAndFeedback(
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
           ActionButton(text = "Go to Practice") {
+            chatViewModel.resetPracticeContext()
+            chatViewModel.endConversation()
             navigationActions.navigateTo(Screen.SPEAKING_JOB_INTERVIEW)
-            // TODO: skip implementing the form and jump straight into interview practice (with the
-            // same context)
           }
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
           ActionButton(text = "Return to Home") {
             chatViewModel.resetPracticeContext()
+            chatViewModel.endConversation()
             navigationActions.navigateTo(Screen.HOME)
           }
         }
