@@ -60,7 +60,7 @@ class SpeakingViewModel(
   }
 
   // Function to handle microphone button click
-  fun onMicButtonClicked(permissionGranted: Boolean) {
+  fun onMicButtonClicked(permissionGranted: Boolean, audioFile: File) {
     if (permissionGranted) {
       if (isRecording.value) {
         repository.stopRecording()
@@ -69,11 +69,11 @@ class SpeakingViewModel(
         repository.setupAnalysisResultsUsage(
             onSuccess = { ad ->
               _analysisData.value = ad
-              userProfileViewModel.addNewestData(ad)
+              userProfileViewModel.addNewestData(_analysisData.value!!)
               userProfileViewModel.updateMetricMean()
             },
             onFailure = { error -> _analysisError.value = error })
-        repository.startRecording()
+        repository.startRecording(audioFile)
         _isRecording.value = true
       }
     } else {

@@ -120,10 +120,9 @@ fun SpeakingSalesPitchModule(
    */
   SpeakingPracticeModule(
       navigationActions = navigationActions,
-      screenTitle = "Sales Pitch",
       headerText = "Master your sales pitch and negotiation skills",
       inputs = inputFields,
-      onGetStarted = {
+      onClick = {
         // Create a SalesPitchContext object with the user's inputs
         val salesPitchContext =
             SalesPitchContext(

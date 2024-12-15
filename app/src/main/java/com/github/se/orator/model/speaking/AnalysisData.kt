@@ -21,14 +21,6 @@ data class AnalysisData(
       Log.e("AnalysisData", "Invalid transcription: cannot be blank.")
       return false
     }
-    if (fillerWordsCount < 0) {
-      Log.e("AnalysisData", "Invalid fillerWordsCount: cannot be negative.")
-      return false
-    }
-    if (averagePauseDuration < 0.0) {
-      Log.e("AnalysisData", "Invalid averagePauseDuration: cannot be negative.")
-      return false
-    }
     if (talkTimePercentage < 0.0 || talkTimePercentage > 100.0) {
       Log.e("AnalysisData", "Invalid talkTimePercentage: must be between 0 and 100.")
       return false

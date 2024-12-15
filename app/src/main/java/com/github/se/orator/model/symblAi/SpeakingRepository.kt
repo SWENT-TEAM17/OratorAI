@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.StateFlow
 interface SpeakingRepository {
   val analysisState: StateFlow<AnalysisState>
 
+  fun startRecording(audioFile: File)
+
   fun startRecording()
 
   fun getTranscript(

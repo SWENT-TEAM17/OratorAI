@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import com.github.se.orator.model.profile.SessionType
@@ -24,7 +25,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
-import com.github.se.orator.ui.theme.ProjectTheme
+import java.util.Locale
 
 var currentPracticeMode = mutableStateOf(SessionType.SPEECH)
 var currentRankMetric = mutableStateOf("Ratio")
@@ -66,81 +67,62 @@ fun LeaderboardScreen(
         (usersForRanking).sortedByDescending { it.statistics.improvement }
       }
 
-  ProjectTheme {
-    Scaffold(
-        topBar = {
-          TopAppBar(
-              title = {
-                Text(
-                    "Leaderboard",
-                    modifier = Modifier.testTag("leaderboardTitle"),
-                    color = MaterialTheme.colorScheme.onSurface)
-              },
-              navigationIcon = {
-                IconButton(
-                    onClick = {
-                      navigationActions.goBack() // Navigate back
-                    },
-                    modifier = Modifier.testTag("leaderboardBackButton")) {
-                      Icon(
-                          Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = "Back",
-                          modifier = Modifier.testTag("leaderboardBackIcon"),
-                          tint = MaterialTheme.colorScheme.onSurface)
-                    }
-              },
-              colors =
-                  TopAppBarDefaults.topAppBarColors(
-                      containerColor = MaterialTheme.colorScheme.surfaceContainer))
-        },
-        bottomBar = {
-          BottomNavigationMenu(
-              onTabSelect = { route -> navigationActions.navigateTo(route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION,
-              selectedItem = Route.FRIENDS)
-        }) { innerPadding ->
-          Column(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .padding(innerPadding)
-                      .padding(
-                          horizontal = AppDimensions.paddingMedium,
-                          vertical = AppDimensions.paddingSmall)
-                      .testTag("leaderboardList"),
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                // Dropdown selector for choosing practice mode
-                ButtonRow()
+  Scaffold(
+      topBar = {
+        TitleAppBar(
+            navigationActions,
+            "Leaderboard",
+            "leaderboardTitle",
+            "leaderboardBackButton",
+            "leaderboardBackIcon")
+      },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = Route.FRIENDS)
+      }) { innerPadding ->
+        Column(
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(
+                        horizontal = AppDimensions.paddingMedium,
+                        vertical = AppDimensions.paddingSmall)
+                    .testTag("leaderboardList"),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              // Dropdown selector for choosing practice mode
+              ButtonRow()
 
-                Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+              Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-                // Leaderboard list displaying ranked profiles
-                LazyColumn(
-                    contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
-                    verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
-                    modifier = Modifier.testTag("leaderboardLazyColumn")) {
-                      if (currentRankMetric.value == "Ratio") {
-                        itemsIndexed(leaderboardEntriesRatio) { index, profile ->
-                          LeaderboardItem(
-                              rank = index + 1, profile = profile, "Ratio", userProfileViewModel)
-                        }
-                      } else if (currentRankMetric.value == "Success") {
-                        itemsIndexed(leaderboardEntriesSuccess) { index, profile ->
-                          LeaderboardItem(
-                              rank = index + 1, profile = profile, "Success", userProfileViewModel)
-                        }
-                      } else {
-                        itemsIndexed(leaderboardEntriesImprovement) { index, profile ->
-                          LeaderboardItem(
-                              rank = index + 1,
-                              profile = profile,
-                              "Improvement",
-                              userProfileViewModel)
-                        }
+              // Leaderboard list displaying ranked profiles
+              LazyColumn(
+                  contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
+                  verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
+                  modifier = Modifier.testTag("leaderboardLazyColumn")) {
+                    if (currentRankMetric.value == "Ratio") {
+                      itemsIndexed(leaderboardEntriesRatio) { index, profile ->
+                        LeaderboardItem(
+                            rank = index + 1, profile = profile, "Ratio", userProfileViewModel)
+                      }
+                    } else if (currentRankMetric.value == "Success") {
+                      itemsIndexed(leaderboardEntriesSuccess) { index, profile ->
+                        LeaderboardItem(
+                            rank = index + 1, profile = profile, "Success", userProfileViewModel)
+                      }
+                    } else {
+                      itemsIndexed(leaderboardEntriesImprovement) { index, profile ->
+                        LeaderboardItem(
+                            rank = index + 1,
+                            profile = profile,
+                            "Improvement",
+                            userProfileViewModel)
                       }
                     }
-              }
-        }
-  }
+                  }
+            }
+      }
 }
 
 /**
@@ -150,7 +132,10 @@ fun LeaderboardScreen(
 @Composable
 fun PracticeModeSelector() {
   var expanded by remember { mutableStateOf(false) } // Controls dropdown menu visibility
-  var selectedMode by remember { mutableStateOf("Practice mode 1") } // Holds the selected mode
+  var selectedMode by remember {
+    mutableStateOf(
+        currentPracticeMode.value.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT))
+  } // Holds the selected mode
 
   Box(
       modifier =
@@ -161,7 +146,7 @@ fun PracticeModeSelector() {
               .testTag("practiceModeSelector"),
       contentAlignment = Alignment.Center) {
         Text(
-            text = "Practice mode",
+            text = "Mode : $selectedMode",
             fontSize = AppFontSizes.subtitle, // 16.0sp
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -169,30 +154,28 @@ fun PracticeModeSelector() {
 
         // Dropdown menu options for selecting a practice mode
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-          DropdownMenuItem(
-              text = { Text("Interview", color = MaterialTheme.colorScheme.onSecondaryContainer) },
-              onClick = {
-                selectedMode = "Practice mode 1"
-                currentPracticeMode.value = SessionType.INTERVIEW
+          PracticeModeDropDownMenuCustomItem(
+              sessionType = SessionType.INTERVIEW,
+              onClickSet = {
+                selectedMode = it
                 expanded = false
               },
-              modifier = Modifier.testTag("practiceModeOption1"))
-          DropdownMenuItem(
-              text = { Text("Speech") },
-              onClick = {
-                selectedMode = "Practice mode 2"
-                currentPracticeMode.value = SessionType.SPEECH
+              testTag = "practiceModeOption1")
+
+          PracticeModeDropDownMenuCustomItem(
+              sessionType = SessionType.SPEECH,
+              onClickSet = {
+                selectedMode = it
                 expanded = false
               },
-              modifier = Modifier.testTag("practiceModeOption2"))
-          DropdownMenuItem(
-              text = { Text("Negotiation") },
-              onClick = {
-                selectedMode = "Practice mode 3"
-                currentPracticeMode.value = SessionType.NEGOTIATION
+              testTag = "practiceModeOption2")
+          PracticeModeDropDownMenuCustomItem(
+              sessionType = SessionType.NEGOTIATION,
+              onClickSet = {
+                selectedMode = it
                 expanded = false
               },
-              modifier = Modifier.testTag("practiceModeOption3"))
+              testTag = "practiceModeOption3")
         }
       }
 }
@@ -264,7 +247,7 @@ fun LeaderboardItem(
                 modifier = Modifier.testTag("leaderboardItemImprovement#$rank"))
           }
 
-          Spacer(modifier = Modifier.weight(AppDimensions.full))
+          Spacer(modifier = Modifier.weight(AppDimensions.FULL))
 
           // Display rank as a badge on the left side
           Text(
@@ -277,6 +260,40 @@ fun LeaderboardItem(
       }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TitleAppBar(
+    navigationActions: NavigationActions,
+    title: String,
+    titleTestTAg: String,
+    buttonTestTag: String,
+    iconTestTag: String
+) {
+  TopAppBar(
+      title = {
+        Text(
+            title,
+            modifier = Modifier.testTag(titleTestTAg),
+            color = MaterialTheme.colorScheme.onSurface)
+      },
+      navigationIcon = {
+        IconButton(
+            onClick = {
+              navigationActions.goBack() // Navigate back
+            },
+            modifier = Modifier.testTag(buttonTestTag)) {
+              Icon(
+                  Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = "Back",
+                  modifier = Modifier.testTag(iconTestTag),
+                  tint = MaterialTheme.colorScheme.onSurface)
+            }
+      },
+      colors =
+          TopAppBarDefaults.topAppBarColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainer))
+}
+
 /**
  * Composable function that displays a dropdown menu for selecting different rank metrics. The
  * selected metric is shown and can be changed by the user.
@@ -284,7 +301,9 @@ fun LeaderboardItem(
 @Composable
 fun RankMetricSelector() {
   var expanded by remember { mutableStateOf(false) } // Controls dropdown menu visibility
-  var selectedMetric by remember { mutableStateOf("Ratio") } // Holds the selected metric
+  var selectedMetric by remember {
+    mutableStateOf(currentRankMetric.value)
+  } // Holds the selected metric
 
   Box(
       modifier =
@@ -295,7 +314,7 @@ fun RankMetricSelector() {
               .testTag("rankMetricSelector"),
       contentAlignment = Alignment.Center) {
         Text(
-            text = "Rank metric",
+            text = "Metric : $selectedMetric",
             fontSize = AppFontSizes.subtitle,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -303,32 +322,30 @@ fun RankMetricSelector() {
 
         // Dropdown menu options for selecting a rank metric
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-          DropdownMenuItem(
-              text = {
-                Text("Success ratio", color = MaterialTheme.colorScheme.onSecondaryContainer)
-              },
-              onClick = {
+          MetricDropDownMenuCustomItem(
+              text = "Ratio",
+              metric = "Ratio",
+              onClickSet = {
                 selectedMetric = "Ratio"
-                currentRankMetric.value = "Ratio"
                 expanded = false
               },
-              modifier = Modifier.testTag("rankMetricOption1"))
-          DropdownMenuItem(
-              text = { Text("Success") },
-              onClick = {
+              testTag = "rankMetricOption1")
+          MetricDropDownMenuCustomItem(
+              text = "Success",
+              metric = "Success",
+              onClickSet = {
                 selectedMetric = "Success"
-                currentRankMetric.value = "Success"
                 expanded = false
               },
-              modifier = Modifier.testTag("rankMetricOption2"))
-          DropdownMenuItem(
-              text = { Text("Improvement") },
-              onClick = {
+              testTag = "rankMetricOption2")
+          MetricDropDownMenuCustomItem(
+              text = "Improvement",
+              metric = "Improvement",
+              onClickSet = {
                 selectedMetric = "Improvement"
-                currentRankMetric.value = "Improvement"
                 expanded = false
               },
-              modifier = Modifier.testTag("rankMetricOption3"))
+              testTag = "rankMetricOption3")
         }
       }
 }
@@ -348,5 +365,82 @@ fun ButtonRow() {
   ) {
     PracticeModeSelector()
     RankMetricSelector()
+  }
+}
+
+/**
+ * Custom dropdown menu item for selecting a practice mode
+ *
+ * @param sessionType The session type to set when the item is clicked
+ * @param onClickSet The function to call when the item is clicked
+ * @param testTag The test tag for the dropdown menu item
+ */
+@Composable
+private fun PracticeModeDropDownMenuCustomItem(
+    sessionType: SessionType,
+    onClickSet: (String) -> Unit,
+    testTag: String
+) {
+  DropdownMenuItem(
+      text = {
+        Text(
+            sessionType.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT),
+            color = colorWhenSelected(currentPracticeMode.value == sessionType))
+      },
+      onClick = {
+        currentPracticeMode.value = sessionType
+        onClickSet(
+            currentPracticeMode.value.toString().lowercase(Locale.ROOT).capitalize(Locale.ROOT))
+      },
+      modifier =
+          Modifier.testTag(testTag)
+              .background(
+                  color =
+                      MaterialTheme.colorScheme.primary.copy(
+                          alpha = if (currentPracticeMode.value == sessionType) 0.4f else 0.0f)))
+}
+
+/**
+ * Custom dropdown menu item for selecting a rank metric
+ *
+ * @param text The text to display in the dropdown menu item
+ * @param metric The metric to set when the item is clicked
+ * @param onClickSet The function to call when the item is clicked
+ * @param testTag The test tag for the dropdown menu item
+ */
+@Composable
+private fun MetricDropDownMenuCustomItem(
+    text: String,
+    metric: String,
+    onClickSet: () -> Unit,
+    testTag: String
+) {
+  DropdownMenuItem(
+      text = { Text(text, color = colorWhenSelected(currentRankMetric.value == metric)) },
+      onClick = {
+        currentRankMetric.value = metric
+        onClickSet()
+      },
+      modifier =
+          Modifier.testTag(testTag)
+              .background(
+                  color =
+                      MaterialTheme.colorScheme.primary.copy(
+                          alpha = if (currentRankMetric.value == metric) 0.4f else 0.0f)))
+}
+
+/**
+ * Composable function that returns the primary app color when the item is selected, and the
+ * onSecondaryContainer color when it is not selected.
+ *
+ * @param selected The boolean value that determines if the item is selected
+ * @return The color to use for the item
+ */
+@Composable
+private fun colorWhenSelected(selected: Boolean): Color {
+  return if (selected) {
+    MaterialTheme.colorScheme.primary
+  } else {
+    MaterialTheme.colorScheme.onSecondaryContainer
   }
 }

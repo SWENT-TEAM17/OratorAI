@@ -110,6 +110,12 @@ object AppDimensions {
   val buttonHeightLarge: Dp
     @Composable get() = (scaleFactorHeight() * 50.0f).dp
 
+  val cardHeightmin: Dp
+    @Composable get() = (scaleFactorHeight() * 200.0f).dp
+
+  val cardHeightmax: Dp
+    @Composable get() = (scaleFactorHeight() * 300.0f).dp
+
   val buttonHeightRounded: Dp
     @Composable get() = buttonHeightLarge
 
@@ -242,6 +248,12 @@ object AppDimensions {
   val jobDescriptionInputFieldHeight: Dp
     @Composable get() = (scaleFactorHeight() * 200.0f).dp
 
+  val graphHeight: Dp
+    @Composable get() = (scaleFactorHeight() * 150.0f).dp
+
+  val graphWidth: Dp
+    @Composable get() = (scaleFactorHeight() * 200.0f).dp
+
   // Drawer Padding
   val drawerPadding: Dp
     @Composable get() = spacerWidthMedium
@@ -251,7 +263,25 @@ object AppDimensions {
     @Composable get() = (scaleFactorWidth() * 64.0f).dp
 
   // Other Dimensions
-  const val full: Float = 1f // Assuming this is a constant and doesn't need scaling
+  const val FULL: Float = 1f // Assuming this is a constant and doesn't need scaling
+  const val ZERO: Float = 0f
+  const val X_VALUE_FOR_OFFSET: Float = -20f
+  const val DRAW_TEXT_TICK_LABEL_X: Float = -50f
+  const val DRAW_TEXT_TICK_LABEL_OFFSET_VALUE_FOR_Y: Float = 10f
+  const val TICK_LABEL_TEXT_SIZE: Float = 20f
+  const val AXIS_STROKE_WIDTH: Float = 10f
+  const val PLOT_LINE_STROKE_WIDTH: Float = 5f
+  const val POINTS_RADIUS: Float = 7f
+}
+
+object Constants {
+  // Progress Delay
+  const val PROCESSING_INCREMENT_DELAY_MS: Long = 200L
+  const val QUICK_FILL_INCREMENT_DELAY_MS: Long = 100L
+
+  // Progress Increments
+  const val PROCESSING_PROGRESS_INCREMENT: Float = 0.01f
+  const val QUICK_FILL_PROGRESS_INCREMENT: Float = 0.02f
 }
 
 object AppShapes {

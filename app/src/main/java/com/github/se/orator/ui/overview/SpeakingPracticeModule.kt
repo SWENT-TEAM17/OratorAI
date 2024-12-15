@@ -37,16 +37,17 @@ import kotlin.math.roundToInt
  * @param screenTitle The title of the screen.
  * @param headerText The header text.
  * @param inputs The input fields.
- * @param onGetStarted The action to perform when the Get Started button is clicked.
+ * @param onClick The action to perform when the Get Started button is clicked.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpeakingPracticeModule(
     navigationActions: NavigationActions,
-    screenTitle: String,
+    screenTitle: String = "",
     headerText: String,
     inputs: List<InputFieldData>,
-    onGetStarted: () -> Unit
+    onClick: () -> Unit,
+    buttonName: String = "Get Started"
 ) {
   val context = LocalContext.current
 
@@ -79,8 +80,7 @@ fun SpeakingPracticeModule(
             },
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface))
+                    containerColor = MaterialTheme.colorScheme.surface))
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -116,7 +116,8 @@ fun SpeakingPracticeModule(
                         question = input.question,
                         placeholder = input.placeholder,
                         testTag = input.testTag,
-                        dropdownItems = input.dropdownItems)
+                        dropdownItems = input.dropdownItems,
+                    )
                   } else {
                     // Display question as Text
                     Text(
@@ -226,6 +227,9 @@ fun SpeakingPracticeModule(
                                   unfocusedPlaceholderColor =
                                       MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                               ),
+                          textStyle =
+                              LocalTextStyle.current.copy(
+                                  color = MaterialTheme.colorScheme.onSurface),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Next))
                     }
@@ -240,7 +244,7 @@ fun SpeakingPracticeModule(
                     onClick = {
                       // Custom action, can be customized for different modules
                       if (inputs.all { it.value.isNotEmpty() }) {
-                        onGetStarted()
+                        onClick()
                       } else {
                         Toast.makeText(context, "Please fill all the fields!", Toast.LENGTH_SHORT)
                             .show()
@@ -258,7 +262,7 @@ fun SpeakingPracticeModule(
                         ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                       Text(
-                          "Get Started",
+                          text = buttonName,
                           modifier = Modifier.testTag("getStartedText"),
                           color = MaterialTheme.colorScheme.primary)
                     }
@@ -326,7 +330,7 @@ fun FocusAreaDropdown(
             modifier = Modifier.testTag("$testTag-DropdownMenu")) {
               dropdownItems.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(text = item) },
+                    text = { Text(text = item, color = MaterialTheme.colorScheme.onSurface) },
                     onClick = {
                       onFocusAreaSelected(item)
                       expanded = false
