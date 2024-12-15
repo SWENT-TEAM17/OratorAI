@@ -38,10 +38,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.theme.AppThemeValue
 import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import java.util.Locale
 
 // class for all that is needed about a section for settings
 data class SettingBar(
@@ -165,14 +167,13 @@ fun SettingsScreen(
 @Composable
 private fun ThemeSwitchDialog(onDismissRequest: () -> Unit, appThemeViewModel: AppThemeViewModel) {
   // Radio options for the theme switch dialog
-  val radioOptions = listOf("Light", "Dark")
+  val radioOptions = AppThemeValue.entries.toTypedArray()
   // Selected option for the theme switch dialog and the setter to update it
   val (selectedOption, onOptionSelected) =
-      remember {
-        mutableStateOf(if (appThemeViewModel.isDark.value) radioOptions[1] else radioOptions[0])
-      }
+      remember { mutableStateOf(appThemeViewModel.currentTheme.value) }
 
   AlertDialog(
+      modifier = Modifier.testTag("settingsThemeDialog"),
       icon = {
         Icon(
             imageVector = Icons.Outlined.DarkMode,
@@ -180,22 +181,29 @@ private fun ThemeSwitchDialog(onDismissRequest: () -> Unit, appThemeViewModel: A
             modifier =
                 Modifier.size(AppDimensions.iconSizeLarge).testTag("settingsThemeDialogIcon"))
       },
-      title = { Text(text = "Select a theme", color = MaterialTheme.colorScheme.onSurface) },
+      title = {
+        Text(
+            text = "Select a theme",
+            modifier = Modifier.testTag("settingsThemeDialogTitle"),
+            color = MaterialTheme.colorScheme.onSurface)
+      },
       // The radio buttons
       text = {
         Column(modifier = Modifier.fillMaxWidth()) {
-          radioOptions.forEach { text ->
+          radioOptions.forEach { option ->
             Row(
                 modifier =
                     Modifier.fillMaxWidth()
                         .selectable(
-                            selected = (text == selectedOption),
-                            onClick = { onOptionSelected(text) }),
+                            selected = (option == selectedOption),
+                            onClick = { onOptionSelected(option) })
+                        .testTag("settingsThemeDialogRow#$option"),
                 verticalAlignment = Alignment.CenterVertically) {
                   RadioButton(
-                      selected = (text == selectedOption), onClick = { onOptionSelected(text) })
+                      selected = (option == selectedOption), onClick = { onOptionSelected(option) })
                   Text(
-                      text = text,
+                      text = formatThemeName(option),
+                      modifier = Modifier.testTag("settingsThemeDialogText#$option"),
                       fontSize = AppFontSizes.bodyLarge,
                       color = MaterialTheme.colorScheme.onSurface,
                   )
@@ -208,18 +216,33 @@ private fun ThemeSwitchDialog(onDismissRequest: () -> Unit, appThemeViewModel: A
       confirmButton = {
         TextButton(
             onClick = {
-              when (selectedOption) {
-                "Light" -> appThemeViewModel.saveTheme(isDark = false)
-                "Dark" -> appThemeViewModel.saveTheme(isDark = true)
-              }
+              appThemeViewModel.saveTheme(selectedOption)
               onDismissRequest()
             }) {
-              Text("Confirm", color = MaterialTheme.colorScheme.primary)
+              Text(
+                  "Confirm",
+                  modifier = Modifier.testTag("settingsThemeDialogConfirm"),
+                  color = MaterialTheme.colorScheme.primary)
             }
       },
       dismissButton = {
         TextButton(onClick = onDismissRequest) {
-          Text("Cancel", color = MaterialTheme.colorScheme.primary)
+          Text(
+              "Cancel",
+              modifier = Modifier.testTag("settingsThemeDialogCancel"),
+              color = MaterialTheme.colorScheme.primary)
         }
       })
+}
+
+/**
+ * Format the theme name to be displayed in the theme switch dialog.
+ *
+ * @param themeValue: The theme value to format
+ * @return The formatted theme name
+ */
+private fun formatThemeName(themeValue: AppThemeValue): String {
+  return themeValue.toString().replace("_", " ").lowercase(Locale.ROOT).replaceFirstChar {
+    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+  }
 }
