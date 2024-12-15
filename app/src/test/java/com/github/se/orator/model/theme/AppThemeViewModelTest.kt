@@ -12,7 +12,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
-class AppThemeValueViewModelTest {
+class AppThemeViewModelTest {
 
   @Mock private lateinit var mockContext: Context
   @Mock private lateinit var mockSharedPreferences: SharedPreferences
@@ -24,58 +24,59 @@ class AppThemeValueViewModelTest {
   fun setUp() {
     MockitoAnnotations.openMocks(this)
 
-    `when`(mockContext.getSharedPreferences("isDark", Context.MODE_PRIVATE))
+    `when`(mockContext.getSharedPreferences("themeValueStorage", Context.MODE_PRIVATE))
         .thenReturn(mockSharedPreferences)
     `when`(mockSharedPreferences.edit()).thenReturn(mockEditor)
-    `when`(mockEditor.putBoolean(any(), any())).thenReturn(mockEditor)
+    `when`(mockEditor.putString(any(), any())).thenReturn(mockEditor)
 
     appThemeViewModel = AppThemeViewModel(mockContext)
 
     // We simulate a value stored in memory equal to "false" in all cases.
-    `when`(mockSharedPreferences.getBoolean(any(), any())).thenReturn(false)
+    `when`(mockSharedPreferences.getString(any(), any())).thenReturn(AppThemeValue.LIGHT.toString())
 
     appThemeViewModel.loadTheme(false)
   }
 
   @Test
   fun loadThemeCorrectlyRetrievesExistingSavedThemeFromMemory() {
-    verify(mockSharedPreferences).getString(eq("isDark"), eq(AppThemeValue.DARK.toString()))
-    assert(!appThemeViewModel.currentTheme.value)
+    verify(mockSharedPreferences)
+        .getString(eq("themeValueStorage"), eq(AppThemeValue.SYSTEM_DEFAULT.toString()))
+    assert(!appThemeViewModel.isDark.value)
   }
 
   @Test
   fun changingTheThemeToTheSameValueAsCurrentDoesNothing() {
-    assert(!appThemeViewModel.currentTheme.value)
-    appThemeViewModel.saveTheme(false)
+    assert(!appThemeViewModel.isDark.value)
+    appThemeViewModel.saveTheme(AppThemeValue.LIGHT)
 
     // The value stored in memory was already false.
     verify(mockSharedPreferences, never()).edit()
-    assert(!appThemeViewModel.currentTheme.value)
+    assert(!appThemeViewModel.isDark.value)
   }
 
   @Test
   fun changingTheThemeToADifferentValueSavesTheNewValue() {
-    assert(!appThemeViewModel.currentTheme.value)
+    assert(!appThemeViewModel.isDark.value)
 
-    appThemeViewModel.saveTheme(true)
+    appThemeViewModel.saveTheme(AppThemeValue.DARK)
 
     verify(mockSharedPreferences).edit()
-    verify(mockEditor).putBoolean(eq("isDark"), eq(true))
+    verify(mockEditor).putString(eq("themeValueStorage"), eq(AppThemeValue.DARK.toString()))
     verify(mockEditor).apply()
 
-    assert(appThemeViewModel.currentTheme.value)
+    assert(appThemeViewModel.isDark.value)
   }
 
   @Test
   fun switchingTheThemeChangesTheTheme() {
-    assert(!appThemeViewModel.currentTheme.value)
+    assert(!appThemeViewModel.isDark.value)
 
     appThemeViewModel.switchTheme()
 
     verify(mockSharedPreferences).edit()
-    verify(mockEditor).putBoolean(eq("isDark"), eq(true))
+    verify(mockEditor).putString(eq("themeValueStorage"), eq(AppThemeValue.DARK.toString()))
     verify(mockEditor).apply()
 
-    assert(appThemeViewModel.currentTheme.value)
+    assert(appThemeViewModel.isDark.value)
   }
 }
