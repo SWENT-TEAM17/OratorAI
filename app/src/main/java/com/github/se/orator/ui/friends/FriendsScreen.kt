@@ -138,7 +138,6 @@ fun ViewFriendsScreen(
   // New state variable for Friend Requests expansion
   var isFriendRequestsExpanded by remember { mutableStateOf(true) }
 
-  // Fetch pending battles when the screen is composed
   LaunchedEffect(Unit) { battleViewModel?.fetchPendingBattlesForUser() }
 
   // Collect the pending battles as state, fallback to an empty list if battleViewModel is null
