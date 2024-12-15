@@ -1,13 +1,11 @@
 package com.github.se.orator.ui.battle
 
 import android.util.Log
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -92,7 +90,7 @@ fun EvaluationScreen(
                 }
           }
           battle!!.status == BattleStatus.EVALUATING -> {
-            // Show loading while waiting for completion
+            // Show loading while waiting for evaluation to complete
             Log.d("EvalScreen", "Evaluating result")
             Box(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
@@ -118,7 +116,7 @@ fun EvaluationScreen(
               Log.d("EvalScreen", "Battle completed")
               DisplayResultAndFeedback(battle, userId, paddingValues, navigationActions)
             } else {
-              // evaluationResult not yet available, possibly wait and retry
+              // EvaluationResult not yet available
               Log.d("EvalScreen", "Battle is COMPLETED but evaluationResult is null")
               Box(
                   modifier = Modifier.fillMaxSize().padding(paddingValues),
@@ -203,11 +201,15 @@ fun DisplayResultAndFeedback(
             // opponent wants to retry aswell and then just go to chat)
           }
 
+          Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
+
           ActionButton(text = "Go to Practice") {
             navigationActions.navigateTo(Screen.SPEAKING_JOB_INTERVIEW)
             // TODO: skip implementing the form and jump straight into interview practice (with the
             // same context)
           }
+
+          Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
           ActionButton(text = "Return to Home") { navigationActions.navigateTo(Screen.HOME) }
         }
@@ -226,15 +228,11 @@ fun ActionButton(text: String, onClick: () -> Unit) {
   Button(
       onClick = onClick,
       modifier =
-          Modifier.fillMaxWidth()
-              .padding(top = AppDimensions.paddingSmall)
-              .border(
-                  width = AppDimensions.borderStrokeWidth,
-                  color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                  shape = MaterialTheme.shapes.medium),
+          Modifier.size(
+              height = AppDimensions.buttonHeightLarge, width = AppDimensions.buttonWidthMax),
       colors =
-          ButtonDefaults.buttonColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
-        Text(text = text, color = MaterialTheme.colorScheme.primary)
-      }
+          ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+  ) {
+    Text(text = text, color = MaterialTheme.colorScheme.onSurface)
+  }
 }
