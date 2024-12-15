@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,20 +13,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -135,11 +140,86 @@ fun SettingsScreen(
                 }
               }
               item {
-                TextButtonFun(listOfSettings[1]) {
-                  themeViewModel?.switchTheme()
-                  Log.d("SettingsScreen", "Theme switch")
+                if (themeViewModel != null) {
+                  val themeDialogIsOpen = remember { mutableStateOf(false) }
+
+                  TextButtonFun(listOfSettings[1]) { themeDialogIsOpen.value = true }
+                  when {
+                    themeDialogIsOpen.value ->
+                        ThemeSwitchDialog(
+                            onDismissRequest = { themeDialogIsOpen.value = false },
+                            appThemeViewModel = themeViewModel)
+                  }
                 }
               }
             }
       }
+}
+
+/**
+ * Dialog for switching the app theme
+ *
+ * @param onDismissRequest: Function called on dialog dismiss
+ * @param appThemeViewModel: ViewModel for the app theme
+ */
+@Composable
+private fun ThemeSwitchDialog(onDismissRequest: () -> Unit, appThemeViewModel: AppThemeViewModel) {
+  // Radio options for the theme switch dialog
+  val radioOptions = listOf("Light", "Dark")
+  // Selected option for the theme switch dialog and the setter to update it
+  val (selectedOption, onOptionSelected) =
+      remember {
+        mutableStateOf(if (appThemeViewModel.isDark.value) radioOptions[1] else radioOptions[0])
+      }
+
+  AlertDialog(
+      icon = {
+        Icon(
+            imageVector = Icons.Outlined.DarkMode,
+            contentDescription = "theme",
+            modifier =
+                Modifier.size(AppDimensions.iconSizeLarge).testTag("settingsThemeDialogIcon"))
+      },
+      title = { Text(text = "Select a theme", color = MaterialTheme.colorScheme.onSurface) },
+      // The radio buttons
+      text = {
+        Column(modifier = Modifier.fillMaxWidth()) {
+          radioOptions.forEach { text ->
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .selectable(
+                            selected = (text == selectedOption),
+                            onClick = { onOptionSelected(text) }),
+                verticalAlignment = Alignment.CenterVertically) {
+                  RadioButton(
+                      selected = (text == selectedOption), onClick = { onOptionSelected(text) })
+                  Text(
+                      text = text,
+                      fontSize = AppFontSizes.bodyLarge,
+                      color = MaterialTheme.colorScheme.onSurface,
+                  )
+                }
+          }
+        }
+      },
+      onDismissRequest = onDismissRequest,
+      // Theme is updated only when the confirm button is clicked
+      confirmButton = {
+        TextButton(
+            onClick = {
+              when (selectedOption) {
+                "Light" -> appThemeViewModel.saveTheme(isDark = false)
+                "Dark" -> appThemeViewModel.saveTheme(isDark = true)
+              }
+              onDismissRequest()
+            }) {
+              Text("Confirm", color = MaterialTheme.colorScheme.primary)
+            }
+      },
+      dismissButton = {
+        TextButton(onClick = onDismissRequest) {
+          Text("Cancel", color = MaterialTheme.colorScheme.primary)
+        }
+      })
 }
