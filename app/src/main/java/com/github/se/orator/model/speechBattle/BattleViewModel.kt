@@ -303,7 +303,9 @@ class BattleViewModel(
                   user1Uid = battle.challenger,
                   user2Uid = battle.opponent,
                   user1messages = battle.challengerData,
-                  user2messages = battle.opponentData)
+                  user2messages = battle.opponentData,
+                  user1name = userProfileViewModel.getName(battle.challenger),
+                  user2name = userProfileViewModel.getName(battle.opponent))
 
           battleRepository.completeBattle(battleId, evaluationResult) { success ->
             if (!success) {
