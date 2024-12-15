@@ -158,7 +158,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    *
    * @param friendUids List of UIDs of the friends to be retrieved.
    */
-  private fun fetchFriendsProfiles(friendUids: List<String>) {
+  fun fetchFriendsProfiles(friendUids: List<String>) {
     repository.getFriendsProfiles(
         friendUids = friendUids,
         onSuccess = { profiles -> friendsProfiles_.value = profiles },
@@ -173,7 +173,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    *
    * @param recReqUIds List of UIDs of the friends to be retrieved.
    */
-  private fun fetchRecReqProfiles(recReqUIds: List<String>) {
+  fun fetchRecReqProfiles(recReqUIds: List<String>) {
     repository.getRecReqProfiles(
         recReqUIds = recReqUIds,
         onSuccess = { profiles -> recReqProfiles_.value = profiles },
@@ -187,7 +187,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
    *
    * @param friendUids List of UIDs of the friends to be retrieved.
    */
-  private fun fetchSentReqProfiles(friendUids: List<String>) {
+  fun fetchSentReqProfiles(friendUids: List<String>) {
     repository.getSentReqProfiles(
         sentReqProfiles = friendUids,
         onSuccess = { profiles -> sentReqProfiles_.value = profiles },
@@ -522,7 +522,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
         }
 
     // Update the MutableStateFlow with the new queue
-    queue.value = updatedQueue
+    recentData_.value = updatedQueue
 
     return updatedQueue
   }
@@ -541,7 +541,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
 
       // Create a new statistics object with the updated queue
       val updatedStats = currentStats.copy(recentData = updatedQueue)
-
       // Create a new profile object with the updated queue
       val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
 
@@ -720,5 +719,30 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       return -1
     }
     return -1
+  }
+
+  /**
+   * Initiates a real-time listener for the specified user's profile.
+   *
+   * This function sets up a continuous listener on the user's profile document in Firestore.
+   * Whenever the user's profile data changes (e.g., friend requests, friends list), the listener
+   * will automatically update the local state flows (`userProfile_`, `friendsProfiles_`,
+   * `recReqProfiles_`, and `sentReqProfiles_`) to reflect the latest data.
+   *
+   * @param uid The unique identifier (UID) of the user whose profile is to be monitored.
+   */
+  fun startListeningToUserProfile(uid: String) {
+    repository.listenToUserProfile(
+        uid = uid,
+        onProfileChanged = { profile ->
+          userProfile_.value = profile
+          profile?.let {
+            // Re-fetch friend requests on every profile update
+            fetchFriendsProfiles(it.friends)
+            fetchRecReqProfiles(it.recReq)
+            fetchSentReqProfiles(it.sentReq)
+          }
+        },
+        onError = { Log.e("UserProfileViewModel", "Error listening to user profile updates", it) })
   }
 }

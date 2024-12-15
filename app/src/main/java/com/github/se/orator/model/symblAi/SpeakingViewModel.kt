@@ -69,7 +69,7 @@ class SpeakingViewModel(
         repository.setupAnalysisResultsUsage(
             onSuccess = { ad ->
               _analysisData.value = ad
-              userProfileViewModel.addNewestData(ad)
+              userProfileViewModel.addNewestData(_analysisData.value!!)
               userProfileViewModel.updateMetricMean()
             },
             onFailure = { error -> _analysisError.value = error })
