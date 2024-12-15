@@ -542,7 +542,9 @@ The session is now over. According to the initial instructions, you can now brea
       user1Uid: String,
       user2Uid: String,
       user1messages: List<Message>,
-      user2messages: List<Message>
+      user2messages: List<Message>,
+      user1name: String,
+      user2name: String
   ): EvaluationResult {
     val user1Transcript = messagesToTranscript(user1Uid, user1messages)
     val user2Transcript = messagesToTranscript(user2Uid, user2messages)
@@ -562,8 +564,8 @@ The session is now over. According to the initial instructions, you can now brea
         Please determine who performed better and explicitly state: "The winner is $user1Uid" or "The winner is $user2Uid".
         Then, provide a message addressed to the winner, highlighting why they won (max one paragraph). 
         Also, provide a message addressed to the loser, highlighting what they did wrong and where they can improve (max one paragraph).
-        For both messages focus on the quality of the answers, clarity, and overall performance. And address both users as "you". 
-        Don't over compliment the winner because he might have also made mistakes, make sure to stay neutral and professional. 
+        For both messages focus on the quality of the answers, clarity, and overall performance.
+        Don't over compliment the winner because he might have also made mistakes, make sure to stay neutral and professional: a strict interviewer. 
         
 
         Format your answer as:
@@ -606,11 +608,25 @@ The session is now over. According to the initial instructions, you can now brea
     val loserMessageText =
         loserMessageRegex.find(content)?.groups?.get(1)?.value?.trim() ?: "No loser message found."
 
+    // Create a map of UIDs to names
+    val uidToNameMap = mapOf(user1Uid to user1name, user2Uid to user2name)
+
+    // Replace UIDs in the messages
+    val updatedWinnerMessageText = replaceUidsWithNames(winnerMessageText, uidToNameMap)
+    val updatedLoserMessageText = replaceUidsWithNames(loserMessageText, uidToNameMap)
+
     // Create Message objects for winnerMessage and loserMessage
-    val winnerMessage = Message(role = "assistant", content = winnerMessageText)
-    val loserMessage = Message(role = "assistant", content = loserMessageText)
+    val winnerMessage = Message(role = "assistant", content = updatedWinnerMessageText)
+    val loserMessage = Message(role = "assistant", content = updatedLoserMessageText)
 
     return EvaluationResult(
         winnerUid = winnerUid, winnerMessage = winnerMessage, loserMessage = loserMessage)
+  }
+
+  // Helper function to replace UIDs with real names
+  private fun replaceUidsWithNames(message: String, uidToNameMap: Map<String, String>): String {
+    var updatedMessage = message
+    uidToNameMap.forEach { (uid, name) -> updatedMessage = updatedMessage.replace(uid, name) }
+    return updatedMessage
   }
 }
