@@ -10,12 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,8 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
@@ -35,6 +35,7 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * The composable that is displayed on the evaluation screen
@@ -69,8 +70,14 @@ fun EvaluationScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Battle Evaluation", color = MaterialTheme.colorScheme.onSurface) })
+        CenterAlignedTopAppBar(
+            title = {
+              Text(
+                  "Battle Evaluation",
+                  color = MaterialTheme.colorScheme.onSurface,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("battleEvaluation"))
+            })
       },
       content = { paddingValues ->
         when {
@@ -78,7 +85,12 @@ fun EvaluationScreen(
             Box(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 contentAlignment = Alignment.Center) {
-                  Text("Error: $errorMessage", color = MaterialTheme.colorScheme.error)
+                  Text(
+                      "Error: $errorMessage",
+                      color = MaterialTheme.colorScheme.error,
+                      textAlign = TextAlign.Center,
+                      style = MaterialTheme.typography.bodyLarge,
+                      modifier = Modifier.testTag("errorText"))
                 }
           }
           battle == null -> {
@@ -86,7 +98,12 @@ fun EvaluationScreen(
             Box(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 contentAlignment = Alignment.Center) {
-                  Text("Loading battle data...")
+                  Text(
+                      "Loading battle data...",
+                      color = MaterialTheme.colorScheme.onSurface,
+                      textAlign = TextAlign.Center,
+                      style = MaterialTheme.typography.bodyLarge,
+                      modifier = Modifier.testTag("loadingText"))
                 }
           }
           battle!!.status == BattleStatus.EVALUATING -> {
@@ -102,11 +119,15 @@ fun EvaluationScreen(
                         modifier =
                             Modifier.size(AppDimensions.loadingIndicatorSize)
                                 .testTag("loadingIndicator"))
+
+                    Spacer(modifier = Modifier.size(AppDimensions.paddingMedium))
+
                     Text(
-                        "EVALUATING PERFORMANCE AND DETERMINING THE WINNER",
+                        "Evaluating performance and determining the winner",
                         textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface)
+                        style = AppTypography.loadingTextStyle,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.testTag("loadingText"))
                   }
                 }
           }
@@ -125,7 +146,8 @@ fun EvaluationScreen(
                         "Processing results...",
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge)
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.testTag("processingResults"))
                   }
             }
           }
@@ -138,7 +160,8 @@ fun EvaluationScreen(
                       "Waiting for evaluation to start...",
                       color = MaterialTheme.colorScheme.onSurface,
                       textAlign = TextAlign.Center,
-                      style = MaterialTheme.typography.bodyLarge)
+                      style = MaterialTheme.typography.bodyLarge,
+                      modifier = Modifier.testTag("waitingForEvaluation"))
                 }
           }
         }
@@ -172,29 +195,30 @@ fun DisplayResultAndFeedback(
       modifier = Modifier.fillMaxSize().padding(paddingValues),
       contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+          // Display the result
           Text(
               resultText,
-              style = MaterialTheme.typography.titleLarge,
-              color = MaterialTheme.colorScheme.onSurface,
+              style = AppTypography.mediumTitleStyle,
+              color = MaterialTheme.colorScheme.primary,
               textAlign = TextAlign.Center,
               modifier =
                   Modifier.padding(horizontal = AppDimensions.paddingSmall).testTag("resultText"))
-          Spacer(modifier = Modifier.size(16.dp))
+
+          Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
+
+          // Display the feedback
           Text(
               message,
               style = MaterialTheme.typography.bodyLarge,
-              color = MaterialTheme.colorScheme.primary,
+              color = MaterialTheme.colorScheme.onSurface,
               textAlign = TextAlign.Center,
               modifier =
                   Modifier.padding(horizontal = AppDimensions.paddingSmall).testTag("message"))
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
-          Text("You can now return to the main screen.")
+          // Buttons to retry, go to practice or return to home
 
-          Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
-
-          // Use the helper function to add buttons
           ActionButton(text = "Retry") {
             // Navigate to the battle screen again with the same friendUid
             // TODO: implement retry mechanism (with the same context -> maybe just check if
@@ -233,6 +257,7 @@ fun ActionButton(text: String, onClick: () -> Unit) {
       colors =
           ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
   ) {
-    Text(text = text, color = MaterialTheme.colorScheme.onSurface)
+    Text(
+        text = text, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.testTag(text))
   }
 }
