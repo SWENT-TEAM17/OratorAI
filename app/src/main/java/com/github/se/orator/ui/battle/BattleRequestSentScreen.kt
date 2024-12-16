@@ -129,25 +129,15 @@ fun BattleRequestSentScreen(
               Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
               // Cancel Button
-              Button(
+              ActionButton(
+                  "Cancel Battle",
                   onClick = {
                     battleViewModel.cancelBattle(battleId)
                     navigationActions.navigateTo(TopLevelDestinations.HOME)
                     Toast.makeText(context, "Battle has been cancelled!", Toast.LENGTH_SHORT).show()
                   },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(AppDimensions.buttonHeightLarge)
-                          .testTag("cancelButton"),
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor = MaterialTheme.colorScheme.error,
-                          contentColor = MaterialTheme.colorScheme.onError)) {
-                    Text(
-                        text = "Cancel battle",
-                        color = Color.White,
-                        modifier = Modifier.testTag("cancelBattleButtonText"))
-                  }
+                  textColor = Color.White,
+                  buttonColor = Color.Red)
             }
       })
 }
