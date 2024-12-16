@@ -12,6 +12,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speaking.AnalysisData
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,8 +26,7 @@ class SpeakingViewModel(
     private val userProfileViewModel: UserProfileViewModel
 ) : ViewModel() {
   /** The analysis data collected. It is not final as the user can still re-record another audio. */
-  private val _offlineAnalysisData = MutableStateFlow<AnalysisData?>(null)
-  val offlineAnalysisData: StateFlow<AnalysisData?> = _offlineAnalysisData.asStateFlow()
+
   val interviewPromptNb = MutableStateFlow("")
 
   /** The analysis data collected. It is not final as the user can still re-record another audio. */
@@ -41,9 +41,6 @@ class SpeakingViewModel(
   val analysisError = _analysisError.asStateFlow()
 
   private val _isRecording = MutableStateFlow(false)
-
-  private val _isTranscribing = MutableStateFlow(false)
-  val isTranscribing = _isTranscribing.asStateFlow()
 
   /** True if the user is currently recording their speech, false otherwise. */
   val isRecording: StateFlow<Boolean> = _isRecording
@@ -67,15 +64,12 @@ class SpeakingViewModel(
       id: String,
       context: Context
   ) {
-    _isTranscribing.value = true
-
     // Suspend until the transcript is available
     withContext(Dispatchers.IO) {
       repository.getTranscript(
           audioFile,
           onSuccess = {
-              ad -> _offlineAnalysisData.value = ad
-              val transcription: String = _offlineAnalysisData.value?.transcription.toString()
+              ad -> val transcription: String = ad.transcription.toString()
               offlinePromptsFunctions.changePromptStatus(id, context, "transcription", transcription)
               offlinePromptsFunctions.changePromptStatus(id, context, "GPTresponse", "1")
                       },
@@ -90,10 +84,7 @@ class SpeakingViewModel(
     Log.d("in speaking view model", "get transcript for offline mode has been called successfully")
     repository.startRecording()
     repository.stopRecording()
-
-    // Suspend until _offlineAnalysisData.value is not null
-    _offlineAnalysisData.first { it != null }
-    _isTranscribing.value = false
+      // might have to suspend here
   }
 
   /**
@@ -113,38 +104,41 @@ class SpeakingViewModel(
       offlinePromptsFunctions: OfflinePromptsFunctionsInterface
   ) {
     // Launch a coroutine to have this run in the background and parallelize
-    viewModelScope.launch {
+    viewModelScope.launch{
         val ID = prompts?.get("ID") ?: "00000000"
+          offlinePromptsFunctions.stopFeedback(ID, context)
       // Wait for the transcript
         val notTranscribing = offlinePromptsFunctions.changePromptStatus(ID, context, "transcribed", "1")
         if (notTranscribing) {
             getTranscript(audioFile, offlinePromptsFunctions, ID, context)
             Log.d(
                 "finished transcript",
-                "finished transcript of file: ${_offlineAnalysisData.value?.transcription}")
+                "finished transcript of file: ${offlinePromptsFunctions.getPromptMapElement(ID, "transcription", context)}")
 
-            // wait for GPT response to finish loading
-            viewModel.isLoading.first { !it }
-
-            
+            // polling the gpt response
+            var promptGPTVal = (prompts?.get("GPTresponse") ?: "0")
+            while ( promptGPTVal != "1" ) {
+                delay(500) // Check every 500ms
+                promptGPTVal =
+                    offlinePromptsFunctions.getPromptMapElement(ID, "GPTresponse", context).toString()
+                Log.d("pr", "promptGPTVal is : $promptGPTVal")
+            }
             // if the transcription did not fail then request a prompt for feedback
-            if (prompts?.get("GPTresponse") ?: "0" == "1") {
-                val transcription = prompts?.get("transcription") ?: ""
+            if (promptGPTVal == "1") {
+                val transcription = offlinePromptsFunctions.getPromptMapElement(ID, "transcription", context)
+                Log.d("before response", "the transcription was successful $transcription")
                 if (transcription != "") {
                     viewModel.offlineRequest(
-                        transcription.trim(),
+                        transcription!!.trim(),
                         prompts?.get("targetCompany") ?: "Apple",
                         prompts?.get("jobPosition") ?: "engineer",
                         ID,
                         context)
                 }
-//                _offlineAnalysisData.value?.transcription?.removePrefix("You said:")?.let {
-//
-//                }
             }
             else {
                 Log.d("error", "transcription might have failed")
-                offlinePromptsFunctions.changePromptStatus(ID, context, "transcribed", "0")
+                offlinePromptsFunctions.stopFeedback(ID, context)
             }
 
         }

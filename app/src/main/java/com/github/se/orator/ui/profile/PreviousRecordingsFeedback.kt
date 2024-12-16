@@ -59,9 +59,7 @@ fun PreviousRecordingsFeedbackScreen(
   var ID: String = prompts?.get("ID") ?: "audio.mp3"
   var audioFile: File = File(context.cacheDir, "$ID.mp3")
 
-  val offlineAnalysisData by speakingViewModel.offlineAnalysisData.collectAsState()
   val fileData by offlinePromptsFunctions.fileData.collectAsState()
-  val response by viewModel.response.collectAsState()
 
   LaunchedEffect(Unit) {
     // clearing old display text
@@ -83,12 +81,9 @@ fun PreviousRecordingsFeedbackScreen(
 
   // if there isn't already an interviewer response: transcribe text + request a gpt prompt
   if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
-    Log.d("in pre ", "file data is null! $fileData")
-    LaunchedEffect(speakingViewModel.isTranscribing.value) {
-      if (!speakingViewModel.isTranscribing.value)
-          speakingViewModel.getTranscriptAndGetGPTResponse(
-              audioFile, prompts, viewModel, context, offlinePromptsFunctions)
-    }
+    Log.d("in pre ", "calling get transcript and gpt response $fileData")
+      speakingViewModel.getTranscriptAndGetGPTResponse(
+          audioFile, prompts, viewModel, context, offlinePromptsFunctions)
   }
 
   // text corresponding to interviewer's response

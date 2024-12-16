@@ -181,9 +181,18 @@ class OfflinePromptsFunctions : OfflinePromptsFunctionsInterface {
   }
 
   override fun stopFeedback(ID: String, context: Context) {
+    readPromptTextFile(context, ID)
+    if (_fileData.value == "Loading interviewer response...") {
+      changePromptStatus(ID, context, "transcribed", "0")
+      changePromptStatus(ID, context, "GPTresponse", "0")
+
+    }
     if (getPromptMapElement(ID, "transcription", context) == "") {
       changePromptStatus(ID, context, "transcribed", "0")
       changePromptStatus(ID, context, "GPTresponse", "0")
     }
+
+
+
   }
 }
