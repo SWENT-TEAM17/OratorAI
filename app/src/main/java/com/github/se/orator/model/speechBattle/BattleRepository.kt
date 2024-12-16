@@ -42,4 +42,10 @@ interface BattleRepository {
       evaluationText: String,
       callback: (Boolean) -> Unit
   )
+
+  fun completeBattle(
+      battleId: String,
+      evaluationResult: EvaluationResult,
+      callback: (Boolean) -> Unit
+  )
 }
