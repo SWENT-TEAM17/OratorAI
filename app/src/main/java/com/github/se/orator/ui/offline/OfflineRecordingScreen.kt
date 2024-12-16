@@ -43,7 +43,7 @@ fun OfflineRecordingScreen(
       mutableStateOf(false)
     } // Makes for easier testing
 ) {
-  val fileSaved = MutableStateFlow(false)
+  val fileSaved = viewModel.fileSaved
   val analysisState = remember {
     MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)
   } // viewModel.analysisState.collectAsState()
@@ -135,7 +135,7 @@ fun OfflineRecordingScreen(
                                       "aall",
                                       " file saved to: \"${viewModel.interviewPromptNb.value}.mp3\"")
                                   recorder.stopRecording()
-                                  fileSaved.value = true
+                                  viewModel.setFileSaved(false)
                                 }
                             analysisState.value = SpeakingRepository.AnalysisState.FINISHED
                           } else {
@@ -181,7 +181,7 @@ fun OfflineRecordingScreen(
                   onClick = {
                     if (fileSaved.value) {
                       viewModel.endAndSave()
-                      fileSaved.value = false
+                      viewModel.setFileSaved(false)
                       navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
                     }
                   },
