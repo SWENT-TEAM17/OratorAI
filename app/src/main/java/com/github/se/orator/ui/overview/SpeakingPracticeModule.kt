@@ -210,7 +210,7 @@ fun SpeakingPracticeModule(
                           },
                           modifier =
                               Modifier.fillMaxWidth()
-                                  .height(input.height)
+                                  .height(input.height + AppDimensions.paddingSmall)
                                   .border(
                                       width = AppDimensions.borderStrokeWidth,
                                       color = MaterialTheme.colorScheme.primary,
