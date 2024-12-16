@@ -539,9 +539,9 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       val currentStats = currentUserProfile.statistics
       val updatedQueue = addData(recentData_, value)
 
-      // Create a new statistics object with the updated queue
+      // Create a new statistics object with the updated queue transformed int a list
       val updatedStats = currentStats.copy(recentData = updatedQueue.toList())
-      // Create a new profile object with the updated queue
+      // Create a new profile object with the updated queue turned to a list
       val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
 
       // Updates the user profile with the new one
