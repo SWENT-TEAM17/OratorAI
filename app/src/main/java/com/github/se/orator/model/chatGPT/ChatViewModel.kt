@@ -551,29 +551,63 @@ The session is now over. According to the initial instructions, you can now brea
 
     val prompt =
         """
-        You are simulating a highly strict recruiter deciding between two candidates, $user1Uid and $user2Uid.
-        
-        You have all their Q&A transcripts:
-        
-        $user1Uid's transcript:
-        $user1Transcript
+        You are an impartial and strict recruiter tasked with evaluating two AI interview candidates, $user1Uid and $user2Uid, based on their interview transcripts. Your goal is to determine which AI performed better and provide constructive feedback for both.
 
-        $user2Uid's transcript:
-        $user2Transcript
+      **Guidelines:**
 
-        Please determine who performed better and explicitly state: "The winner is $user1Uid" or "The winner is $user2Uid".
-        Then, provide a message addressed to the winner, highlighting why they won (max one paragraph). 
-        Also, provide a message addressed to the loser, highlighting what they did wrong and where they can improve (max one paragraph).
-        For both messages focus on the quality of the answers, clarity, and overall performance.
-        Address both users as you so that we can directly display the feedback message on their screens.
-        Don't over compliment the winner because he might have also made mistakes, make sure to stay neutral and professional: a strict interviewer. 
-        
+      1. **Evaluation Criteria:**
+      - **Clarity and Coherence:** Assess how clearly and logically each AI communicated their answers.
+      - **Depth of Responses:** Evaluate the thoroughness and depth of each AI's answers.
+      - **Relevance to Questions:** Determine how well each AI addressed the interview questions.
+      - **Problem-Solving Ability:** Analyze the effectiveness of each AI's problem-solving approach.
+      - **Professionalism:** Consider the professionalism displayed in each AI's responses.
 
-        Format your answer as:
-        The winner is: <winnerUid>
-        Winner message: <short message>
-        Loser message: <short message> 
-        """
+      2. **Determining the Winner:**
+      - Based on the criteria above, decide which AI performed better overall.
+      - Explicitly state the winner in the format: "The winner is: <winnerUid>."
+
+      3. **Feedback for Both AIs:**
+      - **Winner's Feedback:** Provide specific strengths that led to their victory.
+      - **Loser's Feedback:** Offer constructive criticism highlighting areas for improvement.
+
+      **Format your response as follows:**
+
+      ```
+      The winner is: <winnerUid>
+      
+      Winner message: - <Strength 1>
+                      - <Strength 2>
+                      - <Strength 3>
+
+      Loser message: - <Area for Improvement 1>
+                     - <Area for Improvement 2>
+                     - <Area for Improvement 3>
+      ```
+
+      **Example:**
+
+      ```
+      The winner is: user1Uid
+      Winner's Feedback:
+      - Demonstrated exceptional problem-solving skills with clear, logical explanations.
+      - Provided comprehensive and relevant answers to all questions.
+      - Maintained a high level of professionalism throughout the interview.
+
+      Loser's Feedback:
+      - Responses lacked depth and were sometimes vague.
+      - Failed to fully address some of the interview questions.
+      - Could improve clarity and coherence in communication.
+      ```
+
+      **Transcripts:**
+
+      **$user1Uid's Transcript:**
+      $user1Transcript
+
+      **$user2Uid's Transcript:**
+      $user2Transcript
+      """
+            .trimIndent()
 
     val request =
         ChatRequest(
