@@ -584,6 +584,6 @@ class ChatViewModelTest {
         assertTrue(userPrompt.role == "user")
         assertTrue(
             userPrompt.content.contains(
-                "You are simulating a highly strict recruiter deciding between two candidates"))
+                "You are an impartial and strict recruiter tasked with evaluating two AI interview candidates"))
       }
 }
