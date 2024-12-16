@@ -285,7 +285,7 @@ class BattleViewModel(
 
     getBattleById(battleId) { battle ->
       if (battle == null) {
-        onFailure(IllegalStateException("Battle not found"))
+        onFailure(IllegalStateException("Battle not found for ID: $battleId"))
         return@getBattleById
       }
 
