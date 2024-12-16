@@ -25,7 +25,6 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,15 +56,7 @@ fun WaitingForCompletionScreen(
   }
 
   Scaffold(
-      topBar = {
-        TopNavigationMenu(
-            title = {
-              Text(
-                  "Waiting for Completion",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  style = AppTypography.mediumTopBarStyle)
-            })
-      },
+      topBar = { TopNavigationMenu(title = "Waiting for Completion") },
       content = { innerPadding ->
         Column(
             modifier =

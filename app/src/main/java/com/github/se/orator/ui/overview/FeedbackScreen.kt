@@ -91,13 +91,8 @@ fun FeedbackScreen(
       topBar = {
         TopNavigationMenu(
             testTag = "feedbackTopAppBar",
-            title = {
-              Text(
-                  text = "Feedback",
-                  modifier = Modifier.testTag("FeedbackText"),
-                  color = MaterialTheme.colorScheme.onSurface,
-                  style = AppTypography.mediumTopBarStyle)
-            },
+            textTestTag = "FeedbackText",
+            title = "Feedback",
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },

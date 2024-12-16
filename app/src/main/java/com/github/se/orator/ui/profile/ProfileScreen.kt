@@ -81,14 +81,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
   Scaffold(
       topBar = {
         TopNavigationMenu(
-            title = {
-              Text(
-                  text = "Profile",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.testTag("profile_title"),
-                  style = AppTypography.mediumTopBarStyle,
-              )
-            },
+            textTestTag = "profile_title",
+            title = "Profile",
             actions = {
               IconButton(
                   onClick = { navigationActions.navigateTo(Screen.SETTINGS) },

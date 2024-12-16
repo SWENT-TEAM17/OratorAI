@@ -22,7 +22,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,13 +78,8 @@ fun CreateAccountScreen(
   Scaffold(
       topBar = {
         TopNavigationMenu(
-            title = {
-              Text(
-                  "Create your Orator profile",
-                  modifier = Modifier.testTag("createProfileTitle"),
-                  color = MaterialTheme.colorScheme.onSurface,
-                  style = AppTypography.mediumTopBarStyle)
-            },
+            textTestTag = "createProfileTitle",
+            title = "Create your Orator profile",
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },

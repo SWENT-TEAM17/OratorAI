@@ -13,21 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopNavigationMenu
-import com.github.se.orator.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EvaluationScreen(battleId: String, navigationActions: NavigationActions) {
   Scaffold(
-      topBar = {
-        TopNavigationMenu(
-            title = {
-              Text(
-                  "Evaluation in Progress",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  style = AppTypography.mediumTopBarStyle)
-            })
-      },
+      topBar = { TopNavigationMenu(title = "Evaluation in Progress") },
       content = { paddingValues ->
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues),

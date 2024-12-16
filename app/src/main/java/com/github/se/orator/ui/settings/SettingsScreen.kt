@@ -36,7 +36,6 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
-import com.github.se.orator.ui.theme.AppTypography
 
 // class for all that is needed about a section for settings
 data class SettingBar(
@@ -95,13 +94,8 @@ fun SettingsScreen(
   Scaffold(
       topBar = {
         TopNavigationMenu(
-            title = {
-              Text(
-                  "Settings",
-                  modifier = Modifier.testTag("SettingsText"),
-                  color = MaterialTheme.colorScheme.onSurface,
-                  style = AppTypography.mediumTopBarStyle)
-            },
+            textTestTag = "SettingsText",
+            title = "Settings",
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },

@@ -57,13 +57,8 @@ fun SpeakingPracticeModule(
       topBar = {
         TopNavigationMenu(
             testTag = "topAppBar",
-            title = {
-              Text(
-                  text = screenTitle,
-                  style = AppTypography.mediumTopBarStyle,
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.testTag("screenTitle"))
-            },
+            textTestTag = "screenTitle",
+            title = screenTitle,
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },

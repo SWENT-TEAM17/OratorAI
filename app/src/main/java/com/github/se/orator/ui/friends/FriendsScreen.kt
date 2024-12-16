@@ -86,7 +86,6 @@ import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
@@ -187,13 +186,8 @@ fun ViewFriendsScreen(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
               TopNavigationMenu(
-                  title = {
-                    Text(
-                        "My Friends",
-                        modifier = Modifier.testTag("myFriendsTitle"),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = AppTypography.mediumTopBarStyle)
-                  },
+                  textTestTag = "myFriendsTitle",
+                  title = "My Friends",
                   navigationIcon = {
                     IconButton(
                         onClick = { scope.launch { drawerState.open() } },

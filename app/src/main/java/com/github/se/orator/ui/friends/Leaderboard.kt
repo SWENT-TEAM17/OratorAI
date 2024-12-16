@@ -26,7 +26,6 @@ import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
-import com.github.se.orator.ui.theme.AppTypography
 import java.util.Locale
 
 var currentPracticeMode = mutableStateOf(SessionType.SPEECH)
@@ -272,13 +271,7 @@ fun TitleAppBar(
     iconTestTag: String
 ) {
   TopNavigationMenu(
-      title = {
-        Text(
-            title,
-            modifier = Modifier.testTag(titleTestTAg),
-            color = MaterialTheme.colorScheme.onSurface,
-            style = AppTypography.mediumTopBarStyle)
-      },
+      title = title,
       navigationIcon = {
         IconButton(
             onClick = {

@@ -53,7 +53,6 @@ import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
-import com.github.se.orator.ui.theme.AppTypography
 import java.io.File
 
 /**
@@ -83,14 +82,8 @@ fun EditProfileScreen(
   Scaffold(
       topBar = {
         TopNavigationMenu(
-            title = {
-              Text(
-                  modifier = Modifier.testTag("edit_profile_title"),
-                  text = "Edit Profile",
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.onSurface,
-                  style = AppTypography.mediumTopBarStyle)
-            },
+            testTag = "edit_profile_title",
+            title = "Edit Profile",
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },

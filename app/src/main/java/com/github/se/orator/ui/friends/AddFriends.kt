@@ -49,7 +49,6 @@ import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.AppTypography
 
 /**
  * Composable function that displays the "Add Friends" screen, where users can:
@@ -96,13 +95,8 @@ fun AddFriendsScreen(
   Scaffold(
       topBar = {
         TopNavigationMenu(
-            title = {
-              Text(
-                  "Add a friend",
-                  modifier = Modifier.testTag("addFriendTitle"),
-                  color = MaterialTheme.colorScheme.onSurface,
-                  style = AppTypography.mediumTopBarStyle)
-            },
+            textTestTag = "addFriendTitle",
+            title = "Add a friend",
             navigationIcon = {
               IconButton(
                   onClick = {
