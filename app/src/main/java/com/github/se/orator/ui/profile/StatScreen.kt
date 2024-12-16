@@ -106,7 +106,9 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                                 profile.statistics.recentData.toList().map { data ->
                                   data.talkTimeSeconds.toFloat()
                                 }),
-                            "talkTimeSecGraph")
+                            "talkTimeSecGraph",
+                            yMin = 0f,
+                            yMax = 60f)
                       }
 
                   Column(
@@ -148,7 +150,9 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                                 profile.statistics.recentData.toList().map { data ->
                                   data.talkTimePercentage.toFloat()
                                 }),
-                            "talkTimePercGraph")
+                            "talkTimePercGraph",
+                            yMin = 0f,
+                            yMax = 100f)
                       }
 
                   Column(
@@ -180,7 +184,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
 }
 
 @Composable
-fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
+fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String, yMin: Float, yMax: Float) {
   require(xValues.size == yValues.size) { "X and Y values must have the same size." }
 
   Canvas(
@@ -189,12 +193,12 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
               .height(graphHeight)
               .padding(start = paddingExtraLarge, top = paddingSmall)
               .testTag(testTag)) {
-        val maxX = xValues.maxOrNull()?.toFloat() ?: FULL // full being the const value for 1f
-        val maxY = yValues.maxOrNull() ?: FULL
-        val minY = yValues.minOrNull() ?: ZERO // zero for the value 0f
+        // Use the provided yMin and yMax instead of computing from data
+        val minY = yMin
+        val maxY = yMax
         val yRange = maxY - minY
 
-        // Avoid division by zero: Assign a minimal range if all yValues are the same
+        // If by any chance yRange is 0, fallback to 1f
         val adjustedYRange = if (yRange == ZERO) FULL else yRange
         val xStep = size.width / (xValues.size - 1)
         val yScale = size.height / adjustedYRange
@@ -256,9 +260,7 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
         for (i in xValues.indices) {
           val x = i * xStep
           val y = size.height - (yValues[i] - minY) * yScale
-          drawCircle(
-              color = graphDots, center = Offset(x, y), radius = POINTS_RADIUS // Smaller point size
-              )
+          drawCircle(color = graphDots, center = Offset(x, y), radius = POINTS_RADIUS)
         }
       }
 }
