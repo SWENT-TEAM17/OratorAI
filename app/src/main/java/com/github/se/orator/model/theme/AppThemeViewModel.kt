@@ -22,15 +22,21 @@ class AppThemeViewModel(private val context: Context) {
 
   private val _currentTheme = MutableStateFlow(AppThemeValue.SYSTEM_DEFAULT)
   /**
-   * StateFlow holding the `AppThemeValue` describing the current theme. If you only need to know if
-   * the device is currently in dark or light theme, use the `isDark` object.
+   * StateFlow holding the `AppThemeValue` describing the current theme. Use the `isDark` object if
+   * you only need to know if the device is currently in dark or light theme, without caring about
+   * if the theme is the system default one or instead chosen by the user.
    */
   val currentTheme = _currentTheme.asStateFlow()
 
   private val _isDark = MutableStateFlow(false)
-  /** StateFlow holding the value `true` if the app is in dark mode, `false` otherwise. */
+  /**
+   * StateFlow holding the value `true` if the app is in dark mode, `false` otherwise. This
+   * attribute takes into account the case where the user selected the system default theme :
+   * `isDark` is updated automatically.
+   */
   val isDark = _isDark.asStateFlow()
 
+  // Saves the theme of the device when `loadTheme` is called.
   private var deviceThemeIsDarkTheme = false
 
   /**
