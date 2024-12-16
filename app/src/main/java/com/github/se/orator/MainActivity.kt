@@ -339,7 +339,13 @@ fun OratorApp(
               arguments = listOf(navArgument("battleId") { type = NavType.StringType })) {
                   backStackEntry ->
                 val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
-                EvaluationScreen(battleId = battleId, navigationActions = navigationActions)
+                val userId = userProfileViewModel.userProfile.value?.uid ?: ""
+                EvaluationScreen(
+                    userId = userId,
+                    battleId = battleId,
+                    navigationActions = navigationActions,
+                    battleViewModel = battleViewModel,
+                    chatViewModel = chatViewModel)
               }
         }
 
