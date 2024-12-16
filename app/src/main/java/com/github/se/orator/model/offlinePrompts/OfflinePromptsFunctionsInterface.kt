@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.StateFlow
 interface OfflinePromptsFunctionsInterface {
   val fileData: StateFlow<String?>
 
+  val TRANSCRIBED: String
+
   fun savePromptsToFile(prompts: Map<String, String>, context: Context)
 
   fun loadPromptsFromFile(context: Context): List<Map<String, String>>?
@@ -17,4 +19,8 @@ interface OfflinePromptsFunctionsInterface {
   fun readPromptTextFile(context: Context, ID: String)
 
   fun clearDisplayText()
+
+  fun changePromptStatus(id: String, context: Context, entry: String,value: String = "1"): Boolean
+  fun getPromptMapElement(id: String, element: String, context: Context): String?
+  fun stopFeedback(ID: String, context: Context)
 }

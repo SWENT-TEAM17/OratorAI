@@ -109,7 +109,10 @@ fun OfflineInterviewModule(
                       mapOf(
                           "targetCompany" to targetCompany,
                           "jobPosition" to jobPosition,
-                          "ID" to ID),
+                          "ID" to ID,
+                          "transcribed" to "0",
+                      "GPTresponse" to "0",
+                          "transcription" to ""),
               )
               offlinePromptsFunctions.createEmptyPromptFile(context, ID)
               speakingViewModel.interviewPromptNb.value = ID

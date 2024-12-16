@@ -63,7 +63,9 @@ class SpeakingViewModel(
   // Suspend function to handle transcript fetching
   suspend fun getTranscript(
       audioFile: File,
-      offlinePromptsFunctions: OfflinePromptsFunctionsInterface = OfflinePromptsFunctions()
+      offlinePromptsFunctions: OfflinePromptsFunctionsInterface = OfflinePromptsFunctions(),
+      id: String,
+      context: Context
   ) {
     _isTranscribing.value = true
 
@@ -71,10 +73,17 @@ class SpeakingViewModel(
     withContext(Dispatchers.IO) {
       repository.getTranscript(
           audioFile,
-          onSuccess = { ad -> _offlineAnalysisData.value = ad },
+          onSuccess = {
+              ad -> _offlineAnalysisData.value = ad
+              val transcription: String = _offlineAnalysisData.value?.transcription.toString()
+              offlinePromptsFunctions.changePromptStatus(id, context, "transcription", transcription)
+              offlinePromptsFunctions.changePromptStatus(id, context, "GPTresponse", "1")
+                      },
           onFailure = { error ->
             _analysisError.value = error
             offlinePromptsFunctions.clearDisplayText()
+              offlinePromptsFunctions.changePromptStatus(id, context, "transcribed", "0")
+
           })
     }
 
@@ -103,26 +112,46 @@ class SpeakingViewModel(
       context: Context,
       offlinePromptsFunctions: OfflinePromptsFunctionsInterface
   ) {
-    // Launch a coroutine
+    // Launch a coroutine to have this run in the background and parallelize
     viewModelScope.launch {
+        val ID = prompts?.get("ID") ?: "00000000"
       // Wait for the transcript
-      getTranscript(audioFile, offlinePromptsFunctions)
-      Log.d(
-          "finished transcript",
-          "finished transcript of file: ${_offlineAnalysisData.value?.transcription}")
-      val ID = prompts?.get("ID") ?: "00000000"
-        // wait for GPT response to finish loading
-      viewModel.isLoading.first { !it }
+        val notTranscribing = offlinePromptsFunctions.changePromptStatus(ID, context, "transcribed", "1")
+        if (notTranscribing) {
+            getTranscript(audioFile, offlinePromptsFunctions, ID, context)
+            Log.d(
+                "finished transcript",
+                "finished transcript of file: ${_offlineAnalysisData.value?.transcription}")
 
-        // if the transcription did not fail then request a prompt for feedback
-      _offlineAnalysisData.value?.transcription?.removePrefix("You said:")?.let {
-        viewModel.offlineRequest(
-            it.trim(),
-            prompts?.get("targetCompany") ?: "Apple",
-            prompts?.get("jobPosition") ?: "engineer",
-            ID,
-            context)
-      }
+            // wait for GPT response to finish loading
+            viewModel.isLoading.first { !it }
+
+            
+            // if the transcription did not fail then request a prompt for feedback
+            if (prompts?.get("GPTresponse") ?: "0" == "1") {
+                val transcription = prompts?.get("transcription") ?: ""
+                if (transcription != "") {
+                    viewModel.offlineRequest(
+                        transcription.trim(),
+                        prompts?.get("targetCompany") ?: "Apple",
+                        prompts?.get("jobPosition") ?: "engineer",
+                        ID,
+                        context)
+                }
+//                _offlineAnalysisData.value?.transcription?.removePrefix("You said:")?.let {
+//
+//                }
+            }
+            else {
+                Log.d("error", "transcription might have failed")
+                offlinePromptsFunctions.changePromptStatus(ID, context, "transcribed", "0")
+            }
+
+        }
+        else {
+            Log.d("in speaking view model", "already transcribing!!")
+        }
+
     }
   }
 
