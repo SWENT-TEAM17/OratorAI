@@ -1,6 +1,7 @@
 package com.github.se.orator.model.theme
 
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -52,9 +53,14 @@ class AppThemeViewModel(private val context: Context) {
         context.getSharedPreferences( // NOSONAR - This is not sensitive information
             THEME_STORAGE_LABEL, Context.MODE_PRIVATE)
 
-    _currentTheme.value =
-        AppThemeValue.valueOf(
-            preference.getString(THEME_STORAGE_LABEL, AppThemeValue.SYSTEM_DEFAULT.toString())!!)
+    try {
+      _currentTheme.value =
+          AppThemeValue.valueOf(
+              preference.getString(THEME_STORAGE_LABEL, AppThemeValue.SYSTEM_DEFAULT.toString())!!)
+    } catch (e: IllegalArgumentException) {
+      _currentTheme.value = AppThemeValue.SYSTEM_DEFAULT
+      Log.e("AppThemeViewModel", e.message, e)
+    }
     chooseTheme()
   }
 
