@@ -2,9 +2,11 @@ package com.github.se.orator.ui.profile
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.friends.TitleAppBar
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
@@ -74,7 +77,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         .testTag("graphScreenTitle"),
                 text = "Statistics Graph",
                 style = AppTypography.mediumTitleStyle, // Apply custom style for title
-                color = MaterialTheme.colorScheme.onSurface)
+                color = MaterialTheme.colorScheme.primary)
 
             Text(
                 modifier =
@@ -159,6 +162,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         color = MaterialTheme.colorScheme.onSurface)
                   }
             }
+            TitleAndStatsRow(profile)
           }
         }
       },
@@ -251,5 +255,59 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String) {
               color = graphDots, center = Offset(x, y), radius = POINTS_RADIUS // Smaller point size
               )
         }
+      }
+}
+
+/** Composable for practice mode title displays on the stats screen */
+@Composable
+fun PracticeModeTitle(modeTitleTestTag: String, mode: String) {
+  androidx.compose.material3.Text(
+      modifier =
+          Modifier.padding(start = AppDimensions.paddingSmall)
+              .padding(top = AppDimensions.paddingXXLarge)
+              .testTag(modeTitleTestTag),
+      text = mode,
+      style = AppTypography.smallTitleStyle, // Apply custom style for title
+      color = MaterialTheme.colorScheme.primary)
+}
+
+/** Composable for stats displays on the stats screen */
+@Composable
+fun StatDisplay(statTestTag: String, stat: String, statValue: String) {
+  androidx.compose.material3.Text(
+      modifier =
+          Modifier.padding(start = AppDimensions.paddingSmall)
+              .padding(top = AppDimensions.paddingSmall)
+              .testTag(statTestTag),
+      text = stat + statValue,
+      style = AppTypography.xSmallTitleStyle, // Apply custom style for title
+      color = MaterialTheme.colorScheme.onSurface)
+}
+
+/** Composable for a single mode's stats and title */
+@Composable
+fun ModeStatsColumn(titleTestTag: String, mode: String, profile: UserProfile) {
+  val modeKey = mode.uppercase()
+  Column {
+    PracticeModeTitle(titleTestTag, mode)
+    StatDisplay(
+        statTestTag = "totalSessions${mode}Title",
+        stat = "Sessions: ",
+        statValue = profile.statistics.sessionsGiven[modeKey]?.toString() ?: "0")
+    StatDisplay(
+        statTestTag = "successSessions${mode}Title",
+        stat = "Successful: ",
+        statValue = profile.statistics.successfulSessions[modeKey]?.toString() ?: "0")
+  }
+}
+/** Row that contains the titles and stats for each mode, side by side */
+@Composable
+fun TitleAndStatsRow(profile: UserProfile) {
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = AppDimensions.paddingMedium),
+      horizontalArrangement = Arrangement.SpaceEvenly) {
+        ModeStatsColumn("InterviewTitle", "Interview", profile)
+        ModeStatsColumn("SpeechTitle", "Speech", profile)
+        ModeStatsColumn("NegotiationTitle", "Negotiation", profile)
       }
 }

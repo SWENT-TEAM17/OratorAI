@@ -435,8 +435,8 @@ class FriendsUITests {
     // Select "Practice mode 2"
     composeTestRule.onNodeWithTag("practiceModeOption2").performClick()
 
-    // Optionally, verify that the selected mode is reflected
-    composeTestRule.onNodeWithTag("practiceModeSelector").assertTextEquals("Practice mode")
+    // Verify that the prefix text is displayed
+    composeTestRule.onNodeWithTag("practiceModeSelector").assertTextEquals("Mode : Speech")
   }
 
   /** Tests the Rank Metric Selector functionality. */
@@ -456,8 +456,8 @@ class FriendsUITests {
     // Select "Practice mode 2"
     composeTestRule.onNodeWithTag("rankMetricOption2").performClick()
 
-    // Optionally, verify that the selected mode is reflected
-    composeTestRule.onNodeWithTag("rankMetricSelector").assertTextEquals("Rank metric")
+    // Verify that the prefix text is displayed
+    composeTestRule.onNodeWithTag("rankMetricSelector").assertTextEquals("Metric : Success")
   }
 
   /**

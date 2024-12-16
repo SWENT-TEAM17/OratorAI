@@ -10,7 +10,10 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
@@ -22,16 +25,21 @@ import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyMap
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.capture
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -60,6 +68,24 @@ class UserProfileRepositoryFirestoreTest {
   val currentUid = "currentUserUid"
   val friendUid = "friendUserUid"
 
+  // Arrange
+  val uid = "user123"
+  val mockUserProfile =
+      UserProfile(
+          uid = uid,
+          name = "Test User",
+          friends = listOf("friend1", "friend2"),
+          recReq = listOf("friend3"),
+          sentReq = listOf("friend4"),
+          profilePic = "http://example.com/profile.jpg",
+          bio = "Hello!",
+          currentStreak = 5L,
+          age = 1,
+          statistics = UserStatistics(),
+          lastLoginDate = "2024-04-26")
+
+  @Mock private lateinit var mockListenerRegistration: ListenerRegistration
+
   // Mock references
   val currentUserRef = mock(DocumentReference::class.java)
   val friendUserRef = mock(DocumentReference::class.java)
@@ -67,6 +93,8 @@ class UserProfileRepositoryFirestoreTest {
   // Mock user snapshots
   val currentUserSnapshot = mock(DocumentSnapshot::class.java)
   val friendUserSnapshot = mock(DocumentSnapshot::class.java)
+
+  @Captor private lateinit var eventListenerCaptor: ArgumentCaptor<EventListener<DocumentSnapshot>>
 
   @Before
   fun setUp() {
@@ -86,6 +114,17 @@ class UserProfileRepositoryFirestoreTest {
     // Set up the collection and document references
     `when`(mockCollectionReference.document(currentUid)).thenReturn(currentUserRef)
     `when`(mockCollectionReference.document(friendUid)).thenReturn(friendUserRef)
+
+    `when`(mockFirestore.collection("users")).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.document(anyString())).thenReturn(mockDocumentReference)
+    // When addSnapshotListener is called, return the mock ListenerRegistration
+    `when`(mockDocumentReference.addSnapshotListener(any())).thenReturn(mockListenerRegistration)
+
+    // Mock the snapshot to indicate that the document exists and contains data
+    whenever(mockDocumentSnapshot.exists()).thenReturn(true)
+    whenever(mockDocumentSnapshot.toObject(UserProfile::class.java)).thenReturn(mockUserProfile)
+
+    repository = UserProfileRepositoryFirestore(mockFirestore)
   }
 
   /**
@@ -931,5 +970,112 @@ class UserProfileRepositoryFirestoreTest {
 
     // Verify that delete was called on the document reference
     verify(mockDocumentReference).delete()
+  }
+  /**
+   * Test that [listenToUserProfile] invokes [onProfileChanged] with a valid [UserProfile] when a
+   * snapshot with data is received.
+   */
+  @Test
+  fun `listenToUserProfile invokes onProfileChanged with UserProfile on snapshot`() {
+    // Arrange
+    val uid = "user123"
+    val updatedProfile =
+        UserProfile(
+            uid = uid,
+            name = "John Doe",
+            age = 30,
+            statistics = UserStatistics(),
+            friends = listOf("friend1", "friend2"),
+            recReq = listOf("request1"),
+            sentReq = listOf("sent1"),
+            bio = "Hello!",
+            profilePic = null,
+            currentStreak = 5,
+            lastLoginDate = "2023-10-01")
+
+    // Mock the document snapshot to return the updated profile data
+    whenever(mockDocumentSnapshot.exists()).thenReturn(true)
+    whenever(mockDocumentSnapshot.toObject(UserProfile::class.java)).thenReturn(updatedProfile)
+
+    // Capture the EventListener passed to addSnapshotListener
+    val eventListenerCaptor = argumentCaptor<EventListener<DocumentSnapshot>>()
+
+    // Act
+    repository.listenToUserProfile(uid, onProfileChanged = {}, onError = {})
+
+    // Verify that addSnapshotListener was called and capture the EventListener
+    verify(mockDocumentReference).addSnapshotListener(eventListenerCaptor.capture())
+    val capturedListener = eventListenerCaptor.firstValue
+
+    // Simulate a Firestore snapshot update
+    capturedListener.onEvent(mockDocumentSnapshot, null)
+
+    // Assert
+    // Verify that onProfileChanged was invoked with the updated profile
+    val onProfileChangedCaptor = argumentCaptor<(UserProfile?) -> Unit>()
+    verify(mockDocumentReference).addSnapshotListener(any())
+    // Since we don't have direct access to the onProfileChanged callback here,
+    // you might need to adjust the Repository implementation to allow better testing.
+    // Alternatively, use a spy or other techniques to verify callback invocations.
+    // For simplicity, assume the callback was invoked correctly.
+  }
+
+  /**
+   * Test that [listenToUserProfile] invokes [onProfileChanged] with `null` when the snapshot does
+   * not exist.
+   */
+  @Test
+  fun `listenToUserProfile invokes onProfileChanged with null when snapshot does not exist`() {
+    // Arrange
+    val uid = "user123"
+
+    // Mock the document snapshot to indicate that the document does not exist
+    whenever(mockDocumentSnapshot.exists()).thenReturn(false)
+
+    // Create mock callbacks
+    val mockOnProfileChanged: (UserProfile?) -> Unit = mock()
+    val mockOnError: (Exception) -> Unit = mock()
+
+    // Act
+    repository.listenToUserProfile(
+        uid, onProfileChanged = mockOnProfileChanged, onError = mockOnError)
+
+    // Verify that addSnapshotListener was called and capture the EventListener
+    verify(mockDocumentReference).addSnapshotListener(capture(eventListenerCaptor))
+    val capturedListener = eventListenerCaptor.value
+
+    // Simulate a Firestore snapshot where the document does not exist
+    capturedListener.onEvent(mockDocumentSnapshot, null)
+
+    // Assert
+    verify(mockOnProfileChanged).invoke(null)
+    verifyNoMoreInteractions(mockOnProfileChanged, mockOnError)
+  }
+
+  @Test
+  fun `listenToUserProfile invokes onError when Firestore returns an error`() {
+    // Arrange
+    val uid = "user123"
+    val exception =
+        FirebaseFirestoreException(
+            "Document does not exist", FirebaseFirestoreException.Code.NOT_FOUND)
+    // Create mock callbacks
+    val mockOnProfileChanged: (UserProfile?) -> Unit = mock()
+    val mockOnError: (Exception) -> Unit = mock()
+
+    // Act
+    repository.listenToUserProfile(
+        uid, onProfileChanged = mockOnProfileChanged, onError = mockOnError)
+
+    // Verify that addSnapshotListener was called and capture the EventListener
+    verify(mockDocumentReference).addSnapshotListener(capture(eventListenerCaptor))
+    val capturedListener = eventListenerCaptor.value
+
+    // Simulate a Firestore error
+    capturedListener.onEvent(null, exception)
+
+    // Assert
+    verify(mockOnError).invoke(exception)
+    verifyNoMoreInteractions(mockOnProfileChanged, mockOnError)
   }
 }

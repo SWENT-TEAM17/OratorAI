@@ -238,7 +238,6 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Log.d("scn", "bio is: ${profile.bio}")
-
                 // stats section
                 CardSection(
                     title = "My stats",

@@ -63,6 +63,9 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
             isLoading = true // Show loading screen
             val uid = result.user?.uid
+            if (uid != null) {
+              viewModel.startListeningToUserProfile(uid)
+            }
             uid?.let { u ->
               viewModel.getUserProfile(u) // Fetch user profile
               viewModel.updateLoginStreak()
