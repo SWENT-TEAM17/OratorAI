@@ -15,8 +15,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
-import java.util.ArrayDeque
 import java.util.Date
+import kotlin.math.floor
 
 /**
  * Repository class for managing user profiles in Firestore.
@@ -248,10 +248,22 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             val successfulSessions =
                 successfulSessionsMap.mapValues { entry -> entry.value.toInt() }
 
-            // Extract 'recentData' queue
+            // Extract 'recentData' list
+            val recentDataList =
+                (statisticsMap["recentData"] as? List<Map<String, Any>>) ?: emptyList()
             val recentData =
-                it["recentData"] as? kotlin.collections.ArrayDeque<AnalysisData>
-                    ?: kotlin.collections.ArrayDeque<AnalysisData>()
+                recentDataList.map { dataMap ->
+                  AnalysisData(
+                      transcription = dataMap["transcription"] as? String ?: "",
+                      fillerWordsCount = (dataMap["fillerWordsCount"] as? Number)?.toInt() ?: -1,
+                      averagePauseDuration =
+                          (dataMap["averagePauseDuration"] as? Number)?.toDouble() ?: -1.0,
+                      sentimentScore = (dataMap["sentimentScore"] as? Number)?.toDouble() ?: 0.0,
+                      talkTimePercentage =
+                          (dataMap["talkTimePercentage"] as? Number)?.toDouble() ?: -1.0,
+                      talkTimeSeconds = (dataMap["talkTimeSeconds"] as? Number)?.toDouble() ?: -1.0,
+                      pace = (dataMap["pace"] as? Number)?.toInt() ?: -1)
+                }
             // Extract means
             val talkTimeSecMean = (it["talkTimeSecMean"] as? Number)?.toDouble() ?: 0.0
             val talkTimePercMean = (it["talkTimePercMean"] as? Number)?.toDouble() ?: 0.0
@@ -685,7 +697,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
 
     // Sum the elements and divide by the size of the list
     val sum = values.sum()
-    return sum / values.size
+    return floor((sum / values.size) * 100) / 100
   }
 
   override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {

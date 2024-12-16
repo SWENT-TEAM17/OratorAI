@@ -103,12 +103,12 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         LineChart(
                             xValues,
                             profileViewModel.ensureListSizeTen(
-                                profile.statistics.recentData.toList().map { data ->
+                                profile.statistics.recentData.map { data ->
                                   data.talkTimeSeconds.toFloat()
                                 }),
                             "talkTimeSecGraph",
                             yMin = 0f,
-                            yMax = 60f)
+                            yMax = 10f)
                       }
 
                   Column(
@@ -147,7 +147,7 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         LineChart(
                             xValues,
                             profileViewModel.ensureListSizeTen(
-                                profile.statistics.recentData.toList().map { data ->
+                                profile.statistics.recentData.map { data ->
                                   data.talkTimePercentage.toFloat()
                                 }),
                             "talkTimePercGraph",
