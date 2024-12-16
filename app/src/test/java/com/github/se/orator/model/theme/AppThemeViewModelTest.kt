@@ -79,4 +79,15 @@ class AppThemeViewModelTest {
 
     assert(appThemeViewModel.isDark.value)
   }
+
+  @Test
+  fun invalidMemoryValueDefaultsToSystemDefault() {
+    assert(!appThemeViewModel.isDark.value)
+
+    `when`(mockSharedPreferences.getString(any(), any())).thenReturn("invalid value")
+
+    appThemeViewModel.loadTheme(true)
+
+    assert(appThemeViewModel.isDark.value)
+  }
 }
