@@ -569,36 +569,17 @@ The session is now over. According to the initial instructions, you can now brea
       3. **Feedback for Both AIs:**
       - **Winner's Feedback:** Provide specific strengths that led to their victory.
       - **Loser's Feedback:** Offer constructive criticism highlighting areas for improvement.
+       
+      Address both AIs as "you" so that we can directly display the feedback message on their screens.
+      
+      Don't over compliment the winner because he might have also made mistakes, make sure to stay neutral and professional: a strict interviewer. 
 
       **Format your response as follows:**
 
-      ```
       The winner is: <winnerUid>
-      
-      Winner message: - <Strength 1>
-                      - <Strength 2>
-                      - <Strength 3>
-
-      Loser message: - <Area for Improvement 1>
-                     - <Area for Improvement 2>
-                     - <Area for Improvement 3>
-      ```
-
-      **Example:**
-
-      ```
-      The winner is: user1Uid
-      Winner's Feedback:
-      - Demonstrated exceptional problem-solving skills with clear, logical explanations.
-      - Provided comprehensive and relevant answers to all questions.
-      - Maintained a high level of professionalism throughout the interview.
-
-      Loser's Feedback:
-      - Responses lacked depth and were sometimes vague.
-      - Failed to fully address some of the interview questions.
-      - Could improve clarity and coherence in communication.
-      ```
-
+      Winner message: <short message that highlights some strengths that would make him more likely to be hired than the loser, while addressing the winner as you instead of his UID>
+      Loser message: <short message that highlights some of the flaws that prevented him from being hired instead of the winner, while addressing the loser as you instead of his UID>
+                   
       **Transcripts:**
 
       **$user1Uid's Transcript:**
@@ -627,12 +608,14 @@ The session is now over. According to the initial instructions, you can now brea
     // Winner message: Congratulations user1Uid, you showed...
     // Loser message: user2Uid, you lacked clarity...
 
+    // Extract the winner UID from the response
     val winnerRegex = Regex("The winner is:\\s*(\\S+)")
     val winnerMatch =
         winnerRegex.find(content) ?: throw IllegalStateException("No winner found in the response")
 
     val winnerUid = winnerMatch.groupValues[1]
 
+    // Extract the winner and loser messages from the response
     val winnerMessageRegex =
         Regex("Winner message:\\s*(.*?)(?=Loser message:|$)", RegexOption.DOT_MATCHES_ALL)
     val loserMessageRegex = Regex("Loser message:\\s*(.*)", RegexOption.DOT_MATCHES_ALL)
