@@ -13,7 +13,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +26,8 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
+import com.github.se.orator.ui.theme.cancelButtonColor
+import com.github.se.orator.ui.theme.cancelButtonTextColor
 
 /**
  * Composable function that displays a message indicating that the battle request has been sent, and
@@ -138,8 +139,8 @@ fun BattleRequestSentScreen(
                     navigationActions.navigateTo(TopLevelDestinations.HOME)
                     Toast.makeText(context, "Battle has been cancelled!", Toast.LENGTH_SHORT).show()
                   },
-                  textColor = Color.White,
-                  buttonColor = Color.Red)
+                  textColor = cancelButtonTextColor,
+                  buttonColor = cancelButtonColor)
             }
       })
 }
