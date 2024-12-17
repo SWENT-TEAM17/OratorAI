@@ -768,11 +768,15 @@ fun BattlePopup(
 }
 
 /**
- * Builds a one-line description of the battle based on the [InterviewContext].
+ * Builds a short description of the battle based on the [InterviewContext].
  *
  * @param context The [InterviewContext] containing battle details.
- * @return A one-line description string.
+ * @return A short description string.
  */
 fun buildBattleDescription(context: InterviewContext): String {
-  return "Battle Context: ${context.interviewType} for ${context.targetPosition} at ${context.companyName}."
+  return """
+      Interview Battle Context: ${context.interviewType} for ${context.targetPosition} at ${context.companyName}.
+      Job description: ${context.jobDescription}
+      """
+      .trimIndent()
 }
