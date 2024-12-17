@@ -2,10 +2,10 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
-import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.utils.formatDate
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.mapToAnalysisData
 import com.github.se.orator.utils.mapToSpeechBattle
 import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
@@ -251,19 +251,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             // Extract 'recentData' list
             val recentDataList =
                 (statisticsMap["recentData"] as? List<Map<String, Any>>) ?: emptyList()
-            val recentData =
-                recentDataList.map { dataMap ->
-                  AnalysisData(
-                      transcription = dataMap["transcription"] as? String ?: "",
-                      fillerWordsCount = (dataMap["fillerWordsCount"] as? Number)?.toInt() ?: -1,
-                      averagePauseDuration =
-                          (dataMap["averagePauseDuration"] as? Number)?.toDouble() ?: -1.0,
-                      sentimentScore = (dataMap["sentimentScore"] as? Number)?.toDouble() ?: 0.0,
-                      talkTimePercentage =
-                          (dataMap["talkTimePercentage"] as? Number)?.toDouble() ?: -1.0,
-                      talkTimeSeconds = (dataMap["talkTimeSeconds"] as? Number)?.toDouble() ?: -1.0,
-                      pace = (dataMap["pace"] as? Number)?.toInt() ?: -1)
-                }
+            val recentData = recentDataList.map { dataMap -> mapToAnalysisData(dataMap) }
             // Extract means
             val talkTimeSecMean = (it["talkTimeSecMean"] as? Number)?.toDouble() ?: 0.0
             val talkTimePercMean = (it["talkTimePercMean"] as? Number)?.toDouble() ?: 0.0

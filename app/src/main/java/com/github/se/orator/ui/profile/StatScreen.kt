@@ -194,9 +194,12 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String, yMin: F
               .padding(start = paddingExtraLarge, top = paddingSmall)
               .testTag(testTag)) {
         // Use the provided yMin and yMax instead of computing from data
-        val minY = yMin
-        val maxY = yMax
-        val yRange = maxY - minY
+        val maxY = yValues.maxOrNull() ?: FULL // full being the const value for 1f
+        val minY = ZERO // zero for the value 0f
+        var yRange = maxY - minY
+        if (yRange < 9f) {
+          yRange = 9f
+        }
 
         // If by any chance yRange is 0, fallback to 1f
         val adjustedYRange = if (yRange == ZERO) FULL else yRange
