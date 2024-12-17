@@ -2,10 +2,10 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
-import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.utils.formatDate
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.mapToAnalysisData
 import com.github.se.orator.utils.mapToSpeechBattle
 import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
@@ -15,8 +15,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
-import java.util.ArrayDeque
 import java.util.Date
+import kotlin.math.floor
 
 /**
  * Repository class for managing user profiles in Firestore.
@@ -248,10 +248,10 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             val successfulSessions =
                 successfulSessionsMap.mapValues { entry -> entry.value.toInt() }
 
-            // Extract 'recentData' queue
-            val recentData =
-                it["recentData"] as? kotlin.collections.ArrayDeque<AnalysisData>
-                    ?: kotlin.collections.ArrayDeque<AnalysisData>()
+            // Extract 'recentData' list
+            val recentDataList =
+                (statisticsMap["recentData"] as? List<Map<String, Any>>) ?: emptyList()
+            val recentData = recentDataList.map { dataMap -> mapToAnalysisData(dataMap) }
             // Extract means
             val talkTimeSecMean = (it["talkTimeSecMean"] as? Number)?.toDouble() ?: 0.0
             val talkTimePercMean = (it["talkTimePercMean"] as? Number)?.toDouble() ?: 0.0
@@ -685,7 +685,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
 
     // Sum the elements and divide by the size of the list
     val sum = values.sum()
-    return sum / values.size
+    return floor((sum / values.size) * 100) / 100
   }
 
   override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
