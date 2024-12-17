@@ -90,7 +90,7 @@ class SpeakingViewModel(
    *
    * @param audioFile : The audio file to transcript - corresponds to the offline mode recording
    * @param prompts : String -> String mapping that maps the interviews to the companies, target job
-   *   position, and interview ID
+   *   position, interview ID, chatGPTresponse, transcription, and transcribed
    * @param viewModel : chat view model that is needed to get the GPT response
    * @param offlinePromptsFunctions : offline prompt functions and variables needed to write to
    *   files
@@ -105,7 +105,7 @@ class SpeakingViewModel(
     // Launch a coroutine to have this run in the background and parallelize
     viewModelScope.launch {
       val ID = prompts?.get("ID") ?: "00000000"
-      offlinePromptsFunctions.stopFeedback(ID, context)
+      //offlinePromptsFunctions.stopFeedback(ID, context)
       // Wait for the transcript
       val notTranscribing =
           offlinePromptsFunctions.changePromptStatus(ID, context, "transcribed", "1")

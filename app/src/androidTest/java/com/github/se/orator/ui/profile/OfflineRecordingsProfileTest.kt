@@ -5,6 +5,8 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepository
@@ -24,6 +26,7 @@ class OfflineRecordingsProfileTest {
   private lateinit var speakingViewModel: SpeakingViewModel
   private lateinit var speakingRepository: SpeakingRepository
   private lateinit var apiLinkViewModel: ApiLinkViewModel
+  private lateinit var offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 
   @Before
   fun setUp() {
@@ -32,6 +35,7 @@ class OfflineRecordingsProfileTest {
     userProfileRepository = mock(UserProfileRepository::class.java)
     userProfileViewModel = UserProfileViewModel(userProfileRepository)
     apiLinkViewModel = ApiLinkViewModel()
+    offlinePromptsFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
 
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
@@ -49,7 +53,7 @@ class OfflineRecordingsProfileTest {
     //            )
     //        )
     composeTestRule.setContent {
-      OfflineRecordingsProfileScreen(navigationActions, speakingViewModel)
+      OfflineRecordingsProfileScreen(navigationActions, speakingViewModel, offlinePromptsFunctions)
     }
     //
     //        composeTestRule.onNodeWithTag("prompt_card_0").assertIsDisplayed()
@@ -67,7 +71,7 @@ class OfflineRecordingsProfileTest {
     //            )
     //        )
     composeTestRule.setContent {
-      OfflineRecordingsProfileScreen(navigationActions, speakingViewModel)
+      OfflineRecordingsProfileScreen(navigationActions, speakingViewModel, offlinePromptsFunctions)
     }
 
     composeTestRule.onNodeWithTag("no_prompts_text").isDisplayed()

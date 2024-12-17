@@ -141,12 +141,6 @@ class OfflinePromptsFunctions : OfflinePromptsFunctionsInterface {
     file.writeText(prompt)
     _fileData.value = prompt
     Log.d("wrote to file $fileName", "$prompt")
-    //        if (fileContents == "0//!") {
-    //            file.writeText(prompt)
-    //        }
-    //        else {
-    //            Log.d("in writeToPromptFile function: ", "file is not empty!")
-    //        }
   }
 
   override fun readPromptTextFile(context: Context, ID: String) {
