@@ -68,6 +68,8 @@ fun BattleRequestSentScreen(
       if (event == Lifecycle.Event.ON_STOP) {
         if (battleStatus == BattleStatus.PENDING) {
           battleViewModel.cancelBattle(battleId)
+          Toast.makeText(context, "Battle cancelled", Toast.LENGTH_LONG).show()
+          navigationActions.navigateTo(TopLevelDestinations.HOME)
           Log.d("BattleRequestSentScreen", "Battle canceled due to app backgrounded.")
         }
       }
