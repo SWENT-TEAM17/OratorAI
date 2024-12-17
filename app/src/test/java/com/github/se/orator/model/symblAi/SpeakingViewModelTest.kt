@@ -102,88 +102,54 @@ class SpeakingViewModelTest {
     verify(speakingRepository).startRecording()
     verify(speakingRepository).stopRecording()
   }
-  //
-  //  @Test
-  //  fun `getTranscriptAndGetGPTResponse requests GPT response after transcript`() =
-  //      runTest(testDispatcher) {
-  //        // mocking
-  //        val audioFile = mock<File>()
-  //        val prompts =
-  //            mapOf("ID" to "00000000", "targetCompany" to "google", "jobPosition" to
-  // "researcher",
-  //              "transcribed" to "1", "transcription" to "hello!", "GPTresponse" to "1")
-  //        val chatViewModel =
-  //            mock<ChatViewModel> { on { isLoading }.thenReturn(MutableStateFlow(false)) }
-  //        val offlinePromptsFunctions = mock<OfflinePromptsFunctionsInterface>()
-  //
-  //        whenever(chatViewModel.isLoading).thenReturn(MutableStateFlow(false))
-  //
-  //        whenever(speakingRepository.getTranscript(eq(audioFile), any(), any())).thenAnswer {
-  //          val onSuccess = it.arguments[1] as (AnalysisData) -> Unit
-  //          onSuccess(
-  //              mock<AnalysisData>().apply {
-  //                whenever(transcription).thenReturn("Test transcription")
-  //              })
-  //        }
-  //
-  //        // calling get transcript and then gpt response
-  //        speakingViewModel.getTranscriptAndGetGPTResponse(
-  //            audioFile, prompts, chatViewModel, context, offlinePromptsFunctions)
-  //
-  //        // waiting for isLoading to be checked since it's in a separate thread
-  //        advanceUntilIdle()
-  //        advanceUntilIdle()
-  //        advanceUntilIdle()
-  //        advanceUntilIdle()
-  //        // assert the function is being called
-  //        verify(chatViewModel)
-  //            .offlineRequest(any(), eq("google"), eq("researcher"), eq("00000000"), any())
-  //      }
 
   @Test
-  fun `getTranscriptAndGetGPTResponse requests GPT response after transcript`() =
-      runTest(testDispatcher) {
-        // Arrange
-        val audioFile = mock<File>()
-        val prompts =
-            mapOf(
-                "ID" to "00000000",
-                "targetCompany" to "Google",
-                "jobPosition" to "Researcher",
-                "transcribed" to "1",
-                "transcription" to "Hello!",
-                "GPTresponse" to "1")
-        val chatViewModel =
-            mock<ChatViewModel> { on { isLoading }.thenReturn(MutableStateFlow(false)) }
-        val offlinePromptsFunctions = mock<OfflinePromptsFunctionsInterface>()
+  fun `getTranscriptAndGetGPTResponse requests GPT response after transcript`() = runTest {
+    // Arrange
+    val audioFile = mock<File>() // Audio file mock
+    val prompts =
+        mapOf(
+            "ID" to "00000000",
+            "targetCompany" to "Google",
+            "jobPosition" to "Researcher",
+            "transcribed" to "1",
+            "transcription" to "Hello!",
+            "GPTresponse" to "1")
 
-        whenever(
-                offlinePromptsFunctions.changePromptStatus(
-                    any(), any(), eq("transcribed"), eq("1")))
-            .thenReturn(true)
+    val chatViewModel = mock<ChatViewModel> { on { isLoading }.thenReturn(MutableStateFlow(false)) }
 
-        whenever(offlinePromptsFunctions.getPromptMapElement(any(), eq("GPTresponse"), any()))
-            .thenReturn("1")
+    val offlinePromptsFunctions = mock<OfflinePromptsFunctionsInterface>()
 
-        whenever(offlinePromptsFunctions.getPromptMapElement(any(), eq("transcription"), any()))
-            .thenReturn("Test transcription")
+    // Mock changePromptStatus to return true for updating "transcribed"
+    whenever(offlinePromptsFunctions.changePromptStatus(any(), any(), eq("transcribed"), eq("1")))
+        .thenReturn(true)
 
-        whenever(chatViewModel.isLoading).thenReturn(MutableStateFlow(false))
+    // Mock the retrieval of the GPTresponse and transcription
+    whenever(offlinePromptsFunctions.getPromptMapElement("00000000", "GPTresponse", context))
+        .thenReturn("1")
+    whenever(offlinePromptsFunctions.getPromptMapElement("00000000", "transcription", context))
+        .thenReturn("Test transcription")
 
-        // Act
-        speakingViewModel.getTranscriptAndGetGPTResponse(
-            audioFile, prompts, chatViewModel, context, offlinePromptsFunctions)
+    // Act
+    speakingViewModel.getTranscriptAndGetGPTResponse(
+        audioFile, prompts, chatViewModel, context, offlinePromptsFunctions)
 
-        advanceUntilIdle() // Ensures coroutine execution completes
+    // Ensure all coroutines finish executing
+    advanceUntilIdle()
 
-        // Assert
-        verify(offlinePromptsFunctions).changePromptStatus("00000000", context, "transcribed", "1")
-        verify(chatViewModel)
-            .offlineRequest(
-                eq("Test transcription"),
-                eq("Google"),
-                eq("Researcher"),
-                eq("00000000"),
-                eq(context))
-      }
+    // Assert
+    // Verify that the transcribed status was updated
+    verify(offlinePromptsFunctions)
+        .changePromptStatus(eq("00000000"), eq(context), eq("transcribed"), eq("1"))
+
+    // Verify that the offlineRequest method in ChatViewModel was called with correct values
+    verify(chatViewModel)
+        .offlineRequest(
+            eq("Test transcription"), // The transcription text
+            eq("Google"), // Target company
+            eq("Researcher"), // Job position
+            eq("00000000"), // Interview ID
+            eq(context) // Context
+            )
+  }
 }
