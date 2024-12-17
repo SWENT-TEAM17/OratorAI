@@ -62,6 +62,7 @@ fun PreviousRecordingsFeedbackScreen(
   val fileData by offlinePromptsFunctions.fileData.collectAsState()
 
   LaunchedEffect(Unit) {
+    Log.d("aa", "launching")
     // clearing old display text
     offlinePromptsFunctions.clearDisplayText()
     // read the file containing interviewer's response
@@ -82,8 +83,8 @@ fun PreviousRecordingsFeedbackScreen(
   // if there isn't already an interviewer response: transcribe text + request a gpt prompt
   if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
     Log.d("in pre ", "calling get transcript and gpt response $fileData")
-      speakingViewModel.getTranscriptAndGetGPTResponse(
-          audioFile, prompts, viewModel, context, offlinePromptsFunctions)
+    speakingViewModel.getTranscriptAndGetGPTResponse(
+        audioFile, prompts, viewModel, context, offlinePromptsFunctions)
   }
 
   // text corresponding to interviewer's response

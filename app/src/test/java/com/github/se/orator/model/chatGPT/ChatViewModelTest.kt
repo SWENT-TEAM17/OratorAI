@@ -171,7 +171,7 @@ class ChatViewModelTest {
   fun setUp() {
     Dispatchers.setMain(testDispatcher) // Set the test dispatcher
 
-      context = mock(Context::class.java)
+    context = mock(Context::class.java)
     chatGPTService = mock(ChatGPTService::class.java)
     apiLinkViewModel = mock(ApiLinkViewModel::class.java)
 

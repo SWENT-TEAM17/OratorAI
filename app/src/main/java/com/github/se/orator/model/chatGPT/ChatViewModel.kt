@@ -282,14 +282,15 @@ class ChatViewModel(
 
         val response = chatGPTService.getChatCompletion(request)
 
-          // if the response is not empty then write to the file
-        if (!has_responded.value) {
-          response.choices.firstOrNull()?.message?.let { responseMessage ->
-            _response.value = responseMessage.content
-            has_responded.value = true
-            Log.d("response in offline request in chatViewModel", "$responseMessage.content")
-            offlinePromptsFunctions.writeToPromptFile(context, interviewID, _response.value)
-          }
+        Log.d("a", "has responded ${has_responded.value} is loading ${isLoading}")
+        // if the response is not empty then write to the file
+        Log.d("babushka", "has responded is false!!!")
+        Log.d("a", "has responded ${has_responded.value} is loading ${isLoading}")
+        response.choices.firstOrNull()?.message?.let { responseMessage ->
+          _response.value = responseMessage.content
+          has_responded.value = true
+          Log.d("response in offline request in chatViewModel", "$responseMessage.content")
+          offlinePromptsFunctions.writeToPromptFile(context, interviewID, _response.value)
         }
       } catch (e: Exception) {
         handleError(e)

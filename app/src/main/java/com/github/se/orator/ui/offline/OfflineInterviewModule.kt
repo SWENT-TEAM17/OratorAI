@@ -111,7 +111,7 @@ fun OfflineInterviewModule(
                           "jobPosition" to jobPosition,
                           "ID" to ID,
                           "transcribed" to "0",
-                      "GPTresponse" to "0",
+                          "GPTresponse" to "0",
                           "transcription" to ""),
               )
               offlinePromptsFunctions.createEmptyPromptFile(context, ID)

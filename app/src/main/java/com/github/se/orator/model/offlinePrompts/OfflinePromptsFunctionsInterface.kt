@@ -20,7 +20,9 @@ interface OfflinePromptsFunctionsInterface {
 
   fun clearDisplayText()
 
-  fun changePromptStatus(id: String, context: Context, entry: String,value: String = "1"): Boolean
+  fun changePromptStatus(id: String, context: Context, entry: String, value: String = "1"): Boolean
+
   fun getPromptMapElement(id: String, element: String, context: Context): String?
+
   fun stopFeedback(ID: String, context: Context)
 }
