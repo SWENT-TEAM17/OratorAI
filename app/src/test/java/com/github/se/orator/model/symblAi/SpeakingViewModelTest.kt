@@ -96,45 +96,94 @@ class SpeakingViewModelTest {
     val mockFile = mock<File>()
 
     // Act
-    speakingViewModel.getTranscript(mockFile)
+    speakingViewModel.getTranscript(mockFile, context = context, id = "12345678")
 
     // Assert
     verify(speakingRepository).startRecording()
     verify(speakingRepository).stopRecording()
   }
+  //
+  //  @Test
+  //  fun `getTranscriptAndGetGPTResponse requests GPT response after transcript`() =
+  //      runTest(testDispatcher) {
+  //        // mocking
+  //        val audioFile = mock<File>()
+  //        val prompts =
+  //            mapOf("ID" to "00000000", "targetCompany" to "google", "jobPosition" to
+  // "researcher",
+  //              "transcribed" to "1", "transcription" to "hello!", "GPTresponse" to "1")
+  //        val chatViewModel =
+  //            mock<ChatViewModel> { on { isLoading }.thenReturn(MutableStateFlow(false)) }
+  //        val offlinePromptsFunctions = mock<OfflinePromptsFunctionsInterface>()
+  //
+  //        whenever(chatViewModel.isLoading).thenReturn(MutableStateFlow(false))
+  //
+  //        whenever(speakingRepository.getTranscript(eq(audioFile), any(), any())).thenAnswer {
+  //          val onSuccess = it.arguments[1] as (AnalysisData) -> Unit
+  //          onSuccess(
+  //              mock<AnalysisData>().apply {
+  //                whenever(transcription).thenReturn("Test transcription")
+  //              })
+  //        }
+  //
+  //        // calling get transcript and then gpt response
+  //        speakingViewModel.getTranscriptAndGetGPTResponse(
+  //            audioFile, prompts, chatViewModel, context, offlinePromptsFunctions)
+  //
+  //        // waiting for isLoading to be checked since it's in a separate thread
+  //        advanceUntilIdle()
+  //        advanceUntilIdle()
+  //        advanceUntilIdle()
+  //        advanceUntilIdle()
+  //        // assert the function is being called
+  //        verify(chatViewModel)
+  //            .offlineRequest(any(), eq("google"), eq("researcher"), eq("00000000"), any())
+  //      }
 
   @Test
   fun `getTranscriptAndGetGPTResponse requests GPT response after transcript`() =
       runTest(testDispatcher) {
-        // mocking
+        // Arrange
         val audioFile = mock<File>()
         val prompts =
-            mapOf("ID" to "00000000", "targetCompany" to "google", "jobPosition" to "researcher")
+            mapOf(
+                "ID" to "00000000",
+                "targetCompany" to "Google",
+                "jobPosition" to "Researcher",
+                "transcribed" to "1",
+                "transcription" to "Hello!",
+                "GPTresponse" to "1")
         val chatViewModel =
             mock<ChatViewModel> { on { isLoading }.thenReturn(MutableStateFlow(false)) }
         val offlinePromptsFunctions = mock<OfflinePromptsFunctionsInterface>()
 
+        whenever(
+                offlinePromptsFunctions.changePromptStatus(
+                    any(), any(), eq("transcribed"), eq("1")))
+            .thenReturn(true)
+
+        whenever(offlinePromptsFunctions.getPromptMapElement(any(), eq("GPTresponse"), any()))
+            .thenReturn("1")
+
+        whenever(offlinePromptsFunctions.getPromptMapElement(any(), eq("transcription"), any()))
+            .thenReturn("Test transcription")
+
         whenever(chatViewModel.isLoading).thenReturn(MutableStateFlow(false))
 
-        whenever(speakingRepository.getTranscript(eq(audioFile), any(), any())).thenAnswer {
-          val onSuccess = it.arguments[1] as (AnalysisData) -> Unit
-          onSuccess(
-              mock<AnalysisData>().apply {
-                whenever(transcription).thenReturn("Test transcription")
-              })
-        }
-
-        // calling get transcript and then gpt response
+        // Act
         speakingViewModel.getTranscriptAndGetGPTResponse(
             audioFile, prompts, chatViewModel, context, offlinePromptsFunctions)
 
-        // waiting for isLoading to be checked since it's in a separate thread
-        advanceUntilIdle()
-        advanceUntilIdle()
-        advanceUntilIdle()
-        advanceUntilIdle()
-        // assert the function is being called
+        advanceUntilIdle() // Ensures coroutine execution completes
+
+        // Assert
+        verify(offlinePromptsFunctions).changePromptStatus("00000000", context, "transcribed", "1")
         verify(chatViewModel)
-            .offlineRequest(any(), eq("google"), eq("researcher"), eq("00000000"), any())
+            .offlineRequest(
+                eq("Test transcription"),
+                eq("Google"),
+                eq("Researcher"),
+                eq("00000000"),
+                eq(context))
       }
 }

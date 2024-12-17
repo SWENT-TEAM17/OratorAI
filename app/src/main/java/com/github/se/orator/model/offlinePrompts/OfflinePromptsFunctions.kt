@@ -120,6 +120,7 @@ class OfflinePromptsFunctions : OfflinePromptsFunctionsInterface {
     file.writeText(json)
   }
 
+  /**  */
   override fun loadPromptsFromFile(context: Context): List<Map<String, String>>? {
     val file = File(context.cacheDir, "prompts_cache.json")
     return if (file.exists()) {
@@ -128,6 +129,13 @@ class OfflinePromptsFunctions : OfflinePromptsFunctionsInterface {
     } else null
   }
 
+  /**
+   * Function to create an empty file that will soon contain the GPT response to the offline
+   * interview question Data will be stored in a .txt file
+   *
+   * @param context: context
+   * @param ID: ID of the offline interview to know where to store the gpt response
+   */
   override fun createEmptyPromptFile(context: Context, ID: String) {
     val fileName = "$ID.txt"
     val fileIsEmptyHeader = "0//!"
@@ -135,6 +143,7 @@ class OfflinePromptsFunctions : OfflinePromptsFunctionsInterface {
     file.writeText(fileIsEmptyHeader)
   }
 
+  /** Function used to overwrite a gpt prompt response to a file */
   override fun writeToPromptFile(context: Context, ID: String, prompt: String) {
     val fileName = "$ID.txt"
     val file = File(context.cacheDir, fileName)
@@ -143,6 +152,13 @@ class OfflinePromptsFunctions : OfflinePromptsFunctionsInterface {
     Log.d("wrote to file $fileName", "$prompt")
   }
 
+  /**
+   * Reads the value in a file containing the gpt prompt response to the interview question stores
+   * the value in the mutable state flow fileData to be accessable outside and mockable
+   *
+   * @param ID: id of the interview
+   * @param context: context
+   */
   override fun readPromptTextFile(context: Context, ID: String) {
     val fileName = "$ID.txt"
     Log.d("repo readptf", "inside the txt file $fileName")
@@ -170,6 +186,10 @@ class OfflinePromptsFunctions : OfflinePromptsFunctionsInterface {
     return entry[element]
   }
 
+  /**
+   * Function to change the requesting GPT feedback and transcribing states for the prompt in the
+   * mapping Used whenever an error happens with transcribing
+   */
   override fun stopFeedback(ID: String, context: Context) {
     readPromptTextFile(context, ID)
     if (_fileData.value == "Loading interviewer response...") {

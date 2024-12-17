@@ -44,7 +44,9 @@ class OfflineInterviewModuleTest {
 
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-    composeTestRule.setContent { OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsFunctions) }
+    composeTestRule.setContent {
+      OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsFunctions)
+    }
   }
 
   @Test

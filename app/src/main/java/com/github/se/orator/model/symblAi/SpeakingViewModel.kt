@@ -105,7 +105,7 @@ class SpeakingViewModel(
     // Launch a coroutine to have this run in the background and parallelize
     viewModelScope.launch {
       val ID = prompts?.get("ID") ?: "00000000"
-      //offlinePromptsFunctions.stopFeedback(ID, context)
+      // offlinePromptsFunctions.stopFeedback(ID, context)
       // Wait for the transcript
       val notTranscribing =
           offlinePromptsFunctions.changePromptStatus(ID, context, "transcribed", "1")

@@ -5,7 +5,6 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -64,12 +63,6 @@ class OfflineRecordingsProfileTest {
 
   @Test
   fun testEverythingIsDisplayedNoPrompts() {
-    //        `when`(loadPromptsFromFile(any())).thenReturn(
-    //            listOf(
-    //                mapOf(
-    //                )
-    //            )
-    //        )
     composeTestRule.setContent {
       OfflineRecordingsProfileScreen(navigationActions, speakingViewModel, offlinePromptsFunctions)
     }

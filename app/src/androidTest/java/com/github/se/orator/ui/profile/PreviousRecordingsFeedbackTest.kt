@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
-import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -48,13 +47,13 @@ class PreviousRecordingsFeedbackTest {
     apiLinkViewModel = ApiLinkViewModel()
     chatGPTService = mock(ChatGPTService::class.java)
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
-      offlinePromptsFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
+    offlinePromptsFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
 
     mockPlayer = mock(AudioPlayer::class.java)
 
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-      `when`(offlinePromptsFunctions.fileData).thenReturn(MutableStateFlow("Loading").asStateFlow())
+    `when`(offlinePromptsFunctions.fileData).thenReturn(MutableStateFlow("Loading").asStateFlow())
   }
 
   @Test
@@ -119,10 +118,9 @@ class PreviousRecordingsFeedbackTest {
     }
 
     // Verify that the expected methods were called in the LaunchedEffect
-    //verify(speakingRepository).getTranscript(any(), any(), any())
+    // verify(speakingRepository).getTranscript(any(), any(), any())
 
-      verify(offlinePromptsFunctions).clearDisplayText()
-      verify(offlinePromptsFunctions).readPromptTextFile(any(), any())
-
+    verify(offlinePromptsFunctions).clearDisplayText()
+    verify(offlinePromptsFunctions).readPromptTextFile(any(), any())
   }
 }
