@@ -1,6 +1,8 @@
 package com.github.se.orator.model.speechBattle
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -80,7 +82,7 @@ class BattleViewModel(
    *
    * @param battleId The ID of the battle to accept.
    */
-  fun acceptBattle(battleId: String) {
+  fun acceptBattle(battleId: String, localContext: Context? = null) {
     val currentUserUid = userProfileViewModel.userProfile.value?.uid ?: return
 
     // Use getFriendUid to determine the friend's UID
@@ -94,6 +96,10 @@ class BattleViewModel(
               if (battle != null) {
                 // Set the practice context for the battle
                 apiLinkViewModel.updatePracticeContext(battle.context)
+
+                if (localContext != null) {
+                  Toast.makeText(localContext, "Battle accepted!", Toast.LENGTH_SHORT).show()
+                }
 
                 // Navigate to the battle chat screen with the battleId and userId
                 navigationActions.navigateToBattleScreen(battleId, currentUserUid)
@@ -119,10 +125,13 @@ class BattleViewModel(
    *
    * @param battleId The ID of the battle to decline.
    */
-  fun declineBattle(battleId: String) {
+  fun declineBattle(battleId: String, localContext: Context? = null) {
     battleRepository.updateBattleStatus(battleId, BattleStatus.CANCELLED) { success ->
       if (success) {
         // Battle declined successfully
+        if (localContext != null) {
+          Toast.makeText(localContext, "Battle declined.", Toast.LENGTH_SHORT).show()
+        }
       } else {
         Log.e("BattleViewModel", "Failed to decline battle")
       }

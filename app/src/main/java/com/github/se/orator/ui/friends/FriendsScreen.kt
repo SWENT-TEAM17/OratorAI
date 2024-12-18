@@ -390,20 +390,14 @@ fun ViewFriendsScreen(
                     onAccept = {
 
                       // Handle battle acceptance
-                      battleViewModel?.acceptBattle(battle.battleId)
+                      battleViewModel?.acceptBattle(battle.battleId, localContext)
                       selectedBattle = null
-
-                      // Show a toast
-                      Toast.makeText(localContext, "Battle accepted!", Toast.LENGTH_SHORT).show()
                     },
                     onDecline = {
 
                       // Handle battle decline
-                      battleViewModel?.declineBattle(battle.battleId)
+                      battleViewModel?.declineBattle(battle.battleId, localContext)
                       selectedBattle = null
-
-                      // Show a toast
-                      Toast.makeText(localContext, "Battle declined.", Toast.LENGTH_SHORT).show()
                     },
                     onDismiss = {
                       // Handle dialog dismissal
