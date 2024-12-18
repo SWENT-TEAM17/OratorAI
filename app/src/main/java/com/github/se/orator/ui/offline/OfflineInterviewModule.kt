@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
@@ -33,7 +34,6 @@ import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import kotlin.random.Random
-import savePromptsToFile
 
 fun generateRandomString(length: Int = 8): String {
   val charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -51,7 +51,8 @@ fun generateRandomString(length: Int = 8): String {
 @Composable
 fun OfflineInterviewModule(
     navigationActions: NavigationActions,
-    speakingViewModel: SpeakingViewModel
+    speakingViewModel: SpeakingViewModel,
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
   var targetCompany by remember { mutableStateOf("") }
   var jobPosition by remember { mutableStateOf("") }
@@ -102,14 +103,18 @@ fun OfflineInterviewModule(
         Button(
             onClick = {
               // this is for the profile screen to see previous interviews
-              savePromptsToFile(
+              offlinePromptsFunctions.savePromptsToFile(
                   context = context,
                   prompts =
                       mapOf(
                           "targetCompany" to targetCompany,
                           "jobPosition" to jobPosition,
-                          "ID" to ID),
+                          "ID" to ID,
+                          "transcribed" to "0",
+                          "GPTresponse" to "0",
+                          "transcription" to ""),
               )
+              offlinePromptsFunctions.createEmptyPromptFile(context, ID)
               speakingViewModel.interviewPromptNb.value = ID
               navigationActions.navigateTo(Screen.PRACTICE_QUESTIONS_SCREEN)
             },

@@ -320,4 +320,14 @@ class BattleViewModel(
       }
     }
   }
+
+  fun cancelBattle(battleId: String) {
+    battleRepository.updateBattleStatus(battleId, BattleStatus.CANCELLED) { success ->
+      if (success) {
+        Log.d("BattleViewModel", "Battle cancelled successfully.")
+      } else {
+        Log.e("BattleViewModel", "Failed to cancel battle.")
+      }
+    }
+  }
 }

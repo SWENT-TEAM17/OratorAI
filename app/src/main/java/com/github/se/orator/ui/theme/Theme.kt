@@ -266,7 +266,7 @@ object AppDimensions {
   const val FULL: Float = 1f // Assuming this is a constant and doesn't need scaling
   const val ZERO: Float = 0f
   const val X_VALUE_FOR_OFFSET: Float = -20f
-  const val DRAW_TEXT_TICK_LABEL_X: Float = -50f
+  const val DRAW_TEXT_TICK_LABEL_X: Float = -70f
   const val DRAW_TEXT_TICK_LABEL_OFFSET_VALUE_FOR_Y: Float = 10f
   const val TICK_LABEL_TEXT_SIZE: Float = 20f
   const val AXIS_STROKE_WIDTH: Float = 10f
