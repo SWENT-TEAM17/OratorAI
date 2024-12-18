@@ -199,7 +199,7 @@ fun SpeakingPracticeModule(
                           },
                           modifier =
                               Modifier.fillMaxWidth()
-                                  .height(input.height)
+                                  .height(input.height + AppDimensions.paddingSmall)
                                   .border(
                                       width = AppDimensions.borderStrokeWidth,
                                       color = MaterialTheme.colorScheme.primary,
@@ -311,8 +311,10 @@ fun FocusAreaDropdown(
             colors =
                 TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                ))
+                    cursorColor = MaterialTheme.colorScheme.primary),
+            textStyle =
+                LocalTextStyle.current.copy(
+                    color = MaterialTheme.colorScheme.onSurface)) // Apply text color
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },

@@ -75,7 +75,7 @@ data class UserStatistics(
     val improvement: Float = 0.0f,
     val battleStats: List<SpeechBattle> = emptyList(),
     val previousRuns: List<SpeechStats> = emptyList(),
-    val recentData: ArrayDeque<AnalysisData> = ArrayDeque(),
+    val recentData: List<AnalysisData> = emptyList(),
     val talkTimeSecMean: Double = 0.0,
     val talkTimePercMean: Double = 0.0
 )
