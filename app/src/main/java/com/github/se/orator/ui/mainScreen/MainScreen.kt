@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.github.se.orator.R
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
@@ -53,22 +54,7 @@ fun MainScreen(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxSize(),
       content = { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-          Text(
-              modifier =
-                  Modifier.padding(start = AppDimensions.paddingXXLarge)
-                      .padding(top = AppDimensions.paddingXXXLarge)
-                      .testTag("mainScreenText1"),
-              text = "Find your",
-              style = AppTypography.largeTitleStyle, // Apply custom style for title
-              color = MaterialTheme.colorScheme.secondary)
-
-          Text(
-              modifier =
-                  Modifier.padding(start = AppDimensions.paddingXXLarge).testTag("mainScreenText2"),
-              text = "practice mode",
-              style = AppTypography.largeTitleStyle, // Apply custom style for subtitle
-              fontWeight = FontWeight.Bold,
-              color = MaterialTheme.colorScheme.primary)
+          MainTitle("mainScreenText1", "Find your", "mainScreenText2", "practice mode")
 
           ButtonRow(navigationActions)
 
@@ -95,9 +81,9 @@ fun ButtonRow(navigationActions: NavigationActions) {
       horizontalArrangement =
           Arrangement.spacedBy(AppDimensions.spacingXLarge, Alignment.CenterHorizontally),
   ) {
-    SectionButton("Popular") {
-      // Do nothing, stays on the same screen
-    }
+    SectionButton("Popular", {}, true)
+
+    SectionButton("Online", { navigationActions.navigateTo(Screen.ONLINE_SCREEN) }, false)
   }
 }
 
@@ -107,11 +93,18 @@ fun ButtonRow(navigationActions: NavigationActions) {
  * The implementation of a button
  */
 @Composable
-fun SectionButton(text: String, onClick: () -> Unit) {
+fun SectionButton(text: String, onClick: () -> Unit, isSelected: Boolean) {
+  var selectedColor = MaterialTheme.colorScheme.secondary
+  var boldIfSelected = FontWeight.Normal
+  if (isSelected) {
+    selectedColor = MaterialTheme.colorScheme.primary
+    boldIfSelected = FontWeight.Bold
+  }
   TextButton(onClick = onClick, modifier = Modifier.testTag("button")) {
     Text(
         text = text,
-        color = MaterialTheme.colorScheme.secondary,
+        color = selectedColor,
+        fontWeight = boldIfSelected,
         fontSize = AppFontSizes.buttonText)
   }
 }
@@ -144,6 +137,8 @@ fun AnimatedCards(navigationActions: NavigationActions) {
         items(modes) { mode ->
           ModeCard(
               text = mode.text,
+              note = "",
+              withNote = false,
               painter = painterResource(mode.imageRes),
               visible = true,
               onCardClick = {
@@ -156,6 +151,7 @@ fun AnimatedCards(navigationActions: NavigationActions) {
 
 /**
  * @param text the text describing each mode
+ * @param note an additional note
  * @param painter the image displayed for each mode
  * @param visible boolean used for the animation effect
  * @param onCardClick callback function for a on click event
@@ -163,7 +159,14 @@ fun AnimatedCards(navigationActions: NavigationActions) {
  * The implementation of a mode card
  */
 @Composable
-fun ModeCard(text: String, painter: Painter, visible: Boolean, onCardClick: () -> Unit) {
+fun ModeCard(
+    text: String,
+    note: String,
+    withNote: Boolean,
+    painter: Painter,
+    visible: Boolean,
+    onCardClick: () -> Unit
+) {
   AnimatedVisibility(
       visible = visible,
       enter = slideInVertically() + fadeIn(),
@@ -195,7 +198,47 @@ fun ModeCard(text: String, painter: Painter, visible: Boolean, onCardClick: () -
                         Modifier.padding(AppDimensions.paddingMedium)
                             .align(Alignment.CenterHorizontally),
                     color = MaterialTheme.colorScheme.primary)
+                if (withNote) {
+                  Text(
+                      text = note,
+                      fontSize = AppFontSizes.cardTitle,
+                      fontStyle = FontStyle.Italic,
+                      modifier =
+                          Modifier.padding(
+                                  start = AppDimensions.paddingMedium,
+                                  end = AppDimensions.paddingMedium,
+                                  bottom = AppDimensions.paddingMedium)
+                              .align(Alignment.CenterHorizontally),
+                      color = MaterialTheme.colorScheme.secondary)
+                }
               }
             }
       }
+}
+
+/**
+ * @param testTagText1 test tag for the first text
+ * @param text1 first text of the title
+ * @param testTagText2 test tag for the second text
+ * @param text2 second text of the title
+ *
+ * Composable for the title on the main screen and online screen
+ */
+@Composable
+fun MainTitle(testTagText1: String, text1: String, testTagText2: String, text2: String) {
+  Text(
+      modifier =
+          Modifier.padding(start = AppDimensions.paddingXXLarge)
+              .padding(top = AppDimensions.paddingXXXLarge)
+              .testTag(testTagText1),
+      text = text1,
+      style = AppTypography.largeTitleStyle, // Apply custom style for title
+      color = MaterialTheme.colorScheme.secondary)
+
+  Text(
+      modifier = Modifier.padding(start = AppDimensions.paddingXXLarge).testTag(testTagText2),
+      text = text2,
+      style = AppTypography.largeTitleStyle, // Apply custom style for subtitle
+      fontWeight = FontWeight.Bold,
+      color = MaterialTheme.colorScheme.primary)
 }
