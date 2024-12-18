@@ -336,54 +336,6 @@ class ChatViewModel(
 
       // Provide different levels of feedback based on how many questions the user answered
       return when {
-        answeredCount < 3 -> {
-          // Not enough answers for meaningful feedback
-          "You have only answered $answeredCount questions so far, which isn't enough for meaningful feedback. Please continue answering a few more questions or try restarting the session."
-        }
-        answeredCount in 3..7 -> {
-          // Partial feedback: the interview is not considered finished
-          // Optional: We could still call GPT for partial insights, or just provide a static
-          // message.
-          // For illustration, let's still call GPT but mention it's partial.
-
-          val analysisSummary = getAnalysisSummary()
-          Log.d("ChatViewModel", "Analysis Summary: $analysisSummary")
-
-          val practiceContextAsValue = practiceContext.value
-          if (practiceContextAsValue == null) {
-            Log.e("ChatViewModel", "Practice context is null")
-            return "There was an issue generating partial feedback. Please continue or restart."
-          }
-
-          val outcomeRequest =
-              "Please specifically say: You've answered $answeredCount questions so far, which gives some initial data but not enough for a full evaluation." +
-                  "          \n" +
-                  "          Once this is done, provide to the advanced AI agent some preliminary insights on my current performance. Make it clear that this feedback is partial and that continuing the session or answering more questions would lead to a more comprehensive analysis. Do not start a new question here just propose to continue the session continuing the session to lead to a more comprehensive analysis." +
-                  "          \n" +
-                  "In the end, please specifically say: please continue the session by clicking on the back button or end the session by clicking on the try again button."
-
-          // Build the message for GPT
-          val feedbackRequestMessage =
-              Message(
-                  role = "user",
-                  content =
-                      """
-            The session is partially complete. I've answered $answeredCount questions.
-            Here's an analysis of my responses so far:
-
-            $analysisSummary
-
-            $outcomeRequest
-          """
-                          .trimIndent())
-
-          val messages = _chatMessages.value + feedbackRequestMessage
-          val request = ChatRequest(model = "gpt-3.5-turbo", messages = messages)
-
-          val response = chatGPTService.getChatCompletion(request)
-          val content = response.choices.firstOrNull()?.message?.content
-          content ?: "Couldn't retrieve partial feedback at this moment."
-        }
         else -> {
           // answeredCount >= 8: Provide full, final feedback as if the session were complete
           // This is your original final feedback logic
