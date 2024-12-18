@@ -94,12 +94,9 @@ fun ButtonRow(navigationActions: NavigationActions) {
  */
 @Composable
 fun SectionButton(text: String, onClick: () -> Unit, isSelected: Boolean) {
-  var selectedColor = MaterialTheme.colorScheme.secondary
-  var boldIfSelected = FontWeight.Normal
-  if (isSelected) {
-    selectedColor = MaterialTheme.colorScheme.primary
-    boldIfSelected = FontWeight.Bold
-  }
+  val selectedColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+    val boldIfSelected = if (isSelected) FontWeight.Bold else FontWeight.Normal
+}
   TextButton(onClick = onClick, modifier = Modifier.testTag("button")) {
     Text(
         text = text,
