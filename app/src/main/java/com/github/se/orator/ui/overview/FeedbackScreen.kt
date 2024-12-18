@@ -41,7 +41,7 @@ fun FeedbackScreen(
 
   val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
   val userProfile by userProfileViewModel.userProfile.collectAsState()
-  val talkTimePercentageMean = userProfile?.statistics?.talkTimePercMean
+  val paceMean = userProfile?.statistics?.paceMean
   val talkTimeSecondsMean = userProfile?.statistics?.talkTimeSecMean
 
   val sessionType =
@@ -181,12 +181,11 @@ fun FeedbackScreen(
                               value = talkTimeSecondsMean?.let { "%.2f".format(it) } ?: "No data",
                               testTag = "talkTimeSeconds")
 
-                          // Display Talk Time Percentage
+                          // Display Pace
                           MetricDisplayItem(
-                              title = "Talk Time (Percentage)",
-                              value =
-                                  talkTimePercentageMean?.let { "%.2f%%".format(it) } ?: "No data",
-                              testTag = "talkTimePercentage")
+                              title = "Pace",
+                              value = paceMean?.let { "%.2f".format(it) } ?: "No data",
+                              testTag = "pace")
                         }
                   }
                   else -> {
