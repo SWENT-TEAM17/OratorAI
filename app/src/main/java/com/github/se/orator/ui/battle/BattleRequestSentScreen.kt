@@ -17,6 +17,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 
@@ -53,8 +54,9 @@ fun BattleRequestSentScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Battle Request Sent") },
+        TopNavigationMenu(
+            testTag = "topAppBar",
+            title = "Battle Request Sent",
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
                 Icon(
@@ -64,7 +66,7 @@ fun BattleRequestSentScreen(
                     tint = MaterialTheme.colorScheme.onSurface)
               }
             },
-            modifier = Modifier.testTag("topAppBar"))
+        )
       },
       content = { innerPadding ->
         Column(

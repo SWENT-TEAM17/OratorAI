@@ -30,8 +30,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +46,7 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
 
@@ -95,13 +94,9 @@ fun AddFriendsScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Add a friend",
-                  modifier = Modifier.testTag("addFriendTitle"),
-                  color = MaterialTheme.colorScheme.onSurface)
-            },
+        TopNavigationMenu(
+            textTestTag = "addFriendTitle",
+            title = "Add a friend",
             navigationIcon = {
               IconButton(
                   onClick = {
@@ -113,10 +108,7 @@ fun AddFriendsScreen(
                         contentDescription = "Back",
                         tint = MaterialTheme.colorScheme.onSurface)
                   }
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer))
+            })
       },
       bottomBar = {
         BottomNavigationMenu(

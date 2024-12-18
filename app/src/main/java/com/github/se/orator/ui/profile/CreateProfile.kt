@@ -22,7 +22,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +41,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.profile.UserStatistics
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
@@ -77,8 +77,9 @@ fun CreateAccountScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("") },
+        TopNavigationMenu(
+            textTestTag = "createProfileTitle",
+            title = "Create your Orator profile",
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -86,30 +87,14 @@ fun CreateAccountScreen(
                     Image(
                         painter = painterResource(id = R.drawable.chevron_left),
                         contentDescription = "Back",
-                        modifier =
-                            Modifier.size(AppDimensions.iconSizeSmall)
-                                .testTag("BackImage") // Replaced 32.dp
-                        )
+                        modifier = Modifier.size(AppDimensions.iconSizeSmall).testTag("BackImage"))
                   }
-            },
-            backgroundColor = AppColors.surfaceColor, // Replaced Color.White
-            contentColor = AppColors.textColor, // Replaced Color.Black
-            elevation = AppDimensions.appBarElevation // Replaced 4.dp
-            )
+            })
       },
       content = {
         Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(it)
-                    .padding(AppDimensions.paddingMedium), // Replaced 16.dp
+            modifier = Modifier.fillMaxSize().padding(it).padding(AppDimensions.paddingMedium),
             horizontalAlignment = Alignment.CenterHorizontally) {
-              Text(
-                  text = "Create your Orator profile", // Adjust the title text here
-                  style = AppTypography.smallTitleStyle,
-                  modifier =
-                      Modifier.padding(bottom = AppDimensions.paddingLarge) // Add bottom padding
-                  )
 
               // Profile Picture
               Box(
@@ -178,7 +163,7 @@ fun CreateAccountScreen(
                   singleLine = true,
                   colors =
                       TextFieldDefaults.textFieldColors(
-                          textColor = AppColors.textColor, // Text color
+                          textColor = AppColors.textColor,
                           placeholderColor = AppColors.placeholderColor, // Placeholder text color
                           backgroundColor =
                               AppColors.placeholderColor, // Background color of the TextField

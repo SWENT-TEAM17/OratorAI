@@ -11,7 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +23,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 
@@ -63,10 +63,7 @@ fun WaitingForCompletionScreen(
   }
 
   Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("Waiting for Completion", color = MaterialTheme.colorScheme.onSurface) })
-      },
+      topBar = { TopNavigationMenu(title = "Waiting for Completion") },
       content = { innerPadding ->
         Column(
             modifier =

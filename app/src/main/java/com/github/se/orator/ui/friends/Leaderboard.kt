@@ -23,6 +23,7 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import java.util.Locale
@@ -269,13 +270,8 @@ fun TitleAppBar(
     buttonTestTag: String,
     iconTestTag: String
 ) {
-  TopAppBar(
-      title = {
-        Text(
-            title,
-            modifier = Modifier.testTag(titleTestTAg),
-            color = MaterialTheme.colorScheme.onSurface)
-      },
+  TopNavigationMenu(
+      title = title,
       navigationIcon = {
         IconButton(
             onClick = {
@@ -288,10 +284,7 @@ fun TitleAppBar(
                   modifier = Modifier.testTag(iconTestTag),
                   tint = MaterialTheme.colorScheme.onSurface)
             }
-      },
-      colors =
-          TopAppBarDefaults.topAppBarColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainer))
+      })
 }
 
 /**

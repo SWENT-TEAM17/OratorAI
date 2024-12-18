@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -26,7 +25,6 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
@@ -51,6 +49,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
@@ -82,18 +81,9 @@ fun EditProfileScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding().testTag("edit_profile_app_bar"),
-            backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
-            elevation = AppDimensions.elevationSmall,
-            title = {
-              Text(
-                  modifier = Modifier.testTag("edit_profile_title"),
-                  text = "Edit Profile",
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.onSurface,
-              )
-            },
+        TopNavigationMenu(
+            testTag = "edit_profile_title",
+            title = "Edit Profile",
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
