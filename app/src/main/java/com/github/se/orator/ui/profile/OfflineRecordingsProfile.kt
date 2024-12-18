@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Card
@@ -40,36 +41,38 @@ fun PromptCard(
     speakingViewModel: SpeakingViewModel,
     promptID: String
 ) {
-  Card(
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(AppDimensions.cardSectionHeight)
-              .padding(AppDimensions.paddingSmall)
-              .testTag("prompt_card_$index"),
-      onClick = {
-        speakingViewModel.interviewPromptNb.value = promptID
-        Log.d(
-            "OfflineRecordingsProfile: ",
-            "opening the file : ${speakingViewModel.interviewPromptNb.value}.mp3")
-        navigationActions.navigateTo(Screen.FEEDBACK_SCREEN)
-      }) {
+    Card(
+        modifier =
+        Modifier.fillMaxWidth()
+            .height(AppDimensions.cardSectionHeightMedium)
+            .padding(AppDimensions.paddingSmall)
+            .testTag("prompt_card_$index"),
+        onClick = {
+            speakingViewModel.interviewPromptNb.value = promptID
+            Log.d(
+                "OfflineRecordingsProfile: ",
+                "opening the file : ${speakingViewModel.interviewPromptNb.value}.mp3")
+            navigationActions.navigateTo(Screen.FEEDBACK_SCREEN)
+        }) {
         Column(
             modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium),
             verticalArrangement = Arrangement.Center) {
-              Text(
-                  text = "Interview ${index + 1}",
-                  fontSize = AppFontSizes.bodyLarge,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("prompt_title_$index"))
-              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-              prompt.forEach { (key, value) ->
-                Text(
-                    text = "Company: $value",
-                    fontSize = AppFontSizes.bodySmall,
-                    modifier = Modifier.testTag("prompt_detail_${index}_$key"))
-              }
-            }
-      }
+            Text(
+                text = "Interview ${index + 1}",
+                fontSize = AppFontSizes.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("prompt_title_$index"))
+            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+            Text(
+                text = "Company: ${prompt["targetCompany"]}",
+                fontSize = AppFontSizes.bodySmall
+            )
+            Text(
+                text = "Job position: ${prompt["jobPosition"]}",
+                fontSize = AppFontSizes.bodySmall
+            )
+        }
+    }
 }
 
 @Composable
@@ -79,28 +82,31 @@ fun PromptCardsSection(
     speakingViewModel: SpeakingViewModel,
     offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-  val prompts =
-      offlinePromptsFunctions.loadPromptsFromFile(context) // Load the prompts from the file
+    val prompts =
+        offlinePromptsFunctions.loadPromptsFromFile(context) // Load the prompts from the file
 
-  Column(
-      modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium),
-      horizontalAlignment = Alignment.CenterHorizontally) {
+    LazyColumn (
+        modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium),
+        horizontalAlignment = Alignment.CenterHorizontally) {
         if (prompts.isNullOrEmpty()) {
-          // If no prompts exist, show a placeholder text
-          Text(
-              text = "No prompts found.",
-              style = AppTypography.bodyLargeStyle,
-              modifier = Modifier.testTag("no_prompts_text"))
+            // If no prompts exist, show a placeholder text
+            item {
+                Text(
+                    text = "No prompts found.",
+                    style = AppTypography.bodyLargeStyle,
+                    modifier = Modifier.testTag("no_prompts_text")
+                )
+            }
         } else {
-          // Display a card for each prompt
-          prompts.forEachIndexed { index, prompt ->
-            val promptID = prompt.get("ID") ?: "audio.mp3"
-            PromptCard(
-                prompt = prompt, index = index, navigationActions, speakingViewModel, promptID)
-            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-          }
+            // Display a card for each prompt
+            prompts.forEachIndexed { index, prompt ->
+                val promptID = prompt.get("ID") ?: "audio.mp3"
+                item {PromptCard(
+                    prompt = prompt, index = index, navigationActions, speakingViewModel, promptID)}
+                item {Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))}
+            }
         }
-      }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,24 +116,24 @@ fun OfflineRecordingsProfileScreen(
     speakingViewModel: SpeakingViewModel,
     offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-  val context = LocalContext.current
-  Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
-    TopAppBar(
-        title = {
-          Text("Previous sessions", modifier = Modifier.testTag("previous_sessions_test"))
-        },
-        navigationIcon = {
-          IconButton(
-              onClick = { navigationActions.goBack() },
-              modifier = Modifier.testTag("back_button")) {
-                androidx.compose.material.Icon(
-                    Icons.Outlined.ArrowBackIosNew,
-                    contentDescription = "Back button",
-                    modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                    tint = Color.Black)
-              }
-        })
-    Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-    PromptCardsSection(context, navigationActions, speakingViewModel, offlinePromptsFunctions)
-  }
+    val context = LocalContext.current
+    Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
+        TopAppBar(
+            title = {
+                Text("Previous sessions", modifier = Modifier.testTag("previous_sessions_test"))
+            },
+            navigationIcon = {
+                IconButton(
+                    onClick = { navigationActions.goBack() },
+                    modifier = Modifier.testTag("back_button")) {
+                    androidx.compose.material.Icon(
+                        Icons.Outlined.ArrowBackIosNew,
+                        contentDescription = "Back button",
+                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                        tint = Color.Black)
+                }
+            })
+        Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+        PromptCardsSection(context, navigationActions, speakingViewModel, offlinePromptsFunctions)
+    }
 }

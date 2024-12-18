@@ -17,10 +17,12 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.PlayCircleOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,87 +54,114 @@ fun PreviousRecordingsFeedbackScreen(
     player: AudioPlayer = AndroidAudioPlayer(context),
     offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-  var prompts: Map<String, String>? =
-      offlinePromptsFunctions.loadPromptsFromFile(context)?.find {
-        it["ID"] == speakingViewModel.interviewPromptNb.value
-      }
-  var ID: String = prompts?.get("ID") ?: "audio.mp3"
-  var audioFile: File = File(context.cacheDir, "$ID.mp3")
-
-  val fileData by offlinePromptsFunctions.fileData.collectAsState()
-
-  LaunchedEffect(Unit) {
-    Log.d("aa", "launching")
-    // clearing old display text
-    offlinePromptsFunctions.clearDisplayText()
-    // read the file containing interviewer's response
-    offlinePromptsFunctions.readPromptTextFile(context, ID)
-
-    // retrieve previous interviews mapping
-    prompts =
+    var prompts: Map<String, String>? =
         offlinePromptsFunctions.loadPromptsFromFile(context)?.find {
-          it["ID"] == speakingViewModel.interviewPromptNb.value
+            it["ID"] == speakingViewModel.interviewPromptNb.value
         }
+    var ID: String = prompts?.get("ID") ?: "audio.mp3"
+    var audioFile: File = File(context.cacheDir, "$ID.mp3")
 
-    ID = prompts?.get("ID") ?: "audio.mp3"
-    audioFile = File(context.cacheDir, "$ID.mp3")
+    val fileData by offlinePromptsFunctions.fileData.collectAsState()
 
-    Log.d("PreviousRecordingsFeedbackScreen", "Screen is opened, running code.")
-  }
+    LaunchedEffect(Unit) {
+        Log.d("aa", "launching")
+        // clearing old display text
+        offlinePromptsFunctions.clearDisplayText()
+        // read the file containing interviewer's response
+        offlinePromptsFunctions.readPromptTextFile(context, ID)
 
-  // if there isn't already an interviewer response: transcribe text + request a gpt prompt
-  if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
-    Log.d("in pre ", "calling get transcript and gpt response $fileData")
-    speakingViewModel.getTranscriptAndGetGPTResponse(
-        audioFile, prompts, viewModel, context, offlinePromptsFunctions)
-  }
-
-  // text corresponding to interviewer's response
-  val displayText =
-      when {
-        fileData == "Loading interviewer response..." || fileData.isNullOrEmpty() -> {
-          "Processing your audio, please wait..."
-        }
-        else -> "Interviewer's response: $fileData"
-      }
-
-  // rest of UI elements
-  Column(
-      modifier =
-          Modifier.fillMaxSize()
-              .padding(AppDimensions.paddingMedium)
-              .testTag("RecordingReviewScreen"),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = displayText ?: "",
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.testTag("ResponseText"))
-
-        Button(
-            onClick = { player.playFile(audioFile) },
-            shape = AppShapes.circleShape,
-            modifier = Modifier.testTag("play_button"),
-            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface),
-            contentPadding = PaddingValues(0.dp)) {
-              Icon(
-                  Icons.Outlined.PlayCircleOutline,
-                  contentDescription = "Play button",
-                  modifier = Modifier.size(30.dp),
-                  tint = AppColors.primaryColor)
+        // retrieve previous interviews mapping
+        prompts =
+            offlinePromptsFunctions.loadPromptsFromFile(context)?.find {
+                it["ID"] == speakingViewModel.interviewPromptNb.value
             }
 
+        ID = prompts?.get("ID") ?: "audio.mp3"
+        audioFile = File(context.cacheDir, "$ID.mp3")
+
+        Log.d("PreviousRecordingsFeedbackScreen", "Screen is opened, running code.")
+    }
+
+    // if there isn't already an interviewer response: transcribe text + request a gpt prompt
+    if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
+        Log.d("in pre ", "calling get transcript and gpt response $fileData")
+        speakingViewModel.getTranscriptAndGetGPTResponse(
+            audioFile, prompts, viewModel, context, offlinePromptsFunctions)
+    }
+
+    // text corresponding to interviewer's response
+    val displayText =
+        when {
+            fileData == "Loading interviewer response..." || fileData.isNullOrEmpty() -> {
+                "Processing your audio, please wait..."
+            }
+            else -> "Interviewer's response: $fileData"
+        }
+
+    // rest of UI elements
+    Column(
+        modifier =
+        Modifier.fillMaxSize()
+            .padding(AppDimensions.paddingMedium)
+            .testTag("RecordingReviewScreen"),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty() ) {
+            LoadingUI()
+        }
+        else {
+            Text(
+                text = displayText ?: "",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.testTag("ResponseText"))
+
+            Button(
+                onClick = { player.playFile(audioFile) },
+                shape = AppShapes.circleShape,
+                modifier = Modifier.testTag("play_button"),
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface),
+                contentPadding = PaddingValues(0.dp)) {
+                Icon(
+                    Icons.Outlined.PlayCircleOutline,
+                    contentDescription = "Play button",
+                    modifier = Modifier.size(30.dp),
+                    tint = AppColors.primaryColor)
+            }
+
+        }
         Row(
             modifier = Modifier.fillMaxWidth().testTag("Back"),
             verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  imageVector = Icons.Filled.ArrowBack,
-                  contentDescription = "Back",
-                  modifier =
-                      Modifier.size(AppDimensions.iconSizeSmall)
-                          .clickable { navigationActions.goBack() }
-                          .testTag("BackButton"),
-                  tint = MaterialTheme.colorScheme.primary)
-            }
-      }
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier =
+                Modifier.size(AppDimensions.iconSizeSmall)
+                    .clickable { navigationActions.goBack() }
+                    .testTag("BackButton"),
+                tint = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+@Composable
+fun LoadingUI() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize().testTag("loadingColumn"), // Ensures the Column takes up the entire screen
+        verticalArrangement = Arrangement.Center, // Centers content vertically
+        horizontalAlignment = Alignment.CenterHorizontally // Centers content horizontally
+    ) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.onBackground,
+            strokeWidth = AppDimensions.strokeWidth,
+            modifier =
+            Modifier.size(AppDimensions.loadingIndicatorSize).testTag("loadingIndicator")
+        )
+        Text(
+            "Loading interviewer response...",
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.testTag("interviewerResponse")
+        )
+    }
 }
