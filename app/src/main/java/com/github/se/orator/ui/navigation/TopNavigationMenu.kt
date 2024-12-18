@@ -20,7 +20,7 @@ import com.github.se.orator.ui.theme.AppTypography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopNavigationMenu(
-    title: String,
+    title: String = "",
     actions: @Composable() (RowScope.() -> Unit) = {},
     navigationIcon: @Composable () -> Unit = {},
     testTag: String = "top_app_bar",

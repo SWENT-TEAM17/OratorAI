@@ -15,7 +15,7 @@ class TopNavBarTest {
   @Test
   fun topNavigationMenu_displaysDefaultContent() {
     // Set the content with default parameters
-    composeTestRule.setContent { TopNavigationMenu() }
+    composeTestRule.setContent { TopNavigationMenu("") }
 
     // Verify the top app bar with the default test tag is displayed
     composeTestRule.onNodeWithTag("top_app_bar").assertIsDisplayed()
@@ -24,7 +24,7 @@ class TopNavBarTest {
   @Test
   fun topNavigationMenu_displaysCustomTitle() {
     // Set the content with a custom title
-    composeTestRule.setContent { TopNavigationMenu(title = { Text("Custom Title") }) }
+    composeTestRule.setContent { TopNavigationMenu(title = "Custom Title") }
 
     // Verify the custom title is displayed
     composeTestRule.onNodeWithText("Custom Title").assertIsDisplayed()
