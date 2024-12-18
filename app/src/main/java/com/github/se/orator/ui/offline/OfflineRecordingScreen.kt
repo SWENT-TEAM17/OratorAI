@@ -30,6 +30,7 @@ import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 // TODO: remove this suppress and fix the permissions
 @SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
@@ -69,6 +70,8 @@ fun OfflineRecordingScreen(
 
   val colors = MaterialTheme.colorScheme
   val amplitudes = remember { mutableStateListOf<Float>() }
+  val feedbackMessage = remember { MutableStateFlow("Tap the mic to start recording") }
+
   handleAudioRecording(collState, permissionGranted, amplitudes)
 
   // back button
@@ -127,8 +130,8 @@ fun OfflineRecordingScreen(
                             analysisState.value = SpeakingRepository.AnalysisState.RECORDING
                           }
                           // what to do when user finishes recording a file
-                          else if (analysisState.value ==
-                              SpeakingRepository.AnalysisState.RECORDING) {
+                          else if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
+                              analysisState.value = SpeakingRepository.AnalysisState.IDLE
                             File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3")
                                 .also {
                                   Log.d(
@@ -137,8 +140,8 @@ fun OfflineRecordingScreen(
                                   recorder.stopRecording()
                                   fileSaved.value = true
                                 }
-                            analysisState.value = SpeakingRepository.AnalysisState.FINISHED
-                          } else {
+                          }
+                          else {
                             Log.d("offline recording screen issue", "Unrecognized analysis state!")
                           }
                         },
@@ -148,20 +151,23 @@ fun OfflineRecordingScreen(
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-              // Display feedback messages
-              val feedbackMessage =
-                  when (analysisState.value) {
-                    SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
-                    SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
-                    else ->
-                        when (viewModel.analysisError.value) {
-                          SpeakingError.NO_ERROR -> "Analysis finished."
-                          else -> "Finished recording"
-                        }
-                  }
+            LaunchedEffect (analysisState.value) {
+                feedbackMessage.value =
+                    when (analysisState.value) {
+                        SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
+                        SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
+                        else ->
+                            when (viewModel.analysisError.value) {
+                                SpeakingError.NO_ERROR -> "Analysis finished."
+                                else -> "Finished recording"
+                            }
+                    }
+                Log.d("in offline recording screen", "analysis state value is now ${analysisState.value}")
+                Log.d("aa", "feedback msg : ${feedbackMessage.value}")
+            }
 
               Text(
-                  feedbackMessage,
+                  feedbackMessage.value,
                   modifier = Modifier.testTag("mic_text"),
                   fontSize = AppFontSizes.bodyLarge,
                   color = colors.onSurface)
@@ -179,7 +185,7 @@ fun OfflineRecordingScreen(
               // button for user to click when he is done recording
               Button(
                   onClick = {
-                    if (fileSaved.value) {
+                    if (fileSaved.value && analysisState.value != SpeakingRepository.AnalysisState.RECORDING) {
                       viewModel.endAndSave()
                       fileSaved.value = false
                       navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)

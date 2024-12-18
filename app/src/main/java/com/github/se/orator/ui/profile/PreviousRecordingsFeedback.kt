@@ -107,7 +107,9 @@ fun PreviousRecordingsFeedbackScreen(
         }
 
   Scaffold(
-      topBar = { TopNavigationMenu(title = "Interview ",
+      topBar = {
+          val company = offlinePromptsFunctions.getPromptMapElement(ID, "targetCompany", context)
+          TopNavigationMenu(title = "$company interview",
           navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -116,7 +118,7 @@ fun PreviousRecordingsFeedbackScreen(
                       Icons.Outlined.ArrowBackIosNew,
                       contentDescription = "Back button",
                       modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                      tint = Color.Black)
+                      tint = MaterialTheme.colorScheme.onSurface)
               }
           })
 
@@ -150,7 +152,7 @@ fun PreviousRecordingsFeedbackScreen(
               HorizontalDivider()
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
               Text(
-                  text = "You answered: ${offlinePromptsFunctions.getPromptMapElement(ID, "transcription", context)}",
+                  text = offlinePromptsFunctions.getPromptMapElement(ID, "transcription", context).toString(),
                   color = MaterialTheme.colorScheme.primary,
                   modifier = Modifier.testTag("ResponseText"))
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
@@ -158,7 +160,7 @@ fun PreviousRecordingsFeedbackScreen(
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
             Text(
                 text = displayText ?: "",
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.testTag("ResponseText"))
 
           }

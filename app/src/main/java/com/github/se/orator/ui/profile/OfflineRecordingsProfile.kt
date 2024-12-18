@@ -14,8 +14,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,6 +49,7 @@ fun PromptCard(
               .height(AppDimensions.cardSectionHeightMedium)
               .padding(AppDimensions.paddingSmall)
               .testTag("prompt_card_$index"),
+      //colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurface),
       onClick = {
         speakingViewModel.interviewPromptNb.value = promptID
         Log.d(
@@ -61,12 +64,16 @@ fun PromptCard(
                   text = "Interview ${index + 1}",
                   fontSize = AppFontSizes.bodyLarge,
                   fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.primary,
                   modifier = Modifier.testTag("prompt_title_$index"))
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-              Text(text = "Company: ${prompt["targetCompany"]}", fontSize = AppFontSizes.bodySmall)
+              Text(text = "Company: ${prompt["targetCompany"]}",
+                  fontSize = AppFontSizes.bodySmall,
+                  color = MaterialTheme.colorScheme.primary)
               Text(
                   text = "Job position: ${prompt["jobPosition"]}",
-                  fontSize = AppFontSizes.bodySmall)
+                  fontSize = AppFontSizes.bodySmall,
+                  color = MaterialTheme.colorScheme.primary)
             }
       }
 }
@@ -126,7 +133,7 @@ fun OfflineRecordingsProfileScreen(
                     Icons.Outlined.ArrowBackIosNew,
                     contentDescription = "Back button",
                     modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                    tint = Color.Black)
+                    tint = MaterialTheme.colorScheme.onSurface)
               }
         })
     Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
