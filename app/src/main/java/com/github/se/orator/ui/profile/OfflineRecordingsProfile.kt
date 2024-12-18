@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Card
@@ -43,7 +44,7 @@ fun PromptCard(
   Card(
       modifier =
           Modifier.fillMaxWidth()
-              .height(AppDimensions.cardSectionHeight)
+              .height(AppDimensions.cardSectionHeightMedium)
               .padding(AppDimensions.paddingSmall)
               .testTag("prompt_card_$index"),
       onClick = {
@@ -62,12 +63,10 @@ fun PromptCard(
                   fontWeight = FontWeight.Bold,
                   modifier = Modifier.testTag("prompt_title_$index"))
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-              prompt.forEach { (key, value) ->
-                Text(
-                    text = "Company: $value",
-                    fontSize = AppFontSizes.bodySmall,
-                    modifier = Modifier.testTag("prompt_detail_${index}_$key"))
-              }
+              Text(text = "Company: ${prompt["targetCompany"]}", fontSize = AppFontSizes.bodySmall)
+              Text(
+                  text = "Job position: ${prompt["jobPosition"]}",
+                  fontSize = AppFontSizes.bodySmall)
             }
       }
 }
@@ -82,22 +81,26 @@ fun PromptCardsSection(
   val prompts =
       offlinePromptsFunctions.loadPromptsFromFile(context) // Load the prompts from the file
 
-  Column(
+  LazyColumn(
       modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (prompts.isNullOrEmpty()) {
           // If no prompts exist, show a placeholder text
-          Text(
-              text = "No prompts found.",
-              style = AppTypography.bodyLargeStyle,
-              modifier = Modifier.testTag("no_prompts_text"))
+          item {
+            Text(
+                text = "No prompts found.",
+                style = AppTypography.bodyLargeStyle,
+                modifier = Modifier.testTag("no_prompts_text"))
+          }
         } else {
           // Display a card for each prompt
           prompts.forEachIndexed { index, prompt ->
             val promptID = prompt.get("ID") ?: "audio.mp3"
-            PromptCard(
-                prompt = prompt, index = index, navigationActions, speakingViewModel, promptID)
-            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+            item {
+              PromptCard(
+                  prompt = prompt, index = index, navigationActions, speakingViewModel, promptID)
+            }
+            item { Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) }
           }
         }
       }
