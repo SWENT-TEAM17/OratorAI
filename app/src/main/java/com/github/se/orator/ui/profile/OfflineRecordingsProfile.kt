@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
@@ -30,7 +31,6 @@ import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppTypography
-import loadPromptsFromFile
 
 @Composable
 fun PromptCard(
@@ -76,9 +76,11 @@ fun PromptCard(
 fun PromptCardsSection(
     context: Context,
     navigationActions: NavigationActions,
-    speakingViewModel: SpeakingViewModel
+    speakingViewModel: SpeakingViewModel,
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-  val prompts = loadPromptsFromFile(context) // Load the prompts from the file
+  val prompts =
+      offlinePromptsFunctions.loadPromptsFromFile(context) // Load the prompts from the file
 
   Column(
       modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium),
@@ -105,7 +107,8 @@ fun PromptCardsSection(
 @Composable
 fun OfflineRecordingsProfileScreen(
     navigationActions: NavigationActions,
-    speakingViewModel: SpeakingViewModel
+    speakingViewModel: SpeakingViewModel,
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
   val context = LocalContext.current
   Column {
@@ -123,10 +126,9 @@ fun OfflineRecordingsProfileScreen(
                     tint = Color.Black)
               }
         })
-
     Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
       Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-      PromptCardsSection(context, navigationActions, speakingViewModel)
+      PromptCardsSection(context, navigationActions, speakingViewModel, offlinePromptsFunctions)
     }
   }
 }

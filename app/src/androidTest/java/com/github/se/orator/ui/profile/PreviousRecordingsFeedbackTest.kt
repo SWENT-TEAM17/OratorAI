@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.AudioPlayer
@@ -13,11 +14,14 @@ import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.ChatGPTService
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 
 class PreviousRecordingsFeedbackTest {
@@ -32,6 +36,7 @@ class PreviousRecordingsFeedbackTest {
   private lateinit var chatGPTService: ChatGPTService
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var mockPlayer: AudioPlayer
+  private lateinit var offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 
   @Before
   fun setUp() {
@@ -42,11 +47,13 @@ class PreviousRecordingsFeedbackTest {
     apiLinkViewModel = ApiLinkViewModel()
     chatGPTService = mock(ChatGPTService::class.java)
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+    offlinePromptsFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
 
     mockPlayer = mock(AudioPlayer::class.java)
 
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
+    `when`(offlinePromptsFunctions.fileData).thenReturn(MutableStateFlow("Loading").asStateFlow())
   }
 
   @Test
@@ -55,7 +62,8 @@ class PreviousRecordingsFeedbackTest {
       PreviousRecordingsFeedbackScreen(
           navigationActions = navigationActions,
           viewModel = chatViewModel,
-          speakingViewModel = speakingViewModel)
+          speakingViewModel = speakingViewModel,
+          offlinePromptsFunctions = offlinePromptsFunctions)
     }
     composeTestRule.onNodeWithTag("RecordingReviewScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("play_button").assertIsDisplayed()
@@ -69,7 +77,8 @@ class PreviousRecordingsFeedbackTest {
       PreviousRecordingsFeedbackScreen(
           navigationActions = navigationActions,
           viewModel = chatViewModel,
-          speakingViewModel = speakingViewModel)
+          speakingViewModel = speakingViewModel,
+          offlinePromptsFunctions = offlinePromptsFunctions)
     }
 
     // Click on the back button
@@ -87,7 +96,8 @@ class PreviousRecordingsFeedbackTest {
           navigationActions = navigationActions,
           viewModel = chatViewModel,
           speakingViewModel = speakingViewModel,
-          player = mockPlayer)
+          player = mockPlayer,
+          offlinePromptsFunctions = offlinePromptsFunctions)
     }
 
     // Click on the play button
@@ -103,10 +113,14 @@ class PreviousRecordingsFeedbackTest {
       PreviousRecordingsFeedbackScreen(
           navigationActions = navigationActions,
           viewModel = chatViewModel,
-          speakingViewModel = speakingViewModel)
+          speakingViewModel = speakingViewModel,
+          offlinePromptsFunctions = offlinePromptsFunctions)
     }
 
     // Verify that the expected methods were called in the LaunchedEffect
-    verify(speakingRepository).getTranscript(any(), any(), any())
+    // verify(speakingRepository).getTranscript(any(), any(), any())
+
+    verify(offlinePromptsFunctions).clearDisplayText()
+    verify(offlinePromptsFunctions).readPromptTextFile(any(), any())
   }
 }

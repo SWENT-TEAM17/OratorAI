@@ -1,10 +1,13 @@
 package com.github.se.orator.model.chatGPT
 
+import android.content.Context
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.SessionType
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
@@ -23,7 +26,9 @@ import kotlinx.coroutines.launch
 class ChatViewModel(
     private val chatGPTService: ChatGPTService,
     private val apiLinkViewModel: ApiLinkViewModel,
-    private val textToSpeech: TextToSpeech? = null
+    private val textToSpeech: TextToSpeech? = null,
+    private val offlinePromptsFunctions: OfflinePromptsFunctionsInterface =
+        OfflinePromptsFunctions()
 ) : ViewModel() {
 
   var isConversationInitialized = false
@@ -243,11 +248,22 @@ class ChatViewModel(
   }
 
   /**
-   * Function to send individual requests to GPT to get feedback for the offline queries
+   * Function to send individual requests to GPT to get feedback for the offline queries Saves the
+   * queries into the interviewID file
    *
    * @param msg: What the user said and wishes to get feedback on
+   * @param company : target company
+   * @param position : target job position
+   * @param interviewID : interview's ID
+   * @param context : context
    */
-  fun offlineRequest(msg: String, company: String, position: String) {
+  fun offlineRequest(
+      msg: String,
+      company: String,
+      position: String,
+      interviewID: String,
+      context: Context
+  ) {
     Log.d("ChatViewModel", "Getting next GPT response")
     viewModelScope.launch {
       try {
@@ -267,12 +283,15 @@ class ChatViewModel(
 
         val response = chatGPTService.getChatCompletion(request)
 
-        if (!has_responded.value) {
-          response.choices.firstOrNull()?.message?.let { responseMessage ->
-            _response.value = responseMessage.content
-            has_responded.value = true
-            Log.d("aa", "$responseMessage.content")
-          }
+        Log.d("a", "has responded ${has_responded.value} is loading ${isLoading}")
+        // if the response is not empty then write to the file
+        Log.d("babushka", "has responded is false!!!")
+        Log.d("a", "has responded ${has_responded.value} is loading ${isLoading}")
+        response.choices.firstOrNull()?.message?.let { responseMessage ->
+          _response.value = responseMessage.content
+          has_responded.value = true
+          Log.d("response in offline request in chatViewModel", "$responseMessage.content")
+          offlinePromptsFunctions.writeToPromptFile(context, interviewID, _response.value)
         }
       } catch (e: Exception) {
         handleError(e)
