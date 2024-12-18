@@ -146,6 +146,7 @@ fun OfflineRecordingScreen(
                             File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3"))
                   }
 
+            
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
               // Display feedback messages
