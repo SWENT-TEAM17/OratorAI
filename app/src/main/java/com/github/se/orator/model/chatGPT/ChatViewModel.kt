@@ -198,9 +198,7 @@ class ChatViewModel(
         }
 
     val systemMessage = Message(role = "system", content = systemMessageContent)
-
     val userStartMessage = Message(role = "user", content = "I'm ready to begin the session.")
-
     _chatMessages.value = listOf(systemMessage, userStartMessage)
 
     getNextGPTResponse()
