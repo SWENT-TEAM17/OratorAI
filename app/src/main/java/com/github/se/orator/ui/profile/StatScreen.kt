@@ -133,8 +133,8 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                     modifier =
                         Modifier.padding(start = AppDimensions.paddingXXLarge)
                             .padding(top = AppDimensions.paddingExtraLarge)
-                            .testTag("talkTimePercTitle"),
-                    text = "Talk Time Percentage:",
+                            .testTag("paceTitle"),
+                    text = "Pace:",
                     style = AppTypography.smallTitleStyle, // Apply custom style for title
                     color = MaterialTheme.colorScheme.onSurface)
 
@@ -148,10 +148,8 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         LineChart(
                             xValues,
                             profileViewModel.ensureListSizeTen(
-                                profile.statistics.recentData.map { data ->
-                                  data.talkTimePercentage.toFloat()
-                                }),
-                            "talkTimePercGraph",
+                                profile.statistics.recentData.map { data -> data.pace.toFloat() }),
+                            "paceGraph",
                             yMin = 0f,
                             yMax = 100f)
                       }
@@ -166,8 +164,8 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                             modifier =
                                 Modifier.padding(start = AppDimensions.paddingLarge)
                                     .padding(top = AppDimensions.paddingExtraLarge)
-                                    .testTag("talkTimePercMeanTitle"),
-                            text = "Mean: ${profile.statistics.talkTimePercMean}",
+                                    .testTag("paceMeanTitle"),
+                            text = "Mean: ${profile.statistics.paceMean}",
                             style = AppTypography.smallTitleStyle, // Apply custom style for title
                             color = MaterialTheme.colorScheme.onSurface)
                       }

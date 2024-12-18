@@ -77,7 +77,7 @@ data class UserStatistics(
     val previousRuns: List<SpeechStats> = emptyList(),
     val recentData: List<AnalysisData> = emptyList(),
     val talkTimeSecMean: Double = 0.0,
-    val talkTimePercMean: Double = 0.0
+    val paceMean: Double = 0.0
 )
 
 /**

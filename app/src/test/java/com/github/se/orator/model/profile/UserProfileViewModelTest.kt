@@ -476,13 +476,13 @@ class UserProfileViewModelTest {
     // Assert
     val updatedUserProfile = viewModel.userProfile.first()
     val expectedTalkTimeSecMean = analysisDataList.map { it.talkTimeSeconds }.average()
-    val expectedTalkTimePercMean = analysisDataList.map { it.talkTimePercentage }.average()
+    val expectedPaceMean = analysisDataList.map { it.pace.toDouble() }.average()
 
     updatedUserProfile?.statistics?.talkTimeSecMean?.let {
       Assert.assertEquals(expectedTalkTimeSecMean, it, 0.001)
     }
-    updatedUserProfile?.statistics?.talkTimePercMean?.let {
-      Assert.assertEquals(expectedTalkTimePercMean, it, 0.001)
+    updatedUserProfile?.statistics?.paceMean?.let {
+      Assert.assertEquals(expectedPaceMean, it, 0.001)
     }
 
     verify(repository).updateUserProfile(any(), any(), any())
@@ -538,7 +538,7 @@ class UserProfileViewModelTest {
     // Assert
     val updatedUserProfile = viewModel.userProfile.first()
     updatedUserProfile?.statistics?.talkTimeSecMean?.let { Assert.assertEquals(0.0, it, 0.001) }
-    updatedUserProfile?.statistics?.talkTimePercMean?.let { Assert.assertEquals(0.0, it, 0.001) }
+    updatedUserProfile?.statistics?.paceMean?.let { Assert.assertEquals(0.0, it, 0.001) }
 
     verify(repository).updateUserProfile(any(), any(), any())
   }
