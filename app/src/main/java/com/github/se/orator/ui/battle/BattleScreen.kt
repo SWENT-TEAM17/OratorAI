@@ -9,7 +9,6 @@ import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.overview.InputFieldData
 import com.github.se.orator.ui.overview.SpeakingPracticeModule
-import com.github.se.orator.ui.theme.AppDimensions
 
 /**
  * The BattleScreen composable is a screen where the user can initiate a battle with a friend.
@@ -50,21 +49,6 @@ fun BattleScreen(
               placeholder = "e.g., McKinsey",
               testTag = "companyNameInput"),
           InputFieldData(
-              value = interviewType,
-              onValueChange = { interviewType = it },
-              question = "What type of interview are you preparing for?",
-              placeholder = "Select interview type",
-              testTag = "interviewTypeInput",
-              isDropdown = true,
-              dropdownItems =
-                  listOf(
-                      "Phone Interview",
-                      "Video Interview",
-                      "In-Person Interview",
-                      "Panel Interview",
-                      "Group Interview",
-                      "Assessment Center")),
-          InputFieldData(
               value = experienceLevel,
               onValueChange = { experienceLevel = it },
               question = "What is your experience level in this field?",
@@ -73,14 +57,6 @@ fun BattleScreen(
               isDropdown = true,
               dropdownItems =
                   listOf("Entry-Level", "Mid-Level", "Senior-Level", "Executive-Level")),
-          InputFieldData(
-              value = jobDescription,
-              onValueChange = { jobDescription = it },
-              question = "Please provide the job description:",
-              placeholder = "Paste the job description here",
-              testTag = "jobDescriptionInput",
-              isScrollable = true,
-              height = AppDimensions.jobDescriptionInputFieldHeight),
           InputFieldData(
               value = focusArea,
               onValueChange = { focusArea = it },
