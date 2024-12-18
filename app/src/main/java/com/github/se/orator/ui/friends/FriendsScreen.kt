@@ -403,7 +403,7 @@ fun ViewFriendsScreen(
                       selectedBattle = null
 
                       // Show a toast
-                      Toast.makeText(localContext, "Battle accepted!", Toast.LENGTH_SHORT).show()
+                      Toast.makeText(localContext, "Battle declined.", Toast.LENGTH_SHORT).show()
                     },
                     onDismiss = {
                       // Handle dialog dismissal
