@@ -271,6 +271,7 @@ fun TitleAppBar(
     iconTestTag: String
 ) {
   TopNavigationMenu(
+      textTestTag = titleTestTAg,
       title = title,
       navigationIcon = {
         IconButton(
