@@ -65,6 +65,7 @@ import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
+import com.github.se.orator.ui.profile.GraphStats
 import com.github.se.orator.ui.profile.OfflineRecordingsProfileScreen
 import com.github.se.orator.ui.profile.PreviousRecordingsFeedbackScreen
 import com.github.se.orator.ui.profile.ProfileScreen
@@ -265,6 +266,7 @@ fun OratorApp(
             composable(Screen.EDIT_PROFILE) {
               EditProfileScreen(navigationActions, userProfileViewModel)
             }
+            composable(Screen.STAT) { GraphStats(navigationActions, userProfileViewModel) }
             composable(Screen.LEADERBOARD) {
               LeaderboardScreen(navigationActions, userProfileViewModel)
             }
@@ -313,7 +315,7 @@ fun OratorApp(
               arguments =
                   listOf(
                       navArgument("battleId") { type = NavType.StringType },
-                      navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                  )) { backStackEntry ->
                 val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
                 val userId = userProfileViewModel.userProfile.value?.uid ?: ""
                 BattleChatScreen(
@@ -326,15 +328,19 @@ fun OratorApp(
               }
 
           composable(
-              route = "${Route.WAITING_FOR_COMPLETION}/{battleId}",
-              arguments = listOf(navArgument("battleId") { type = NavType.StringType })) {
-                  backStackEntry ->
+              route = "${Route.WAITING_FOR_COMPLETION}/{battleId}/{friendUid}",
+              arguments =
+                  listOf(
+                      navArgument("battleId") { type = NavType.StringType },
+                      navArgument("friendUid") { type = NavType.StringType })) { backStackEntry ->
                 val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
+                val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
                 WaitingForCompletionScreen(
+                    friendUid = friendUid,
                     battleId = battleId,
                     navigationActions = navigationActions,
                     battleViewModel = battleViewModel,
-                    userId = userProfileViewModel.userProfile.value?.uid ?: "")
+                    userProfileViewModel = userProfileViewModel)
               }
           composable(
               route = "${Route.EVALUATION}/{battleId}",

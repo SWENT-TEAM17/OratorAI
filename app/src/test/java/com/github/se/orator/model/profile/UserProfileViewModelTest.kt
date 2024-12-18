@@ -4,6 +4,8 @@ import android.net.Uri
 import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.ui.friends.currentPracticeMode
 import com.github.se.orator.ui.friends.currentRankMetric
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.*
@@ -12,6 +14,7 @@ import org.junit.runner.RunWith
 import org.mockito.*
 import org.mockito.Mockito.*
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.robolectric.RobolectricTestRunner
 
@@ -553,4 +556,175 @@ class UserProfileViewModelTest {
 
     verify(repository).updateUserProfile(any(), any(), any())
   }
+
+  @Test
+  fun `ensureListSizeTen with fewer than 10 elements`() {
+    val inputList = listOf(1f, 2f, 3f)
+    val expectedOutput = listOf(1f, 2f, 3f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
+    val actualOutput = viewModel.ensureListSizeTen(inputList)
+    assertEquals(expectedOutput, actualOutput)
+  }
+
+  @Test
+  fun `ensureListSizeTen with exactly 10 elements`() {
+    val inputList = listOf(1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f)
+    val expectedOutput = inputList // Should return the same list
+    val actualOutput = viewModel.ensureListSizeTen(inputList)
+    assertEquals(expectedOutput, actualOutput)
+  }
+
+  @Test
+  fun `ensureListSizeTen with more than 10 elements`() {
+    val inputList = listOf(1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f)
+    val expectedOutput = listOf(1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f)
+    val actualOutput = viewModel.ensureListSizeTen(inputList)
+    assertEquals(expectedOutput, actualOutput)
+  }
+
+  /** Test that startListeningToUserProfile handles errors by invoking the onError callback. */
+  @Test
+  fun `startListeningToUserProfile handles errors correctly`() = runTest {
+    // Arrange
+    val testException = Exception("Firestore error")
+
+    // Capture the callbacks passed to listenToUserProfile
+    val onProfileChangedCaptor = argumentCaptor<(UserProfile?) -> Unit>()
+    val onErrorCaptor = argumentCaptor<(Exception) -> Unit>()
+
+    // Act
+    viewModel.startListeningToUserProfile(testUid)
+
+    // Verify that listenToUserProfile was called with correct parameters and capture callbacks
+    verify(repository)
+        .listenToUserProfile(eq(testUid), onProfileChangedCaptor.capture(), onErrorCaptor.capture())
+
+    // Simulate an error by invoking the captured onError callback
+    onErrorCaptor.firstValue.invoke(testException)
+
+    // Advance coroutine until idle to process updates
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    // userProfile should remain unchanged
+    val currentProfile = viewModel.userProfile.first()
+    assertEquals(testUserProfile, currentProfile)
+  }
+
+  /**
+   * Tests that when a user's profile is updated via startListeningToUserProfile, the ViewModel
+   * updates userProfile_ and fetches the related friends, received requests, and sent requests
+   * accordingly
+   */
+  @Test
+  fun `startListeningToUserProfile updates friends recReq and sentReq after profile update`() =
+      runTest {
+        // Arrange
+        // Create an updated profile with different friends, recReq, and sentReq
+        val updatedProfile =
+            testUserProfile.copy(
+                friends = listOf("friendX", "friendY"),
+                recReq = listOf("reqA"),
+                sentReq = listOf("sentZ"))
+
+        val onProfileChangedCaptor = argumentCaptor<(UserProfile?) -> Unit>()
+        val onErrorCaptor = argumentCaptor<(Exception) -> Unit>()
+
+        // Mock getFriendsProfiles to return a list of friends based on the provided UIDs
+        doAnswer {
+              val friendsUids = it.getArgument<List<String>>(0)
+              val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+              val friendsList =
+                  friendsUids.map { uid ->
+                    UserProfile(
+                        uid = uid,
+                        name = "Name $uid",
+                        age = 30,
+                        statistics = UserStatistics(),
+                        friends = emptyList(),
+                        recReq = emptyList(),
+                        sentReq = emptyList(),
+                        bio = "Friend $uid")
+                  }
+              onSuccess.invoke(friendsList)
+              null
+            }
+            .`when`(repository)
+            .getFriendsProfiles(any(), any(), any())
+
+        // Mock getRecReqProfiles to return a list of recReq profiles
+        doAnswer {
+              val recUids = it.getArgument<List<String>>(0)
+              val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+              val recList =
+                  recUids.map { uid ->
+                    UserProfile(
+                        uid = uid,
+                        name = "Rec $uid",
+                        age = 20,
+                        statistics = UserStatistics(),
+                        friends = emptyList(),
+                        recReq = emptyList(),
+                        sentReq = emptyList(),
+                        bio = "RecBio")
+                  }
+              onSuccess.invoke(recList)
+              null
+            }
+            .`when`(repository)
+            .getRecReqProfiles(any(), any(), any())
+
+        // Mock getSentReqProfiles to return a list of sentReq profiles
+        doAnswer {
+              val sentUids = it.getArgument<List<String>>(0)
+              val onSuccess = it.getArgument<(List<UserProfile>) -> Unit>(1)
+              val sentList =
+                  sentUids.map { uid ->
+                    UserProfile(
+                        uid = uid,
+                        name = "Sent $uid",
+                        age = 20,
+                        statistics = UserStatistics(),
+                        friends = emptyList(),
+                        recReq = emptyList(),
+                        sentReq = emptyList(),
+                        bio = "SentBio")
+                  }
+              onSuccess.invoke(sentList)
+              null
+            }
+            .`when`(repository)
+            .getSentReqProfiles(any(), any(), any())
+
+        // Act
+        viewModel.startListeningToUserProfile(testUid)
+        verify(repository)
+            .listenToUserProfile(
+                eq(testUid), onProfileChangedCaptor.capture(), onErrorCaptor.capture())
+
+        // Simulate the profile changing via onProfileChanged callback
+        onProfileChangedCaptor.firstValue.invoke(updatedProfile)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Assert
+        // Check that userProfile_ is updated
+        val currentUserProfile = viewModel.userProfile.first()
+        assertNotNull(currentUserProfile)
+        assertEquals(updatedProfile, currentUserProfile)
+
+        // Check that friendsProfiles is updated
+        val currentFriendsProfiles = viewModel.friendsProfiles.first()
+        assertEquals(2, currentFriendsProfiles.size)
+        assertEquals("Name friendX", currentFriendsProfiles[0].name)
+        assertEquals("Name friendY", currentFriendsProfiles[1].name)
+
+        // Check that recReqProfiles is updated
+        val currentRecReqProfiles = viewModel.recReqProfiles.first()
+        assertEquals(1, currentRecReqProfiles.size)
+        assertEquals("Rec reqA", currentRecReqProfiles[0].name)
+
+        // Check that sentReqProfiles is updated
+        val currentSentReqProfiles = viewModel.sentReqProfiles.first()
+        assertEquals(1, currentSentReqProfiles.size)
+        assertEquals("Sent sentZ", currentSentReqProfiles[0].name)
+      }
 }

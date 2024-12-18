@@ -47,7 +47,6 @@ fun BattleRequestSentScreen(
     if (battleStatus == BattleStatus.IN_PROGRESS) {
       Log.d("BattleRequestSentScreen", "Battle in progress")
       // Navigate to the battle screen
-      // navigationActions.navigateToBattleScreen(battleId, friendUid)
       battleViewModel.startBattle(battleId)
     }
   }
@@ -81,6 +80,7 @@ fun BattleRequestSentScreen(
                       "Interview Battle request has been successfully sent to $friendName.\nWaiting for $friendName to accept the battle.",
                   style = MaterialTheme.typography.bodyLarge,
                   textAlign = TextAlign.Center,
+                  color = MaterialTheme.colorScheme.onSurface,
                   modifier =
                       Modifier.padding(bottom = AppDimensions.paddingMedium)
                           .testTag("battleRequestSentText"))
