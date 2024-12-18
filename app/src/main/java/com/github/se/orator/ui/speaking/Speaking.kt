@@ -138,7 +138,9 @@ fun SpeakingScreen(
 
           // Display transcribed text
           if (analysisData != null) {
-            Text("Transcribed Text: ${analysisData!!.transcription}", color = textColor,
+            Text(
+                "Transcribed Text: ${analysisData!!.transcription}",
+                color = textColor,
                 textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
 
