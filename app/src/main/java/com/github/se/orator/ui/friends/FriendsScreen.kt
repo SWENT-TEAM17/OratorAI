@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -74,11 +75,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speaking.InterviewContext
+import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
@@ -114,6 +118,9 @@ fun ViewFriendsScreen(
     userProfileViewModel: UserProfileViewModel,
     battleViewModel: BattleViewModel? = null // Optional ViewModel for battle management
 ) {
+
+  val localContext = LocalContext.current
+
   // State variables
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
   val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
@@ -137,6 +144,9 @@ fun ViewFriendsScreen(
 
   // New state variable for Friend Requests expansion
   var isFriendRequestsExpanded by remember { mutableStateOf(true) }
+
+  // State for managing the popup
+  var selectedBattle by remember { mutableStateOf<SpeechBattle?>(null) }
 
   LaunchedEffect(Unit) { battleViewModel?.fetchPendingBattlesForUser() }
 
@@ -344,15 +354,21 @@ fun ViewFriendsScreen(
                       // Display the list of friends if any match the search query
                       items(filteredFriends) { friend ->
                         val hasPendingBattle = friend.uid in challengerBattleMap.keys
+
+                        val pendingBattle =
+                            pendingBattles.find {
+                              it.challenger == friend.uid && it.status == BattleStatus.PENDING
+                            }
+
                         FriendItem(
                             friend = friend,
                             hasPendingBattle = hasPendingBattle,
                             userProfileViewModel = userProfileViewModel,
                             onProfilePictureClick = { selectedFriend = it },
                             onClick = { selectedFriend ->
-                              if (hasPendingBattle) {
-                                // Accept battle and navigate to battle screen
-                                battleViewModel?.acceptBattle(challengerBattleMap[friend.uid]!!)
+                              if (hasPendingBattle && pendingBattle != null) {
+                                // Show the popup with battle details
+                                selectedBattle = pendingBattle
                               } else {
                                 // Navigate to create battle screen
                                 navigationActions.navigateToSendBattleScreen(selectedFriend.uid)
@@ -361,6 +377,33 @@ fun ViewFriendsScreen(
                       }
                     }
                   }
+
+              // Display the BattlePopup if a battle is selected
+              selectedBattle?.let { battle ->
+                // Extract the InterviewContext from the SpeechBattle
+                val battleContext = battle.context
+                // Get the challenger's name
+                val challengerName = userProfileViewModel.getName(battle.challenger)
+                BattlePopup(
+                    challengerName = challengerName,
+                    interviewContext = battleContext,
+                    onAccept = {
+
+                      // Handle battle acceptance
+                      battleViewModel?.acceptBattle(battle.battleId, localContext)
+                      selectedBattle = null
+                    },
+                    onDecline = {
+
+                      // Handle battle decline
+                      battleViewModel?.declineBattle(battle.battleId, localContext)
+                      selectedBattle = null
+                    },
+                    onDismiss = {
+                      // Handle dialog dismissal
+                      selectedBattle = null
+                    })
+              }
 
               // Dialog to display the enlarged profile picture
               if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
@@ -636,4 +679,98 @@ fun FriendRequestItem(friendRequest: UserProfile, userProfileViewModel: UserProf
                   }
             }
       }
+}
+
+/**
+ * A composable function that displays a popup dialog for a pending battle.
+ *
+ * @param challengerName The name of the challenger.
+ * @param interviewContext The [InterviewContext] containing details about the battle.
+ * @param onAccept Callback invoked when the user accepts the battle.
+ * @param onDecline Callback invoked when the user declines the battle.
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ */
+@Composable
+fun BattlePopup(
+    challengerName: String,
+    interviewContext: InterviewContext,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+    onDismiss: () -> Unit
+) {
+  AlertDialog(
+      onDismissRequest = onDismiss,
+      title = {
+        // Centered Title with OnSurface Color
+        Text(
+            text = "Pending Battle Request from $challengerName",
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleMedium,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(bottom = AppDimensions.paddingSmall)
+                    .testTag("battlePopupTitle"))
+      },
+      text = {
+        // Centered Text with Small Size and OnSurface Color
+        Text(
+            text = buildBattleDescription(interviewContext),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(horizontal = AppDimensions.paddingSmall)
+                    .testTag("battlePopupDescription"))
+      },
+      confirmButton = {
+        // Centered Row for Accept and Decline Icons
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(top = AppDimensions.paddingSmall)
+                    .testTag("battlePopupActions"),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically) {
+              // Accept Icon
+              IconButton(
+                  onClick = onAccept,
+                  modifier =
+                      Modifier.size(AppDimensions.iconSizeMedium)
+                          .testTag("battlePopupAcceptButton")) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Accept Battle",
+                        tint = Color.Green)
+                  }
+              // Decline Icon
+              IconButton(
+                  onClick = onDecline,
+                  modifier =
+                      Modifier.size(AppDimensions.iconSizeMedium)
+                          .testTag("battlePopupDeclineButton")) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Decline Battle",
+                        tint = Color.Red)
+                  }
+            }
+      },
+      dismissButton = {} // Empty as the actions are in confirmButton
+      )
+}
+
+/**
+ * Builds a short description of the battle based on the [InterviewContext].
+ *
+ * @param context The [InterviewContext] containing battle details.
+ * @return A short description string.
+ */
+fun buildBattleDescription(context: InterviewContext): String {
+  return """
+      Interview Battle Context: ${context.interviewType} for ${context.targetPosition} at ${context.companyName}.
+      Job description: ${context.jobDescription}
+      """
+      .trimIndent()
 }
