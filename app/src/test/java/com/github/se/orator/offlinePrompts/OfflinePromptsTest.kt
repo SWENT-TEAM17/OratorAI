@@ -232,4 +232,145 @@ class OfflinePromptsFunctionsTest {
     `when`(mockContext.cacheDir).thenReturn(tempDir)
     offlinePromptsFunctions.getPromptMapElement(invalidId, "transcribed", mockContext)
   }
+
+  @Test
+  fun `stopFeedback sets transcribed and GPTresponse to 0 when fileData is Loading interviewer response`() {
+    // Arrange
+    val id = "1234"
+    val tempDir = createTempDir()
+    val fileName = "prompts_cache.json"
+    val file = File(tempDir, fileName)
+
+    // Create initial JSON content with transcribed = 1 and GPTresponse = 1
+    val prompts = mutableListOf(mapOf("ID" to id, "transcribed" to "1", "GPTresponse" to "1"))
+    file.writeText(Gson().toJson(prompts))
+
+    // Create the .txt file with "Loading interviewer response..."
+    val textFile = File(tempDir, "$id.txt")
+    textFile.writeText("Loading interviewer response...")
+
+    // Mock the cacheDir to point to the tempDir
+    `when`(mockContext.cacheDir).thenReturn(tempDir)
+
+    // Act
+    offlinePromptsFunctions.stopFeedback(id, mockContext)
+
+    // Assert
+    val updatedContent = file.readText()
+    val updatedPrompts =
+        Gson().fromJson(updatedContent, List::class.java) as List<Map<String, String>>
+
+    // Verify that transcribed and GPTresponse are set to "0"
+    assertEquals("0", updatedPrompts.first { it["ID"] == id }["transcribed"])
+    assertEquals("0", updatedPrompts.first { it["ID"] == id }["GPTresponse"])
+  }
+
+  @Test
+  fun `stopFeedback does not update file when conditions are not met`() {
+    // Arrange
+    val id = "1234"
+    val tempDir = createTempDir()
+    val fileName = "prompts_cache.json"
+    val file = File(tempDir, fileName)
+
+    // Create initial JSON content with transcribed = 1 and GPTresponse = 1
+    val prompts =
+        mutableListOf(
+            mapOf(
+                "ID" to id,
+                "transcribed" to "1",
+                "GPTresponse" to "1",
+                "transcription" to "Some transcription"))
+    file.writeText(Gson().toJson(prompts))
+
+    // Create a .txt file with some content that doesn't trigger the first condition
+    val textFile = File(tempDir, "$id.txt")
+    textFile.writeText("Some other content")
+
+    // Mock the cacheDir to point to the tempDir
+    `when`(mockContext.cacheDir).thenReturn(tempDir)
+
+    // Act
+    offlinePromptsFunctions.stopFeedback(id, mockContext)
+
+    // Assert
+    val updatedContent = file.readText()
+    val updatedPrompts =
+        Gson().fromJson(updatedContent, List::class.java) as List<Map<String, String>>
+
+    // Verify that transcribed and GPTresponse are not changed
+    assertEquals("1", updatedPrompts.first { it["ID"] == id }["transcribed"])
+    assertEquals("1", updatedPrompts.first { it["ID"] == id }["GPTresponse"])
+  }
+
+  @Test
+  fun `writeToPromptFile creates new file and writes content`() {
+    // Arrange
+    val id = "1234"
+    val content = "This is a test prompt."
+    val tempDir = createTempDir() // Create a real temporary directory
+    val fileName = "$id.txt"
+    val file = File(tempDir, fileName)
+
+    `when`(mockContext.cacheDir).thenReturn(tempDir) // Mock cacheDir to point to tempDir
+
+    // Act
+    offlinePromptsFunctions.writeToPromptFile(mockContext, id, content)
+
+    // Assert
+    assertTrue(file.exists()) // Verify that the file was created
+    assertEquals(content, file.readText()) // Verify the file content
+    assertEquals(content, offlinePromptsFunctions.fileData.value) // Verify _fileData is updated
+  }
+
+  @Test
+  fun `writeToPromptFile overwrites existing file with new content`() {
+    // Arrange
+    val id = "1234"
+    val initialContent = "Initial content."
+    val newContent = "Updated content."
+    val tempDir = createTempDir() // Create a real temporary directory
+    val fileName = "$id.txt"
+    val file = File(tempDir, fileName)
+
+    // Create the file with initial content
+    file.writeText(initialContent)
+
+    `when`(mockContext.cacheDir).thenReturn(tempDir) // Mock cacheDir to point to tempDir
+
+    // Act
+    offlinePromptsFunctions.writeToPromptFile(mockContext, id, newContent)
+
+    // Assert
+    assertTrue(file.exists()) // Verify that the file still exists
+    assertEquals(newContent, file.readText()) // Verify the file content is updated
+    assertEquals(newContent, offlinePromptsFunctions.fileData.value) // Verify _fileData is updated
+  }
+
+  @Test
+  fun `loadPromptsFromFile returns list of prompts when file exists with valid content`() {
+    // Arrange
+    val tempDir = createTempDir()
+    val fileName = "prompts_cache.json"
+    val file = File(tempDir, fileName)
+
+    // Write valid JSON content to the file
+    val prompts =
+        listOf(
+            mapOf("ID" to "1234", "targetCompany" to "Google", "jobPosition" to "Engineer"),
+            mapOf("ID" to "5678", "targetCompany" to "Apple", "jobPosition" to "Designer"))
+    file.writeText(Gson().toJson(prompts))
+
+    // Mock the cacheDir to point to tempDir
+    `when`(mockContext.cacheDir).thenReturn(tempDir)
+
+    // Act
+    val result = offlinePromptsFunctions.loadPromptsFromFile(mockContext)
+
+    // Assert
+    assertNotNull(result) // Verify result is not null
+    assertEquals(2, result!!.size) // Verify the number of prompts
+    assertTrue(result.any { it["ID"] == "1234" && it["targetCompany"] == "Google" })
+    assertTrue(result.any { it["ID"] == "5678" && it["targetCompany"] == "Apple" })
+  }
 }
