@@ -213,16 +213,16 @@ fun ChatMessageItem(message: Message) {
   // Determine the background color based on the message role.
   val backgroundColor =
       if (message.role == "user") {
-        MaterialTheme.colorScheme.tertiaryContainer // Use theme color for user messages
+        MaterialTheme.colorScheme.primaryContainer // Use theme color for user messages
       } else {
-        MaterialTheme.colorScheme.primaryContainer // Use theme color for assistant messages
+        MaterialTheme.colorScheme.secondaryContainer // Use theme color for assistant messages
       }
 
   val textColor =
       if (message.role == "user") {
-        MaterialTheme.colorScheme.onTertiaryContainer // Use theme color for user messages
+        MaterialTheme.colorScheme.onPrimaryContainer // Use theme color for user messages
       } else {
-        MaterialTheme.colorScheme.onPrimaryContainer // Use theme color for assistant messages
+        MaterialTheme.colorScheme.onSecondaryContainer // Use theme color for assistant messages
       }
 
   // Determine the alignment based on the message role.
