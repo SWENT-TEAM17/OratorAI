@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.rule.GrantPermissionRule
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -20,6 +21,10 @@ import org.mockito.Mockito.mock
 
 class OfflineRecordingScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
+
+  @get:Rule
+  val permissionRule: GrantPermissionRule =
+      GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var speakingViewModel: SpeakingViewModel

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -25,8 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speechBattle.BattleStatus
@@ -34,6 +33,7 @@ import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
@@ -71,16 +71,7 @@ fun EvaluationScreen(
   }
 
   Scaffold(
-      topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-              Text(
-                  "Battle Evaluation",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("battleEvaluation"))
-            })
-      },
+      topBar = { TopNavigationMenu("Battle Evaluation", testTag = "battleEvaluation") },
       content = { paddingValues ->
         when {
           errorMessage != null -> {
@@ -223,27 +214,33 @@ fun DisplayResultAndFeedback(
 
           // Buttons to retry, go to practice or return to home
 
-          ActionButton(text = "Retry") {
-            // Navigate to the battle screen again with the same friendUid
-            // TODO: implement retry mechanism (with the same context -> maybe just check if
-            // opponent wants to retry aswell and then just go to chat)
-          }
+          ActionButton(
+              text = "Retry",
+              onClick = {
+                // Navigate to the battle screen again with the same friendUid
+                // TODO: implement retry mechanism (with the same context -> maybe just check if
+                // opponent wants to retry aswell and then just go to chat)
+              })
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
-          ActionButton(text = "Go to Practice") {
-            chatViewModel.resetPracticeContext()
-            chatViewModel.endConversation()
-            navigationActions.navigateTo(Screen.SPEAKING_JOB_INTERVIEW)
-          }
+          ActionButton(
+              text = "Go to Practice",
+              {
+                chatViewModel.resetPracticeContext()
+                chatViewModel.endConversation()
+                navigationActions.navigateTo(Screen.SPEAKING_JOB_INTERVIEW)
+              })
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
-          ActionButton(text = "Return to Home") {
-            chatViewModel.resetPracticeContext()
-            chatViewModel.endConversation()
-            navigationActions.navigateTo(Screen.HOME)
-          }
+          ActionButton(
+              text = "Return to Home",
+              onClick = {
+                chatViewModel.resetPracticeContext()
+                chatViewModel.endConversation()
+                navigationActions.navigateTo(Screen.HOME)
+              })
         }
       }
 }
@@ -256,16 +253,20 @@ fun DisplayResultAndFeedback(
  * @param onClick The lambda to be invoked when the button is clicked.
  */
 @Composable
-fun ActionButton(text: String, onClick: () -> Unit) {
+fun ActionButton(
+    text: String,
+    onClick: () -> Unit,
+    buttonColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    textColor: Color = MaterialTheme.colorScheme.onSurface
+) {
   Button(
       onClick = onClick,
       modifier =
           Modifier.size(
               height = AppDimensions.buttonHeightLarge, width = AppDimensions.buttonWidthMax),
       colors =
-          ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+          ButtonDefaults.buttonColors(containerColor = buttonColor, contentColor = buttonColor),
   ) {
-    Text(
-        text = text, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.testTag(text))
+    Text(text = text, color = textColor, modifier = Modifier.testTag(text))
   }
 }

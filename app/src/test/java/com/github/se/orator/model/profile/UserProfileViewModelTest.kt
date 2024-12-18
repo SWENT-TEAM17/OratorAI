@@ -352,13 +352,6 @@ class UserProfileViewModelTest {
 
   @Test
   fun `addNewestData should maintain a maximum size of 10 in recentData`() = runTest {
-    // Arrange
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          onSuccess()
-        }
-        .`when`(repository)
-        .updateUserProfile(any(), any(), any())
 
     // Prepopulate recentData with 10 items
     for (i in 1..10) {
@@ -438,13 +431,6 @@ class UserProfileViewModelTest {
 
   @Test
   fun `updateMetricMean should calculate means and update user profile`() = runTest {
-    // Arrange
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          onSuccess()
-        }
-        .`when`(repository)
-        .updateUserProfile(any(), any(), any())
 
     // Add several AnalysisData items
     val analysisDataList =
@@ -490,13 +476,13 @@ class UserProfileViewModelTest {
     // Assert
     val updatedUserProfile = viewModel.userProfile.first()
     val expectedTalkTimeSecMean = analysisDataList.map { it.talkTimeSeconds }.average()
-    val expectedTalkTimePercMean = analysisDataList.map { it.talkTimePercentage }.average()
+    val expectedPaceMean = analysisDataList.map { it.pace.toDouble() }.average()
 
     updatedUserProfile?.statistics?.talkTimeSecMean?.let {
       Assert.assertEquals(expectedTalkTimeSecMean, it, 0.001)
     }
-    updatedUserProfile?.statistics?.talkTimePercMean?.let {
-      Assert.assertEquals(expectedTalkTimePercMean, it, 0.001)
+    updatedUserProfile?.statistics?.paceMean?.let {
+      Assert.assertEquals(expectedPaceMean, it, 0.001)
     }
 
     verify(repository).updateUserProfile(any(), any(), any())
@@ -552,7 +538,7 @@ class UserProfileViewModelTest {
     // Assert
     val updatedUserProfile = viewModel.userProfile.first()
     updatedUserProfile?.statistics?.talkTimeSecMean?.let { Assert.assertEquals(0.0, it, 0.001) }
-    updatedUserProfile?.statistics?.talkTimePercMean?.let { Assert.assertEquals(0.0, it, 0.001) }
+    updatedUserProfile?.statistics?.paceMean?.let { Assert.assertEquals(0.0, it, 0.001) }
 
     verify(repository).updateUserProfile(any(), any(), any())
   }

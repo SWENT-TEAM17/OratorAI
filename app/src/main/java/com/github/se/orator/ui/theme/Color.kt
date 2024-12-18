@@ -124,3 +124,6 @@ val surfaceContainerLowDark = Color(0xFF1B1B21)
 val surfaceContainerDark = Color(0xFF1F1F25)
 val surfaceContainerHighDark = Color(0xFF292A2F)
 val surfaceContainerHighestDark = Color(0xFF34343A)
+
+val cancelButtonColor = Color.Red
+val cancelButtonTextColor = Color.White

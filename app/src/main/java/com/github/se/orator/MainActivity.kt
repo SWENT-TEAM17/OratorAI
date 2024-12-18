@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModelFactory
@@ -47,6 +48,7 @@ import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.mainScreen.MainScreen
+import com.github.se.orator.ui.mainScreen.OnlineScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
@@ -164,6 +166,8 @@ fun OratorApp(
       SpeakingViewModel(SpeakingRepositoryRecord(context), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
+  val offlinePromptsFunctions = OfflinePromptsFunctions()
+
   // Initialize BattleViewModel using the factory
   val battleViewModel: BattleViewModel =
       viewModel(
@@ -190,10 +194,11 @@ fun OratorApp(
             RecordingReviewScreen(navigationActions, speakingViewModel)
           }
           composable(Screen.OFFLINE_RECORDING_PROFILE) {
-            OfflineRecordingsProfileScreen(navigationActions, speakingViewModel)
+            OfflineRecordingsProfileScreen(
+                navigationActions, speakingViewModel, offlinePromptsFunctions)
           }
           composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-            OfflineInterviewModule(navigationActions, speakingViewModel)
+            OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsFunctions)
           }
 
           composable(
@@ -215,6 +220,7 @@ fun OratorApp(
           // Main/home flow
           navigation(startDestination = Screen.HOME, route = Route.HOME) {
             composable(Screen.HOME) { MainScreen(navigationActions) }
+            composable(Screen.ONLINE_SCREEN) { OnlineScreen(navigationActions) }
             composable(Screen.SPEAKING_JOB_INTERVIEW) {
               SpeakingJobInterviewModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
@@ -252,7 +258,11 @@ fun OratorApp(
 
             composable(Screen.FEEDBACK_SCREEN) {
               PreviousRecordingsFeedbackScreen(
-                  context, navigationActions, chatViewModel, speakingViewModel)
+                  context,
+                  navigationActions,
+                  chatViewModel,
+                  speakingViewModel,
+                  offlinePromptsFunctions = offlinePromptsFunctions)
             }
 
             composable(Screen.EDIT_PROFILE) {

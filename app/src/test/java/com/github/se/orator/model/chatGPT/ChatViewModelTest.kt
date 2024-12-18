@@ -1,5 +1,6 @@
 package com.github.se.orator.model.chatGPT
 
+import android.content.Context
 import android.speech.tts.TextToSpeech
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.profile.SessionType
@@ -13,6 +14,7 @@ import com.github.se.orator.ui.network.ChatResponse
 import com.github.se.orator.ui.network.Choice
 import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.network.Usage
+import java.io.File
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
@@ -45,6 +47,7 @@ class ChatViewModelTest {
   @Mock private lateinit var apiLinkViewModel: ApiLinkViewModel
 
   private lateinit var chatViewModel: ChatViewModel
+  private lateinit var context: Context
 
   private val testDispatcher = StandardTestDispatcher() // Using a test dispatcher
 
@@ -172,6 +175,7 @@ class ChatViewModelTest {
   fun setUp() {
     Dispatchers.setMain(testDispatcher) // Set the test dispatcher
 
+    context = mock(Context::class.java)
     chatGPTService = mock(ChatGPTService::class.java)
     apiLinkViewModel = mock(ApiLinkViewModel::class.java)
 
@@ -455,13 +459,13 @@ class ChatViewModelTest {
   }
 
   @Test
-  fun `offlineRequest sends query and sets response`() = runTest {
-    val choice: Choice = Choice(0, Message("assistant", "Response content"), "done")
-    // Arrange
-    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+  fun `offlineRequest sends query and sets response without writing to directory`() = runTest {
+    val choice = Choice(0, Message("assistant", "Response content"), "done")
     val message = "Test message"
     val company = "Test Company"
     val position = "Test Position"
+
+    // Arrange
     val mockResponse =
         ChatResponse(
             id = "1",
@@ -471,10 +475,18 @@ class ChatViewModelTest {
             choices = listOf(choice),
             usage = Usage(1, 1, 2))
 
+    // Mock services and file operations
     `when`(chatGPTService.getChatCompletion(any())).thenReturn(mockResponse)
+    val mockContext = mock<Context>()
+    val mockCacheDir = mock<File>()
+
+    `when`(mockContext.cacheDir).thenReturn(mockCacheDir)
+
+    // Recreate ViewModel with mocks
+    chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
 
     // Act
-    chatViewModel.offlineRequest(message, company, position)
+    chatViewModel.offlineRequest(message, company, position, "000000000", mockContext)
     advanceUntilIdle()
 
     // Assert
@@ -492,7 +504,7 @@ class ChatViewModelTest {
     `when`(chatGPTService.getChatCompletion(any())).thenThrow(RuntimeException("Error"))
 
     // Act
-    chatViewModel.offlineRequest(message, company, position)
+    chatViewModel.offlineRequest(message, company, position, "00000000", context)
     advanceUntilIdle()
 
     // Assert
