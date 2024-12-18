@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.speechBattle.BattleStatus
@@ -35,6 +33,7 @@ import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
@@ -72,16 +71,7 @@ fun EvaluationScreen(
   }
 
   Scaffold(
-      topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-              Text(
-                  "Battle Evaluation",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("battleEvaluation"))
-            })
-      },
+      topBar = { TopNavigationMenu("Battle Evaluation", testTag = "battleEvaluation") },
       content = { paddingValues ->
         when {
           errorMessage != null -> {

@@ -44,8 +44,7 @@ class StatScreenTest {
 
   private val talkTimeSecMean =
       (mockedRecentData.toList().map { data -> data.talkTimeSeconds }).average()
-  private val talkTimePercMean =
-      (mockedRecentData.toList().map { data -> data.talkTimePercentage }).average()
+  private val paceMean = (mockedRecentData.toList().map { data -> data.pace.toDouble() }).average()
 
   private val testUserProfile =
       UserProfile(
@@ -56,7 +55,7 @@ class StatScreenTest {
               UserStatistics(
                   recentData = mockedRecentData,
                   talkTimeSecMean = talkTimeSecMean,
-                  talkTimePercMean = talkTimePercMean,
+                  paceMean = paceMean,
                   sessionsGiven = mapOf("INTERVIEW" to 10, "SPEECH" to 5, "NEGOTIATION" to 8),
                   successfulSessions = mapOf("INTERVIEW" to 7, "SPEECH" to 3, "NEGOTIATION" to 4)),
           friends = listOf("friend1", "friend2"),
@@ -107,19 +106,16 @@ class StatScreenTest {
         .assert(hasText("Mean: ${talkTimeSecMean}")) // Adjust if your formatting differs
 
     // Check Talk Time Percentage Title
-    composeTestRule
-        .onNodeWithTag("talkTimePercTitle")
-        .assertIsDisplayed()
-        .assert(hasText("Talk Time Percentage:"))
+    composeTestRule.onNodeWithTag("paceTitle").assertIsDisplayed().assert(hasText("Pace:"))
 
     // Check the second graph for talk time percentage
-    composeTestRule.onNodeWithTag("talkTimePercGraph").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("paceGraph").assertIsDisplayed()
 
     // For percentages (i * 5 for i in 1..10): The average would be [5,10,15,...,50] mean = 27.5
     composeTestRule
-        .onNodeWithTag("talkTimePercMeanTitle")
+        .onNodeWithTag("paceMeanTitle")
         .assertIsDisplayed()
-        .assert(hasText("Mean: ${talkTimePercMean}"))
+        .assert(hasText("Mean: ${paceMean}"))
   }
 
   @Test
@@ -176,8 +172,8 @@ fun createMockedRecentData(): ArrayDeque<AnalysisData> {
             fillerWordsCount = 0,
             averagePauseDuration = 0.0,
             talkTimeSeconds = i.toDouble(),
-            talkTimePercentage = i.toDouble() / 2.0,
-            pace = 0))
+            talkTimePercentage = 0.0,
+            pace = i))
   }
   return mockedRecentData
 }

@@ -24,6 +24,7 @@ import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.cancelButtonColor
@@ -81,8 +82,9 @@ fun BattleRequestSentScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Battle Request Sent") },
+        TopNavigationMenu(
+            testTag = "topAppBar",
+            title = "Battle Request Sent",
             navigationIcon = {
               IconButton(
                   onClick = {
@@ -97,7 +99,7 @@ fun BattleRequestSentScreen(
                         tint = MaterialTheme.colorScheme.onSurface)
                   }
             },
-            modifier = Modifier.testTag("topAppBar"))
+        )
       },
       content = { innerPadding ->
         Column(
