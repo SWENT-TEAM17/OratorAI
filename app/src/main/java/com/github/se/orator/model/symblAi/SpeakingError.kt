@@ -1,8 +1,8 @@
 package com.github.se.orator.model.symblAi
 
-
 /**
- * Enum class to represent the different errors that can occur during the processing of the user's speech.
+ * Enum class to represent the different errors that can occur during the processing of the user's
+ * speech.
  */
 enum class SpeakingError {
   NO_ERROR,
