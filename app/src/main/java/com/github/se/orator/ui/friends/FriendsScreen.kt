@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +30,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -45,7 +43,6 @@ import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -90,6 +87,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.COLOR_AMBER
@@ -197,14 +195,9 @@ fun ViewFriendsScreen(
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
-              TopAppBar(
-                  modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-                  title = {
-                    Text(
-                        "My Friends",
-                        modifier = Modifier.testTag("myFriendsTitle"),
-                        color = MaterialTheme.colorScheme.onSurface)
-                  },
+              TopNavigationMenu(
+                  textTestTag = "myFriendsTitle",
+                  title = "My Friends",
                   navigationIcon = {
                     IconButton(
                         onClick = { scope.launch { drawerState.open() } },
@@ -214,9 +207,7 @@ fun ViewFriendsScreen(
                               contentDescription = "Menu",
                               tint = MaterialTheme.colorScheme.onSurface)
                         }
-                  },
-                  backgroundColor = MaterialTheme.colorScheme.surface)
-              HorizontalDivider()
+                  })
             },
             bottomBar = {
               BottomNavigationMenu(
