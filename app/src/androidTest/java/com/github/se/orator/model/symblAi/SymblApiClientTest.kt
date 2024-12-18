@@ -143,9 +143,9 @@ class SymblApiClientTest {
 
       val expectedTranscription =
           """
-            You said: Thank you for reaching out to us.
-            You said: All lines are currently busy.
-            You said: Your call is very important to us.
+            Thank you for reaching out to us.
+            All lines are currently busy.
+            Your call is very important to us.
         """
               .trimIndent()
 

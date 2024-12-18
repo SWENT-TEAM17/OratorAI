@@ -16,7 +16,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterfac
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppTypography
@@ -111,11 +111,10 @@ fun OfflineRecordingsProfileScreen(
     offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
   val context = LocalContext.current
-  Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
-    TopAppBar(
-        title = {
-          Text("Previous sessions", modifier = Modifier.testTag("previous_sessions_test"))
-        },
+  Column {
+    TopNavigationMenu(
+        textTestTag = "previous_sessions_test",
+        title = "Previous sessions",
         navigationIcon = {
           IconButton(
               onClick = { navigationActions.goBack() },
@@ -127,7 +126,9 @@ fun OfflineRecordingsProfileScreen(
                     tint = Color.Black)
               }
         })
-    Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-    PromptCardsSection(context, navigationActions, speakingViewModel, offlinePromptsFunctions)
+    Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
+      Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+      PromptCardsSection(context, navigationActions, speakingViewModel, offlinePromptsFunctions)
+    }
   }
 }

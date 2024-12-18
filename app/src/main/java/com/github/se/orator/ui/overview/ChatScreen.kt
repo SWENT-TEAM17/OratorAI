@@ -14,10 +14,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.theme.AppDimensions
 
@@ -86,14 +86,9 @@ fun ChatScreen(
   Scaffold(
       // Top app bar with a centered title and a back button.
       topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-              Text(
-                  text = "Chat Screen",
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.onSurface, // Use theme color for text
-                  modifier = Modifier.testTag("chat_screen_title"))
-            },
+        TopNavigationMenu(
+            textTestTag = "chat_screen_title",
+            title = "Chat Screen",
             navigationIcon = {
               if (showBackButton) {
                 IconButton(
@@ -113,11 +108,7 @@ fun ChatScreen(
               } else {
                 null
               }
-            },
-            colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer),
-            modifier = Modifier.testTag("top_app_bar"))
+            })
       },
       content = { paddingValues ->
         Column(

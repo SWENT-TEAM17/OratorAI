@@ -40,6 +40,7 @@ import com.github.se.orator.ui.theme.AppDimensions.AXIS_STROKE_WIDTH
 import com.github.se.orator.ui.theme.AppDimensions.DRAW_TEXT_TICK_LABEL_OFFSET_VALUE_FOR_Y
 import com.github.se.orator.ui.theme.AppDimensions.DRAW_TEXT_TICK_LABEL_X
 import com.github.se.orator.ui.theme.AppDimensions.FULL
+import com.github.se.orator.ui.theme.AppDimensions.MIN_Y_RANGE
 import com.github.se.orator.ui.theme.AppDimensions.PLOT_LINE_STROKE_WIDTH
 import com.github.se.orator.ui.theme.AppDimensions.POINTS_RADIUS
 import com.github.se.orator.ui.theme.AppDimensions.TICK_LABEL_TEXT_SIZE
@@ -132,8 +133,8 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                     modifier =
                         Modifier.padding(start = AppDimensions.paddingXXLarge)
                             .padding(top = AppDimensions.paddingExtraLarge)
-                            .testTag("talkTimePercTitle"),
-                    text = "Talk Time Percentage:",
+                            .testTag("paceTitle"),
+                    text = "Pace:",
                     style = AppTypography.smallTitleStyle, // Apply custom style for title
                     color = MaterialTheme.colorScheme.onSurface)
 
@@ -147,10 +148,8 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                         LineChart(
                             xValues,
                             profileViewModel.ensureListSizeTen(
-                                profile.statistics.recentData.map { data ->
-                                  data.talkTimePercentage.toFloat()
-                                }),
-                            "talkTimePercGraph",
+                                profile.statistics.recentData.map { data -> data.pace.toFloat() }),
+                            "paceGraph",
                             yMin = 0f,
                             yMax = 100f)
                       }
@@ -165,8 +164,8 @@ fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfi
                             modifier =
                                 Modifier.padding(start = AppDimensions.paddingLarge)
                                     .padding(top = AppDimensions.paddingExtraLarge)
-                                    .testTag("talkTimePercMeanTitle"),
-                            text = "Mean: ${profile.statistics.talkTimePercMean}",
+                                    .testTag("paceMeanTitle"),
+                            text = "Mean: ${profile.statistics.paceMean}",
                             style = AppTypography.smallTitleStyle, // Apply custom style for title
                             color = MaterialTheme.colorScheme.onSurface)
                       }
@@ -197,16 +196,14 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String, yMin: F
         val maxY = yValues.maxOrNull() ?: FULL // full being the const value for 1f
         val minY = ZERO // zero for the value 0f
         var yRange = maxY - minY
-        if (yRange < 9f) {
-          yRange = 9f
+        if (yRange < MIN_Y_RANGE) {
+          yRange = MIN_Y_RANGE
         }
 
-        // If by any chance yRange is 0, fallback to 1f
-        val adjustedYRange = if (yRange == ZERO) FULL else yRange
         val xStep = size.width / (xValues.size - 1)
-        val yScale = size.height / adjustedYRange
+        val yScale = size.height / yRange
 
-        val tickInterval = adjustedYRange / TICK_COUNT
+        val tickInterval = yRange / TICK_COUNT
 
         // Draw Y-axis ticks and labels
         for (i in 0..TICK_COUNT) {

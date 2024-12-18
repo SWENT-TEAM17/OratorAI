@@ -27,8 +27,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +39,7 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.theme.AppThemeValue
 import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import java.util.Locale
@@ -101,13 +100,9 @@ fun SettingsScreen(
   val context = LocalContext.current
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Settings",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.testTag("SettingsText"))
-            },
+        TopNavigationMenu(
+            textTestTag = "SettingsText",
+            title = "Settings",
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -119,14 +114,7 @@ fun SettingsScreen(
                         tint = MaterialTheme.colorScheme.onSurface)
                   }
             },
-            colors =
-                TopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ))
+        )
       }) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding).testTag("settingsScreen"),

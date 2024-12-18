@@ -567,13 +567,12 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       // Calculate the mean of the values of the metric queues
       val updatedTalkTimeSecMean =
           repository.getMetricMean(recentData_.value.map { data -> data.talkTimeSeconds })
-      val updatedTalkTimePercMean =
-          repository.getMetricMean(recentData_.value.map { data -> data.talkTimePercentage })
+      val updatedPaceMean =
+          repository.getMetricMean(recentData_.value.map { data -> data.pace.toDouble() })
 
       // Create a new statistics object with the updated means
       val updatedStats =
-          currentStats.copy(
-              talkTimeSecMean = updatedTalkTimeSecMean, talkTimePercMean = updatedTalkTimePercMean)
+          currentStats.copy(talkTimeSecMean = updatedTalkTimeSecMean, paceMean = updatedPaceMean)
 
       // Create a new profile object with the updated stats
       val updatedProfile = currentUserProfile.copy(statistics = updatedStats)

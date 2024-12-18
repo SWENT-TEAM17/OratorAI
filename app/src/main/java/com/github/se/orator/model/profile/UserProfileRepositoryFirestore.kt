@@ -254,7 +254,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             val recentData = recentDataList.map { dataMap -> mapToAnalysisData(dataMap) }
             // Extract means
             val talkTimeSecMean = (it["talkTimeSecMean"] as? Number)?.toDouble() ?: 0.0
-            val talkTimePercMean = (it["talkTimePercMean"] as? Number)?.toDouble() ?: 0.0
+            val paceMean = (it["paceMean"] as? Number)?.toDouble() ?: 0.0
 
             // Extract 'previousRuns' list
             val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
@@ -284,7 +284,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
                 previousRuns = previousRuns,
                 recentData = recentData,
                 talkTimeSecMean = talkTimeSecMean,
-                talkTimePercMean = talkTimePercMean,
+                paceMean = paceMean,
                 battleStats = battleStats)
           } ?: UserStatistics()
 

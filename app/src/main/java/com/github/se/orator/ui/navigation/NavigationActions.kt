@@ -41,6 +41,7 @@ object Route {
   const val EVALUATION = "EvaluationScreen"
   const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
   const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
+  const val ONLINE = "Online"
 }
 
 object Screen {
@@ -75,6 +76,7 @@ object Screen {
   const val EVALUATION_SCREEN = "Evaluation Waiting Screen"
   const val OFFLINE_INTERVIEW_MODULE = "OfflineInterviewModule"
   const val OFFLINE_RECORDING_PROFILE = "OfflineRecordingProfile"
+  const val ONLINE_SCREEN = "Online Screen"
 }
 
 data class TopLevelDestination(

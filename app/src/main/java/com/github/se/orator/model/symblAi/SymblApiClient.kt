@@ -131,7 +131,7 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
           }
 
           // Append the disfluencies before the transcribed message
-          textBuilder.append("You said: $disfluencies$messageText\n")
+          textBuilder.append("$disfluencies$messageText\n")
 
           val sentiment = messageObject.optJSONObject("sentiment")
           if (sentiment != null) {
