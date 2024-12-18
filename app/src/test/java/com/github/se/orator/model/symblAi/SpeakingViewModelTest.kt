@@ -246,4 +246,37 @@ class SpeakingViewModelTest {
     assertEquals("1", updatedPrompt["transcribed"]) // Verify that transcribed was set to 0
     assertEquals("", updatedPrompt["transcription"]) // Verify that transcription remains empty
   }
+
+  /**
+   * Test that the [SpeakingError] enum string constants (holding the error message to display) are
+   * correct.
+   */
+  @Test
+  fun symblErrorConstStringsAreCorrect() {
+    assert(SpeakingError.STRING_SYMBL_DATA_ERROR == "There was an error with the SymblAI data")
+    assert(SpeakingError.STRING_HTTP_ERROR == "There was an error when issuing the HTTP request")
+    assert(SpeakingError.STRING_SYMBL_JOB_ERROR == "There was an error processing the job")
+    assert(
+        SpeakingError.STRING_SYMBL_PROCESSING_ERROR ==
+            "There was an error processing the data from SymblAI")
+  }
+
+  /** Test that the toString() method of the [SpeakingError] enum provides the correct string */
+  @Test
+  fun symblErrorToStringProvidesCorrectString() {
+    assert(SpeakingError.NO_ERROR.toString() == "No error")
+    assert(SpeakingError.CREDENTIALS_ERROR.toString() == SpeakingError.STRING_SYMBL_DATA_ERROR)
+    assert(SpeakingError.ACCESS_TOKEN_ERROR.toString() == SpeakingError.STRING_SYMBL_DATA_ERROR)
+    assert(SpeakingError.HTTP_REQUEST_ERROR.toString() == SpeakingError.STRING_HTTP_ERROR)
+    assert(SpeakingError.JOB_PROCESSING_ERROR.toString() == SpeakingError.STRING_SYMBL_JOB_ERROR)
+    assert(SpeakingError.MISSING_CONV_ID_ERROR.toString() == SpeakingError.STRING_SYMBL_DATA_ERROR)
+    assert(
+        SpeakingError.JSON_PARSING_ERROR.toString() == SpeakingError.STRING_SYMBL_PROCESSING_ERROR)
+    assert(
+        SpeakingError.NO_MESSAGES_FOUND_ERROR.toString() ==
+            SpeakingError.STRING_SYMBL_PROCESSING_ERROR)
+    assert(
+        SpeakingError.NO_ANALYTICS_FOUND_ERROR.toString() ==
+            SpeakingError.STRING_SYMBL_PROCESSING_ERROR)
+  }
 }
