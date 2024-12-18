@@ -43,16 +43,6 @@ fun SpeakingPublicSpeakingModule(
               question = "What is the occasion?",
               placeholder = "e.g., Conference, Seminar, Wedding",
               testTag = "occasionInput"),
-          // Dropdown input field for selecting the primary purpose of the speech (e.g., Inform,
-          // Persuade)
-          InputFieldData(
-              value = purpose,
-              onValueChange = { purpose = it },
-              question = "What is the primary purpose of your speech?",
-              placeholder = "Select purpose",
-              testTag = "purposeInput",
-              isDropdown = true,
-              dropdownItems = listOf("Inform", "Persuade", "Inspire", "Entertain")),
           // Dropdown input field for selecting the expected size of the audience
           InputFieldData(
               value = audienceSize,
@@ -75,50 +65,6 @@ fun SpeakingPublicSpeakingModule(
               question = "What is your audience demographic?",
               placeholder = "e.g., College students, Professionals",
               testTag = "demographicInput"),
-          // Dropdown input field for selecting the presentation style (e.g., Formal, Informal)
-          InputFieldData(
-              value = presentationStyle,
-              onValueChange = { presentationStyle = it },
-              question = "What presentation style will you be using?",
-              placeholder = "Select style",
-              testTag = "presentationStyleInput",
-              isDropdown = true,
-              dropdownItems = listOf("Formal", "Informal", "Storytelling", "Interactive")),
-          // Input field for listing the key points or themes of the speech (e.g., Innovation,
-          // Leadership)
-          InputFieldData(
-              value = mainPoints,
-              onValueChange = { mainPoints = it },
-              question = "What are the key points or themes of your speech?",
-              placeholder = "e.g., Innovation, Leadership, Teamwork",
-              testTag = "mainPointsInput"),
-          // Dropdown input field for indicating whether visual aids will be used in the
-          // presentation
-          InputFieldData(
-              value = visualAids,
-              onValueChange = { visualAids = it },
-              question = "Will you be using visual aids?",
-              placeholder = "Select option",
-              testTag = "visualAidsInput",
-              isDropdown = true,
-              dropdownItems = listOf("Yes", "No")),
-          // Dropdown input field for selecting the speaker's experience level with public speaking
-          InputFieldData(
-              value = experienceLevel,
-              onValueChange = { experienceLevel = it },
-              question = "What is your experience level with public speaking?",
-              placeholder = "Select experience level",
-              testTag = "experienceLevelInput",
-              isDropdown = true,
-              dropdownItems = listOf("Beginner", "Intermediate", "Advanced")),
-          // Input field for describing anticipated challenges or concerns about the speech (e.g.,
-          // Nervousness)
-          InputFieldData(
-              value = anticipatedChallenges,
-              onValueChange = { anticipatedChallenges = it },
-              question = "What challenges or concerns do you have about this speech?",
-              placeholder = "e.g., Nervousness, Audience engagement",
-              testTag = "anticipatedChallengesInput"),
           // Dropdown input field for selecting the aspect of the speech the user wants to focus on
           InputFieldData(
               value = focusArea,
@@ -134,24 +80,7 @@ fun SpeakingPublicSpeakingModule(
                       "Audience Engagement",
                       "Handling Q&A",
                       "Storytelling",
-                      "Visual Aids Usage")),
-          // Dropdown input field for specifying the type of feedback the user desires (e.g., Verbal
-          // Delivery)
-          InputFieldData(
-              value = feedbackType,
-              onValueChange = { feedbackType = it },
-              question = "What type of feedback would you like to receive?",
-              placeholder = "Select feedback type",
-              testTag = "feedbackTypeInput",
-              isDropdown = true,
-              dropdownItems =
-                  listOf(
-                      "Verbal Delivery",
-                      "Body Language",
-                      "Vocal Variety",
-                      "Clarity",
-                      "Confidence",
-                      "Use of Filler Words")))
+                      "Visual Aids Usage")))
 
   /**
    * The SpeakingPracticeModule composable function displays the Public Speaking practice module.
