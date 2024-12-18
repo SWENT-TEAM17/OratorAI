@@ -23,8 +23,8 @@ import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.theme.AppDimensions
 
 /**
- * The main screen's composable responsible to display the welcome text, the practice mode cards and
- * the toolbar containing buttons for different sections
+ * The online screen's composable responsible to display the welcome text, the BOTI card and the
+ * toolbar containing buttons for different sections
  */
 @Composable
 fun OnlineScreen(navigationActions: NavigationActions) {
@@ -64,7 +64,7 @@ fun OnlineScreen(navigationActions: NavigationActions) {
 }
 
 /**
- * The implementation of the toolbar containing the different selection buttons of the main screen
+ * The implementation of the toolbar containing the different selection buttons of the online screen
  */
 @Composable
 fun ButtonRowOnline(navigationActions: NavigationActions) {
