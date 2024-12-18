@@ -149,7 +149,7 @@ class BattleChatScreenTest {
   }
 
   @Test
-  fun backButtonNavigatesBack() = runTest {
+  fun backButtonIsNotDisplayed() = runTest {
     composeTestRule.setContent {
       BattleChatScreen(
           battleId = "testBattle",
@@ -160,9 +160,7 @@ class BattleChatScreenTest {
           userProfileViewModel = userProfileViewModel)
     }
 
-    composeTestRule.onNodeWithTag("back_button").performClick()
-
-    verify(mockNavigationActions).goBack()
+    composeTestRule.onNodeWithTag("back_button").assertDoesNotExist()
   }
 
   @Test
