@@ -119,7 +119,7 @@ class SpeakingViewModel(
         var promptGPTVal =
             offlinePromptsFunctions.getPromptMapElement(ID, "GPTresponse", context).toString()
         while (promptGPTVal != "1") {
-          delay(5000) // Check every 500ms
+          delay(500) // Check every 500ms
           promptGPTVal =
               offlinePromptsFunctions.getPromptMapElement(ID, "GPTresponse", context).toString()
           Log.d("pr", "promptGPTVal is : $promptGPTVal")
