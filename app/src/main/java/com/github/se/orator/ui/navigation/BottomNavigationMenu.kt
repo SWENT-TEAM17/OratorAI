@@ -41,12 +41,14 @@ fun BottomNavigationMenu(
                   Icon(
                       tab.coloredIcon,
                       contentDescription = null,
-                      tint = MaterialTheme.colorScheme.primary)
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.padding(AppDimensions.smallPadding))
                 } else {
                   Icon(
                       tab.outlinedIcon,
                       contentDescription = null,
-                      tint = MaterialTheme.colorScheme.onSurface)
+                      tint = MaterialTheme.colorScheme.onSurface,
+                      modifier = Modifier.padding(AppDimensions.smallPadding))
                 }
               },
               label = { Text(tab.textId, color = MaterialTheme.colorScheme.onSurface) },

@@ -13,6 +13,7 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
+import com.github.se.orator.model.speechBattle.EvaluationResult
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.Message
@@ -535,7 +536,134 @@ The session is now over. According to the initial instructions, you can now brea
     getNextGPTResponse()
   }
 
-  private fun messagesToTranscript(messages: List<Message>): String {
-    return messages.filter { it.role == "user" }.joinToString("\n") { it.content }
+  /**
+   * Evaluates the battle candidates and provides feedback to the winner and loser.
+   *
+   * @param userUid The UID of the user.
+   * @param messages The messages of that user
+   */
+  private fun messagesToTranscript(userUid: String, messages: List<Message>): String {
+    return messages.joinToString("\n") {
+      if (it.role == "user") "$userUid: ${it.content}" else "Interviewer: ${it.content}"
+    }
+  }
+
+  /**
+   * Evaluates the battle candidates, determines the winner of the battle and provides feedback to
+   * the winner and loser.
+   *
+   * @param user1Uid The UID of the first user.
+   * @param user2Uid The UID of the second user.
+   * @param user1messages The messages of the first user.
+   * @param user2messages The messages of the second user.
+   */
+  suspend fun evaluateBattleCandidates(
+      user1Uid: String,
+      user2Uid: String,
+      user1messages: List<Message>,
+      user2messages: List<Message>,
+      user1name: String,
+      user2name: String
+  ): EvaluationResult {
+    val user1Transcript = messagesToTranscript(user1Uid, user1messages)
+    val user2Transcript = messagesToTranscript(user2Uid, user2messages)
+
+    val prompt =
+        """
+        You are an impartial and strict recruiter tasked with evaluating two AI interview candidates, $user1Uid and $user2Uid, based on their interview transcripts. Your goal is to determine which AI performed better and provide constructive feedback for both.
+
+      **Guidelines:**
+
+      1. **Evaluation Criteria:**
+      - **Clarity and Coherence:** Assess how clearly and logically each AI communicated their answers.
+      - **Depth of Responses:** Evaluate the thoroughness and depth of each AI's answers.
+      - **Relevance to Questions:** Determine how well each AI addressed the interview questions.
+      - **Problem-Solving Ability:** Analyze the effectiveness of each AI's problem-solving approach.
+      - **Professionalism:** Consider the professionalism displayed in each AI's responses.
+
+      2. **Determining the Winner:**
+      - Based on the criteria above, decide which AI performed better overall.
+      - Explicitly state the winner in the format: "The winner is: <winnerUid>."
+
+      3. **Feedback for Both AIs:**
+      - **Winner's Feedback:** Provide specific strengths that led to their victory.
+      - **Loser's Feedback:** Offer constructive criticism highlighting areas for improvement.
+       
+      Address both AIs as "you" so that we can directly display the feedback message on their screens.
+      
+      Don't over compliment the winner because he might have also made mistakes, make sure to stay neutral and professional: a strict interviewer. 
+
+      **Format your response as follows:**
+
+      The winner is: <winnerUid>
+      Winner message: <short message that highlights some strengths that would make him more likely to be hired than the loser, while addressing the winner as you instead of his UID>
+      Loser message: <short message that highlights some of the flaws that prevented him from being hired instead of the winner, while addressing the loser as you instead of his UID>
+                   
+      **Transcripts:**
+
+      **$user1Uid's Transcript:**
+      $user1Transcript
+
+      **$user2Uid's Transcript:**
+      $user2Transcript
+      """
+            .trimIndent()
+
+    val request =
+        ChatRequest(
+            model = "gpt-3.5-turbo",
+            messages =
+                listOf(
+                    Message(role = "system", content = "You are an unbiased strict recruiter."),
+                    Message(role = "user", content = prompt)))
+
+    val response = chatGPTService.getChatCompletion(request)
+    val content =
+        response.choices.firstOrNull()?.message?.content
+            ?: throw IllegalStateException("No response from ChatGPT")
+
+    // Example expected format:
+    // The winner is: user1Uid
+    // Winner message: Congratulations user1Uid, you showed...
+    // Loser message: user2Uid, you lacked clarity...
+
+    // Extract the winner UID from the response
+    val winnerRegex = Regex("The winner is:\\s*(\\S+)")
+    val winnerMatch =
+        winnerRegex.find(content) ?: throw IllegalStateException("No winner found in the response")
+
+    val winnerUid = winnerMatch.groupValues[1]
+
+    // Extract the winner and loser messages from the response
+    val winnerMessageRegex =
+        Regex("Winner message:\\s*(.*?)(?=Loser message:|$)", RegexOption.DOT_MATCHES_ALL)
+    val loserMessageRegex = Regex("Loser message:\\s*(.*)", RegexOption.DOT_MATCHES_ALL)
+
+    val winnerMessageText =
+        winnerMessageRegex.find(content)?.groups?.get(1)?.value?.trim()
+            ?: "No winner message found."
+    val loserMessageText =
+        loserMessageRegex.find(content)?.groups?.get(1)?.value?.trim() ?: "No loser message found."
+
+    // Create a map of UIDs to names
+    val uidToNameMap = mapOf(user1Uid to user1name, user2Uid to user2name)
+
+    // Replace UIDs in the messages
+    val updatedWinnerMessageText = replaceUidsWithNames(winnerMessageText, uidToNameMap)
+    val updatedLoserMessageText = replaceUidsWithNames(loserMessageText, uidToNameMap)
+
+    // Create Message objects for winnerMessage and loserMessage
+    val winnerMessage = Message(role = "assistant", content = updatedWinnerMessageText)
+    val loserMessage = Message(role = "assistant", content = updatedLoserMessageText)
+
+    return EvaluationResult(
+        winnerUid = winnerUid, winnerMessage = winnerMessage, loserMessage = loserMessage)
+  }
+
+  // Helper function to replace UIDs with real names
+  private fun replaceUidsWithNames(message: String, uidToNameMap: Map<String, String>): String {
+    var updatedMessage = message
+    uidToNameMap.forEach { (uid, name) -> updatedMessage = updatedMessage.replace(uid, name) }
+    return updatedMessage
   }
 }

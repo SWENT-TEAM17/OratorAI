@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.theme.AppColors
@@ -47,7 +48,13 @@ fun WaitingForCompletionScreen(
           if (friendUid == it.opponent) it.opponentCompleted else it.challengerCompleted
 
       if (otherUserCompleted) {
-        // Navigate directly to the evaluation screen
+        // Update the battle status to EVALUATING
+        battleViewModel.updateBattleStatus(battleId, BattleStatus.EVALUATING) { success ->
+          if (!success) {
+            Log.e("WaitingForCompletionScreen", "Failed to update battle status.")
+          }
+        }
+        // Navigate to the evaluation screen
         navigationActions.navigateToEvaluationScreen(battleId)
       } else {
         Log.d("WaitingForCompletionScreen", "Waiting for the other user to finish.")

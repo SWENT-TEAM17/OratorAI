@@ -352,13 +352,6 @@ class UserProfileViewModelTest {
 
   @Test
   fun `addNewestData should maintain a maximum size of 10 in recentData`() = runTest {
-    // Arrange
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          onSuccess()
-        }
-        .`when`(repository)
-        .updateUserProfile(any(), any(), any())
 
     // Prepopulate recentData with 10 items
     for (i in 1..10) {
@@ -438,13 +431,6 @@ class UserProfileViewModelTest {
 
   @Test
   fun `updateMetricMean should calculate means and update user profile`() = runTest {
-    // Arrange
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          onSuccess()
-        }
-        .`when`(repository)
-        .updateUserProfile(any(), any(), any())
 
     // Add several AnalysisData items
     val analysisDataList =

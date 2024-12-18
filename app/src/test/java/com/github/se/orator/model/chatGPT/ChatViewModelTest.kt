@@ -9,6 +9,7 @@ import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speaking.PublicSpeakingContext
 import com.github.se.orator.model.speaking.SalesPitchContext
 import com.github.se.orator.ui.network.ChatGPTService
+import com.github.se.orator.ui.network.ChatRequest
 import com.github.se.orator.ui.network.ChatResponse
 import com.github.se.orator.ui.network.Choice
 import com.github.se.orator.ui.network.Message
@@ -28,6 +29,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -36,6 +38,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 
 class ChatViewModelTest {
@@ -507,4 +510,92 @@ class ChatViewModelTest {
     // Assert
     assert(chatViewModel.errorMessage.value == "Error")
   }
+
+  @Test
+  fun `evaluateBattleCandidates returns correct EvaluationResult when ChatGPT response is valid`() =
+      runTest {
+        chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
+
+        // Arrange
+        val user1Uid = "user1Uid"
+        val user2Uid = "user2Uid"
+        val user1Name = "User One"
+        val user2Name = "User Two"
+
+        val user1Messages =
+            listOf(
+                Message(role = "assistant", content = "Hi from assistant"),
+                Message(role = "user", content = "Hello from user1"))
+
+        val user2Messages =
+            listOf(
+                Message(role = "assistant", content = "Hi from assistant"),
+                Message(role = "user", content = "Hello from user2"))
+
+        val chatGPTResponseContent =
+            """
+            The winner is: $user1Uid
+            Winner message: Congratulations $user1Name, you demonstrated exceptional problem-solving skills.
+            Loser message: $user2Name, you need to improve your communication clarity.
+        """
+                .trimIndent()
+
+        val assistantMessage = Message(role = "assistant", content = chatGPTResponseContent)
+        val choice = Choice(index = 0, message = assistantMessage, finish_reason = "stop")
+        val chatGPTResponse =
+            ChatResponse(
+                id = "test-id",
+                `object` = "chat.completion",
+                created = 1234567890L,
+                model = "gpt-3.5-turbo",
+                choices = listOf(choice),
+                usage = Usage(prompt_tokens = 0, completion_tokens = 0, total_tokens = 0))
+
+        // Mock chatGPTService.getChatCompletion to return the above response
+        `when`(chatGPTService.getChatCompletion(any())).thenReturn(chatGPTResponse)
+
+        // Act
+        val evaluationResult =
+            chatViewModel.evaluateBattleCandidates(
+                user1Uid = user1Uid,
+                user2Uid = user2Uid,
+                user1messages = user1Messages,
+                user2messages = user2Messages,
+                user1name = user1Name,
+                user2name = user2Name)
+
+        // Advance until idle to ensure coroutines run
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Assert
+        assertNotNull(evaluationResult)
+        assertEquals(user1Uid, evaluationResult.winnerUid)
+        assertEquals(
+            "Congratulations $user1Name, you demonstrated exceptional problem-solving skills.",
+            evaluationResult.winnerMessage.content)
+        assertEquals(
+            "$user2Name, you need to improve your communication clarity.",
+            evaluationResult.loserMessage.content)
+
+        // Verify that chatGPTService.getChatCompletion was called with correct ChatRequest
+        val captor = argumentCaptor<ChatRequest>()
+        verify(chatGPTService).getChatCompletion(captor.capture())
+
+        val capturedRequest = captor.firstValue
+        assertEquals("gpt-3.5-turbo", capturedRequest.model)
+
+        // Check that the system message and user prompt are correctly formed
+        assertTrue(capturedRequest.messages.size == 2)
+        val systemMessage = capturedRequest.messages[0]
+        val userPrompt = capturedRequest.messages[1]
+
+        assertEquals("system", systemMessage.role)
+        assertEquals("You are an unbiased strict recruiter.", systemMessage.content)
+
+        // The userPrompt should contain the prompt defined in evaluateBattleCandidates
+        assertTrue(userPrompt.role == "user")
+        assertTrue(
+            userPrompt.content.contains(
+                "You are an impartial and strict recruiter tasked with evaluating two AI interview candidates"))
+      }
 }
