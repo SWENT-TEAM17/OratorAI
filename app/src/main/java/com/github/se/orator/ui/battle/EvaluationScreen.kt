@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -223,27 +224,33 @@ fun DisplayResultAndFeedback(
 
           // Buttons to retry, go to practice or return to home
 
-          ActionButton(text = "Retry") {
-            // Navigate to the battle screen again with the same friendUid
-            // TODO: implement retry mechanism (with the same context -> maybe just check if
-            // opponent wants to retry aswell and then just go to chat)
-          }
+          ActionButton(
+              text = "Retry",
+              onClick = {
+                // Navigate to the battle screen again with the same friendUid
+                // TODO: implement retry mechanism (with the same context -> maybe just check if
+                // opponent wants to retry aswell and then just go to chat)
+              })
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
-          ActionButton(text = "Go to Practice") {
-            chatViewModel.resetPracticeContext()
-            chatViewModel.endConversation()
-            navigationActions.navigateTo(Screen.SPEAKING_JOB_INTERVIEW)
-          }
+          ActionButton(
+              text = "Go to Practice",
+              {
+                chatViewModel.resetPracticeContext()
+                chatViewModel.endConversation()
+                navigationActions.navigateTo(Screen.SPEAKING_JOB_INTERVIEW)
+              })
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
 
-          ActionButton(text = "Return to Home") {
-            chatViewModel.resetPracticeContext()
-            chatViewModel.endConversation()
-            navigationActions.navigateTo(Screen.HOME)
-          }
+          ActionButton(
+              text = "Return to Home",
+              onClick = {
+                chatViewModel.resetPracticeContext()
+                chatViewModel.endConversation()
+                navigationActions.navigateTo(Screen.HOME)
+              })
         }
       }
 }
@@ -256,16 +263,20 @@ fun DisplayResultAndFeedback(
  * @param onClick The lambda to be invoked when the button is clicked.
  */
 @Composable
-fun ActionButton(text: String, onClick: () -> Unit) {
+fun ActionButton(
+    text: String,
+    onClick: () -> Unit,
+    buttonColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    textColor: Color = MaterialTheme.colorScheme.onSurface
+) {
   Button(
       onClick = onClick,
       modifier =
           Modifier.size(
               height = AppDimensions.buttonHeightLarge, width = AppDimensions.buttonWidthMax),
       colors =
-          ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+          ButtonDefaults.buttonColors(containerColor = buttonColor, contentColor = buttonColor),
   ) {
-    Text(
-        text = text, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.testTag(text))
+    Text(text = text, color = textColor, modifier = Modifier.testTag(text))
   }
 }

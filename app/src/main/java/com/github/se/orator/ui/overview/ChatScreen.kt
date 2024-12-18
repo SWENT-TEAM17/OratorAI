@@ -63,7 +63,8 @@ fun ChatScreen(
     navigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
     chatButtonType: ChatButtonType = ChatButtonType.FEEDBACK_BUTTON,
-    onChatButtonClick: () -> Unit = { navigationActions.navigateTo(Screen.FEEDBACK) }
+    onChatButtonClick: () -> Unit = { navigationActions.navigateTo(Screen.FEEDBACK) },
+    showBackButton: Boolean = true
 ) {
   // Collect the list of chat messages from the view model as a state.
   val chatMessages by chatViewModel.chatMessages.collectAsState()
@@ -94,19 +95,23 @@ fun ChatScreen(
                   modifier = Modifier.testTag("chat_screen_title"))
             },
             navigationIcon = {
-              IconButton(
-                  onClick = {
-                    navigationActions.goBack()
-                    chatViewModel.toggleTextToSpeech(false)
-                    chatViewModel.resetPracticeContext()
-                    chatViewModel.endConversation()
-                  },
-                  modifier = Modifier.testTag("back_button")) {
-                    Icon(
-                        imageVector = Icons.Outlined.ArrowBackIosNew,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(AppDimensions.iconSizeSmall),
-                        tint = MaterialTheme.colorScheme.onSurface) // Use theme color for icon
+              if (showBackButton) {
+                IconButton(
+                    onClick = {
+                      navigationActions.goBack()
+                      chatViewModel.toggleTextToSpeech(false)
+                      chatViewModel.resetPracticeContext()
+                      chatViewModel.endConversation()
+                    },
+                    modifier = Modifier.testTag("back_button")) {
+                      Icon(
+                          imageVector = Icons.Outlined.ArrowBackIosNew,
+                          contentDescription = "Back",
+                          modifier = Modifier.size(AppDimensions.iconSizeSmall),
+                          tint = MaterialTheme.colorScheme.onSurface) // Use theme color for icon
+                }
+              } else {
+                null
               }
             },
             colors =
