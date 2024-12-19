@@ -72,13 +72,16 @@ fun ChatScreen(
   // Collect the loading state from the view model as a state.
   val isLoading by chatViewModel.isLoading.collectAsState()
 
+  // Filter out system messages for display purposes only
+  val displayMessages = chatMessages.filter { it.role != "system" }
+
   // Remember the list state for the LazyColumn to manage scrolling position.
   val listState = rememberLazyListState()
 
   // Side effect to auto-scroll to the last message when a new message is added.
-  LaunchedEffect(chatMessages.size) {
-    if (chatMessages.isNotEmpty()) {
-      listState.animateScrollToItem(chatMessages.size - 1)
+  LaunchedEffect(displayMessages.size) {
+    if (displayMessages.isNotEmpty()) {
+      listState.animateScrollToItem(displayMessages.size - 1)
     }
   }
 
@@ -135,7 +138,7 @@ fun ChatScreen(
                                 .testTag(
                                     "chat_messages_list")) // Dynamically add chat message items.
                     {
-                          items(chatMessages) { message -> ChatMessageItem(message) }
+                          items(displayMessages) { message -> ChatMessageItem(message) }
                         }
 
                     // Display a loading indicator when a message is being processed.

@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.symblAi.SpeakingError
 import com.github.se.orator.model.symblAi.SpeakingRepository
@@ -137,7 +138,10 @@ fun SpeakingScreen(
 
           // Display transcribed text
           if (analysisData != null) {
-            Text("Transcribed Text: ${analysisData!!.transcription}", color = textColor)
+            Text(
+                "Transcribed Text: ${analysisData!!.transcription}",
+                color = textColor,
+                textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
 
             // Display sentiment analysis result

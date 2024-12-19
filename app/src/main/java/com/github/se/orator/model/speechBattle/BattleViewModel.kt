@@ -97,10 +97,6 @@ class BattleViewModel(
                 // Set the practice context for the battle
                 apiLinkViewModel.updatePracticeContext(battle.context)
 
-                if (localContext != null) {
-                  Toast.makeText(localContext, "Battle accepted!", Toast.LENGTH_SHORT).show()
-                }
-
                 // Navigate to the battle chat screen with the battleId and userId
                 navigationActions.navigateToBattleScreen(battleId, currentUserUid)
 
