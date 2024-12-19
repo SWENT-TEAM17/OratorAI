@@ -3,7 +3,9 @@ package com.github.se.orator.ui.profile
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +18,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
@@ -26,13 +31,10 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -43,12 +45,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
@@ -62,13 +68,19 @@ import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
-import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.google.firebase.auth.FirebaseAuth
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays the Profile screen, including user information, stats, and offline recordings.
+ *
+ * @param navigationActions Provides navigation functions for the app.
+ * @param profileViewModel The ViewModel providing user profile data and actions.
+ */
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
+  val colors = MaterialTheme.colorScheme
+
   // Get the context
   val context = LocalContext.current
 
@@ -77,6 +89,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   // Collect the profile data from the ViewModel
   val userProfile by profileViewModel.userProfile.collectAsState()
+  var showStatsDialog by remember { mutableStateOf(false) }
 
   Scaffold(
       topBar = {
@@ -124,147 +137,214 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
       backgroundColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier =
-                Modifier.fillMaxSize().padding(innerPadding).padding(AppDimensions.paddingMedium),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              userProfile?.let { profile ->
-                Box(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .height(AppDimensions.profileBoxHeight)
-                            .padding(top = AppDimensions.paddingXXXLarge),
-                    contentAlignment = Alignment.TopCenter) {
-                      // Background "card" behind the profile picture
-                      Card(
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(AppDimensions.paddingMedium)
+                    .verticalScroll(rememberScrollState()), // Enable scrolling
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingMedium),
+        ) {
+          userProfile?.let { profile ->
+            /**
+             * Displays user profile information, including profile picture, name, streak, and bio.
+             */
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(AppDimensions.profileBoxHeight)
+                        .padding(top = AppDimensions.paddingXXXLarge),
+                contentAlignment = Alignment.TopCenter) {
+                  // Background "card" behind the profile picture
+                  Card(
+                      modifier =
+                          Modifier.fillMaxWidth(0.95f)
+                              .height(AppDimensions.profileCardHeight)
+                              .shadow(
+                                  elevation = AppDimensions.elevationSmall,
+                                  shape = RoundedCornerShape(size = AppDimensions.statusBarPadding),
+                                  clip = false)
+                              .background(
+                                  colors.surfaceVariant,
+                                  shape =
+                                      RoundedCornerShape(size = AppDimensions.statusBarPadding)),
+                      elevation = AppDimensions.elevationSmall) {}
+
+                  // Profile Picture with overlapping positioning
+                  ProfilePicture(
+                      profilePictureUrl = profile.profilePic,
+                      onClick = { isDialogOpen = true },
+                      modifier =
+                          Modifier.align(Alignment.TopCenter)
+                              .offset(y = (-AppDimensions.profilePictureSize / 2)))
+
+                  // Edit button
+                  Button(
+                      onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
+                      modifier =
+                          Modifier.testTag("edit_button")
+                              .size(AppDimensions.spacingXLarge)
+                              .align(Alignment.TopEnd)
+                              .offset(y = -AppDimensions.paddingMediumSmall),
+                      // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
+                      shape = AppShapes.circleShape,
+                      colors =
+                          ButtonDefaults.buttonColors(
+                              backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
+                      contentPadding = PaddingValues(AppDimensions.nullPadding)) {
+                        Icon(
+                            Icons.Outlined.Edit,
+                            contentDescription = "Edit button",
+                            modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                            tint = MaterialTheme.colorScheme.primary)
+                      }
+
+                  Column(
+                      horizontalAlignment = Alignment.CenterHorizontally,
+                      modifier =
+                          Modifier.align(Alignment.TopCenter)
+                              .padding(top = AppDimensions.paddingSmall)) {
+                        Spacer(modifier = Modifier.height(AppDimensions.mediumSpacerHeight))
+
+                        // Box to hold username and streak
+                        Box(
+                            modifier = Modifier.fillMaxWidth().testTag("profile_name_box"),
+                            contentAlignment = Alignment.Center) {
+                              // Username remains centered
+                              Text(
+                                  text = profile.name,
+                                  fontSize = AppFontSizes.titleMedium,
+                                  fontWeight = FontWeight.Bold,
+                                  modifier = Modifier.testTag("profile_name"),
+                                  color = MaterialTheme.colorScheme.primary)
+
+                              // Current Streak aligned to the end with fire icon
+                              Row(
+                                  verticalAlignment = Alignment.CenterVertically,
+                                  modifier =
+                                      Modifier.align(Alignment.CenterEnd)
+                                          .offset(
+                                              x =
+                                                  -AppDimensions
+                                                      .paddingLarge) // Push a little to the
+                                          // left
+                                          .testTag("current_streak")) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Whatshot, // Fire icon
+                                        contentDescription = "Active Streak",
+                                        tint = COLOR_AMBER,
+                                        modifier = Modifier.size(AppDimensions.iconSizeSmall))
+                                    Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
+                                    Text(
+                                        text = "${profile.currentStreak}",
+                                        fontSize = AppFontSizes.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = COLOR_AMBER,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.testTag("current_streak_text"))
+                                  }
+                            }
+
+                        Spacer(modifier = Modifier.height(AppDimensions.smallSpacerHeight))
+
+                        Text(
+                            text =
+                                if (profile.bio.isNullOrBlank()) "Write your bio here"
+                                else profile.bio,
+                            modifier = Modifier.padding(horizontal = AppDimensions.paddingMedium),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1, // Limit to one line
+                            overflow = TextOverflow.Ellipsis // Truncate with ellipsis
+                            )
+                      }
+                }
+
+            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+            Log.d("scn", "bio is: ${profile.bio}")
+
+            ProfileSection(
+                title = "My Stats",
+                modifier = Modifier.testTag("statistics_section"),
+                action = {
+                  Button(
+                      onClick = { showStatsDialog = true },
+                      modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall),
+                      colors =
+                          ButtonDefaults.buttonColors(
+                              backgroundColor = MaterialTheme.colorScheme.primary,
+                              contentColor = MaterialTheme.colorScheme.inverseOnSurface)) {
+                        Text("View More Stats")
+                      }
+
+                  if (showStatsDialog) {
+                    Dialog(onDismissRequest = { showStatsDialog = false }) {
+                      Box(
                           modifier =
-                              Modifier.fillMaxWidth(0.95f).height(AppDimensions.profileCardHeight),
-                          backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                          elevation = AppDimensions.elevationSmall) {}
-
-                      // Profile Picture with overlapping positioning
-                      ProfilePicture(
-                          profilePictureUrl = profile.profilePic,
-                          onClick = { isDialogOpen = true },
-                          modifier =
-                              Modifier.align(Alignment.TopCenter)
-                                  .offset(y = (-AppDimensions.profilePictureSize / 2)))
-
-                      // Edit button
-                      Button(
-                          onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
-                          modifier =
-                              Modifier.testTag("edit_button")
-                                  .size(AppDimensions.spacingXLarge)
-                                  .align(Alignment.TopEnd)
-                                  .offset(y = -AppDimensions.paddingMediumSmall),
-                          // .offset(x = (AppDimensions.profilePictureSize / 2.2f)),
-                          shape = AppShapes.circleShape,
-                          colors =
-                              ButtonDefaults.buttonColors(
-                                  backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
-                          contentPadding = PaddingValues(AppDimensions.nullPadding)) {
-                            Icon(
-                                Icons.Outlined.Edit,
-                                contentDescription = "Edit button",
-                                modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                                tint = MaterialTheme.colorScheme.primary)
-                          }
-
-                      Column(
-                          horizontalAlignment = Alignment.CenterHorizontally,
-                          modifier =
-                              Modifier.align(Alignment.TopCenter)
-                                  .padding(top = AppDimensions.paddingSmall)) {
-                            Spacer(modifier = Modifier.height(AppDimensions.mediumSpacerHeight))
-
-                            // Box to hold username and streak
-                            Box(
-                                modifier = Modifier.fillMaxWidth().testTag("profile_name_box"),
-                                contentAlignment = Alignment.Center) {
-                                  // Username remains centered
-                                  Text(
-                                      text = profile.name,
-                                      fontSize = AppFontSizes.titleMedium,
-                                      fontWeight = FontWeight.Bold,
-                                      modifier = Modifier.testTag("profile_name"),
-                                      color = MaterialTheme.colorScheme.primary)
-
-                                  // Current Streak aligned to the end with fire icon
-                                  Row(
-                                      verticalAlignment = Alignment.CenterVertically,
-                                      modifier =
-                                          Modifier.align(Alignment.CenterEnd)
-                                              .offset(
-                                                  x =
-                                                      -AppDimensions
-                                                          .paddingLarge) // Push a little to the
-                                              // left
-                                              .testTag("current_streak")) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Whatshot, // Fire icon
-                                            contentDescription = "Active Streak",
-                                            tint = COLOR_AMBER,
-                                            modifier = Modifier.size(AppDimensions.iconSizeSmall))
-                                        Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
-                                        Text(
-                                            text = "${profile.currentStreak}",
-                                            fontSize = AppFontSizes.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = COLOR_AMBER,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            modifier = Modifier.testTag("current_streak_text"))
-                                      }
+                              Modifier.fillMaxSize()
+                                  .padding(AppDimensions.paddingMedium)
+                                  .background(
+                                      MaterialTheme.colorScheme.surface,
+                                      shape = MaterialTheme.shapes.medium)) {
+                            GraphStats(profileViewModel = profileViewModel)
+                            IconButton(
+                                onClick = { showStatsDialog = false },
+                                modifier = Modifier.align(Alignment.TopEnd)) {
+                                  Icon(
+                                      imageVector = Icons.Default.Close,
+                                      contentDescription = "Close Stats")
                                 }
-
-                            Spacer(modifier = Modifier.height(AppDimensions.smallSpacerHeight))
-
-                            Text(
-                                text =
-                                    if (profile.bio.isNullOrBlank()) "Write your bio here"
-                                    else profile.bio,
-                                modifier =
-                                    Modifier.padding(horizontal = AppDimensions.paddingMedium),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1, // Limit to one line
-                                overflow = TextOverflow.Ellipsis // Truncate with ellipsis
-                                )
                           }
                     }
-
-                Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-                Log.d("scn", "bio is: ${profile.bio}")
-                // stats section
-                CardSection(
-                    title = "My stats",
-                    imageVector = Icons.Outlined.QueryStats,
-                    onClick = { navigationActions.navigateTo(Screen.STAT) },
-                    modifier = Modifier.testTag("statistics_section"))
-
-                Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-
-                // Previous Sessions Section
-                CardSection(
-                    title = "Previous Recordings",
-                    imageVector = Icons.Outlined.History,
-                    onClick = { navigationActions.navigateTo(Screen.OFFLINE_RECORDING_PROFILE) },
-                    modifier = Modifier.testTag("previous_sessions_section"))
-              }
-                  ?: run {
-                    Text(
-                        text = "Loading profile...",
-                        style = AppTypography.bodyLargeStyle,
-                        modifier = Modifier.testTag("loading_profile_text"))
                   }
-            }
+                }) {
+                  // Streak Content
+                  Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall)) {
+                        Icon(
+                            imageVector = Icons.Filled.Whatshot,
+                            contentDescription = "Streak",
+                            tint = COLOR_AMBER,
+                            modifier = Modifier.size(AppDimensions.iconSizeMedium))
+                        Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+                        Text(
+                            text = "Current Streak: ${profile.currentStreak}",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = COLOR_AMBER,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis)
+                      }
+                }
+          }
 
-        // Dialog to show the profile picture in larger format
-        if (isDialogOpen && userProfile?.profilePic != null) {
-          ProfilePictureDialog(
-              profilePictureUrl = userProfile!!.profilePic!!, onDismiss = { isDialogOpen = false })
+          Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+
+          ProfileSection(
+              title = "My Offline Recordings",
+              modifier = Modifier.testTag("offline_recordings_section"),
+              action = {
+                Button(
+                    onClick = { navigationActions.navigateTo(Screen.OFFLINE_RECORDING_PROFILE) },
+                    modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.inverseOnSurface)) {
+                      Text("View Your Offline Recordings")
+                    }
+              }) {}
         }
       }
+
+  // Dialog to show the profile picture in larger format
+  if (isDialogOpen && userProfile?.profilePic != null) {
+    ProfilePictureDialog(
+        profilePictureUrl = userProfile!!.profilePic!!, onDismiss = { isDialogOpen = false })
+  }
 }
 
+/** Composable function to display the profile picture. */
 @Composable
 fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit, modifier: Modifier = Modifier) {
   val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
@@ -310,43 +390,43 @@ fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
 }
 
 /**
- * Composable function to display a card section with an icon and title.
+ * Composable function to display a reusable profile section with a title, content, and optional
+ * action button.
  *
- * @param title Title of the card section.
- * @param imageVector Icon of the card.
- * @param onClick Callback to handle click events.
- * @param modifier Modifier to be applied to the card.
+ * @param title The title of the section to be displayed.
+ * @param modifier Modifier to apply to the section layout.
+ * @param action Optional composable lambda for an action button or additional UI at the bottom of
+ *   the section.
+ * @param content Composable lambda to define the main content of the section.
  */
 @Composable
-fun CardSection(
+fun ProfileSection(
     title: String,
-    imageVector: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    action: (@Composable () -> Unit)? = null,
+    content: @Composable () -> Unit
 ) {
-  Card(
-      modifier =
-          modifier
-              .fillMaxWidth()
-              .height(AppDimensions.cardSectionHeight)
-              .clickable { onClick() }
-              .testTag("cardSection"),
-      elevation = AppDimensions.elevationSmall,
-      backgroundColor = MaterialTheme.colorScheme.surfaceVariant) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(AppDimensions.paddingSmallMedium)) {
-              Icon(
-                  imageVector,
-                  contentDescription = "Card icon",
-                  modifier = Modifier.size(AppDimensions.iconSizeMedium))
-              Spacer(modifier = Modifier.width(AppDimensions.paddingSmallMedium))
-              Text(
-                  text = title,
-                  fontSize = AppFontSizes.bodyLarge,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("titleText"),
-                  color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-      }
+  Column(modifier = modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
+    // Section Title
+    Text(
+        text = title,
+        style =
+            TextStyle(
+                fontSize = 18.sp,
+                fontFamily = FontFamily(Font(R.font.poppins_black)),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(vertical = AppDimensions.paddingSmall))
+
+    // Section Content
+    content()
+
+    // Optional Action Button
+    action?.let {
+      Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+      it()
+    }
+  }
 }

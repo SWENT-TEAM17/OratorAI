@@ -76,7 +76,7 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag("statistics_section").assertIsDisplayed()
 
     // Verify the Previous Sessions section is displayed
-    composeTestRule.onNodeWithTag("previous_sessions_section").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("offline_recordings_section").assertIsDisplayed()
   }
 
   @Test
