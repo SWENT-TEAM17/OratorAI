@@ -66,20 +66,6 @@ fun OfflineInterviewModule(
 
   val context = LocalContext.current
 
-  val inputFields =
-      listOf(
-          InputFieldData(
-              value = targetCompany,
-              onValueChange = { newValue: String -> targetCompany = newValue },
-              question = "What company are you applying to?",
-              placeholder = "e.g Apple, Google",
-              testTag = "company"),
-          InputFieldData(
-              value = jobPosition,
-              onValueChange = { newValue: String -> jobPosition = newValue },
-              question = "What job position are you applying for?",
-              placeholder = "e.g Hardware engineer",
-              testTag = "jobInput"))
   Scaffold(
       topBar = {
         TopNavigationMenu(
@@ -90,7 +76,7 @@ fun OfflineInterviewModule(
                   onClick = {
                     navigationActions.goBack() // Navigate back
                   },
-                  modifier = Modifier.testTag("addFriendBackButton")) {
+                  modifier = Modifier.testTag("back_button")) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
@@ -111,10 +97,9 @@ fun OfflineInterviewModule(
                   value = targetCompany,
                   onValueChange = { newCompany -> targetCompany = newCompany },
                   label = {
-                    Text(
-                        "What company are you applying to?", modifier = Modifier.testTag("company"))
+                    Text("What company are you applying to?", modifier = Modifier.testTag(""))
                   },
-                  modifier = Modifier.fillMaxWidth().testTag("username_field"),
+                  modifier = Modifier.fillMaxWidth().testTag("company_field"),
                   singleLine = true,
                   colors =
                       androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
@@ -129,10 +114,8 @@ fun OfflineInterviewModule(
               OutlinedTextField(
                   value = jobPosition,
                   onValueChange = { newJobPosition -> jobPosition = newJobPosition },
-                  label = {
-                    Text("What job are you applying to?", modifier = Modifier.testTag("company"))
-                  },
-                  modifier = Modifier.fillMaxWidth().testTag("username_field"),
+                  label = { Text("What job are you applying to?") },
+                  modifier = Modifier.fillMaxWidth().testTag("job_field"),
                   singleLine = true,
                   colors =
                       androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
