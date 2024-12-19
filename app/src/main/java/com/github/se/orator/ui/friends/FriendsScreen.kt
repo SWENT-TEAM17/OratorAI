@@ -146,7 +146,7 @@ fun ViewFriendsScreen(
   // State for managing the popup
   var selectedBattle by remember { mutableStateOf<SpeechBattle?>(null) }
 
-  LaunchedEffect(Unit) { battleViewModel?.fetchPendingBattlesForUser() }
+  LaunchedEffect(Unit) { battleViewModel?.listenForPendingBattles() }
 
   // Collect the pending battles as state, fallback to an empty list if battleViewModel is null
   val pendingBattles by
