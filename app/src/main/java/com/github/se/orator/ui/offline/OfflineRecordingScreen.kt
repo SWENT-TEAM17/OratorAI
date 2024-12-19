@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.symblAi.AudioRecorder
 import com.github.se.orator.model.symblAi.SpeakingError
 import com.github.se.orator.model.symblAi.SpeakingRepository
@@ -74,6 +75,7 @@ fun OfflineRecordingScreen(
 
   handleAudioRecording(collState, permissionGranted, amplitudes)
 
+    val offlinePromptsFunctions = OfflinePromptsFunctions()
   // back button
   Column(
       modifier =
@@ -123,10 +125,6 @@ fun OfflineRecordingScreen(
                           if (analysisState.value == SpeakingRepository.AnalysisState.IDLE) {
                             recorder.startRecording(
                                 File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3"))
-
-                            Log.d(
-                                "aa",
-                                "now transcribing to: ${viewModel.interviewPromptNb.value}.mp3")
                             analysisState.value = SpeakingRepository.AnalysisState.RECORDING
                           }
                           // what to do when user finishes recording a file
@@ -134,9 +132,6 @@ fun OfflineRecordingScreen(
                               analysisState.value = SpeakingRepository.AnalysisState.IDLE
                             File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3")
                                 .also {
-                                  Log.d(
-                                      "aall",
-                                      " file saved to: \"${viewModel.interviewPromptNb.value}.mp3\"")
                                   recorder.stopRecording()
                                   fileSaved.value = true
                                 }
@@ -151,34 +146,26 @@ fun OfflineRecordingScreen(
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-            LaunchedEffect (analysisState.value) {
-                feedbackMessage.value =
-                    when (analysisState.value) {
-                        SpeakingRepository.AnalysisState.RECORDING -> "Recording..."
-                        SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
-                        else ->
-                            when (viewModel.analysisError.value) {
-                                SpeakingError.NO_ERROR -> "Analysis finished."
-                                else -> "Finished recording"
-                            }
-                    }
-                Log.d("in offline recording screen", "analysis state value is now ${analysisState.value}")
-                Log.d("aa", "feedback msg : ${feedbackMessage.value}")
-            }
-
               Text(
-                  feedbackMessage.value,
+                  "Tap once to record, tap again to stop returning.",
                   modifier = Modifier.testTag("mic_text"),
                   fontSize = AppFontSizes.bodyLarge,
                   color = colors.onSurface)
 
-              // question for user to remember
-              Text(
-                  text = question,
-                  fontSize = AppFontSizes.bodyLarge,
-                  color = colors.onSurface,
-                  modifier =
-                      Modifier.padding(top = AppDimensions.paddingMedium).testTag("QuestionText"))
+            Text(
+                text = "Target company: ${offlinePromptsFunctions.getPromptMapElement(viewModel.interviewPromptNb.value, "targetCompany", context)}",
+                fontSize = AppFontSizes.bodyLarge,
+                color = colors.onSurface,
+                modifier =
+                Modifier.padding(top = AppDimensions.paddingMedium).testTag("targetCompany"))
+
+            // question for user to remember
+            Text(
+                text = "Make sure to focus on: " + question,
+                fontSize = AppFontSizes.bodyLarge,
+                color = colors.onSurface,
+                modifier =
+                Modifier.padding(top = AppDimensions.paddingMedium).testTag("QuestionText"))
 
               Spacer(modifier = Modifier.weight(1f))
 
