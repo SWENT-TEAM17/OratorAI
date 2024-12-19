@@ -843,7 +843,7 @@ class FriendsUITests {
           null
         }
         .`when`(mockBattleRepository)
-        .getPendingBattlesForUser(any(), any(), any())
+        .listenForPendingBattles(any(), any())
 
     // Mock getBattleById to return the specific battle
     `when`(mockBattleRepository.getBattleById(eq("battle1"), any())).thenAnswer { invocation ->
@@ -941,7 +941,7 @@ class FriendsUITests {
                     focusArea = "Problem Solving"))
 
     // Mock getPendingBattlesForUser to return the mock battle
-    `when`(mockBattleRepository.getPendingBattlesForUser(eq("testUser"), any(), any())).thenAnswer {
+    `when`(mockBattleRepository.listenForPendingBattles(eq("testUser"), any())).thenAnswer {
       val callback = it.getArgument<(List<SpeechBattle>) -> Unit>(1)
       callback(listOf(mockBattle))
       null
