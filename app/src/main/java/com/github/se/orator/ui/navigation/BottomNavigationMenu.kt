@@ -18,6 +18,13 @@ import androidx.compose.ui.platform.testTag
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 
+/**
+ * Bottom navigation bar to navigate within the main screens
+ *
+ * @param onTabSelect function for on click event
+ * @param tabList list of top level destinations
+ * @param selectedItem selected route
+ */
 @Composable
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
