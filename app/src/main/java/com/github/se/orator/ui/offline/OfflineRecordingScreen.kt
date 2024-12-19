@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.symblAi.AudioRecorder
-import com.github.se.orator.model.symblAi.SpeakingError
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -31,7 +30,6 @@ import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 // TODO: remove this suppress and fix the permissions
 @SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
@@ -75,7 +73,7 @@ fun OfflineRecordingScreen(
 
   handleAudioRecording(collState, permissionGranted, amplitudes)
 
-    val offlinePromptsFunctions = OfflinePromptsFunctions()
+  val offlinePromptsFunctions = OfflinePromptsFunctions()
   // back button
   Column(
       modifier =
@@ -128,15 +126,15 @@ fun OfflineRecordingScreen(
                             analysisState.value = SpeakingRepository.AnalysisState.RECORDING
                           }
                           // what to do when user finishes recording a file
-                          else if (analysisState.value == SpeakingRepository.AnalysisState.RECORDING) {
-                              analysisState.value = SpeakingRepository.AnalysisState.IDLE
+                          else if (analysisState.value ==
+                              SpeakingRepository.AnalysisState.RECORDING) {
+                            analysisState.value = SpeakingRepository.AnalysisState.IDLE
                             File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3")
                                 .also {
                                   recorder.stopRecording()
                                   fileSaved.value = true
                                 }
-                          }
-                          else {
+                          } else {
                             Log.d("offline recording screen issue", "Unrecognized analysis state!")
                           }
                         },
@@ -152,27 +150,29 @@ fun OfflineRecordingScreen(
                   fontSize = AppFontSizes.bodyLarge,
                   color = colors.onSurface)
 
-            Text(
-                text = "Target company: ${offlinePromptsFunctions.getPromptMapElement(viewModel.interviewPromptNb.value, "targetCompany", context)}",
-                fontSize = AppFontSizes.bodyLarge,
-                color = colors.onSurface,
-                modifier =
-                Modifier.padding(top = AppDimensions.paddingMedium).testTag("targetCompany"))
+              Text(
+                  text =
+                      "Target company: ${offlinePromptsFunctions.getPromptMapElement(viewModel.interviewPromptNb.value, "targetCompany", context)}",
+                  fontSize = AppFontSizes.bodyLarge,
+                  color = colors.onSurface,
+                  modifier =
+                      Modifier.padding(top = AppDimensions.paddingMedium).testTag("targetCompany"))
 
-            // question for user to remember
-            Text(
-                text = "Make sure to focus on: " + question,
-                fontSize = AppFontSizes.bodyLarge,
-                color = colors.onSurface,
-                modifier =
-                Modifier.padding(top = AppDimensions.paddingMedium).testTag("QuestionText"))
+              // question for user to remember
+              Text(
+                  text = "Make sure to focus on: " + question,
+                  fontSize = AppFontSizes.bodyLarge,
+                  color = colors.onSurface,
+                  modifier =
+                      Modifier.padding(top = AppDimensions.paddingMedium).testTag("QuestionText"))
 
               Spacer(modifier = Modifier.weight(1f))
 
               // button for user to click when he is done recording
               Button(
                   onClick = {
-                    if (fileSaved.value && analysisState.value != SpeakingRepository.AnalysisState.RECORDING) {
+                    if (fileSaved.value &&
+                        analysisState.value != SpeakingRepository.AnalysisState.RECORDING) {
                       viewModel.endAndSave()
                       fileSaved.value = false
                       navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)

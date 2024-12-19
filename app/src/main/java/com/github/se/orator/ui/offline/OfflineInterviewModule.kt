@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme.colors
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -19,9 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,16 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
-import com.github.se.orator.ui.navigation.Screen
 import com.github.se.orator.ui.navigation.TopNavigationMenu
-import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import kotlin.random.Random
@@ -65,7 +61,7 @@ fun OfflineInterviewModule(
 ) {
   var targetCompany by remember { mutableStateOf("") }
   var jobPosition by remember { mutableStateOf("") }
-    var question by remember { mutableStateOf("") }
+  var question by remember { mutableStateOf("") }
   val ID = generateRandomString()
 
   val context = LocalContext.current
@@ -84,135 +80,122 @@ fun OfflineInterviewModule(
               question = "What job position are you applying for?",
               placeholder = "e.g Hardware engineer",
               testTag = "jobInput"))
-    Scaffold(
-        topBar = {
-            TopNavigationMenu(
-                textTestTag = "offlineModuleTitle",
-                title = "Offline interview",
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navigationActions.goBack() // Navigate back
-                        },
-                        modifier = Modifier.testTag("addFriendBackButton")
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            )
-        }
-    ) {
-        innerPadding ->
+  Scaffold(
+      topBar = {
+        TopNavigationMenu(
+            textTestTag = "offlineModuleTitle",
+            title = "Offline interview",
+            navigationIcon = {
+              IconButton(
+                  onClick = {
+                    navigationActions.goBack() // Navigate back
+                  },
+                  modifier = Modifier.testTag("addFriendBackButton")) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface)
+                  }
+            })
+      }) { innerPadding ->
         Column(
             modifier =
-            Modifier.fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = AppDimensions.paddingMedium)
-                .padding(top = AppDimensions.paddingSmall)
-                .verticalScroll(rememberScrollState())
-                .testTag("content"),
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = AppDimensions.paddingMedium)
+                    .padding(top = AppDimensions.paddingSmall)
+                    .verticalScroll(rememberScrollState())
+                    .testTag("content"),
             verticalArrangement = Arrangement.Top) {
-            OutlinedTextField(
-                value = targetCompany,
-                onValueChange = { newCompany -> targetCompany = newCompany },
-                label = {
+              OutlinedTextField(
+                  value = targetCompany,
+                  onValueChange = { newCompany -> targetCompany = newCompany },
+                  label = {
                     Text(
-                        "What company are you applying to?",
-                        modifier = Modifier.testTag("company")
-                    )
-                },
-                modifier = Modifier.fillMaxWidth().testTag("username_field"),
-                singleLine = true,
-                colors =
-                androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = MaterialTheme.colorScheme.surface,
-                    textColor = MaterialTheme.colorScheme.onSurface,
-                    focusedBorderColor = MaterialTheme.colorScheme.outline,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
+                        "What company are you applying to?", modifier = Modifier.testTag("company"))
+                  },
+                  modifier = Modifier.fillMaxWidth().testTag("username_field"),
+                  singleLine = true,
+                  colors =
+                      androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
+                          backgroundColor = MaterialTheme.colorScheme.surface,
+                          textColor = MaterialTheme.colorScheme.onSurface,
+                          focusedBorderColor = MaterialTheme.colorScheme.outline,
+                          unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                          cursorColor = MaterialTheme.colorScheme.primary,
+                          focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                          unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
 
-            OutlinedTextField(
-                value = jobPosition,
-                onValueChange = { newJobPosition -> jobPosition = newJobPosition },
-                label = {
-                    Text(
-                        "What job are you applying to?",
-                        modifier = Modifier.testTag("company")
-                    )
-                },
-                modifier = Modifier.fillMaxWidth().testTag("username_field"),
-                singleLine = true,
-                colors =
-                androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = MaterialTheme.colorScheme.surface,
-                    textColor = MaterialTheme.colorScheme.onSurface,
-                    focusedBorderColor = MaterialTheme.colorScheme.outline,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
+              OutlinedTextField(
+                  value = jobPosition,
+                  onValueChange = { newJobPosition -> jobPosition = newJobPosition },
+                  label = {
+                    Text("What job are you applying to?", modifier = Modifier.testTag("company"))
+                  },
+                  modifier = Modifier.fillMaxWidth().testTag("username_field"),
+                  singleLine = true,
+                  colors =
+                      androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
+                          backgroundColor = MaterialTheme.colorScheme.surface,
+                          textColor = MaterialTheme.colorScheme.onSurface,
+                          focusedBorderColor = MaterialTheme.colorScheme.outline,
+                          unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                          cursorColor = MaterialTheme.colorScheme.primary,
+                          focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                          unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
 
-            OutlinedTextField(
-                value = question,
-                onValueChange = { newQuestion -> question = newQuestion },
-                label = {
-                    Text(
-                        "What do you want to focus on?",
-                        modifier = Modifier.testTag("question")
-                    )
-                },
-                modifier = Modifier.fillMaxWidth().testTag("question_field"),
-                singleLine = false,
-                colors =
-                androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = MaterialTheme.colorScheme.surface,
-                    textColor = MaterialTheme.colorScheme.onSurface,
-                    focusedBorderColor = MaterialTheme.colorScheme.outline,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
+              OutlinedTextField(
+                  value = question,
+                  onValueChange = { newQuestion -> question = newQuestion },
+                  label = {
+                    Text("What do you want to focus on?", modifier = Modifier.testTag("question"))
+                  },
+                  modifier = Modifier.fillMaxWidth().testTag("question_field"),
+                  singleLine = false,
+                  colors =
+                      androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
+                          backgroundColor = MaterialTheme.colorScheme.surface,
+                          textColor = MaterialTheme.colorScheme.onSurface,
+                          focusedBorderColor = MaterialTheme.colorScheme.outline,
+                          unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                          cursorColor = MaterialTheme.colorScheme.primary,
+                          focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                          unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
 
-            Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
+              Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
-            Button(
-                onClick = {
+              Button(
+                  onClick = {
                     // this is for the profile screen to see previous interviews
                     offlinePromptsFunctions.savePromptsToFile(
                         context = context,
                         prompts =
-                        mapOf(
-                            "targetCompany" to targetCompany,
-                            "jobPosition" to jobPosition,
-                            "question" to question,
-                            "ID" to ID,
-                            "transcribed" to "0",
-                            "GPTresponse" to "0",
-                            "transcription" to ""),
+                            mapOf(
+                                "targetCompany" to targetCompany,
+                                "jobPosition" to jobPosition,
+                                "question" to question,
+                                "ID" to ID,
+                                "transcribed" to "0",
+                                "GPTresponse" to "0",
+                                "transcription" to ""),
                     )
                     offlinePromptsFunctions.createEmptyPromptFile(context, ID)
                     speakingViewModel.interviewPromptNb.value = ID
                     navigationActions.goToOfflineRecording(question)
-                },
-                modifier =
-                Modifier.fillMaxWidth(0.8f)
-                    .padding(AppDimensions.paddingSmall)
-                    .testTag("doneButton")
-                    .align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
-                Text(
-                    text = "Go to recording screen",
-                    fontSize = AppFontSizes.buttonText,
-                    color = MaterialTheme.colorScheme.surface)
+                  },
+                  modifier =
+                      Modifier.fillMaxWidth(0.8f)
+                          .padding(AppDimensions.paddingSmall)
+                          .testTag("doneButton")
+                          .align(Alignment.CenterHorizontally),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = MaterialTheme.colorScheme.primary)) {
+                    Text(
+                        text = "Go to recording screen",
+                        fontSize = AppFontSizes.buttonText,
+                        color = MaterialTheme.colorScheme.surface)
+                  }
             }
-        }
-
-    }
-
+      }
 }

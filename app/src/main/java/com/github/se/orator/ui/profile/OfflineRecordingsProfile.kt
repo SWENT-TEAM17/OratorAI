@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +47,7 @@ fun PromptCard(
               .height(AppDimensions.cardSectionHeightMedium)
               .padding(AppDimensions.paddingSmall)
               .testTag("prompt_card_$index"),
-      //colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurface),
+      // colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurface),
       onClick = {
         speakingViewModel.interviewPromptNb.value = promptID
         Log.d(
@@ -67,7 +65,8 @@ fun PromptCard(
                   color = MaterialTheme.colorScheme.primary,
                   modifier = Modifier.testTag("prompt_title_$index"))
               Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-              Text(text = "Company: ${prompt["targetCompany"]}",
+              Text(
+                  text = "Company: ${prompt["targetCompany"]}",
                   fontSize = AppFontSizes.bodySmall,
                   color = MaterialTheme.colorScheme.primary)
               Text(

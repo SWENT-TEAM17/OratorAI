@@ -31,66 +31,59 @@ fun RecordingReviewScreen(
     navigationActions: NavigationActions,
     speakingViewModel: SpeakingViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-    val recorder by lazy { AudioRecorder(context = context) }
+  val context = LocalContext.current
+  val recorder by lazy { AudioRecorder(context = context) }
 
-    val player by lazy { AndroidAudioPlayer(context) }
+  val player by lazy { AndroidAudioPlayer(context) }
 
-    val audioFile: File = File(context.cacheDir, "${speakingViewModel.interviewPromptNb.value}.mp3")
+  val audioFile: File = File(context.cacheDir, "${speakingViewModel.interviewPromptNb.value}.mp3")
 
-    Log.d("rec screen review", "the file that you shall play is $audioFile")
-    Column(
-        modifier =
-        Modifier
-            .fillMaxSize()
-            .padding(AppDimensions.paddingMedium)
-            .testTag("RecordingReviewScreen"),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+  Log.d("rec screen review", "the file that you shall play is $audioFile")
+  Column(
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(AppDimensions.paddingMedium)
+              .testTag("RecordingReviewScreen"),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             modifier = Modifier.testTag("hear_recording_button"),
             colors =
-            ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { player.playFile(audioFile) }) {
-            Text(text = "Play recording", color = MaterialTheme.colorScheme.surface)
-        }
+              Text(text = "Play recording", color = MaterialTheme.colorScheme.surface)
+            }
 
         Button(
             modifier = Modifier.testTag("stop_recording_button"),
             colors =
-            ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { player.stop() }) {
-            Text(text = "Stop recording", color = MaterialTheme.colorScheme.surface)
-        }
+              Text(text = "Stop recording", color = MaterialTheme.colorScheme.surface)
+            }
 
         Button(
             modifier = Modifier.testTag("try_again"),
             colors =
-            ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { navigationActions.navigateTo(Screen.OFFLINE_INTERVIEW_MODULE) }) {
-            Text(
-                text = "Do another interview",
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.testTag("text_try_again")
-            )
-        }
+              Text(
+                  text = "Do another interview",
+                  color = MaterialTheme.colorScheme.surface,
+                  modifier = Modifier.testTag("text_try_again"))
+            }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("Back"),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.ArrowBackIosNew,
-                contentDescription = "Back",
-                modifier =
-                Modifier
-                    .size(AppDimensions.iconSizeSmall)
-                    .clickable { navigationActions.goBack() }
-                    .testTag("BackButton"),
-                tint = MaterialTheme.colorScheme.primary)
-        }
-    }
+            modifier = Modifier.fillMaxWidth().testTag("Back"),
+            verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  imageVector = Icons.Outlined.ArrowBackIosNew,
+                  contentDescription = "Back",
+                  modifier =
+                      Modifier.size(AppDimensions.iconSizeSmall)
+                          .clickable { navigationActions.goBack() }
+                          .testTag("BackButton"),
+                  tint = MaterialTheme.colorScheme.primary)
+            }
+      }
 }

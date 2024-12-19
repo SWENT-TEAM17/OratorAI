@@ -274,7 +274,7 @@ class ChatViewModel(
                 "For example if the user only gives a few strengths you will tell him to cite more. If his strengths don't aline with a job as a $position or are off topic you will mention that." +
                 "Do not ask questions for the user to provide more skills or strengths. Assume this is a one time exchange where you can only give remarks without expecting any more messages." +
                 "Make sure you focus on this a lot: $question it is very important you talk about it and if the user is good at this area" +
-                    "The query the interviewee has said that you will critique is: $msg"
+                "The query the interviewee has said that you will critique is: $msg"
         Log.d("mr smith", gptQuery)
 
         val request =
@@ -502,7 +502,6 @@ The session is now over. According to the initial instructions, you can now brea
         }
       }
     }
-
   }
 
   /**
