@@ -333,14 +333,13 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                 .background(colors.onPrimary)
                                 .padding(AppDimensions.paddingMedium)
                         ) {
-                            EmptyScreen()
+                            // EmptyScreen()
                             // TODO: Fix crash when wanting to display thia screen.
-                            /*
+
                             GraphStats(
                                 navigationActions = navigationActions,
-                                profileViewModel = profileViewModel,
-                                onCloseClick = { isStatsVisible = false }
-                            )*/
+                                profileViewModel = profileViewModel
+                            )
                         }
                     }
                 }

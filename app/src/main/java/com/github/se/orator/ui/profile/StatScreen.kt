@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -50,12 +48,11 @@ import com.github.se.orator.ui.theme.AppDimensions.ZERO
 import com.github.se.orator.ui.theme.AppDimensions.graphHeight
 import com.github.se.orator.ui.theme.AppDimensions.graphWidth
 import com.github.se.orator.ui.theme.AppDimensions.paddingExtraLarge
+import com.github.se.orator.ui.theme.AppDimensions.paddingLarge
 import com.github.se.orator.ui.theme.AppDimensions.paddingSmall
 import com.github.se.orator.ui.theme.AppDimensions.paddingXXLarge
 import com.github.se.orator.ui.theme.AppTypography
 
-@OptIn(ExperimentalMaterial3Api::class)
-// Number of ticks to show on the Y-axis
 const val TICK_COUNT = 5
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -63,7 +60,6 @@ const val TICK_COUNT = 5
 fun GraphStats(
     navigationActions: NavigationActions,
     profileViewModel: UserProfileViewModel,
-    onCloseClick: () -> Unit
 ) {
 
   // Collect the profile data from the ViewModel
@@ -83,8 +79,8 @@ fun GraphStats(
               userProfile?.let { profile ->
                 Text(
                     modifier =
-                        Modifier.padding(start = AppDimensions.paddingXXLarge)
-                            .padding(top = AppDimensions.paddingXXLarge)
+                        Modifier.padding(start = paddingXXLarge)
+                            .padding(top = paddingXXLarge)
                             .testTag("graphScreenTitle"),
                     text = "Statistics Graph",
                     style = AppTypography.mediumTitleStyle, // Apply custom style for title
@@ -92,14 +88,14 @@ fun GraphStats(
 
                 Text(
                     modifier =
-                        Modifier.padding(start = AppDimensions.paddingXXLarge)
-                            .padding(top = AppDimensions.paddingExtraLarge)
+                        Modifier.padding(start = paddingXXLarge)
+                            .padding(top = paddingExtraLarge)
                             .testTag("talkTimeSecTitle"),
                     text = "Talk Time Seconds:",
                     style = AppTypography.smallTitleStyle, // Apply custom style for title
                     color = MaterialTheme.colorScheme.onSurface)
 
-                Row() {
+                Row {
                   Column(
                       modifier =
                           Modifier.padding(
@@ -125,8 +121,8 @@ fun GraphStats(
                               start = paddingExtraLarge)) {
                         Text(
                             modifier =
-                                Modifier.padding(start = AppDimensions.paddingLarge)
-                                    .padding(top = AppDimensions.paddingExtraLarge)
+                                Modifier.padding(start = paddingLarge)
+                                    .padding(top = paddingExtraLarge)
                                     .testTag("talkTimeSecMeanTitle"),
                             text = "Mean: ${profile.statistics.talkTimeSecMean}",
                             style = AppTypography.smallTitleStyle, // Apply custom style for title
@@ -136,14 +132,14 @@ fun GraphStats(
 
                 Text(
                     modifier =
-                        Modifier.padding(start = AppDimensions.paddingXXLarge)
-                            .padding(top = AppDimensions.paddingExtraLarge)
+                        Modifier.padding(start = paddingXXLarge)
+                            .padding(top = paddingExtraLarge)
                             .testTag("paceTitle"),
                     text = "Pace:",
                     style = AppTypography.smallTitleStyle, // Apply custom style for title
                     color = MaterialTheme.colorScheme.onSurface)
 
-                Row() {
+                Row {
                   Column(
                       modifier =
                           Modifier.padding(
@@ -167,8 +163,8 @@ fun GraphStats(
                               start = paddingExtraLarge)) {
                         Text(
                             modifier =
-                                Modifier.padding(start = AppDimensions.paddingLarge)
-                                    .padding(top = AppDimensions.paddingExtraLarge)
+                                Modifier.padding(start = paddingLarge)
+                                    .padding(top = paddingExtraLarge)
                                     .testTag("paceMeanTitle"),
                             text = "Mean: ${profile.statistics.paceMean}",
                             style = AppTypography.smallTitleStyle, // Apply custom style for title
@@ -177,17 +173,6 @@ fun GraphStats(
                 }
                 TitleAndStatsRow(profile)
               }
-
-            Button(
-                onClick = { onCloseClick() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppDimensions.paddingMedium)
-                    .testTag("close_button")
-            ) {
-                Text("Close Stats")
-            }
-
         }
       },
       bottomBar = {
@@ -286,8 +271,8 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String, yMin: F
 fun PracticeModeTitle(modeTitleTestTag: String, mode: String) {
   Text(
       modifier =
-          Modifier.padding(start = AppDimensions.paddingSmall)
-              .padding(top = AppDimensions.paddingXXLarge)
+          Modifier.padding(start = paddingSmall)
+              .padding(top = paddingXXLarge)
               .testTag(modeTitleTestTag),
       text = mode,
       style = AppTypography.smallTitleStyle, // Apply custom style for title
@@ -299,8 +284,8 @@ fun PracticeModeTitle(modeTitleTestTag: String, mode: String) {
 fun StatDisplay(statTestTag: String, stat: String, statValue: String) {
   Text(
       modifier =
-          Modifier.padding(start = AppDimensions.paddingSmall)
-              .padding(top = AppDimensions.paddingSmall)
+          Modifier.padding(start = paddingSmall)
+              .padding(top = paddingSmall)
               .testTag(statTestTag),
       text = stat + statValue,
       style = AppTypography.xSmallTitleStyle, // Apply custom style for title
