@@ -171,6 +171,7 @@ fun FeedbackScreen(
                           Text(
                               text = "Your Performance Metrics:",
                               style = AppTypography.mediumTitleStyle,
+                              color = MaterialTheme.colorScheme.secondary,
                               modifier =
                                   Modifier.padding(AppDimensions.paddingMedium)
                                       .testTag("performanceMetricsTitle"))
@@ -247,10 +248,12 @@ fun MetricDisplayItem(title: String, value: String, testTag: String) {
     Text(
         text = title,
         style = AppTypography.smallTitleStyle,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(bottom = AppDimensions.paddingSmall))
     Text(
         text = value,
         style = AppTypography.smallTitleStyle,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(bottom = AppDimensions.paddingSmall))
   }
 }
