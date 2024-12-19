@@ -618,6 +618,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
   }
 
+  /** Updates the login streak */
   fun updateLoginStreak() {
     val uid = repository.getCurrentUserUid()
     if (uid != null) {

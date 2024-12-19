@@ -37,6 +37,8 @@ data class UserProfile(
  *
  * @param positiveResponse The positive response for the session type.
  * @param negativeResponse The negative response for the session type.
+ * @param successMessage The success messages
+ * @param failureMessage The failure messages
  */
 enum class SessionType(
     val positiveResponse: String,
@@ -67,7 +69,11 @@ enum class SessionType(
  * @param sessionsGiven The number of sessions given by the user.
  * @param successfulSessions The number of successful sessions by the user.
  * @param improvement The improvement of the user.
+ * @param battleStats The battle stats
  * @param previousRuns The list of previous runs.
+ * @param recentData The list containing the recording data
+ * @param talkTimeSecMean Mean of the last 10 talkTimeSeconds
+ * @param paceMean Mean of the last 10 paces
  */
 data class UserStatistics(
     val sessionsGiven: Map<String, Int> = SessionType.values().associate { it.name to 0 },
