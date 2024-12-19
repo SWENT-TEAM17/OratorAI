@@ -258,8 +258,7 @@ class EndToEndAppTest {
         .assertIsEnabled() // now the save profile button should be enabled
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen.HOME) // forcing back to home where the user would be once he finishes creating his
-      // account
+          Screen.HOME)
     }
 
     // navigating to profile
@@ -363,9 +362,7 @@ class EndToEndAppTest {
     // Step 8: Speaking screen
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen.SPEAKING) // forcing back to home where the user would be once he finishes creating
-      // his
-      // account
+          Screen.SPEAKING)
     }
     composeTestRule.onNodeWithTag("ui_column").assertIsDisplayed()
     composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
@@ -389,8 +386,7 @@ class EndToEndAppTest {
 
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen.SPEAKING) // forcing back to home where the user would be once he finishes creating
-      // his account
+          Screen.SPEAKING)
     }
     composeTestRule.onNodeWithTag("mic_text").assertTextContains("Recording...")
 
@@ -412,8 +408,7 @@ class EndToEndAppTest {
 
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen.SPEAKING) // forcing back to home where the user would be once he finishes creating
-      // his account
+          Screen.SPEAKING)
     }
     composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
 
@@ -421,8 +416,7 @@ class EndToEndAppTest {
 
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen.OFFLINE) // forcing back to home where the user would be once he finishes creating
-      // his account
+          Screen.OFFLINE)
     }
     composeTestRule.onNodeWithText("No Internet Connection").assertIsDisplayed()
     composeTestRule
@@ -454,17 +448,11 @@ class EndToEndAppTest {
     composeTestRule.onNodeWithTag("TitleText").assertIsDisplayed()
     composeTestRule.onNodeWithText("Choose your practice question").assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag("QuestionCard_0")
-    composeTestRule.onNodeWithTag("QuestionCard_1")
-    composeTestRule.onNodeWithTag("QuestionCard_2")
-    composeTestRule.onNodeWithTag("QuestionCard_3")
-    composeTestRule.onNodeWithTag("QuestionCard_4")
-
-    composeTestRule.onNodeWithTag("QuestionText_0")
-    composeTestRule.onNodeWithTag("QuestionText_1")
-    composeTestRule.onNodeWithTag("QuestionText_2")
-    composeTestRule.onNodeWithTag("QuestionText_3")
-    composeTestRule.onNodeWithTag("QuestionText_4")
+    composeTestRule.onNodeWithTag("QuestionCard_0").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("QuestionCard_1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("QuestionCard_2").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("QuestionCard_3").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("QuestionCard_4").assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("QuestionCard_0").performClick()
     verify(navigationActions).goToOfflineRecording("What are your strengths?")
