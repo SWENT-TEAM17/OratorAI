@@ -746,4 +746,14 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
         },
         onError = { Log.e("UserProfileViewModel", "Error listening to user profile updates", it) })
   }
+
+  /** Starts a real-time listener on the entire user profiles collection. */
+  fun startListeningToAllProfiles() {
+    repository.listenToAllUserProfiles(
+        onProfilesChanged = { profiles ->
+          // Update the state flow with the new list of all profiles
+          allProfiles_.value = profiles
+        },
+        onError = { Log.e("UserProfileViewModel", "Error listening to all user profiles", it) })
+  }
 }
