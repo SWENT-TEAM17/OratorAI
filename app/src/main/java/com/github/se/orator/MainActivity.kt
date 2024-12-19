@@ -266,7 +266,11 @@ fun OratorApp(
             composable(Screen.EDIT_PROFILE) {
               EditProfileScreen(navigationActions, userProfileViewModel)
             }
-            composable(Screen.STAT) { GraphStats(navigationActions, userProfileViewModel) }
+            composable(Screen.STAT) { GraphStats(
+                navigationActions,
+                userProfileViewModel,
+                onCloseClick = { navController.popBackStack() })// Navigate back when stats are closed
+            }
             composable(Screen.LEADERBOARD) {
               LeaderboardScreen(navigationActions, userProfileViewModel)
             }

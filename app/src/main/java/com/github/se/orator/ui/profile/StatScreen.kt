@@ -59,7 +59,11 @@ const val TICK_COUNT = 5
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun GraphStats(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
+fun GraphStats(
+    navigationActions: NavigationActions,
+    profileViewModel: UserProfileViewModel,
+    onCloseClick: () -> Unit
+) {
 
   // Collect the profile data from the ViewModel
   val userProfile by profileViewModel.userProfile.collectAsState()

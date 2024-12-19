@@ -64,7 +64,10 @@ class StatScreenTest {
   @Test
   fun graphStats_displaysStatTitleAndBackButton() {
     composeTestRule.setContent {
-      GraphStats(navigationActions = navigationActions, profileViewModel = userProfileViewModel)
+      GraphStats(
+          navigationActions = navigationActions,
+          profileViewModel = userProfileViewModel,
+          onCloseClick = { showGraphStats = false })
     }
 
     // Check title
@@ -79,7 +82,10 @@ class StatScreenTest {
   fun graphStats_displaysGraphTitlesAndGraphs() {
 
     composeTestRule.setContent {
-      GraphStats(navigationActions = navigationActions, profileViewModel = userProfileViewModel)
+      GraphStats(
+          navigationActions = navigationActions,
+          profileViewModel = userProfileViewModel,
+          onCloseClick = { showGraphStats = false })
     }
 
     // Check Graph Screen Title
