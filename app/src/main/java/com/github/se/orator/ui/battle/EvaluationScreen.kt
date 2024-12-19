@@ -33,6 +33,7 @@ import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
@@ -67,8 +68,8 @@ fun EvaluationScreen(
           b.evaluationResult == null &&
           b.challenger == userId) {
         Log.d("EvalScreen", "Calling eval battle")
-        battleViewModel.evaluateBattle(battleId) { e -> errorMessage = e.message }
         hasEvaluated = true
+        battleViewModel.evaluateBattle(battleId) { e -> errorMessage = e.message }
       }
     }
   }
