@@ -221,9 +221,9 @@ fun DisplayResultAndFeedback(
           ActionButton(
               text = "Retry",
               onClick = {
-                // Navigate to the battle screen again with the same friendUid
-                // TODO: implement retry mechanism (with the same context -> maybe just check if
-                // opponent wants to retry aswell and then just go to chat)
+                chatViewModel.resetPracticeContext()
+                chatViewModel.endConversation()
+                navigationActions.navigateTo(TopLevelDestinations.FRIENDS)
               })
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))
