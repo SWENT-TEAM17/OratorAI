@@ -3,36 +3,16 @@ package com.github.se.orator.ui.profile
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.chatGPT.ChatViewModel
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
@@ -41,8 +21,8 @@ import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
-import java.io.File
 import kotlinx.coroutines.delay
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
@@ -55,153 +35,223 @@ fun PreviousRecordingsFeedbackScreen(
     player: AudioPlayer = AndroidAudioPlayer(context),
     offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-  // Initialize prompts and audioFile as before
-  var prompts: Map<String, String>? =
-      offlinePromptsFunctions.loadPromptsFromFile(context)?.find {
-        it["ID"] == speakingViewModel.interviewPromptNb.value
-      }
-  var ID: String = prompts?.get("ID") ?: "audio.mp3"
-  var audioFile: File = File(context.cacheDir, "$ID.mp3")
+    // Load prompts from file
+    val promptsList = offlinePromptsFunctions.loadPromptsFromFile(context)
+    val prompt = promptsList?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
 
-  val fileData by offlinePromptsFunctions.fileData.collectAsState()
-
-  // Use remember to persist 'writtenTo' across recompositions
-  var writtenTo by remember { mutableStateOf(false) }
-
-  LaunchedEffect(Unit) {
-    Log.d("aa", "launching")
-    // Clearing old display text
-    offlinePromptsFunctions.clearDisplayText()
-    // Read the file containing interviewer's response
-    offlinePromptsFunctions.readPromptTextFile(context, ID)
-
-    // Retrieve previous interviews mapping
-    prompts =
-        offlinePromptsFunctions.loadPromptsFromFile(context)?.find {
-          it["ID"] == speakingViewModel.interviewPromptNb.value
-        }
-
-    ID = prompts?.get("ID") ?: "audio.mp3"
-    audioFile = File(context.cacheDir, "$ID.mp3")
-
-    Log.d("PreviousRecordingsFeedbackScreen", "Screen is opened, running code.")
-  }
-
-  // If there isn't already an interviewer response: transcribe text + request a GPT prompt
-  if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
-    Log.d("in pre ", "calling get transcript and gpt response $fileData")
-    speakingViewModel.getTranscriptAndGetGPTResponse(
-        audioFile, prompts, viewModel, context, offlinePromptsFunctions)
-  }
-
-  // Text corresponding to interviewer's response
-  val displayText =
-      when {
-        fileData == "Loading interviewer response..." || fileData.isNullOrEmpty() -> {
-          "Processing your audio, please wait..."
-        }
-        else -> "Interviewer's response: $fileData"
-      }
-
-  LaunchedEffect(Unit) {
-    Log.d("aa", "hello")
-    while (!writtenTo) { // Loop until writtenTo is true
-      offlinePromptsFunctions.readPromptTextFile(context, ID)
-      Log.d("aa", "waiting for gpt response... polling text file")
-      if (offlinePromptsFunctions.fileData.value != null &&
-          offlinePromptsFunctions.fileData.value != "Loading interviewer response...") {
-        Log.d("hello", "file has changed")
-        writtenTo = true // Update state to trigger recomposition
-        break
-      }
-      delay(500) // Polling interval (adjust as needed)
-    }
-  }
-
-  Scaffold(
-      topBar = {
-        val company = offlinePromptsFunctions.getPromptMapElement(ID, "targetCompany", context)
-        TopNavigationMenu(
-            title = "$company interview",
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("back_button")) {
-                    androidx.compose.material.Icon(
-                        Icons.Outlined.ArrowBackIosNew,
-                        contentDescription = "Back button",
-                        modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                        tint = MaterialTheme.colorScheme.onSurface)
-                  }
-            })
-      }) { innerPadding ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
+    // Handle case where prompt is not found
+    if (prompt == null) {
+        Scaffold(
+            topBar = {
+                TopNavigationMenu(
+                    title = "Feedback",
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navigationActions.goBack() },
+                            modifier = Modifier.testTag("back_button")
+                        ) {
+                            Icon(
+                                Icons.Outlined.ArrowBackIosNew,
+                                contentDescription = "Back button",
+                                modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(innerPadding)
                     .padding(AppDimensions.paddingMedium)
-                    .testTag("RecordingReviewScreen"),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              if (!writtenTo) {
-                LoadingUI("$ID.txt", ID, context)
-              } else {
-                Button(
-                    modifier = Modifier.testTag("hear_recording_button"),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary),
-                    onClick = { player.playFile(audioFile) }) {
-                      Text(text = "Play audio", color = MaterialTheme.colorScheme.surface)
-                    }
-                Button(
-                    modifier = Modifier.testTag("stop_recording_button"),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary),
-                    onClick = { player.stop() }) {
-                      Text(text = "Stop audio", color = MaterialTheme.colorScheme.surface)
-                    }
+                    .testTag("ErrorScreen"),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "No prompt found for the selected recording.",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag("ErrorText")
+                )
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-                HorizontalDivider()
+                Button(
+                    onClick = { navigationActions.goBack() },
+                    modifier = Modifier.testTag("GoBackButton")
+                ) {
+                    Text(text = "Go Back")
+                }
+            }
+        }
+        return
+    }
+
+    val ID: String = prompt["ID"] ?: "unknown_id"
+    val audioFile = File(context.cacheDir, "$ID.mp3")
+
+    val fileData by offlinePromptsFunctions.fileData.collectAsState()
+
+    // State to track if the file has been written to
+    var writtenTo by remember { mutableStateOf(false) }
+
+    // Initial setup: clear old display text and read the prompt text file
+    LaunchedEffect(ID) {
+        Log.d("PreviousRecordingsFeedbackScreen", "Launching setup for ID: $ID")
+        offlinePromptsFunctions.clearDisplayText()
+        offlinePromptsFunctions.readPromptTextFile(context, ID)
+    }
+
+    // Trigger transcript and GPT response if needed
+    LaunchedEffect(fileData) {
+        if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
+            Log.d("PreviousRecordingsFeedback", "Calling getTranscriptAndGetGPTResponse with fileData: $fileData")
+            try {
+                speakingViewModel.getTranscriptAndGetGPTResponse(
+                    audioFile, prompt, viewModel, context, offlinePromptsFunctions
+                )
+            } catch (e: Exception) {
+                Log.e("PreviousRecordingsFeedback", "Error in getTranscriptAndGetGPTResponse", e)
+                // Optionally, update UI to show error message
+            }
+        }
+    }
+
+    // Update writtenTo state when fileData changes
+    LaunchedEffect(ID) {
+        Log.d("PreviousRecordingsFeedbackScreen", "Starting polling for GPT response")
+        while (!writtenTo) {
+            offlinePromptsFunctions.readPromptTextFile(context, ID)
+            Log.d("PreviousRecordingsFeedbackScreen", "Polling text file for ID: $ID")
+            val currentFileData = offlinePromptsFunctions.fileData.value
+            if (!currentFileData.isNullOrEmpty() && currentFileData != "Loading interviewer response...") {
+                Log.d("PreviousRecordingsFeedbackScreen", "File has been updated")
+                writtenTo = true
+                break
+            }
+            delay(500) // Polling interval
+        }
+    }
+
+    // Determine the display text based on fileData
+    val displayText = if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
+        "Processing your audio, please wait..."
+    } else {
+        "Interviewer's response: $fileData"
+    }
+
+    Scaffold(
+        topBar = {
+            val company = offlinePromptsFunctions.getPromptMapElement(ID, "targetCompany", context) ?: "Unknown Company"
+            TopNavigationMenu(
+                title = "$company Interview",
+                navigationIcon = {
+                    IconButton(
+                        onClick = { navigationActions.goBack() },
+                        modifier = Modifier.testTag("back_button")
+                    ) {
+                        Icon(
+                            Icons.Outlined.ArrowBackIosNew,
+                            contentDescription = "Back button",
+                            modifier = Modifier.size(AppDimensions.iconSizeMedium),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(AppDimensions.paddingMedium)
+                .testTag("RecordingReviewScreen"),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (!writtenTo) {
+                LoadingUI()
+            } else {
+                // Check if audioFile exists before enabling play/stop buttons
+                if (!audioFile.exists()) {
+                    Text(
+                        text = "Audio file not found.",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.testTag("AudioNotFoundText")
+                    )
+                } else {
+                    Button(
+                        modifier = Modifier.testTag("hear_recording_button"),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        onClick = {
+                            try {
+                                player.playFile(audioFile)
+                            } catch (e: Exception) {
+                                Log.e("PreviousRecordingsFeedback", "Error playing file", e)
+                                // Optionally, show a toast or error message to the user
+                            }
+                        }
+                    ) {
+                        Text(text = "Play Audio", color = MaterialTheme.colorScheme.surface)
+                    }
+                    Button(
+                        modifier = Modifier.testTag("stop_recording_button"),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        onClick = {
+                            try {
+                                player.stop()
+                            } catch (e: Exception) {
+                                Log.e("PreviousRecordingsFeedback", "Error stopping player", e)
+                                // Optionally, show a toast or error message to the user
+                            }
+                        }
+                    ) {
+                        Text(text = "Stop Audio", color = MaterialTheme.colorScheme.surface)
+                    }
+                }
+                Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                Divider()
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Text(
-                    text =
-                        "You said: " +
-                            offlinePromptsFunctions
-                                .getPromptMapElement(ID, "transcription", context)
-                                .orEmpty(),
+                    text = "You said: ${offlinePromptsFunctions.getPromptMapElement(ID, "transcription", context).orEmpty()}",
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.testTag("ResponseText"))
+                    modifier = Modifier.testTag("ResponseText")
+                )
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-                HorizontalDivider()
+                Divider()
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Text(
                     text = displayText,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.testTag("ResponseText"))
-              }
+                    modifier = Modifier.testTag("ResponseText")
+                )
             }
-      }
+        }
+    }
 }
 
 @Composable
-fun LoadingUI(filePath: String, ID: String, context: Context) {
-  Column(
-      modifier =
-          Modifier.fillMaxSize()
-              .testTag("loadingColumn"), // Ensures the Column takes up the entire screen
-      verticalArrangement = Arrangement.Center, // Centers content vertically
-      horizontalAlignment = Alignment.CenterHorizontally // Centers content horizontally
-      ) {
+fun LoadingUI() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("loadingColumn"),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         CircularProgressIndicator(
             color = MaterialTheme.colorScheme.onBackground,
             strokeWidth = AppDimensions.strokeWidth,
-            modifier =
-                Modifier.size(AppDimensions.loadingIndicatorSize).testTag("loadingIndicator"))
+            modifier = Modifier
+                .size(AppDimensions.loadingIndicatorSize)
+                .testTag("loadingIndicator")
+        )
+        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
         Text(
             "Loading interviewer response...",
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.testTag("interviewerResponse"))
-      }
+            modifier = Modifier.testTag("interviewerResponse")
+        )
+    }
 }

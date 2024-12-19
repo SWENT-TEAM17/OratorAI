@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.AudioRecorder
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
@@ -41,7 +42,8 @@ fun OfflineRecordingScreen(
     viewModel: SpeakingViewModel = viewModel(),
     permissionGranted: MutableState<Boolean> = remember {
       mutableStateOf(false)
-    } // Makes for easier testing
+    }, // Makes for easier testing
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface = OfflinePromptsFunctions()
 ) {
   val fileSaved = MutableStateFlow(false)
   val analysisState = remember {
@@ -73,7 +75,6 @@ fun OfflineRecordingScreen(
 
   handleAudioRecording(collState, permissionGranted, amplitudes)
 
-  val offlinePromptsFunctions = OfflinePromptsFunctions()
   // back button
   Column(
       modifier =
