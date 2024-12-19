@@ -57,15 +57,18 @@ fun EvaluationScreen(
 ) {
   val battle by battleViewModel.getBattleByIdFlow(battleId).collectAsState(initial = null)
   var errorMessage by remember { mutableStateOf<String?>(null) }
+  var hasEvaluated by remember { mutableStateOf(false) }
 
   // If challenger and no evaluationResult yet, start evaluation
   LaunchedEffect(battle) {
     battle?.let { b ->
-      if (b.status == BattleStatus.EVALUATING &&
+      if (!hasEvaluated &&
+          b.status == BattleStatus.EVALUATING &&
           b.evaluationResult == null &&
           b.challenger == userId) {
         Log.d("EvalScreen", "Calling eval battle")
         battleViewModel.evaluateBattle(battleId) { e -> errorMessage = e.message }
+        hasEvaluated = true
       }
     }
   }
