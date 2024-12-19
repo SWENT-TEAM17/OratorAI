@@ -46,14 +46,6 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
   private val isLoading_ = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = isLoading_.asStateFlow()
 
-  private val pendingBattles_ = MutableStateFlow<Map<String, String>>(emptyMap())
-  val pendingBattles: StateFlow<Map<String, String>> = pendingBattles_.asStateFlow()
-
-  private val friendsWithPendingBattles_ =
-      MutableStateFlow<List<Pair<UserProfile, String>>>(emptyList())
-  val friendsWithPendingBattles: StateFlow<List<Pair<UserProfile, String>>> =
-      friendsWithPendingBattles_.asStateFlow()
-
   // Queue of the last ten analysis data
   private val recentData_ = MutableStateFlow<ArrayDeque<AnalysisData>>(ArrayDeque())
   val recentData: StateFlow<ArrayDeque<AnalysisData>> = recentData_.asStateFlow()
@@ -567,13 +559,12 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
       // Calculate the mean of the values of the metric queues
       val updatedTalkTimeSecMean =
           repository.getMetricMean(recentData_.value.map { data -> data.talkTimeSeconds })
-      val updatedTalkTimePercMean =
-          repository.getMetricMean(recentData_.value.map { data -> data.talkTimePercentage })
+      val updatedPaceMean =
+          repository.getMetricMean(recentData_.value.map { data -> data.pace.toDouble() })
 
       // Create a new statistics object with the updated means
       val updatedStats =
-          currentStats.copy(
-              talkTimeSecMean = updatedTalkTimeSecMean, talkTimePercMean = updatedTalkTimePercMean)
+          currentStats.copy(talkTimeSecMean = updatedTalkTimeSecMean, paceMean = updatedPaceMean)
 
       // Create a new profile object with the updated stats
       val updatedProfile = currentUserProfile.copy(statistics = updatedStats)
@@ -627,6 +618,7 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
     }
   }
 
+  /** Updates the login streak */
   fun updateLoginStreak() {
     val uid = repository.getCurrentUserUid()
     if (uid != null) {
@@ -746,5 +738,15 @@ class UserProfileViewModel(internal val repository: UserProfileRepository) : Vie
           }
         },
         onError = { Log.e("UserProfileViewModel", "Error listening to user profile updates", it) })
+  }
+
+  /** Starts a real-time listener on the entire user profiles collection. */
+  fun startListeningToAllProfiles() {
+    repository.listenToAllUserProfiles(
+        onProfilesChanged = { profiles ->
+          // Update the state flow with the new list of all profiles
+          allProfiles_.value = profiles
+        },
+        onError = { Log.e("UserProfileViewModel", "Error listening to all user profiles", it) })
   }
 }

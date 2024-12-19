@@ -17,6 +17,15 @@ import androidx.compose.ui.text.font.FontWeight
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
 
+/**
+ * Top navigation menu
+ *
+ * @param title the title
+ * @param actions
+ * @param navigationIcon
+ * @param testTag test tag for the bar
+ * @param textTestTag test tag for the text in the bar
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopNavigationMenu(

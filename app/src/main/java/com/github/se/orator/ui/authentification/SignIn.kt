@@ -65,6 +65,7 @@ fun SignInScreen(navigationActions: NavigationActions, viewModel: UserProfileVie
             val uid = result.user?.uid
             if (uid != null) {
               viewModel.startListeningToUserProfile(uid)
+              viewModel.startListeningToAllProfiles()
             }
             uid?.let { u ->
               viewModel.getUserProfile(u) // Fetch user profile

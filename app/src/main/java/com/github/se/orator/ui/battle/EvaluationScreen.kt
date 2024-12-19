@@ -33,6 +33,7 @@ import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
@@ -57,14 +58,17 @@ fun EvaluationScreen(
 ) {
   val battle by battleViewModel.getBattleByIdFlow(battleId).collectAsState(initial = null)
   var errorMessage by remember { mutableStateOf<String?>(null) }
+  var hasEvaluated by remember { mutableStateOf(false) }
 
   // If challenger and no evaluationResult yet, start evaluation
   LaunchedEffect(battle) {
     battle?.let { b ->
-      if (b.status == BattleStatus.EVALUATING &&
+      if (!hasEvaluated &&
+          b.status == BattleStatus.EVALUATING &&
           b.evaluationResult == null &&
           b.challenger == userId) {
         Log.d("EvalScreen", "Calling eval battle")
+        hasEvaluated = true
         battleViewModel.evaluateBattle(battleId) { e -> errorMessage = e.message }
       }
     }
@@ -217,9 +221,9 @@ fun DisplayResultAndFeedback(
           ActionButton(
               text = "Retry",
               onClick = {
-                // Navigate to the battle screen again with the same friendUid
-                // TODO: implement retry mechanism (with the same context -> maybe just check if
-                // opponent wants to retry aswell and then just go to chat)
+                chatViewModel.resetPracticeContext()
+                chatViewModel.endConversation()
+                navigationActions.navigateTo(TopLevelDestinations.FRIENDS)
               })
 
           Spacer(modifier = Modifier.size(AppDimensions.paddingSmall))

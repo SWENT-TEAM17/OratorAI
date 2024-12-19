@@ -27,6 +27,15 @@ import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 
+/**
+ * Composable that is responsible for the waiting for completion screen
+ *
+ * @param battleId
+ * @param friendUid
+ * @param navigationActions
+ * @param battleViewModel
+ * @param userProfileViewModel
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WaitingForCompletionScreen(

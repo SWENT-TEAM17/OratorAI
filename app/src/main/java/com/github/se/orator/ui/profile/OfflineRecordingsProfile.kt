@@ -33,6 +33,15 @@ import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppTypography
 
+/**
+ * Prompt card for offline mode
+ *
+ * @param prompt the prompt
+ * @param index
+ * @param navigationActions
+ * @param speakingViewModel
+ * @param promptID
+ */
 @Composable
 fun PromptCard(
     prompt: Map<String, String>,

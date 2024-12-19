@@ -48,6 +48,7 @@ import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.mainScreen.MainScreen
+import com.github.se.orator.ui.mainScreen.OnlineScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
@@ -215,6 +216,7 @@ fun OratorApp(
           // Main/home flow
           navigation(startDestination = Screen.HOME, route = Route.HOME) {
             composable(Screen.HOME) { MainScreen(navigationActions) }
+            composable(Screen.ONLINE_SCREEN) { OnlineScreen(navigationActions) }
             composable(Screen.SPEAKING_JOB_INTERVIEW) {
               SpeakingJobInterviewModule(navigationActions, chatViewModel, apiLinkViewModel)
             }

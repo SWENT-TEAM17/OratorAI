@@ -158,6 +158,8 @@ class SpeakingViewModel(
               _analysisData.value = ad
               userProfileViewModel.addNewestData(_analysisData.value!!)
               userProfileViewModel.updateMetricMean()
+              // Reset the error state
+              _analysisError.value = SpeakingError.NO_ERROR
             },
             onFailure = { error -> _analysisError.value = error })
         repository.startRecording(audioFile)

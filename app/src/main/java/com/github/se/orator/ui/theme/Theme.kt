@@ -275,6 +275,7 @@ object AppDimensions {
   const val AXIS_STROKE_WIDTH: Float = 10f
   const val PLOT_LINE_STROKE_WIDTH: Float = 5f
   const val POINTS_RADIUS: Float = 7f
+  const val MIN_Y_RANGE: Float = 10f
 }
 
 object Constants {
