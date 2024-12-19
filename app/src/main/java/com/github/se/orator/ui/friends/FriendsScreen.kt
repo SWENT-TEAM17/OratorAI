@@ -87,7 +87,6 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
-import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.COLOR_AMBER
@@ -114,12 +113,10 @@ import kotlinx.coroutines.launch
 fun ViewFriendsScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel,
-    battleViewModel: BattleViewModel? = null // Optional ViewModel for battle management
+    battleViewModel: BattleViewModel? = null
 ) {
-
   val localContext = LocalContext.current
 
-  // State variables
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
   val recReqProfiles by userProfileViewModel.recReqProfiles.collectAsState()
   var searchQuery by remember { mutableStateOf("") }
@@ -128,34 +125,27 @@ fun ViewFriendsScreen(
   val filteredRecReq =
       recReqProfiles.filter { recReq -> recReq.name.contains(searchQuery, ignoreCase = true) }
 
-  // State variables for UI components
   val focusRequester = FocusRequester()
   val focusManager = LocalFocusManager.current
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
-  // State variable for selected friend
   var selectedFriend by remember { mutableStateOf<UserProfile?>(null) }
+  val snackbarHostState = SnackbarHostState()
 
-  // State variable for Snackbar
-  val snackbarHostState = remember { SnackbarHostState() }
-
-  // New state variable for Friend Requests expansion
   var isFriendRequestsExpanded by remember { mutableStateOf(true) }
 
-  // State for managing the popup
   var selectedBattle by remember { mutableStateOf<SpeechBattle?>(null) }
 
   LaunchedEffect(Unit) { battleViewModel?.listenForPendingBattles() }
 
-  // Collect the pending battles as state, fallback to an empty list if battleViewModel is null
   val pendingBattles by
       battleViewModel?.pendingBattles?.observeAsState(emptyList())
           ?: remember { mutableStateOf(emptyList<SpeechBattle>()) }
 
-  // Create a HashMap of challengerUID to battleID for quick lookup
   val challengerBattleMap =
       remember(pendingBattles) { pendingBattles.associateBy({ it.challenger }, { it.battleId }) }
+
   ModalNavigationDrawer(
       modifier = Modifier.testTag("viewFriendsDrawerMenu"),
       drawerState = drawerState,
@@ -194,21 +184,7 @@ fun ViewFriendsScreen(
       }) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
-            topBar = {
-              TopNavigationMenu(
-                  textTestTag = "myFriendsTitle",
-                  title = "My Friends",
-                  navigationIcon = {
-                    IconButton(
-                        onClick = { scope.launch { drawerState.open() } },
-                        modifier = Modifier.testTag("viewFriendsMenuButton")) {
-                          Icon(
-                              Icons.Default.Menu,
-                              contentDescription = "Menu",
-                              tint = MaterialTheme.colorScheme.onSurface)
-                        }
-                  })
-            },
+            // No topBar here
             bottomBar = {
               BottomNavigationMenu(
                   onTabSelect = { route ->
@@ -220,187 +196,198 @@ fun ViewFriendsScreen(
                   tabList = LIST_TOP_LEVEL_DESTINATION,
                   selectedItem = Route.FRIENDS)
             }) { innerPadding ->
-              LazyColumn(
-                  modifier =
-                      Modifier.fillMaxSize()
-                          .padding(innerPadding)
-                          .padding(horizontal = AppDimensions.paddingMedium)
-                          .clickable { focusManager.clearFocus() }) {
-                    // Search bar for filtering friends
-                    item {
-                      Box(modifier = Modifier.padding(vertical = AppDimensions.paddingSmall)) {
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            label = { Text("Search for a friend.") },
-                            leadingIcon = {
-                              Icon(
-                                  imageVector = Icons.Default.Search,
-                                  contentDescription = "Search Icon")
-                            },
-                            modifier =
-                                Modifier.fillMaxWidth(1f)
-                                    .horizontalScroll(rememberScrollState())
-                                    .wrapContentHeight()
-                                    .focusRequester(focusRequester)
-                                    .testTag("viewFriendsSearch"),
-                            colors =
-                                TextFieldDefaults.outlinedTextFieldColors(
-                                    backgroundColor = MaterialTheme.colorScheme.surface,
-                                    textColor = MaterialTheme.colorScheme.onSurface,
-                                    focusedBorderColor = MaterialTheme.colorScheme.outline,
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    cursorColor = MaterialTheme.colorScheme.primary,
-                                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                                    unfocusedLabelColor =
-                                        MaterialTheme.colorScheme.onSurfaceVariant,
-                                    leadingIconColor = MaterialTheme.colorScheme.primary))
-                      }
-                    }
+              // Main column for the screen content
+              Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                // Row at the top with Menu IconButton and "My Friends" Title
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
+                    verticalAlignment = Alignment.CenterVertically) {
+                      IconButton(
+                          onClick = { scope.launch { drawerState.open() } },
+                          modifier = Modifier.testTag("viewFriendsMenuButton")) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = "Menu",
+                                tint = MaterialTheme.colorScheme.onSurface)
+                          }
 
-                    // Spacer
-                    item { Spacer(modifier = Modifier.height(AppDimensions.paddingMedium)) }
+                      Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
 
-                    // Expandable Section: Received Friend Requests
-                    if (filteredRecReq.isNotEmpty()) {
-                      // Header with Toggle Button
-                      item {
-                        Row(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .clickable {
-                                      isFriendRequestsExpanded = !isFriendRequestsExpanded
-                                    }
-                                    .padding(vertical = AppDimensions.smallPadding),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween) {
-                              Text(
-                                  text = "Friend Requests",
-                                  style = MaterialTheme.typography.titleSmall,
-                                  modifier = Modifier.weight(1f).testTag("friendRequestsHeader"),
-                                  color = MaterialTheme.colorScheme.onSurface)
-                              IconButton(
-                                  onClick = {
-                                    isFriendRequestsExpanded = !isFriendRequestsExpanded
-                                  },
-                                  modifier = Modifier.testTag("toggleFriendRequestsButton")) {
-                                    Icon(
-                                        imageVector =
-                                            if (isFriendRequestsExpanded) Icons.Default.ExpandLess
-                                            else Icons.Default.ExpandMore,
-                                        contentDescription =
-                                            if (isFriendRequestsExpanded) "Collapse Friend Requests"
-                                            else "Expand Friend Requests",
-                                        tint = MaterialTheme.colorScheme.onSurface)
-                                  }
-                            }
-                      }
-
-                      // Friend Requests List with AnimatedVisibility
-                      item {
-                        AnimatedVisibility(
-                            visible = isFriendRequestsExpanded,
-                            enter = expandVertically(),
-                            exit = shrinkVertically()) {
-                              Column {
-                                Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-                                // Friend Requests Items
-                                for (friendRequest in filteredRecReq) {
-                                  FriendRequestItem(
-                                      friendRequest = friendRequest,
-                                      userProfileViewModel = userProfileViewModel)
-                                  Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-                                }
-                                Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
-                              }
-                            }
-                      }
-                    }
-
-                    // Section for Friends List
-                    item {
                       Text(
-                          text = "Your Friends",
-                          style = MaterialTheme.typography.titleSmall,
-                          modifier =
-                              Modifier.padding(bottom = AppDimensions.smallPadding)
-                                  .testTag("viewFriendsList"),
-                          color = MaterialTheme.colorScheme.onSurface)
+                          text = "My Friends",
+                          style = MaterialTheme.typography.titleMedium,
+                          color = MaterialTheme.colorScheme.onSurface,
+                          modifier = Modifier.testTag("myFriendsTitle"))
                     }
 
-                    // Display message if no friends match the search query
-                    if (filteredFriends.isEmpty()) {
+                // Now the LazyColumn with the rest of the UI
+                LazyColumn(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .padding(horizontal = AppDimensions.paddingMedium)
+                            .clickable { focusManager.clearFocus() }) {
+                      // Search bar for filtering friends
                       item {
-                        Box(
-                            modifier = Modifier.fillMaxSize().testTag("noFriendsFound"),
-                            contentAlignment = Alignment.Center) {
-                              Text(
-                                  "No friends found.",
-                                  style = MaterialTheme.typography.bodyLarge,
-                                  modifier = Modifier.testTag("noFriendsFoundText"),
-                                  color = MaterialTheme.colorScheme.onBackground)
-                            }
+                        Box(modifier = Modifier.padding(vertical = AppDimensions.paddingSmall)) {
+                          OutlinedTextField(
+                              value = searchQuery,
+                              onValueChange = { searchQuery = it },
+                              label = { Text("Search for a friend.") },
+                              leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search Icon")
+                              },
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .horizontalScroll(rememberScrollState())
+                                      .wrapContentHeight()
+                                      .focusRequester(focusRequester)
+                                      .testTag("viewFriendsSearch"),
+                              colors =
+                                  TextFieldDefaults.outlinedTextFieldColors(
+                                      backgroundColor = MaterialTheme.colorScheme.surface,
+                                      textColor = MaterialTheme.colorScheme.onSurface,
+                                      focusedBorderColor = MaterialTheme.colorScheme.outline,
+                                      unfocusedBorderColor =
+                                          MaterialTheme.colorScheme.outlineVariant,
+                                      cursorColor = MaterialTheme.colorScheme.primary,
+                                      focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                      unfocusedLabelColor =
+                                          MaterialTheme.colorScheme.onSurfaceVariant,
+                                      leadingIconColor = MaterialTheme.colorScheme.primary))
+                        }
                       }
-                    } else {
-                      // Display the list of friends if any match the search query
-                      items(filteredFriends) { friend ->
-                        val hasPendingBattle = friend.uid in challengerBattleMap.keys
 
-                        val pendingBattle =
-                            pendingBattles.find {
-                              it.challenger == friend.uid && it.status == BattleStatus.PENDING
-                            }
+                      item { Spacer(modifier = Modifier.height(AppDimensions.paddingMedium)) }
 
-                        FriendItem(
-                            friend = friend,
-                            hasPendingBattle = hasPendingBattle,
-                            userProfileViewModel = userProfileViewModel,
-                            onProfilePictureClick = { selectedFriend = it },
-                            onClick = { selectedFriend ->
-                              if (hasPendingBattle && pendingBattle != null) {
-                                // Show the popup with battle details
-                                selectedBattle = pendingBattle
-                              } else {
-                                // Navigate to create battle screen
-                                navigationActions.navigateToSendBattleScreen(selectedFriend.uid)
+                      // Expandable Section: Received Friend Requests
+                      if (filteredRecReq.isNotEmpty()) {
+                        // Header with Toggle Button
+                        item {
+                          Row(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .clickable {
+                                        isFriendRequestsExpanded = !isFriendRequestsExpanded
+                                      }
+                                      .padding(vertical = AppDimensions.smallPadding),
+                              verticalAlignment = Alignment.CenterVertically,
+                              horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(
+                                    text = "Friend Requests",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.weight(1f).testTag("friendRequestsHeader"),
+                                    color = MaterialTheme.colorScheme.onSurface)
+                                IconButton(
+                                    onClick = {
+                                      isFriendRequestsExpanded = !isFriendRequestsExpanded
+                                    },
+                                    modifier = Modifier.testTag("toggleFriendRequestsButton")) {
+                                      Icon(
+                                          imageVector =
+                                              if (isFriendRequestsExpanded) Icons.Default.ExpandLess
+                                              else Icons.Default.ExpandMore,
+                                          contentDescription =
+                                              if (isFriendRequestsExpanded)
+                                                  "Collapse Friend Requests"
+                                              else "Expand Friend Requests",
+                                          tint = MaterialTheme.colorScheme.onSurface)
+                                    }
                               }
-                            })
+                        }
+
+                        // Friend Requests List with AnimatedVisibility
+                        item {
+                          AnimatedVisibility(
+                              visible = isFriendRequestsExpanded,
+                              enter = expandVertically(),
+                              exit = shrinkVertically()) {
+                                Column {
+                                  Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+                                  for (friendRequest in filteredRecReq) {
+                                    FriendRequestItem(
+                                        friendRequest = friendRequest,
+                                        userProfileViewModel = userProfileViewModel)
+                                    Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+                                  }
+                                  Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                                }
+                              }
+                        }
+                      }
+
+                      // Section for Friends List
+                      item {
+                        Text(
+                            text = "Your Friends",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier =
+                                Modifier.padding(bottom = AppDimensions.smallPadding)
+                                    .testTag("viewFriendsList"),
+                            color = MaterialTheme.colorScheme.onSurface)
+                      }
+
+                      if (filteredFriends.isEmpty()) {
+                        item {
+                          Box(
+                              modifier = Modifier.fillMaxSize().testTag("noFriendsFound"),
+                              contentAlignment = Alignment.Center) {
+                                Text(
+                                    "No friends found.",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.testTag("noFriendsFoundText"),
+                                    color = MaterialTheme.colorScheme.onBackground)
+                              }
+                        }
+                      } else {
+                        items(filteredFriends) { friend ->
+                          val hasPendingBattle = friend.uid in challengerBattleMap.keys
+                          val pendingBattle =
+                              pendingBattles.find {
+                                it.challenger == friend.uid && it.status == BattleStatus.PENDING
+                              }
+
+                          FriendItem(
+                              friend = friend,
+                              hasPendingBattle = hasPendingBattle,
+                              userProfileViewModel = userProfileViewModel,
+                              onProfilePictureClick = { selectedFriend = it },
+                              onClick = { selectedFriend ->
+                                if (hasPendingBattle && pendingBattle != null) {
+                                  selectedBattle = pendingBattle
+                                } else {
+                                  navigationActions.navigateToSendBattleScreen(selectedFriend.uid)
+                                }
+                              })
+                        }
                       }
                     }
-                  }
 
-              // Display the BattlePopup if a battle is selected
-              selectedBattle?.let { battle ->
-                // Extract the InterviewContext from the SpeechBattle
-                val battleContext = battle.context
-                // Get the challenger's name
-                val challengerName = userProfileViewModel.getName(battle.challenger)
-                BattlePopup(
-                    challengerName = challengerName,
-                    interviewContext = battleContext,
-                    onAccept = {
+                // Display the BattlePopup if a battle is selected
+                selectedBattle?.let { battle ->
+                  val battleContext = battle.context
+                  val challengerName = userProfileViewModel.getName(battle.challenger)
+                  BattlePopup(
+                      challengerName = challengerName,
+                      interviewContext = battleContext,
+                      onAccept = {
+                        battleViewModel?.acceptBattle(battle.battleId, localContext)
+                        selectedBattle = null
+                      },
+                      onDecline = {
+                        battleViewModel?.declineBattle(battle.battleId, localContext)
+                        selectedBattle = null
+                      },
+                      onDismiss = { selectedBattle = null })
+                }
 
-                      // Handle battle acceptance
-                      battleViewModel?.acceptBattle(battle.battleId, localContext)
-                      selectedBattle = null
-                    },
-                    onDecline = {
-
-                      // Handle battle decline
-                      battleViewModel?.declineBattle(battle.battleId, localContext)
-                      selectedBattle = null
-                    },
-                    onDismiss = {
-                      // Handle dialog dismissal
-                      selectedBattle = null
-                    })
-              }
-
-              // Dialog to display the enlarged profile picture
-              if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
-                ProfilePictureDialog(
-                    profilePictureUrl = selectedFriend!!.profilePic!!,
-                    onDismiss = { selectedFriend = null })
+                // Dialog to display the enlarged profile picture
+                if (selectedFriend != null && !selectedFriend!!.profilePic.isNullOrEmpty()) {
+                  ProfilePictureDialog(
+                      profilePictureUrl = selectedFriend!!.profilePic!!,
+                      onDismiss = { selectedFriend = null })
+                }
               }
             }
       }
