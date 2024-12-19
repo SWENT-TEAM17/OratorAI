@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.network
 
+import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -7,6 +8,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
+
+// Define a timeout duration for network calls
+private const val TIMEOUT_DURATION = 20L
 
 // Define the ChatGPTService interface
 interface ChatGPTService {
@@ -53,6 +57,9 @@ fun createChatGPTService(apiKey: String, organizationId: String): ChatGPTService
   // Create an OkHttpClient with logging and the API key header
   val client =
       OkHttpClient.Builder()
+          .connectTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
+          .readTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
+          .writeTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
           .addInterceptor(logging)
           .addInterceptor { chain ->
             val request =
