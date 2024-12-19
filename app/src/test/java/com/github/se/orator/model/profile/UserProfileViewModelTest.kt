@@ -352,13 +352,6 @@ class UserProfileViewModelTest {
 
   @Test
   fun `addNewestData should maintain a maximum size of 10 in recentData`() = runTest {
-    // Arrange
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          onSuccess()
-        }
-        .`when`(repository)
-        .updateUserProfile(any(), any(), any())
 
     // Prepopulate recentData with 10 items
     for (i in 1..10) {
@@ -438,13 +431,6 @@ class UserProfileViewModelTest {
 
   @Test
   fun `updateMetricMean should calculate means and update user profile`() = runTest {
-    // Arrange
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          onSuccess()
-        }
-        .`when`(repository)
-        .updateUserProfile(any(), any(), any())
 
     // Add several AnalysisData items
     val analysisDataList =
@@ -490,13 +476,13 @@ class UserProfileViewModelTest {
     // Assert
     val updatedUserProfile = viewModel.userProfile.first()
     val expectedTalkTimeSecMean = analysisDataList.map { it.talkTimeSeconds }.average()
-    val expectedTalkTimePercMean = analysisDataList.map { it.talkTimePercentage }.average()
+    val expectedPaceMean = analysisDataList.map { it.pace.toDouble() }.average()
 
     updatedUserProfile?.statistics?.talkTimeSecMean?.let {
       Assert.assertEquals(expectedTalkTimeSecMean, it, 0.001)
     }
-    updatedUserProfile?.statistics?.talkTimePercMean?.let {
-      Assert.assertEquals(expectedTalkTimePercMean, it, 0.001)
+    updatedUserProfile?.statistics?.paceMean?.let {
+      Assert.assertEquals(expectedPaceMean, it, 0.001)
     }
 
     verify(repository).updateUserProfile(any(), any(), any())
@@ -552,7 +538,7 @@ class UserProfileViewModelTest {
     // Assert
     val updatedUserProfile = viewModel.userProfile.first()
     updatedUserProfile?.statistics?.talkTimeSecMean?.let { Assert.assertEquals(0.0, it, 0.001) }
-    updatedUserProfile?.statistics?.talkTimePercMean?.let { Assert.assertEquals(0.0, it, 0.001) }
+    updatedUserProfile?.statistics?.paceMean?.let { Assert.assertEquals(0.0, it, 0.001) }
 
     verify(repository).updateUserProfile(any(), any(), any())
   }
@@ -727,4 +713,52 @@ class UserProfileViewModelTest {
         assertEquals(1, currentSentReqProfiles.size)
         assertEquals("Sent sentZ", currentSentReqProfiles[0].name)
       }
+
+  @Test
+  fun `startListeningToAllProfiles updates allProfiles in real-time`() = runTest {
+    val user1 =
+        UserProfile(
+            uid = "user1",
+            name = "User One",
+            age = 20,
+            statistics = UserStatistics(),
+            friends = emptyList(),
+            recReq = emptyList(),
+            sentReq = emptyList())
+    val user2 =
+        UserProfile(
+            uid = "user2",
+            name = "User Two",
+            age = 25,
+            statistics = UserStatistics(),
+            friends = emptyList(),
+            recReq = emptyList(),
+            sentReq = emptyList())
+
+    // Variables to hold the captured callbacks
+    var capturedOnProfilesChanged: ((List<UserProfile>) -> Unit)? = null
+    var capturedOnError: ((Exception) -> Unit)? = null
+
+    // Mock the repository's listenToAllUserProfiles function to capture the callbacks
+    doAnswer { invocation ->
+          capturedOnProfilesChanged = invocation.getArgument<(List<UserProfile>) -> Unit>(0)
+          capturedOnError = invocation.getArgument<(Exception) -> Unit>(1)
+          null
+        }
+        .`when`(repository)
+        .listenToAllUserProfiles(any(), any())
+
+    // Act
+    viewModel.startListeningToAllProfiles()
+
+    // Simulate receiving new profiles from the repository
+    capturedOnProfilesChanged?.invoke(listOf(user1, user2))
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    val currentAllProfiles = viewModel.allProfiles.first()
+    assertEquals(2, currentAllProfiles.size)
+    assertEquals("User One", currentAllProfiles[0].name)
+    assertEquals("User Two", currentAllProfiles[1].name)
+  }
 }

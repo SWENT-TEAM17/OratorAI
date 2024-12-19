@@ -121,7 +121,7 @@ fun SpeakingScreen(
                 SpeakingRepository.AnalysisState.IDLE -> "Tap the mic to start recording."
                 else ->
                     when (viewModel.analysisError.value) {
-                      SpeakingError.NO_ERROR -> "Analysis finished."
+                      SpeakingError.NO_ERROR -> "Analysis finished, click on Back Button."
                       else -> "Error : ${viewModel.analysisError.value}"
                     }
               }
@@ -135,17 +135,23 @@ fun SpeakingScreen(
             Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
           }
 
-          // Display transcribed text
-          if (analysisData != null) {
-            Text("Transcribed Text: ${analysisData!!.transcription}", color = textColor)
-            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
-
-            // Display sentiment analysis result
-            Text("Sentiment Analysis: ${analysisData!!.sentimentScore}", color = textColor)
-            Spacer(
-                modifier =
-                    Modifier.height(AppDimensions.paddingMedium).testTag("sentiment_analysis"))
-          }
+          //          // Display transcribed text
+          //          if (analysisData != null) {
+          //            Text(
+          //                "Transcribed Text: ${analysisData!!.transcription}",
+          //                color = textColor,
+          //                textAlign = TextAlign.Center)
+          //            Spacer(modifier =
+          // Modifier.height(AppDimensions.paddingMedium).testTag("transcript"))
+          //
+          //            // Display sentiment analysis result
+          //            Text("Sentiment Analysis: ${analysisData!!.sentimentScore}", color =
+          // textColor)
+          //            Spacer(
+          //                modifier =
+          //
+          // Modifier.height(AppDimensions.paddingMedium).testTag("sentiment_analysis"))
+          //          }
 
           Row {
             Button(

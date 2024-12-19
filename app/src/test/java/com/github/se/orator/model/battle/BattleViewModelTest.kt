@@ -13,9 +13,15 @@ import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.network.ChatGPTService
+import com.github.se.orator.ui.network.ChatResponse
+import com.github.se.orator.ui.network.Choice
+import com.github.se.orator.ui.network.Message
+import com.github.se.orator.ui.network.Usage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import org.junit.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
@@ -342,5 +348,138 @@ class BattleViewModelTest {
 
     // Assert
     verify(mockBattleRepository).updateBattleStatus(eq(battleId), eq(BattleStatus.CANCELLED), any())
+  }
+
+  @Test
+  fun `evaluateBattle should do nothing when current user is not the challenger`() = runTest {
+    // Arrange
+    val battleId = "battleIdNotChallenger"
+    var failureCalled = false
+    val onFailure: (Exception) -> Unit = { failureCalled = true }
+
+    // Mock getBattleById to return a battle where current user is not the challenger
+    whenever(mockBattleRepository.getBattleById(eq(battleId), any())).thenAnswer { invocation ->
+      val callback = invocation.getArgument<(SpeechBattle?) -> Unit>(1)
+      callback.invoke(
+          SpeechBattle(
+              battleId = battleId,
+              challenger = "anotherUser",
+              opponent = "testUser",
+              status = BattleStatus.IN_PROGRESS,
+              context =
+                  InterviewContext(
+                      targetPosition = "Dev",
+                      companyName = "TestCorp",
+                      interviewType = "hr",
+                      experienceLevel = "entry",
+                      jobDescription = "A job",
+                      focusArea = "front-end"),
+              challengerCompleted = false,
+              opponentCompleted = false,
+              challengerData = emptyList(),
+              opponentData = emptyList()))
+      null
+    }
+
+    // Act
+    battleViewModel.evaluateBattle(battleId, onFailure)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    Assert.assertFalse(failureCalled)
+    verify(mockBattleRepository).getBattleById(eq(battleId), any())
+    verifyNoMoreInteractions(mockBattleRepository)
+  }
+
+  @Test
+  fun `evaluateBattle should call completeBattle when evaluation succeeds`() = runTest {
+    val battleId = "battleIdSuccess"
+
+    // Prepare a battle where both challenger and opponent have completed their parts
+    val speechBattle =
+        SpeechBattle(
+            battleId = battleId,
+            challenger = "testUser",
+            opponent = "opponentUser",
+            status = BattleStatus.IN_PROGRESS,
+            context =
+                InterviewContext(
+                    targetPosition = "Dev",
+                    companyName = "TestCorp",
+                    interviewType = "technical",
+                    experienceLevel = "mid",
+                    jobDescription = "Develop features",
+                    focusArea = "backend"),
+            challengerCompleted = true,
+            opponentCompleted = true,
+            challengerData =
+                listOf(
+                    Message("assistant", "Hi from challenger assistant"),
+                    Message("user", "Hello from challenger")),
+            opponentData =
+                listOf(
+                    Message("assistant", "Hi from opponent assistant"),
+                    Message("user", "Hello from opponent")))
+
+    // Mock getBattleById to return the speechBattle
+    whenever(mockBattleRepository.getBattleById(eq(battleId), any())).thenAnswer { invocation ->
+      val callback = invocation.getArgument<(SpeechBattle?) -> Unit>(1)
+      callback(speechBattle)
+      null
+    }
+
+    // Provide a ChatGPT response that matches the expected format
+    val assistantMessage =
+        Message(
+            role = "assistant",
+            content =
+                """
+            The winner is: testUser
+            Winner message: Great job!
+            Loser message: Better luck next time!
+        """
+                    .trimIndent())
+    val choice = Choice(message = assistantMessage, finish_reason = "stop", index = 0)
+    val chatResponse =
+        ChatResponse(
+            id = "1",
+            `object` = "chat.completion",
+            created = 1234567890,
+            model = "gpt-3.5-turbo",
+            choices = listOf(choice),
+            usage = Usage(0, 0, 0))
+
+    // Mock chatGPTService to return the above response
+    whenever(chatGPTService.getChatCompletion(any())).thenReturn(chatResponse)
+
+    // Mock completeBattle to simulate success
+    doAnswer {
+          val callback = it.getArgument<(Boolean) -> Unit>(2)
+          callback(true)
+          null
+        }
+        .whenever(mockBattleRepository)
+        .completeBattle(eq(battleId), any(), any())
+
+    var failureCalled = false
+    val onFailure: (Exception) -> Unit = { failureCalled = true }
+
+    // Act
+    battleViewModel.evaluateBattle(battleId, onFailure)
+    testDispatcher.scheduler.advanceUntilIdle() // Advance coroutines
+
+    // Assert
+    // Verify that completeBattle was invoked with the expected EvaluationResult
+    verify(mockBattleRepository)
+        .completeBattle(
+            eq(battleId),
+            argThat {
+              winnerUid == "testUser" &&
+                  winnerMessage.content.contains("Great job!") &&
+                  loserMessage.content.contains("Better luck next time!")
+            },
+            any())
+
+    assertFalse("Failure callback should not have been called", failureCalled)
   }
 }

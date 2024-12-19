@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -104,6 +105,18 @@ object AppTypography {
   val manropeFontFamily = FontFamily(Font(R.font.manrope_variablefont_wght))
   val poppinsBlackFontFamily = FontFamily(Font(R.font.poppins_black))
   val poppinsRegularFontFamily = FontFamily(Font(R.font.poppins_regular))
+
+  val mediumTopBarStyle: TextStyle
+    @Composable
+    get() =
+        TextStyle(
+            fontSize = AppFontSizes.poppinsSizeLarge,
+            fontFamily = poppinsBlackFontFamily,
+            fontWeight = FontWeight.Bold,
+            lineHeight = AppFontSizes.poppinsHeightLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+        )
 
   val bigTitleStyle: TextStyle
     @Composable

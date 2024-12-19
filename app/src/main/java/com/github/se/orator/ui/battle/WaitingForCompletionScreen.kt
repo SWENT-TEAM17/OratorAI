@@ -11,7 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,11 +20,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 
+/**
+ * Composable that is responsible for the waiting for completion screen
+ *
+ * @param battleId
+ * @param friendUid
+ * @param navigationActions
+ * @param battleViewModel
+ * @param userProfileViewModel
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WaitingForCompletionScreen(
@@ -47,7 +57,13 @@ fun WaitingForCompletionScreen(
           if (friendUid == it.opponent) it.opponentCompleted else it.challengerCompleted
 
       if (otherUserCompleted) {
-        // Navigate directly to the evaluation screen
+        // Update the battle status to EVALUATING
+        battleViewModel.updateBattleStatus(battleId, BattleStatus.EVALUATING) { success ->
+          if (!success) {
+            Log.e("WaitingForCompletionScreen", "Failed to update battle status.")
+          }
+        }
+        // Navigate to the evaluation screen
         navigationActions.navigateToEvaluationScreen(battleId)
       } else {
         Log.d("WaitingForCompletionScreen", "Waiting for the other user to finish.")
@@ -56,10 +72,7 @@ fun WaitingForCompletionScreen(
   }
 
   Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("Waiting for Completion", color = MaterialTheme.colorScheme.onSurface) })
-      },
+      topBar = { TopNavigationMenu(title = "Waiting for Completion") },
       content = { innerPadding ->
         Column(
             modifier =

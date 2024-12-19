@@ -16,7 +16,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,14 +23,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.SpeakingViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppTypography
-import loadPromptsFromFile
 
+/**
+ * Prompt card for offline mode
+ *
+ * @param prompt the prompt
+ * @param index
+ * @param navigationActions
+ * @param speakingViewModel
+ * @param promptID
+ */
 @Composable
 fun PromptCard(
     prompt: Map<String, String>,
@@ -76,9 +85,11 @@ fun PromptCard(
 fun PromptCardsSection(
     context: Context,
     navigationActions: NavigationActions,
-    speakingViewModel: SpeakingViewModel
+    speakingViewModel: SpeakingViewModel,
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-  val prompts = loadPromptsFromFile(context) // Load the prompts from the file
+  val prompts =
+      offlinePromptsFunctions.loadPromptsFromFile(context) // Load the prompts from the file
 
   Column(
       modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium),
@@ -105,14 +116,14 @@ fun PromptCardsSection(
 @Composable
 fun OfflineRecordingsProfileScreen(
     navigationActions: NavigationActions,
-    speakingViewModel: SpeakingViewModel
+    speakingViewModel: SpeakingViewModel,
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
   val context = LocalContext.current
-  Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
-    TopAppBar(
-        title = {
-          Text("Previous sessions", modifier = Modifier.testTag("previous_sessions_test"))
-        },
+  Column {
+    TopNavigationMenu(
+        textTestTag = "previous_sessions_test",
+        title = "Previous sessions",
         navigationIcon = {
           IconButton(
               onClick = { navigationActions.goBack() },
@@ -124,7 +135,9 @@ fun OfflineRecordingsProfileScreen(
                     tint = Color.Black)
               }
         })
-    Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-    PromptCardsSection(context, navigationActions, speakingViewModel)
+    Column(modifier = Modifier.fillMaxSize().padding(AppDimensions.paddingMedium)) {
+      Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+      PromptCardsSection(context, navigationActions, speakingViewModel, offlinePromptsFunctions)
+    }
   }
 }
