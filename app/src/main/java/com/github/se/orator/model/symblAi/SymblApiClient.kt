@@ -248,7 +248,7 @@ class SymblApiClient(
             accessToken = accessToken,
             requestBody = requestBody)
 
-    urlCallRequestBlocking(
+    urlCallRequest(
         request = request,
         onSuccess = { response ->
           val jsonObject = JSONObject(response)
