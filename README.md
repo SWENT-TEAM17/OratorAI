@@ -10,8 +10,7 @@ The app is designed for everyone, from beginners to experienced entrepreneurs an
 ## Features
 - **Practice your speech skills**: The user has 3 different practice modes: Sales pitch, public speaking, and interview. The scenario changes depending on the user's answers thanks to the Chat-GPT API we use.
 - **Real-Time Analysis**: Provides real-time feedback on speech delivery, including aspects such as the emotions that can be derived from the words given as a response as well as what points the user can work on better and how good the response to an interview question/the speech given was.
-- **Friends**: Users can have friends and see how they performed on the same interviews, giving them a sense of competition and a drive to work more on their public speaking skills.
-To add friends, the user should send a request to the person he wants to add and they should accept it.
+- **Friends**: To add friends, the user should send a request to the person he wants to add and they should accept it.
 -**Battle of Speech**: Challenge your friends in a Speech Mock Interview, and let the best win !
 -**Track your progress**: The app allows you to track your progress by maintaing a streak, speech-related stats and other entertaining features :)
 
@@ -30,4 +29,4 @@ Orator AI remains fully functional even without internet connectivity:
 
 ## Figma Project
 
-[Click here](https://www.figma.com/design/OvKRhZaDIyr1hJv4Nmcsks/swent?node-id=36-15&t=3CUvDmxivQfOh4vY-1) to access our first Figma draft and explore our design.
+[Click here](https://www.figma.com/design/OvKRhZaDIyr1hJv4Nmcsks/swent?node-id=36-15&t=3CUvDmxivQfOh4vY-1) to access the Figma of the application and explore our design.
