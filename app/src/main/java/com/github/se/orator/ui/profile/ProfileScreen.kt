@@ -38,12 +38,14 @@ import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -101,6 +103,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
     // Collect the profile data from the ViewModel
     val userProfile by profileViewModel.userProfile.collectAsState()
+    var showStatsDialog by remember { mutableStateOf(false) }
+
 
     Scaffold(
         topBar = {
@@ -312,36 +316,68 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                             .testTag("my_stats_title")
                     )
 
-                    StatsSection(
-                        streak = profile.currentStreak,
-                        onStatsClick = { isStatsVisible = !isStatsVisible }
-                    )
+                    // Section 1 : Streak
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(AppDimensions.paddingSmall)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Whatshot,
+                            contentDescription = "Streak",
+                            tint = COLOR_AMBER,
+                            modifier = Modifier.size(AppDimensions.iconSizeMedium)
+                        )
+                        Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+                        Text(
+                            text = "Current Streak: ${profile.currentStreak}",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = COLOR_AMBER,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
-                    AnimatedVisibility(
-                        visible = isStatsVisible,
-                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("animated_visibility_section")
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(colors.onPrimary)
-                                .padding(AppDimensions.paddingMedium)
-                        ) {
-                            // EmptyScreen()
-                            // TODO: Fix crash when wanting to display thia screen.
-
-                            GraphStats(
-                                navigationActions = navigationActions,
-                                profileViewModel = profileViewModel
-                            )
+                    if (showStatsDialog) {
+                        Dialog(onDismissRequest = { showStatsDialog = false }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(AppDimensions.paddingMedium)
+                                    .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+                            ) {
+                                GraphStats(
+                                    profileViewModel = profileViewModel
+                                )
+                                IconButton(
+                                    onClick = { showStatsDialog = false },
+                                    modifier = Modifier.align(Alignment.TopEnd)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Close Stats"
+                                    )
+                                }
+                            }
                         }
                     }
+
+                    Button(
+                        onClick = { showStatsDialog = true },
+                        modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                        )
+                    ) {
+                        Text("View More Stats")
+                    }
+
+
                 }
             }
 

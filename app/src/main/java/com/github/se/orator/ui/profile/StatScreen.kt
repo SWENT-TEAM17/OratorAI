@@ -1,6 +1,7 @@
 package com.github.se.orator.ui.profile
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.ui.friends.TitleAppBar
@@ -58,129 +60,106 @@ const val TICK_COUNT = 5
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun GraphStats(
-    navigationActions: NavigationActions,
-    profileViewModel: UserProfileViewModel,
+    profileViewModel: UserProfileViewModel
 ) {
 
-  // Collect the profile data from the ViewModel
-  val userProfile by profileViewModel.userProfile.collectAsState()
+    // Collect the profile data from the ViewModel
+    val userProfile by profileViewModel.userProfile.collectAsState()
 
-  val xValues = (1..10).toList()
+    val xValues = (1..10).toList()
 
-  Scaffold(
-      topBar = {
-        TitleAppBar(navigationActions, "Statistics", "statTitle", "statBackButton", "statBackIcon")
-      },
-      modifier = Modifier.fillMaxSize(),
-      content = { padding ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
-              userProfile?.let { profile ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(AppDimensions.paddingMedium)
+    ) {
+        if (userProfile == null) {
+            Log.e("GraphStats", "userProfile is null. Cannot render stats.")
+        } else {
+            userProfile?.let { profile ->
                 Text(
-                    modifier =
-                        Modifier.padding(start = paddingXXLarge)
-                            .padding(top = paddingXXLarge)
-                            .testTag("graphScreenTitle"),
-                    text = "Statistics Graph",
-                    style = AppTypography.mediumTitleStyle, // Apply custom style for title
-                    color = MaterialTheme.colorScheme.primary)
+                    modifier = Modifier
+                        .padding(start = AppDimensions.paddingXXLarge, top = AppDimensions.paddingMedium)
+                        .testTag("graphScreenTitle"),
+                    textAlign = TextAlign.Center,
+                    text = "Your Stats",
+                    style = AppTypography.mediumTitleStyle,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
                 Text(
-                    modifier =
-                        Modifier.padding(start = paddingXXLarge)
-                            .padding(top = paddingExtraLarge)
-                            .testTag("talkTimeSecTitle"),
+                    modifier = Modifier
+                        .padding(start = AppDimensions.paddingXXLarge, top = AppDimensions.paddingSmall)
+                        .testTag("talkTimeSecTitle"),
                     text = "Talk Time Seconds:",
-                    style = AppTypography.smallTitleStyle, // Apply custom style for title
-                    color = MaterialTheme.colorScheme.onSurface)
+                    style = AppTypography.smallTitleStyle,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                Row {
-                  Column(
-                      modifier =
-                          Modifier.padding(
-                              top = paddingExtraLarge,
-                              bottom = paddingExtraLarge,
-                              start = paddingExtraLarge)) {
-                        LineChart(
-                            xValues,
-                            profileViewModel.ensureListSizeTen(
-                                profile.statistics.recentData.map { data ->
-                                  data.talkTimeSeconds.toFloat()
-                                }),
-                            "talkTimeSecGraph",
-                            yMin = 0f,
-                            yMax = 10f)
-                      }
-
-                  Column(
-                      modifier =
-                          Modifier.padding(
-                              top = paddingExtraLarge,
-                              bottom = paddingExtraLarge,
-                              start = paddingExtraLarge)) {
-                        Text(
-                            modifier =
-                                Modifier.padding(start = paddingLarge)
-                                    .padding(top = paddingExtraLarge)
-                                    .testTag("talkTimeSecMeanTitle"),
-                            text = "Mean: ${profile.statistics.talkTimeSecMean}",
-                            style = AppTypography.smallTitleStyle, // Apply custom style for title
-                            color = MaterialTheme.colorScheme.onSurface)
-                      }
+                Column(
+                    modifier = Modifier.padding(AppDimensions.paddingLarge)
+                ) {
+                    LineChart(
+                        xValues,
+                        profileViewModel.ensureListSizeTen(
+                            profile.statistics.recentData.map { data ->
+                                data.talkTimeSeconds.toFloat()
+                            }
+                        ),
+                        "talkTimeSecGraph",
+                        yMin = 0f,
+                        yMax = 10f
+                    )
+                    Text(
+                        modifier = Modifier
+                            .padding(top = AppDimensions.paddingSmall)
+                            .testTag("talkTimeSecMeanTitle"),
+                        text = "Mean: ${profile.statistics.talkTimeSecMean}",
+                        style = AppTypography.smallTitleStyle,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
 
                 Text(
-                    modifier =
-                        Modifier.padding(start = paddingXXLarge)
-                            .padding(top = paddingExtraLarge)
-                            .testTag("paceTitle"),
+                    modifier = Modifier.padding(start = AppDimensions.paddingXXLarge, top = AppDimensions.paddingMedium)
+                        .testTag("paceTitle"),
                     text = "Pace:",
-                    style = AppTypography.smallTitleStyle, // Apply custom style for title
-                    color = MaterialTheme.colorScheme.onSurface)
+                    style = AppTypography.smallTitleStyle,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                Row {
-                  Column(
-                      modifier =
-                          Modifier.padding(
-                              top = paddingExtraLarge,
-                              bottom = paddingExtraLarge,
-                              start = paddingExtraLarge)) {
-                        LineChart(
-                            xValues,
-                            profileViewModel.ensureListSizeTen(
-                                profile.statistics.recentData.map { data -> data.pace.toFloat() }),
-                            "paceGraph",
-                            yMin = 0f,
-                            yMax = 100f)
-                      }
-
-                  Column(
-                      modifier =
-                          Modifier.padding(
-                              top = paddingExtraLarge,
-                              bottom = paddingExtraLarge,
-                              start = paddingExtraLarge)) {
-                        Text(
-                            modifier =
-                                Modifier.padding(start = paddingLarge)
-                                    .padding(top = paddingExtraLarge)
-                                    .testTag("paceMeanTitle"),
-                            text = "Mean: ${profile.statistics.paceMean}",
-                            style = AppTypography.smallTitleStyle, // Apply custom style for title
-                            color = MaterialTheme.colorScheme.onSurface)
-                      }
+                Column(
+                    modifier = Modifier.padding(AppDimensions.paddingSmall)
+                ) {
+                    LineChart(
+                        xValues,
+                        profileViewModel.ensureListSizeTen(
+                            profile.statistics.recentData.map { data -> data.pace.toFloat() }
+                        ),
+                        "paceGraph",
+                        yMin = 0f,
+                        yMax = 100f
+                    )
+                    Text(
+                        modifier = Modifier
+                            .padding(top = AppDimensions.paddingSmall)
+                            .testTag("paceMeanTitle"),
+                        text = "Mean: ${profile.statistics.paceMean}",
+                        style = AppTypography.smallTitleStyle,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
-                TitleAndStatsRow(profile)
-              }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(AppDimensions.paddingSmall)
+                ) {
+                    TitleAndStatsRow(profile)
+                }
+            }
         }
-      },
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.PROFILE)
-      })
+    }
 }
 
 @Composable
@@ -311,12 +290,12 @@ fun ModeStatsColumn(titleTestTag: String, mode: String, profile: UserProfile) {
 /** Row that contains the titles and stats for each mode, side by side */
 @Composable
 fun TitleAndStatsRow(profile: UserProfile) {
-  Row(
+  Column(
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = AppDimensions.paddingMedium)
               .padding(bottom = paddingXXLarge),
-      horizontalArrangement = Arrangement.SpaceEvenly) {
+      verticalArrangement = Arrangement.SpaceEvenly) {
         ModeStatsColumn("InterviewTitle", "Interview", profile)
         ModeStatsColumn("SpeechTitle", "Speech", profile)
         ModeStatsColumn("NegotiationTitle", "Negotiation", profile)
