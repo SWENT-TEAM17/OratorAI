@@ -31,7 +31,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
@@ -89,7 +88,6 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   // Collect the profile data from the ViewModel
   val userProfile by profileViewModel.userProfile.collectAsState()
-  var showStatsDialog by remember { mutableStateOf(false) }
 
   Scaffold(
       topBar = {
@@ -267,7 +265,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 modifier = Modifier.testTag("statistics_section"),
                 action = {
                   Button(
-                      onClick = { showStatsDialog = true },
+                      onClick = { navigationActions.navigateTo(Screen.STAT) },
                       modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall),
                       colors =
                           ButtonDefaults.buttonColors(
@@ -275,27 +273,6 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                               contentColor = MaterialTheme.colorScheme.inverseOnSurface)) {
                         Text("View More Stats")
                       }
-
-                  if (showStatsDialog) {
-                    Dialog(onDismissRequest = { showStatsDialog = false }) {
-                      Box(
-                          modifier =
-                              Modifier.fillMaxSize()
-                                  .padding(AppDimensions.paddingMedium)
-                                  .background(
-                                      MaterialTheme.colorScheme.surface,
-                                      shape = MaterialTheme.shapes.medium)) {
-                            GraphStats(profileViewModel = profileViewModel)
-                            IconButton(
-                                onClick = { showStatsDialog = false },
-                                modifier = Modifier.align(Alignment.TopEnd)) {
-                                  Icon(
-                                      imageVector = Icons.Default.Close,
-                                      contentDescription = "Close Stats")
-                                }
-                          }
-                    }
-                  }
                 }) {
                   // Streak Content
                   Row(
