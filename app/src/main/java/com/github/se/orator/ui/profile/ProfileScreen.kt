@@ -348,26 +348,6 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
-                // Offline Recordings Section
-                Column(
-                    modifier =
-                    Modifier.fillMaxWidth()
-                        .padding(AppDimensions.paddingMedium)
-                        .testTag("offline_recordings_column")) {
-                    // Title for Offline Recordings
-                    Text(
-                        text = "My Offline Recordings",
-                        style =
-                        TextStyle(
-                            fontSize = 18.sp,
-                            fontFamily = FontFamily(Font(R.font.poppins_black)),
-                            color = colors.onSurface),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier =
-                        Modifier.padding(vertical = AppDimensions.paddingSmall)
-                            .testTag("offline_recordings_title"))
-                }
             }
         }
 
@@ -434,56 +414,6 @@ fun StatsSection(
         ) {
             Text("View More Stats")
         }
-    }
-}
-
-/**
- * Placeholder for displaying offline audio recordings.
- *
- * @param fileName The name of the audio file.
- * @param onPlayClicked Callback triggered when the play button is clicked.
- */
-@Composable
-fun AudioRecordingPlaceholder(fileName: String, onPlayClicked: () -> Unit) {
-
-    // TODO : Display the Title of the saved audio in the placeholder
-    val colors = MaterialTheme.colorScheme
-
-    Row(
-        modifier =
-        Modifier.width(AppDimensions.imageLargeXXL)
-            .height(96.dp)
-            .shadow(4.dp, shape = RoundedCornerShape(size = 10.dp), clip = false)
-            .background(
-                colors.onSecondary,
-                shape = RoundedCornerShape(size = AppDimensions.paddingMedium))
-            .clickable { onPlayClicked() }
-            .padding(
-                horizontal = AppDimensions.paddingMedium,
-                vertical = AppDimensions.paddingSmall)) {
-        // Play Button Icon
-        Icon(
-            imageVector = Icons.Default.PlayArrow,
-            contentDescription = "Play",
-            modifier =
-            Modifier.size(AppDimensions.iconSizeLarge)
-                .align(Alignment.CenterVertically)
-                .background(colors.errorContainer, shape = CircleShape))
-        // Title of the Recording
-        Text(
-            text = fileName, // /////// recording.title !
-            style =
-            TextStyle(
-                fontSize = 18.sp,
-                fontFamily = FontFamily(Font(R.font.poppins_regular)),
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.onBackground),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier =
-            Modifier.align(Alignment.CenterVertically)
-                .weight(1f) // Ensures text takes available space
-        )
     }
 }
 
