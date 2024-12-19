@@ -256,10 +256,7 @@ class EndToEndAppTest {
     composeTestRule
         .onNodeWithTag("save_profile_button")
         .assertIsEnabled() // now the save profile button should be enabled
-    composeTestRule.runOnUiThread {
-      navController?.navigate(
-          Screen.HOME)
-    }
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.HOME) }
 
     // navigating to profile
     composeTestRule.onNodeWithTag("Profile").performClick()
@@ -360,10 +357,7 @@ class EndToEndAppTest {
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
 
     // Step 8: Speaking screen
-    composeTestRule.runOnUiThread {
-      navController?.navigate(
-          Screen.SPEAKING)
-    }
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.SPEAKING) }
     composeTestRule.onNodeWithTag("ui_column").assertIsDisplayed()
     composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("mic_text").assertTextContains("Tap the mic to start recording.")
@@ -384,10 +378,7 @@ class EndToEndAppTest {
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
-    composeTestRule.runOnUiThread {
-      navController?.navigate(
-          Screen.SPEAKING)
-    }
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.SPEAKING) }
     composeTestRule.onNodeWithTag("mic_text").assertTextContains("Recording...")
 
     composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
@@ -406,18 +397,12 @@ class EndToEndAppTest {
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
-    composeTestRule.runOnUiThread {
-      navController?.navigate(
-          Screen.SPEAKING)
-    }
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.SPEAKING) }
     composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
 
     // Step 9: Offline mode:
 
-    composeTestRule.runOnUiThread {
-      navController?.navigate(
-          Screen.OFFLINE)
-    }
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE) }
     composeTestRule.onNodeWithText("No Internet Connection").assertIsDisplayed()
     composeTestRule
         .onNodeWithText(
