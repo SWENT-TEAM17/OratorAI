@@ -11,7 +11,6 @@ import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.profile.UserStatistics
 import com.github.se.orator.model.speaking.AnalysisData
-import com.github.se.orator.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -23,7 +22,6 @@ import org.mockito.kotlin.any
 class StatScreenTest {
 
   private lateinit var userProfileViewModel: UserProfileViewModel
-  @Mock private lateinit var navigationActions: NavigationActions
   @Mock private lateinit var userProfileRepository: UserProfileRepository
 
   private val mockedRecentData = createMockedRecentData()
@@ -62,37 +60,14 @@ class StatScreenTest {
           bio = "Test bio")
 
   @Test
-  fun graphStats_displaysStatTitleAndBackButton() {
-    composeTestRule.setContent {
-      GraphStats(
-          navigationActions = navigationActions,
-          profileViewModel = userProfileViewModel,
-          onCloseClick = { showGraphStats = false })
-    }
+  fun graphStats_displaysAllTitlesAndGraphs() {
+    composeTestRule.setContent { GraphStats(profileViewModel = userProfileViewModel) }
 
-    // Check title
-    composeTestRule.onNodeWithTag("statTitle").assertIsDisplayed().assert(hasText("Statistics"))
-
-    // Check back button icon is displayed
-    composeTestRule.onNodeWithTag("statBackButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("statBackIcon", useUnmergedTree = true).assertIsDisplayed()
-  }
-
-  @Test
-  fun graphStats_displaysGraphTitlesAndGraphs() {
-
-    composeTestRule.setContent {
-      GraphStats(
-          navigationActions = navigationActions,
-          profileViewModel = userProfileViewModel,
-          onCloseClick = { showGraphStats = false })
-    }
-
-    // Check Graph Screen Title
+    // Check Screen Title
     composeTestRule
         .onNodeWithTag("graphScreenTitle", useUnmergedTree = true)
         .assertIsDisplayed()
-        .assert(hasText("Statistics Graph"))
+        .assert(hasText("Your Stats"))
 
     // Check Talk Time Seconds Title
     composeTestRule
@@ -100,24 +75,22 @@ class StatScreenTest {
         .assertIsDisplayed()
         .assert(hasText("Talk Time Seconds:"))
 
-    // Check the first graph for talk time seconds
+    // Check Talk Time Graph
     composeTestRule.onNodeWithTag("talkTimeSecGraph").assertIsDisplayed()
 
-    // Check mean text is displayed
-    // The mean is calculated from the fake data in the ViewModel
-    // If we used i * 10 (for i in 1..10): The mean of [10,20,...,100] is 55.0
+    // Check Talk Time Mean
     composeTestRule
         .onNodeWithTag("talkTimeSecMeanTitle")
         .assertIsDisplayed()
-        .assert(hasText("Mean: ${talkTimeSecMean}")) // Adjust if your formatting differs
+        .assert(hasText("Mean: ${talkTimeSecMean}"))
 
-    // Check Talk Time Percentage Title
+    // Check Pace Title
     composeTestRule.onNodeWithTag("paceTitle").assertIsDisplayed().assert(hasText("Pace:"))
 
-    // Check the second graph for talk time percentage
+    // Check Pace Graph
     composeTestRule.onNodeWithTag("paceGraph").assertIsDisplayed()
 
-    // For percentages (i * 5 for i in 1..10): The average would be [5,10,15,...,50] mean = 27.5
+    // Check Pace Mean
     composeTestRule
         .onNodeWithTag("paceMeanTitle")
         .assertIsDisplayed()

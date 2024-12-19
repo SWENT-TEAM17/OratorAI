@@ -266,9 +266,7 @@ fun OratorApp(
             composable(Screen.EDIT_PROFILE) {
               EditProfileScreen(navigationActions, userProfileViewModel)
             }
-            composable(Screen.STAT) { GraphStats(
-                userProfileViewModel
-            )}
+            composable(Screen.STAT) { GraphStats(userProfileViewModel) }
             composable(Screen.LEADERBOARD) {
               LeaderboardScreen(navigationActions, userProfileViewModel)
             }

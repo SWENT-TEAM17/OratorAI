@@ -220,5 +220,4 @@ open class NavigationActions(
   open fun navigateToEvaluationScreen(battleId: String) {
     navController.navigate("${Route.EVALUATION}/$battleId")
   }
-
 }
