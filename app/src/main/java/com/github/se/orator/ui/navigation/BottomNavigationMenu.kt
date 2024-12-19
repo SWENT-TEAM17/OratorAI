@@ -3,9 +3,9 @@ package com.github.se.orator.ui.navigation
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
@@ -34,11 +34,7 @@ fun BottomNavigationMenu(
   val insets = WindowInsets.systemBars.asPaddingValues()
 
   BottomNavigation(
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(AppDimensions.bottomNavigationHeight + insets.calculateBottomPadding())
-              .padding(bottom = insets.calculateBottomPadding())
-              .testTag("bottomNavigationMenu"),
+      modifier = Modifier.fillMaxWidth().wrapContentHeight().testTag("bottomNavigationMenu"),
       backgroundColor = MaterialTheme.colorScheme.surface,
       content = {
         tabList.forEach { tab ->
@@ -61,7 +57,10 @@ fun BottomNavigationMenu(
               label = { Text(tab.textId, color = MaterialTheme.colorScheme.onSurface) },
               selected = tab.route == selectedItem,
               onClick = { onTabSelect(tab) },
-              modifier = Modifier.clip(AppShapes.bottomNavigationItemShape).testTag(tab.textId))
+              modifier =
+                  Modifier.padding(bottom = insets.calculateBottomPadding())
+                      .clip(AppShapes.bottomNavigationItemShape)
+                      .testTag(tab.textId))
         }
       },
   )

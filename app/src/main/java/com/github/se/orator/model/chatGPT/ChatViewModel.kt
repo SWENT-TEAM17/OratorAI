@@ -517,7 +517,7 @@ The session is now over. According to the initial instructions, you can now brea
 
     val systemMessageContent =
         """
-                    You are engaged in a battle against $friendName a ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.targetPosition} at ${practiceContextAsValue.companyName}. 
+                    You are engaged in a battle of type ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.targetPosition} at ${practiceContextAsValue.companyName}. 
                     Focus on the following areas: ${practiceContextAsValue.focusArea}. 
                     Ask questions one at a time and wait for the user's response before proceeding. 
                     Do not provide feedback until the end.
