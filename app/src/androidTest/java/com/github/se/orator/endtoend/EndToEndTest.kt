@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.rule.GrantPermissionRule
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfile
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
@@ -69,6 +70,7 @@ class EndToEndAppTest {
   private lateinit var chatGPTService: ChatGPTService
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var mockPlayer: AudioPlayer
+  private lateinit var offlinePromptFunctions: OfflinePromptsFunctionsInterface
 
   // hardcoded values used in tests
   private val bio = "Test bio"
@@ -112,6 +114,7 @@ class EndToEndAppTest {
     apiLinkViewModel = ApiLinkViewModel()
     speakingRepository = mock(SpeakingRepository::class.java)
     chatGPTService = mock(ChatGPTService::class.java)
+      offlinePromptFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
 
@@ -207,7 +210,7 @@ class EndToEndAppTest {
         }
 
         composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-          OfflineInterviewModule(navigationActions, speakingViewModel)
+          OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptFunctions)
         }
 
         composable(Screen.PRACTICE_QUESTIONS_SCREEN) {
@@ -229,7 +232,7 @@ class EndToEndAppTest {
               navigationActions = navigationActions,
               viewModel = chatViewModel,
               speakingViewModel = speakingViewModel,
-              player = mockPlayer)
+              player = mockPlayer, offlinePromptsFunctions = offlinePromptFunctions)
         }
       }
     }
