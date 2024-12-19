@@ -59,7 +59,6 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.orator.R
 import com.github.se.orator.model.profile.UserProfileViewModel
-import com.github.se.orator.model.symblAi.AudioRecorder
 import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
@@ -87,7 +86,6 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   // State to control whether the profile picture dialog is open
   var isDialogOpen by remember { mutableStateOf(false) }
-  val audioRecorder = remember { AudioRecorder(context) }
 
   // Collect the profile data from the ViewModel
   val userProfile by profileViewModel.userProfile.collectAsState()
@@ -264,47 +262,19 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
             Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
             Log.d("scn", "bio is: ${profile.bio}")
 
-            // Stats Section
-            Column(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .padding(AppDimensions.paddingMedium)
-                        .testTag("statistics_section")) {
-                  // Title for My Stats
-                  Text(
-                      text = "My Stats",
-                      style =
-                          TextStyle(
-                              fontSize = 18.sp,
-                              fontFamily = FontFamily(Font(R.font.poppins_black)),
-                              fontWeight = FontWeight.Bold,
-                              color = colors.onSurface),
-                      maxLines = 1,
-                      overflow = TextOverflow.Ellipsis,
-                      modifier =
-                          Modifier.padding(vertical = AppDimensions.paddingSmall)
-                              .testTag("my_stats_title"))
-
-                  // Section 1 : Streak
-                  Row(
-                      verticalAlignment = Alignment.CenterVertically,
-                      modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall)) {
-                        Icon(
-                            imageVector = Icons.Filled.Whatshot,
-                            contentDescription = "Streak",
-                            tint = COLOR_AMBER,
-                            modifier = Modifier.size(AppDimensions.iconSizeMedium))
-                        Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
-                        Text(
-                            text = "Current Streak: ${profile.currentStreak}",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = COLOR_AMBER,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis)
+            ProfileSection(
+                title = "My Stats",
+                modifier = Modifier.testTag("statistics_section"),
+                action = {
+                  Button(
+                      onClick = { showStatsDialog = true },
+                      modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall),
+                      colors =
+                          ButtonDefaults.buttonColors(
+                              backgroundColor = MaterialTheme.colorScheme.primary,
+                              contentColor = MaterialTheme.colorScheme.inverseOnSurface)) {
+                        Text("View More Stats")
                       }
-
-                  Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
                   if (showStatsDialog) {
                     Dialog(onDismissRequest = { showStatsDialog = false }) {
@@ -326,42 +296,34 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                           }
                     }
                   }
-
-                  Button(
-                      onClick = { showStatsDialog = true },
-                      modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall),
-                      colors =
-                          ButtonDefaults.buttonColors(
-                              backgroundColor = MaterialTheme.colorScheme.primary,
-                              contentColor = MaterialTheme.colorScheme.inverseOnSurface)) {
-                        Text("View More Stats")
+                }) {
+                  // Streak Content
+                  Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall)) {
+                        Icon(
+                            imageVector = Icons.Filled.Whatshot,
+                            contentDescription = "Streak",
+                            tint = COLOR_AMBER,
+                            modifier = Modifier.size(AppDimensions.iconSizeMedium))
+                        Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+                        Text(
+                            text = "Current Streak: ${profile.currentStreak}",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = COLOR_AMBER,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis)
                       }
                 }
           }
 
           Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
-          // Offline Recordings Section
-          Column(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(AppDimensions.paddingMedium)
-                      .testTag("offline_recordings_section")) {
-                // Title for Offline Recordings
-                Text(
-                    text = "My Offline Recordings",
-                    style =
-                        TextStyle(
-                            fontSize = 18.sp,
-                            fontFamily = FontFamily(Font(R.font.poppins_black)),
-                            fontWeight = FontWeight.Bold,
-                            color = colors.onSurface),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier =
-                        Modifier.padding(vertical = AppDimensions.paddingSmall)
-                            .testTag("my_offline_recordings_title"))
-
+          ProfileSection(
+              title = "My Offline Recordings",
+              modifier = Modifier.testTag("offline_recordings_section"),
+              action = {
                 Button(
                     onClick = { navigationActions.navigateTo(Screen.OFFLINE_RECORDING_PROFILE) },
                     modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall),
@@ -371,7 +333,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                             contentColor = MaterialTheme.colorScheme.inverseOnSurface)) {
                       Text("View Your Offline Recordings")
                     }
-              }
+              }) {}
         }
       }
 
@@ -424,5 +386,47 @@ fun ProfilePictureDialog(profilePictureUrl: String, onDismiss: () -> Unit) {
                       .clip(CircleShape)
                       .testTag("profile_picture_dialog"))
         }
+  }
+}
+
+/**
+ * Composable function to display a reusable profile section with a title, content, and optional
+ * action button.
+ *
+ * @param title The title of the section to be displayed.
+ * @param modifier Modifier to apply to the section layout.
+ * @param action Optional composable lambda for an action button or additional UI at the bottom of
+ *   the section.
+ * @param content Composable lambda to define the main content of the section.
+ */
+@Composable
+fun ProfileSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    action: (@Composable () -> Unit)? = null,
+    content: @Composable () -> Unit
+) {
+  Column(modifier = modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
+    // Section Title
+    Text(
+        text = title,
+        style =
+            TextStyle(
+                fontSize = 18.sp,
+                fontFamily = FontFamily(Font(R.font.poppins_black)),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(vertical = AppDimensions.paddingSmall))
+
+    // Section Content
+    content()
+
+    // Optional Action Button
+    action?.let {
+      Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+      it()
+    }
   }
 }
