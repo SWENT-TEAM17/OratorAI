@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -176,7 +177,18 @@ fun GraphStats(
                 }
                 TitleAndStatsRow(profile)
               }
+
+            Button(
+                onClick = { onCloseClick() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppDimensions.paddingMedium)
+                    .testTag("close_button")
+            ) {
+                Text("Close Stats")
             }
+
+        }
       },
       bottomBar = {
         BottomNavigationMenu(
@@ -272,7 +284,7 @@ fun LineChart(xValues: List<Int>, yValues: List<Float>, testTag: String, yMin: F
 /** Composable for practice mode title displays on the stats screen */
 @Composable
 fun PracticeModeTitle(modeTitleTestTag: String, mode: String) {
-  androidx.compose.material3.Text(
+  Text(
       modifier =
           Modifier.padding(start = AppDimensions.paddingSmall)
               .padding(top = AppDimensions.paddingXXLarge)
@@ -285,7 +297,7 @@ fun PracticeModeTitle(modeTitleTestTag: String, mode: String) {
 /** Composable for stats displays on the stats screen */
 @Composable
 fun StatDisplay(statTestTag: String, stat: String, statValue: String) {
-  androidx.compose.material3.Text(
+  Text(
       modifier =
           Modifier.padding(start = AppDimensions.paddingSmall)
               .padding(top = AppDimensions.paddingSmall)

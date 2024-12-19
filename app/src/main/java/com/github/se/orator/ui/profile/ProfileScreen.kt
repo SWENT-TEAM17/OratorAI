@@ -1,5 +1,6 @@
 package com.github.se.orator.ui.profile
 
+import EmptyScreen
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -33,6 +34,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -88,7 +90,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
     val colors = MaterialTheme.colorScheme
 
-    var showGraphStats by remember { mutableStateOf(false) }
+  var isStatsVisible by remember { mutableStateOf(false) }
 
     // Get the context
     val context = LocalContext.current
@@ -162,7 +164,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                     Modifier.fillMaxWidth()
                         .height(AppDimensions.profileBoxHeight)
                         .padding(top = AppDimensions.paddingXXXLarge),
-                    contentAlignment = Alignment.TopCenter) {
+                    contentAlignment = Alignment.TopCenter
+                ) {
                     // Background "card" behind the profile picture
                     Card(
                         modifier =
@@ -171,12 +174,15 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                             .shadow(
                                 elevation = AppDimensions.elevationSmall,
                                 shape = RoundedCornerShape(size = AppDimensions.statusBarPadding),
-                                clip = false)
+                                clip = false
+                            )
                             .background(
                                 colors.surfaceVariant,
                                 shape =
-                                RoundedCornerShape(size = AppDimensions.statusBarPadding)),
-                        elevation = AppDimensions.elevationSmall) {}
+                                RoundedCornerShape(size = AppDimensions.statusBarPadding)
+                            ),
+                        elevation = AppDimensions.elevationSmall
+                    ) {}
 
                     // Profile Picture with overlapping positioning
                     ProfilePicture(
@@ -184,7 +190,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                         onClick = { isDialogOpen = true },
                         modifier =
                         Modifier.align(Alignment.TopCenter)
-                            .offset(y = (-AppDimensions.profilePictureSize / 2)))
+                            .offset(y = (-AppDimensions.profilePictureSize / 2))
+                    )
 
                     // Edit button
                     Button(
@@ -198,33 +205,39 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                         shape = AppShapes.circleShape,
                         colors =
                         ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colorScheme.inverseOnSurface),
-                        contentPadding = PaddingValues(AppDimensions.nullPadding)) {
+                            backgroundColor = MaterialTheme.colorScheme.inverseOnSurface
+                        ),
+                        contentPadding = PaddingValues(AppDimensions.nullPadding)
+                    ) {
                         Icon(
                             Icons.Outlined.Edit,
                             contentDescription = "Edit button",
                             modifier = Modifier.size(AppDimensions.iconSizeMedium),
-                            tint = MaterialTheme.colorScheme.primary)
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier =
                         Modifier.align(Alignment.TopCenter)
-                            .padding(top = AppDimensions.paddingSmall)) {
+                            .padding(top = AppDimensions.paddingSmall)
+                    ) {
                         Spacer(modifier = Modifier.height(AppDimensions.mediumSpacerHeight))
 
                         // Box to hold username and streak
                         Box(
                             modifier = Modifier.fillMaxWidth().testTag("profile_name_box"),
-                            contentAlignment = Alignment.Center) {
+                            contentAlignment = Alignment.Center
+                        ) {
                             // Username remains centered
                             Text(
                                 text = profile.name,
                                 fontSize = AppFontSizes.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.testTag("profile_name"),
-                                color = MaterialTheme.colorScheme.primary)
+                                color = MaterialTheme.colorScheme.primary
+                            )
 
                             // Current Streak aligned to the end with fire icon
                             Row(
@@ -234,14 +247,17 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                     .offset(
                                         x =
                                         -AppDimensions
-                                            .paddingLarge) // Push a little to the
+                                            .paddingLarge
+                                    ) // Push a little to the
                                     // left
-                                    .testTag("current_streak")) {
+                                    .testTag("current_streak")
+                            ) {
                                 Icon(
                                     imageVector = Icons.Filled.Whatshot, // Fire icon
                                     contentDescription = "Active Streak",
                                     tint = COLOR_AMBER,
-                                    modifier = Modifier.size(AppDimensions.iconSizeSmall))
+                                    modifier = Modifier.size(AppDimensions.iconSizeSmall)
+                                )
                                 Spacer(modifier = Modifier.width(AppDimensions.smallWidth))
                                 Text(
                                     text = "${profile.currentStreak}",
@@ -250,7 +266,8 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                                     color = COLOR_AMBER,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.testTag("current_streak_text"))
+                                    modifier = Modifier.testTag("current_streak_text")
+                                )
                             }
                         }
 
@@ -272,7 +289,7 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Log.d("scn", "bio is: ${profile.bio}")
 
-// Stats Section
+                // Stats Section
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -295,37 +312,39 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                             .testTag("my_stats_title")
                     )
 
-                    // AnimatedVisibility for GraphStats
+                    StatsSection(
+                        streak = profile.currentStreak,
+                        onStatsClick = { isStatsVisible = !isStatsVisible }
+                    )
+
+                    Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+
                     AnimatedVisibility(
-                        visible = showGraphStats,
+                        visible = isStatsVisible,
                         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("animated_visibility_section")
                     ) {
-                        // GraphStats composable with close functionality
-                        GraphStats(
-                            navigationActions = navigationActions,
-                            profileViewModel = profileViewModel,
-                            onCloseClick = { showGraphStats = false } // Close GraphStats when button clicked
-                        )
-                    }
-
-                    // Toggle Stats Button
-                    if (!showGraphStats) {
-                        Button(
-                            onClick = { showGraphStats = true },
+                        Box(
                             modifier = Modifier
+                                .fillMaxWidth()
+                                .background(colors.onPrimary)
                                 .padding(AppDimensions.paddingMedium)
-                                .testTag("view_stats_button")
                         ) {
-                            Text("View My Stats")
+                            EmptyScreen()
+                            // TODO: Fix crash when wanting to display thia screen.
+                            /*
+                            GraphStats(
+                                navigationActions = navigationActions,
+                                profileViewModel = profileViewModel,
+                                onCloseClick = { isStatsVisible = false }
+                            )*/
                         }
                     }
                 }
-
-                }
+            }
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
 
@@ -359,22 +378,62 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
         }
     }
 
-
 /**
  * Displays the stats section with current streak and total speaking time.
  *
  * @param streak The current streak count.
- * @param totalSpeakingTime The total speaking time in string format.
- * @param onStatsClick Callback triggered when the stats section is clicked.
+ * @param onStatsClick Callback triggered when the stats section or button is clicked.
  */
 @Composable
 fun StatsSection(
+    streak: Long,
     onStatsClick: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
-    // TODO : Put general stats instead of current hardcoded ones
-    Column(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium)) {
 
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(AppDimensions.paddingMedium)
+    ) {
+        // Section 1: Streak
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onStatsClick)
+                .padding(AppDimensions.paddingSmall)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Whatshot,
+                contentDescription = "Streak",
+                tint = COLOR_AMBER,
+                modifier = Modifier.size(AppDimensions.iconSizeMedium)
+            )
+            Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+            Text(
+                text = "Current Streak: $streak",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = COLOR_AMBER,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // Section 2: Button to View More Stats
+        Button(
+            onClick = onStatsClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = AppDimensions.paddingMedium),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = colors.primary,
+                contentColor = colors.onPrimary
+            )
+        ) {
+            Text("View More Stats")
+        }
     }
 }
 
