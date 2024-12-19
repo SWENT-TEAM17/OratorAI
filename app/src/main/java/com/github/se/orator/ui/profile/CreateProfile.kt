@@ -4,21 +4,11 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -41,46 +31,35 @@ import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.profile.UserStatistics
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.TopLevelDestinations
-import com.github.se.orator.ui.navigation.TopNavigationMenu
-import com.github.se.orator.ui.theme.AppColors
-import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.AppFontSizes
-import com.github.se.orator.ui.theme.AppShapes
-import com.github.se.orator.ui.theme.AppTypography
+import com.github.se.orator.ui.theme.*
 
-/**
- * The CreateAccountScreen composable is a composable screen that displays the create account
- * screen.
- *
- * @param navigationActions The navigation actions that can be performed.
- * @param userProfileViewModel The view model for the user profile.
- */
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun CreateAccountScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  // State for storing the username input
   var username by remember { mutableStateOf("") }
-  // State for controlling the dialog visibility
   var isDialogOpen by remember { mutableStateOf(false) }
-  // State variable to hold the selected image URI
   var profilePicUri by remember { mutableStateOf<Uri?>(null) }
-  // State for tracking the upload status
   var isUploading by remember { mutableStateOf(false) }
-
-  // Temporary variable to hold the pending image URI before confirmation
-  var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
 
   val context = LocalContext.current
 
-  Scaffold(
-      topBar = {
-        TopNavigationMenu(
-            textTestTag = "createProfileTitle",
-            title = "Create your Orator profile",
-            navigationIcon = {
+  // Instead of using a Scaffold topBar, place a back button in a row at the top.
+  Column(
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(
+                  top = AppDimensions.paddingLarge,
+                  start = AppDimensions.paddingMedium,
+                  end = AppDimensions.paddingMedium),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        // Row containing the back button and spacing
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically) {
               IconButton(
                   onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("back_button")) {
@@ -89,157 +68,142 @@ fun CreateAccountScreen(
                         contentDescription = "Back",
                         modifier = Modifier.size(AppDimensions.iconSizeSmall).testTag("BackImage"))
                   }
-            })
-      },
-      content = {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(it).padding(AppDimensions.paddingMedium),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            }
 
-              // Profile Picture
+        Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+
+        // Title
+        Text(
+            text = "Create your Orator profile",
+            style = AppTypography.titleLargeStyle,
+            modifier = Modifier.testTag("create_profile_title"))
+
+        Spacer(modifier = Modifier.height(AppDimensions.paddingExtraLarge))
+
+        // Profile Picture Section
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier.size(AppDimensions.slightlyLargerProfilePictureSize)
+                    .testTag("profile_picture_container")) {
               Box(
                   contentAlignment = Alignment.Center,
                   modifier =
-                      Modifier.size(
-                              AppDimensions.slightlyLargerProfilePictureSize) // Slightly larger to
-                          // accommodate the IconButton
-                          // outside the circle
-                          .testTag("profile_picture_container")) {
-                    // Circle with background image and profile picture
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier =
-                            Modifier.size(AppDimensions.slightlyLowerProfilePictureSize)
-                                .clip(CircleShape)) {
-                          // Background Image
-                          Image(
-                              painter = painterResource(id = R.drawable.profile_background),
-                              contentDescription = "Profile Picture Background",
-                              modifier = Modifier.fillMaxSize(), // Fill the circle
-                              contentScale = ContentScale.Crop)
-
-                          // Profile Picture overlay
-                          ProfilePicture(
-                              profilePictureUrl = profilePicUri?.toString(),
-                              onClick = { isDialogOpen = true },
-                          )
-                        }
-
-                    // Camera icon overlay, positioned outside the circle at the bottom left
-                    IconButton(
-                        onClick = { isDialogOpen = true },
-                        modifier =
-                            Modifier.size(AppDimensions.paddingMediumSmall)
-                                .align(Alignment.BottomEnd)
-                                .testTag("upload_profile_picture")) {
-                          Image(
-                              painter = painterResource(id = R.drawable.camera),
-                              contentDescription = "Upload profile picture",
-                              modifier = Modifier.size(AppDimensions.paddingMediumSmall))
-                        }
-                  }
-
-              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall)) // Replaced 16.dp
-
-              Text(
-                  modifier = Modifier.testTag("profile_picture_label"),
-                  text = "Profile picture (optional)",
-                  fontSize = AppFontSizes.bodySmall, // 14.sp
-                  color = Color.Gray // Can be replaced with AppColors.secondaryTextColor
-                  )
-
-              Spacer(modifier = Modifier.height(AppDimensions.paddingLarge)) // Replaced 24.dp
-
-              // Username Input Field
-              TextField(
-                  value = username,
-                  onValueChange = { username = it },
-                  label = { Text("Username") },
-                  placeholder = { Text("Enter your username") },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(AppDimensions.inputFieldHeight) // Replaced with a new variable
-                          .testTag("username_input"),
-                  singleLine = true,
-                  colors =
-                      TextFieldDefaults.textFieldColors(
-                          textColor = AppColors.textColor,
-                          placeholderColor = AppColors.placeholderColor, // Placeholder text color
-                          backgroundColor =
-                              AppColors.placeholderColor, // Background color of the TextField
-                          focusedLabelColor = AppColors.textColor, // Label color when focused
-                          unfocusedLabelColor = AppColors.textColor,
-                          focusedIndicatorColor =
-                              AppColors.textColor, // The color of the focus indicator
-                          unfocusedIndicatorColor =
-                              AppColors.textColor // The color of the unfocused indicator
-                          ))
-
-              Spacer(modifier = Modifier.height(AppDimensions.paddingExtraLarge)) // Replaced 48.dp
-
-              // Save Button
-              Button(
-                  onClick = {
-                    if (username.isNotBlank()) {
-                      isUploading = true
-                      val uid = userProfileViewModel.repository.getCurrentUserUid().toString()
-
-                      val newProfile =
-                          UserProfile(
-                              uid = uid,
-                              name = username,
-                              age = 0,
-                              profilePic = null,
-                              statistics = UserStatistics(),
-                              friends = emptyList())
-
-                      userProfileViewModel.addUserProfile(newProfile)
-
-                      if (profilePicUri != null) {
-                        userProfileViewModel.uploadProfilePicture(uid, profilePicUri!!)
-                      }
-
-                      isUploading = false
-                      navigationActions.navigateTo(TopLevelDestinations.HOME)
-                    }
-                  },
-                  modifier = Modifier.fillMaxWidth().testTag("save_profile_button"),
-                  shape = AppShapes.circleShape,
-                  enabled = username.isNotBlank() && !isUploading,
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          backgroundColor = AppColors.buttonBackgroundColor,
-                          contentColor = AppColors.buttonTextColor)) {
-                    Text(
-                        modifier = Modifier.testTag("save_profile_button_text"),
-                        text = "Save profile",
-                        style = AppTypography.buttonTextStyle)
-                  }
-
-              Spacer(modifier = Modifier.weight(1f))
-
-              Row(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(bottom = AppDimensions.paddingMedium), // Optional bottom padding
-                  horizontalArrangement = Arrangement.Start // Aligns content to the start (left)
-                  ) {
+                      Modifier.size(AppDimensions.slightlyLowerProfilePictureSize)
+                          .clip(CircleShape)) {
+                    // Background Image
                     Image(
-                        painter =
-                            painterResource(
-                                id =
-                                    R.drawable
-                                        .create_profile_speaker), // Replace with your drawable
-                        // image name
-                        contentDescription = "Decorative bottom-left image",
-                        modifier =
-                            Modifier.height(AppDimensions.imageLargeXXL) // Adjust height as needed
-                                .padding(
-                                    start = AppDimensions.paddingSmall), // Optional start padding
+                        painter = painterResource(id = R.drawable.profile_background),
+                        contentDescription = "Profile Picture Background",
+                        modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop)
+
+                    // Profile Picture overlay
+                    ProfilePicture(
+                        profilePictureUrl = profilePicUri?.toString(),
+                        onClick = { isDialogOpen = true },
+                    )
+                  }
+
+              // Camera icon overlay
+              androidx.compose.material.IconButton(
+                  onClick = { isDialogOpen = true },
+                  modifier =
+                      Modifier.size(AppDimensions.paddingMediumSmall)
+                          .align(Alignment.BottomEnd)
+                          .testTag("upload_profile_picture")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.camera),
+                        contentDescription = "Upload profile picture",
+                        modifier = Modifier.size(AppDimensions.paddingMediumSmall))
                   }
             }
-      })
+
+        Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+        Text(
+            modifier = Modifier.testTag("profile_picture_label"),
+            text = "Profile picture (optional)",
+            fontSize = AppFontSizes.bodySmall,
+            color = Color.Gray)
+
+        Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
+
+        // Username Input Field
+        TextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            placeholder = { Text("Enter your username") },
+            modifier =
+                Modifier.fillMaxWidth()
+                    .height(AppDimensions.inputFieldHeight)
+                    .testTag("username_input"),
+            singleLine = true,
+            colors =
+                TextFieldDefaults.textFieldColors(
+                    textColor = AppColors.textColor,
+                    placeholderColor = AppColors.placeholderColor,
+                    backgroundColor = AppColors.placeholderColor,
+                    focusedLabelColor = AppColors.textColor,
+                    unfocusedLabelColor = AppColors.textColor,
+                    focusedIndicatorColor = AppColors.textColor,
+                    unfocusedIndicatorColor = AppColors.textColor))
+
+        Spacer(modifier = Modifier.height(AppDimensions.paddingExtraLarge))
+
+        // Save Button
+        Button(
+            onClick = {
+              if (username.isNotBlank()) {
+                isUploading = true
+                val uid = userProfileViewModel.repository.getCurrentUserUid().toString()
+
+                val newProfile =
+                    UserProfile(
+                        uid = uid,
+                        name = username,
+                        age = 0,
+                        profilePic = null,
+                        statistics = UserStatistics(),
+                        friends = emptyList())
+
+                userProfileViewModel.addUserProfile(newProfile)
+
+                if (profilePicUri != null) {
+                  userProfileViewModel.uploadProfilePicture(uid, profilePicUri!!)
+                }
+
+                isUploading = false
+                navigationActions.navigateTo(TopLevelDestinations.HOME)
+              }
+            },
+            modifier = Modifier.fillMaxWidth().testTag("save_profile_button"),
+            shape = AppShapes.circleShape,
+            enabled = username.isNotBlank() && !isUploading,
+            colors =
+                ButtonDefaults.buttonColors(
+                    backgroundColor = AppColors.buttonBackgroundColor,
+                    contentColor = AppColors.buttonTextColor)) {
+              Text(
+                  modifier = Modifier.testTag("save_profile_button_text"),
+                  text = "Save profile",
+                  style = AppTypography.buttonTextStyle)
+            }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = AppDimensions.paddingMedium),
+            horizontalArrangement = Arrangement.Start) {
+              Image(
+                  painter = painterResource(id = R.drawable.create_profile_speaker),
+                  contentDescription = "Decorative bottom-left image",
+                  modifier =
+                      Modifier.height(AppDimensions.imageLargeXXL)
+                          .padding(start = AppDimensions.paddingSmall),
+                  contentScale = ContentScale.Crop)
+            }
+      }
 
   // Integrate the ImagePicker
   ImagePicker(

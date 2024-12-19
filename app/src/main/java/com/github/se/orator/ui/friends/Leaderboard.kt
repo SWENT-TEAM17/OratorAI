@@ -44,39 +44,32 @@ fun LeaderboardScreen(
     navigationActions: NavigationActions,
     userProfileViewModel: UserProfileViewModel
 ) {
-  // Fetch user profile and friends' profiles to create leaderboard entries
   val userProfile by userProfileViewModel.userProfile.collectAsState()
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
 
   val usersForRanking = listOfNotNull(userProfile) + friendsProfiles
 
-  // Combine and sort profiles by improvement for leaderboard display
   val leaderboardEntriesRatio =
       remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
-        (usersForRanking).sortedByDescending {
+        usersForRanking.sortedByDescending {
           userProfileViewModel.getSuccessRatioForMode(it.statistics, currentPracticeMode.value)
         }
       }
+
   val leaderboardEntriesSuccess =
       remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
-        (usersForRanking).sortedByDescending {
+        usersForRanking.sortedByDescending {
           userProfileViewModel.getSuccessForMode(it.statistics, currentPracticeMode.value)
         }
       }
+
   val leaderboardEntriesImprovement =
       remember(userProfile, friendsProfiles, currentPracticeMode, currentRankMetric) {
-        (usersForRanking).sortedByDescending { it.statistics.improvement }
+        usersForRanking.sortedByDescending { it.statistics.improvement }
       }
 
   Scaffold(
-      topBar = {
-        TitleAppBar(
-            navigationActions,
-            "Leaderboard",
-            "leaderboardTitle",
-            "leaderboardBackButton",
-            "leaderboardBackIcon")
-      },
+      // No topBar here, we will place a custom row instead
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
@@ -92,33 +85,67 @@ fun LeaderboardScreen(
                         vertical = AppDimensions.paddingSmall)
                     .testTag("leaderboardList"),
             horizontalAlignment = Alignment.CenterHorizontally) {
-              // Dropdown selector for choosing practice mode
+              // Row at the top for back button and title
+              Row(
+                  modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
+                  verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { navigationActions.goBack() },
+                        modifier = Modifier.testTag("leaderboardBackButton")) {
+                          Icon(
+                              Icons.AutoMirrored.Filled.ArrowBack,
+                              contentDescription = "Back",
+                              modifier = Modifier.testTag("leaderboardBackIcon"),
+                              tint = MaterialTheme.colorScheme.onSurface)
+                        }
+
+                    Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+
+                    Text(
+                        text = "Leaderboard",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.testTag("leaderboardTitle"))
+                  }
+
+              // Dropdown selectors and leaderboard list
               ButtonRow()
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
 
-              // Leaderboard list displaying ranked profiles
               LazyColumn(
                   contentPadding = PaddingValues(vertical = AppDimensions.paddingSmall),
                   verticalArrangement = Arrangement.spacedBy(AppDimensions.paddingSmall),
                   modifier = Modifier.testTag("leaderboardLazyColumn")) {
-                    if (currentRankMetric.value == "Ratio") {
-                      itemsIndexed(leaderboardEntriesRatio) { index, profile ->
-                        LeaderboardItem(
-                            rank = index + 1, profile = profile, "Ratio", userProfileViewModel)
+                    val selectedMetric = currentRankMetric.value
+                    when (selectedMetric) {
+                      "Ratio" -> {
+                        itemsIndexed(leaderboardEntriesRatio) { index, profile ->
+                          LeaderboardItem(
+                              rank = index + 1,
+                              profile = profile,
+                              selectedMetric = "Ratio",
+                              userProfileViewModel = userProfileViewModel)
+                        }
                       }
-                    } else if (currentRankMetric.value == "Success") {
-                      itemsIndexed(leaderboardEntriesSuccess) { index, profile ->
-                        LeaderboardItem(
-                            rank = index + 1, profile = profile, "Success", userProfileViewModel)
+                      "Success" -> {
+                        itemsIndexed(leaderboardEntriesSuccess) { index, profile ->
+                          LeaderboardItem(
+                              rank = index + 1,
+                              profile = profile,
+                              selectedMetric = "Success",
+                              userProfileViewModel = userProfileViewModel)
+                        }
                       }
-                    } else {
-                      itemsIndexed(leaderboardEntriesImprovement) { index, profile ->
-                        LeaderboardItem(
-                            rank = index + 1,
-                            profile = profile,
-                            "Improvement",
-                            userProfileViewModel)
+                      else -> {
+                        // Improvement
+                        itemsIndexed(leaderboardEntriesImprovement) { index, profile ->
+                          LeaderboardItem(
+                              rank = index + 1,
+                              profile = profile,
+                              selectedMetric = "Improvement",
+                              userProfileViewModel = userProfileViewModel)
+                        }
                       }
                     }
                   }
