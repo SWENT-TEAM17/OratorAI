@@ -29,4 +29,4 @@ Orator AI remains fully functional even without internet connectivity:
 
 ## Figma Project
 
-[Click here](https://www.figma.com/design/OvKRhZaDIyr1hJv4Nmcsks/swent?node-id=36-15&t=3CUvDmxivQfOh4vY-1) to access the Figma of the application and explore our design.
+[Click here](https://www.figma.com/design/OvKRhZaDIyr1hJv4Nmcsks/swent?version-id=2163970124783976182&node-id=36-15&p=f&t=jX47A8MDzibRyVlN-0) to access the Figma of the application and explore our design.
