@@ -1,6 +1,7 @@
 package com.github.se.orator.utils
 
 import android.util.Log
+import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.EvaluationResult
@@ -56,6 +57,23 @@ fun mapToSpeechBattle(data: Map<String, Any>): SpeechBattle? {
     Log.e("UserProfileRepository", "Error converting map to SpeechBattle", e)
     null
   }
+}
+
+/**
+ * Converts a Firestore map to an AnalysisData object.
+ *
+ * @param dataMap The map containing AnalysisData data.
+ * @return An AnalysisData object.
+ */
+fun mapToAnalysisData(dataMap: Map<String, Any>): AnalysisData {
+  return AnalysisData(
+      transcription = dataMap["transcription"] as? String ?: "",
+      fillerWordsCount = (dataMap["fillerWordsCount"] as? Number)?.toInt() ?: -1,
+      averagePauseDuration = (dataMap["averagePauseDuration"] as? Number)?.toDouble() ?: -1.0,
+      sentimentScore = (dataMap["sentimentScore"] as? Number)?.toDouble() ?: 0.0,
+      talkTimePercentage = (dataMap["talkTimePercentage"] as? Number)?.toDouble() ?: -1.0,
+      talkTimeSeconds = (dataMap["talkTimeSeconds"] as? Number)?.toDouble() ?: -1.0,
+      pace = (dataMap["pace"] as? Number)?.toInt() ?: -1)
 }
 
 /**

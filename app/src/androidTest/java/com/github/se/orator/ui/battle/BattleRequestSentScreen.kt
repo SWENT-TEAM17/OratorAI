@@ -16,6 +16,7 @@ import com.github.se.orator.model.speechBattle.BattleStatus
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.SpeechBattle
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.network.ChatGPTService
 import com.google.firebase.firestore.ListenerRegistration
 import org.junit.After
@@ -104,10 +105,36 @@ class BattleRequestSentScreenTest {
       mockListenerRegistration
     }
 
-    // Mock updateBattleStatus to simulate success and trigger battle update
+    // Mock updateBattleStatus to simulate success and trigger battle update to IN_PROGRESS
     `when`(
             mockBattleRepository.updateBattleStatus(
                 eq("battleId"), eq(BattleStatus.IN_PROGRESS), any()))
+        .thenAnswer { invocation ->
+          val status = invocation.getArgument<BattleStatus>(1)
+          val callback = invocation.getArgument<(Boolean) -> Unit>(2)
+          callback(true)
+          // Trigger the battle update callback to simulate status change
+          battleUpdateCallback?.invoke(
+              SpeechBattle(
+                  battleId = "battleId",
+                  challenger = "friendUid",
+                  opponent = "testUser",
+                  status = status,
+                  context =
+                      InterviewContext(
+                          "testPosition",
+                          "testCompany",
+                          "testType",
+                          "testExperience",
+                          "testDescription",
+                          "testFocusArea")))
+          null
+        }
+
+    // Mock updateBattleStatus to simulate success and trigger battle update to CANCELLED
+    `when`(
+            mockBattleRepository.updateBattleStatus(
+                eq("battleId"), eq(BattleStatus.CANCELLED), any()))
         .thenAnswer { invocation ->
           val status = invocation.getArgument<BattleStatus>(1)
           val callback = invocation.getArgument<(Boolean) -> Unit>(2)
@@ -219,7 +246,7 @@ class BattleRequestSentScreenTest {
    * Test that updating the battle status to IN_PROGRESS triggers navigation to the battle screen.
    */
   @Test
-  fun testNavigationOnBattleStatusUpdate() {
+  fun testNavigationOnBattleAccepted() {
     // Set the content of the Compose UI
     composeTestRule.setContent {
       BattleRequestSentScreen(
@@ -243,5 +270,33 @@ class BattleRequestSentScreenTest {
 
     // Verify that navigation to the battle screen was triggered
     verify(mockNavigationActions).navigateToBattleScreen("battleId", "testUser")
+  }
+
+  /** Test that updating the battle status to CANCELLED triggers navigation to the home screen. */
+  @Test
+  fun testNavigationOnBattleDeclined() {
+    // Set the content of the Compose UI
+    composeTestRule.setContent {
+      BattleRequestSentScreen(
+          friendUid = "friendUid",
+          battleId = "battleId",
+          userProfileViewModel = userProfileViewModel,
+          navigationActions = mockNavigationActions,
+          battleViewModel = battleViewModel)
+    }
+
+    // Wait for the UI to settle
+    composeTestRule.waitForIdle()
+
+    // Simulate updating the battle status to CANCELLED
+    battleViewModel.updateBattleStatus("battleId", BattleStatus.CANCELLED) {
+      // No action needed here for this simple test
+    }
+
+    // Wait for the UI to settle after status update
+    composeTestRule.waitForIdle()
+
+    // Verify that navigation to the battle screen was triggered
+    verify(mockNavigationActions).navigateTo(eq(TopLevelDestinations.HOME))
   }
 }

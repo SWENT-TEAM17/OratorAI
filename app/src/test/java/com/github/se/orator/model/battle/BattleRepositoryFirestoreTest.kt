@@ -502,6 +502,91 @@ class BattleRepositoryFirestoreTest {
     assertFalse(callbackResult)
   }
 
+  @Test
+  fun completeBattle_success_callsCallbackWithTrue() {
+    // Arrange
+    val battleId = "battle1"
+    val evaluationResult =
+        EvaluationResult(
+            winnerUid = "user1",
+            winnerMessage =
+                Message(role = "assistant", content = "Congratulations! You won the battle."),
+            loserMessage =
+                Message(
+                    role = "assistant", content = "You lost the battle. Better luck next time."))
+
+    val expectedEvaluationMap =
+        mapOf(
+            "winnerUid" to "user1",
+            "winnerMessage" to
+                mapOf("role" to "assistant", "content" to "Congratulations! You won the battle."),
+            "loserMessage" to
+                mapOf(
+                    "role" to "assistant",
+                    "content" to "You lost the battle. Better luck next time."))
+
+    val expectedUpdates =
+        mapOf("status" to BattleStatus.COMPLETED.name, "evaluationResult" to expectedEvaluationMap)
+
+    // Mock Firestore update operation to succeed
+    `when`(mockDocumentReference.update(expectedUpdates)).thenReturn(Tasks.forResult(null))
+
+    var callbackResult = false
+
+    // Act
+    repository.completeBattle(battleId, evaluationResult) { success -> callbackResult = success }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).update(expectedUpdates)
+    assertTrue("Callback should be called with true on successful update", callbackResult)
+  }
+
+  @Test
+  fun completeBattle_failure_callsCallbackWithFalse() {
+    // Arrange
+    val battleId = "battle1"
+    val evaluationResult =
+        EvaluationResult(
+            winnerUid = "user1",
+            winnerMessage =
+                Message(role = "assistant", content = "Congratulations! You won the battle."),
+            loserMessage =
+                Message(
+                    role = "assistant", content = "You lost the battle. Better luck next time."))
+
+    val expectedEvaluationMap =
+        mapOf(
+            "winnerUid" to "user1",
+            "winnerMessage" to
+                mapOf("role" to "assistant", "content" to "Congratulations! You won the battle."),
+            "loserMessage" to
+                mapOf(
+                    "role" to "assistant",
+                    "content" to "You lost the battle. Better luck next time."))
+
+    val expectedUpdates =
+        mapOf("status" to BattleStatus.COMPLETED.name, "evaluationResult" to expectedEvaluationMap)
+
+    // Mock Firestore update operation to fail
+    val exception = Exception("Update failed")
+    `when`(mockDocumentReference.update(expectedUpdates)).thenReturn(Tasks.forException(exception))
+
+    var callbackResult = true // Initialize to true to verify it's set to false
+
+    // Act
+    repository.completeBattle(battleId, evaluationResult) { success -> callbackResult = success }
+
+    // Process any pending tasks
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    verify(mockDocumentReference).update(expectedUpdates)
+    assertFalse("Callback should be called with false on update failure", callbackResult)
+  }
+
   /** Helper methods to create test data */
   private fun createTestSpeechBattle(): SpeechBattle {
     return SpeechBattle(

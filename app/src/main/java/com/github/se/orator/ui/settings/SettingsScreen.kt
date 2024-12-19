@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,30 +13,36 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.github.se.orator.model.profile.UserProfileViewModel
+import com.github.se.orator.model.theme.AppThemeValue
 import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
+import java.util.Locale
 
 // class for all that is needed about a section for settings
 data class SettingBar(
@@ -94,13 +100,9 @@ fun SettingsScreen(
   val context = LocalContext.current
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Settings",
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.testTag("SettingsText"))
-            },
+        TopNavigationMenu(
+            textTestTag = "SettingsText",
+            title = "Settings",
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -112,14 +114,7 @@ fun SettingsScreen(
                         tint = MaterialTheme.colorScheme.onSurface)
                   }
             },
-            colors =
-                TopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ))
+        )
       }) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding).testTag("settingsScreen"),
@@ -135,11 +130,107 @@ fun SettingsScreen(
                 }
               }
               item {
-                TextButtonFun(listOfSettings[1]) {
-                  themeViewModel?.switchTheme()
-                  Log.d("SettingsScreen", "Theme switch")
+                if (themeViewModel != null) {
+                  val themeDialogIsOpen = remember { mutableStateOf(false) }
+
+                  TextButtonFun(listOfSettings[1]) { themeDialogIsOpen.value = true }
+                  when {
+                    themeDialogIsOpen.value ->
+                        ThemeSwitchDialog(
+                            onDismissRequest = { themeDialogIsOpen.value = false },
+                            appThemeViewModel = themeViewModel)
+                  }
                 }
               }
             }
       }
+}
+
+/**
+ * Dialog for switching the app theme
+ *
+ * @param onDismissRequest: Function called on dialog dismiss
+ * @param appThemeViewModel: ViewModel for the app theme
+ */
+@Composable
+private fun ThemeSwitchDialog(onDismissRequest: () -> Unit, appThemeViewModel: AppThemeViewModel) {
+  // Radio options for the theme switch dialog
+  val radioOptions = AppThemeValue.entries.toTypedArray()
+  // Selected option for the theme switch dialog and the setter to update it
+  val (selectedOption, onOptionSelected) =
+      remember { mutableStateOf(appThemeViewModel.currentTheme.value) }
+
+  AlertDialog(
+      modifier = Modifier.testTag("settingsThemeDialog"),
+      icon = {
+        Icon(
+            imageVector = Icons.Outlined.DarkMode,
+            contentDescription = "theme",
+            modifier =
+                Modifier.size(AppDimensions.iconSizeLarge).testTag("settingsThemeDialogIcon"))
+      },
+      title = {
+        Text(
+            text = "Select a theme",
+            modifier = Modifier.testTag("settingsThemeDialogTitle"),
+            color = MaterialTheme.colorScheme.onSurface)
+      },
+      // The radio buttons
+      text = {
+        Column(modifier = Modifier.fillMaxWidth()) {
+          radioOptions.forEach { option ->
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .selectable(
+                            selected = (option == selectedOption),
+                            onClick = { onOptionSelected(option) })
+                        .testTag("settingsThemeDialogRow#$option"),
+                verticalAlignment = Alignment.CenterVertically) {
+                  RadioButton(
+                      selected = (option == selectedOption), onClick = { onOptionSelected(option) })
+                  Text(
+                      text = formatThemeName(option),
+                      modifier = Modifier.testTag("settingsThemeDialogText#$option"),
+                      fontSize = AppFontSizes.bodyLarge,
+                      color = MaterialTheme.colorScheme.onSurface,
+                  )
+                }
+          }
+        }
+      },
+      onDismissRequest = onDismissRequest,
+      // Theme is updated only when the confirm button is clicked
+      confirmButton = {
+        TextButton(
+            onClick = {
+              appThemeViewModel.saveTheme(selectedOption)
+              onDismissRequest()
+            }) {
+              Text(
+                  "Confirm",
+                  modifier = Modifier.testTag("settingsThemeDialogConfirm"),
+                  color = MaterialTheme.colorScheme.primary)
+            }
+      },
+      dismissButton = {
+        TextButton(onClick = onDismissRequest) {
+          Text(
+              "Cancel",
+              modifier = Modifier.testTag("settingsThemeDialogCancel"),
+              color = MaterialTheme.colorScheme.primary)
+        }
+      })
+}
+
+/**
+ * Format the theme name to be displayed in the theme switch dialog.
+ *
+ * @param themeValue: The theme value to format
+ * @return The formatted theme name
+ */
+private fun formatThemeName(themeValue: AppThemeValue): String {
+  return themeValue.toString().replace("_", " ").lowercase(Locale.ROOT).replaceFirstChar {
+    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+  }
 }

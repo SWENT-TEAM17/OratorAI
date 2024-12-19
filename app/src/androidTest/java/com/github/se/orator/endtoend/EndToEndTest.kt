@@ -19,6 +19,7 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.symblAi.AudioPlayer
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
+import com.github.se.orator.model.theme.AppThemeValue
 import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
@@ -137,7 +138,7 @@ class EndToEndAppTest {
                 org.mockito.kotlin.any(), org.mockito.kotlin.any()))
         .thenReturn(mockSharedPreferences)
     `when`(mockSharedPreferences.edit()).thenReturn(mockEditor)
-    `when`(mockEditor.putBoolean(org.mockito.kotlin.any(), org.mockito.kotlin.any()))
+    `when`(mockEditor.putString(org.mockito.kotlin.any(), org.mockito.kotlin.any()))
         .thenReturn(mockEditor)
 
     // mocking the request for the user who is using the app
@@ -274,21 +275,41 @@ class EndToEndAppTest {
         .performClick() // Simulate click on Settings button
     verify(navigationActions).navigateTo(Screen.SETTINGS)
 
-    // test that each setting button exists and is clickable
-    val settingsTags = listOf("theme")
+    // Open the theme dialog
+    composeTestRule.onNodeWithTag("theme").assertExists()
+    composeTestRule.onNodeWithTag("theme").assertHasClickAction()
+    composeTestRule.onNodeWithTag("theme").performClick()
 
-    settingsTags.forEach { tag ->
-      composeTestRule.onNodeWithTag(tag).assertExists()
-      composeTestRule.onNodeWithTag(tag).assertHasClickAction()
-      composeTestRule.onNodeWithTag(tag).performClick()
+    val correctTexts = listOf("Light", "Dark", "System default")
+    // Check if the theme dialog is displayed
+    composeTestRule.onNodeWithTag("settingsThemeDialog").assertIsDisplayed()
+    // Check that each theme option exists and is clickable, and that the text is correctly
+    // formatted
+    AppThemeValue.entries.zip(correctTexts).forEach { (theme, textValue) ->
+      composeTestRule.onNodeWithTag("settingsThemeDialogRow#$theme").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("settingsThemeDialogRow#$theme").assertHasClickAction()
+      composeTestRule.onNodeWithTag("settingsThemeDialogRow#$theme").performClick()
+
+      composeTestRule
+          .onNodeWithTag("settingsThemeDialogText#$theme", useUnmergedTree = true)
+          .assertTextContains(textValue)
     }
-    // Handle the permission button on its own as clicking it will go to the device settings
+
+    // Select the dark theme
+    composeTestRule.onNodeWithTag("settingsThemeDialogRow#${AppThemeValue.DARK}").performClick()
+    // Close the theme dialog by clicking the confirm button
+    composeTestRule
+        .onNodeWithTag("settingsThemeDialogConfirm", useUnmergedTree = true)
+        .performClick()
+    // Check that the theme value is saved correctly
+    assert(appThemeViewModel.currentTheme.value == AppThemeValue.DARK)
+
+    // Assert that the dialog is closed
+    composeTestRule.onNodeWithTag("settingsThemeDialog").assertDoesNotExist()
+
+    // Don't press the permissions button as clicking it would go to the device settings
     composeTestRule.onNodeWithTag("permissions").assertExists()
     composeTestRule.onNodeWithTag("permissions").assertHasClickAction()
-
-    // testing that the theme switch is triggered
-    verify(mockSharedPreferences).edit()
-    verify(mockEditor).putBoolean(org.mockito.kotlin.any(), org.mockito.kotlin.any())
 
     // go back to profile and test the features there
     composeTestRule.onNodeWithTag("back_button").performClick()

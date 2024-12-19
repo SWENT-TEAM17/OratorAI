@@ -2,10 +2,10 @@ package com.github.se.orator.model.profile
 
 import android.net.Uri
 import android.util.Log
-import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.utils.formatDate
 import com.github.se.orator.utils.getCurrentDate
 import com.github.se.orator.utils.getDaysDifference
+import com.github.se.orator.utils.mapToAnalysisData
 import com.github.se.orator.utils.mapToSpeechBattle
 import com.github.se.orator.utils.parseDate
 import com.google.android.gms.tasks.Task
@@ -15,8 +15,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
-import java.util.ArrayDeque
 import java.util.Date
+import kotlin.math.floor
 
 /**
  * Repository class for managing user profiles in Firestore.
@@ -248,13 +248,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
             val successfulSessions =
                 successfulSessionsMap.mapValues { entry -> entry.value.toInt() }
 
-            // Extract 'recentData' queue
-            val recentData =
-                it["recentData"] as? kotlin.collections.ArrayDeque<AnalysisData>
-                    ?: kotlin.collections.ArrayDeque<AnalysisData>()
+            // Extract 'recentData' list
+            val recentDataList =
+                (statisticsMap["recentData"] as? List<Map<String, Any>>) ?: emptyList()
+            val recentData = recentDataList.map { dataMap -> mapToAnalysisData(dataMap) }
             // Extract means
             val talkTimeSecMean = (it["talkTimeSecMean"] as? Number)?.toDouble() ?: 0.0
-            val talkTimePercMean = (it["talkTimePercMean"] as? Number)?.toDouble() ?: 0.0
+            val paceMean = (it["paceMean"] as? Number)?.toDouble() ?: 0.0
 
             // Extract 'previousRuns' list
             val previousRunsList = it["previousRuns"] as? List<Map<String, Any>>
@@ -284,7 +284,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
                 previousRuns = previousRuns,
                 recentData = recentData,
                 talkTimeSecMean = talkTimeSecMean,
-                talkTimePercMean = talkTimePercMean,
+                paceMean = paceMean,
                 battleStats = battleStats)
           } ?: UserStatistics()
 
@@ -685,7 +685,7 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
 
     // Sum the elements and divide by the size of the list
     val sum = values.sum()
-    return sum / values.size
+    return floor((sum / values.size) * 100) / 100
   }
 
   override fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
@@ -767,6 +767,37 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
         // null
 
         onProfileChanged(null)
+      }
+    }
+  }
+
+  /**
+   * Sets up a real-time listener for all user profiles in the data store.
+   *
+   * Listens to changes in the `user_profiles` collection and triggers the [onProfilesChanged]
+   * callback with the updated list whenever a profile is added, modified, or deleted. If an error
+   * occurs, the [onError] callback is invoked.
+   *
+   * @param onProfilesChanged Callback invoked with the updated list of [UserProfile].
+   * @param onError Callback invoked if an error occurs during listening.
+   */
+  override fun listenToAllUserProfiles(
+      onProfilesChanged: (List<UserProfile>) -> Unit,
+      onError: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).addSnapshotListener { querySnapshot, e ->
+      if (e != null) {
+        // Error occurred
+        onError(e)
+        return@addSnapshotListener
+      }
+      if (querySnapshot != null) {
+        // Map documents to UserProfile objects
+        val profiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+        onProfilesChanged(profiles)
+      } else {
+        // If we get a null snapshot, return an empty list
+        onProfilesChanged(emptyList())
       }
     }
   }

@@ -56,5 +56,6 @@ fun BattleChatScreen(
       onChatButtonClick = {
         // Handle finishing the battle session
         battleViewModel.markUserBattleCompleted(battleId, userId, chatMessages)
-      })
+      },
+      showBackButton = false)
 }
