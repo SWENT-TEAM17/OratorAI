@@ -61,6 +61,10 @@ fun BattleRequestSentScreen(
       // Navigate to the battle screen
       battleViewModel.startBattle(battleId)
     }
+    if (battleStatus == BattleStatus.CANCELLED) {
+      Toast.makeText(context, "$friendName has declined the battle.", Toast.LENGTH_SHORT).show()
+      navigationActions.navigateTo(TopLevelDestinations.HOME)
+    }
   }
 
   // Handle cancellation when the user exits the app via ProcessLifecycleOwner
