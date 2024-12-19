@@ -11,7 +11,7 @@ The app is designed for everyone, from beginners to experienced entrepreneurs an
 - **Practice your speech skills**: The user has 3 different practice modes: Sales pitch, public speaking, and interview. The scenario changes depending on the user's answers thanks to the Chat-GPT API we use.
 - **Real-Time Analysis**: Provides real-time feedback on speech delivery, including aspects such as the emotions that can be derived from the words given as a response as well as what points the user can work on better and how good the response to an interview question/the speech given was.
 - **Friends**: To add friends, the user should send a request to the person he wants to add and they should accept it.
--**Battle of Speech**: Challenge your friends in a Speech Mock Interview, and let the best win !
+-**Battle of Interviews**: Challenge your friends in a Speech Mock Interview, and let the best win !
 -**Track your progress**: The app allows you to track your progress by maintaing a streak, speech-related stats and other entertaining features :)
 
 ### **Architecture diagram**
