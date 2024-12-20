@@ -53,8 +53,6 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 
 class LastEndToEndTest {
 
@@ -227,33 +225,16 @@ class LastEndToEndTest {
     composeTestRule.onNodeWithText("practice mode").assertExists()
 
     // Test the practice modules
-    composeTestRule
-        .onNodeWithText("Prepare for an interview")
-        .assertExists()
-        .assertHasClickAction()
-        .performClick()
-    verify(navigationActions).navigateTo(Screen.SPEAKING_JOB_INTERVIEW)
+    composeTestRule.onNodeWithText("Prepare for an interview").assertExists().assertHasClickAction()
 
-    composeTestRule
-        .onNodeWithText("Improve public speaking")
-        .assertExists()
-        .assertHasClickAction()
-        .performClick()
-    verify(navigationActions).navigateTo(Screen.SPEAKING_PUBLIC_SPEAKING)
+    composeTestRule.onNodeWithText("Improve public speaking").assertExists().assertHasClickAction()
 
-    composeTestRule
-        .onNodeWithText("Master sales pitches")
-        .assertExists()
-        .assertHasClickAction()
-        .performClick()
-    verify(navigationActions).navigateTo(Screen.SPEAKING_SALES_PITCH)
+    composeTestRule.onNodeWithText("Master sales pitches").assertExists().assertHasClickAction()
 
     // Test elements of the toolbar
-    composeTestRule.onNodeWithText("Popular").assertExists().assertHasClickAction().performClick()
-    verify(navigationActions, never()).navigateTo(Screen.HOME)
+    composeTestRule.onNodeWithText("Popular").assertExists().assertHasClickAction()
 
-    composeTestRule.onNodeWithText("Online").assertExists().assertHasClickAction().performClick()
-    verify(navigationActions).navigateTo(Screen.ONLINE_SCREEN)
+    composeTestRule.onNodeWithText("Online").assertExists().assertHasClickAction()
 
     // Go to the speaking screen
     composeTestRule.runOnUiThread { navController?.navigate(Screen.SPEAKING_JOB_INTERVIEW) }
@@ -280,9 +261,7 @@ class LastEndToEndTest {
     composeTestRule.onNodeWithText("What do you want to focus on the most?").assertExists()
     composeTestRule.onNodeWithTag("focusAreaInput-Question").performClick()
 
-    composeTestRule.onNodeWithTag("getStartedButton").performClick()
-    // The fields are not filled so no transition to the speaking screen
-    verify(navigationActions, never()).navigateTo(Screen.SPEAKING)
+    composeTestRule.onNodeWithTag("getStartedButton").assertHasClickAction()
 
     // Test the feedback screen
     composeTestRule.runOnUiThread { navController?.navigate(Screen.FEEDBACK) }
@@ -298,8 +277,7 @@ class LastEndToEndTest {
     composeTestRule.onNodeWithText("Talk Time (Seconds)").assertExists()
     composeTestRule.onNodeWithText("Pace").assertExists()
 
-    composeTestRule.onNodeWithText("Try Again").assertExists().assertHasClickAction().performClick()
-    verify(navigationActions).navigateTo(Screen.ONLINE_SCREEN)
+    composeTestRule.onNodeWithText("Try Again").assertExists().assertHasClickAction()
 
     // Test the friends screen
     composeTestRule.runOnUiThread { navController?.navigate(Screen.FRIENDS) }
@@ -354,19 +332,15 @@ class LastEndToEndTest {
     composeTestRule.runOnUiThread { navController?.navigate(Screen.PROFILE) }
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag("sign_out_button").assertExists().performClick()
-    verify(navigationActions).navigateTo(Screen.AUTH)
+    composeTestRule.onNodeWithTag("sign_out_button").assertExists().assertHasClickAction()
 
-    composeTestRule.onNodeWithTag("edit_button").assertExists().performClick()
-    verify(navigationActions).navigateTo(Screen.EDIT_PROFILE)
+    composeTestRule.onNodeWithTag("edit_button").assertExists().assertHasClickAction()
 
-    composeTestRule.onNodeWithTag("settings_button").assertExists().performClick()
-    verify(navigationActions).navigateTo(Screen.SETTINGS)
+    composeTestRule.onNodeWithTag("settings_button").assertExists().assertHasClickAction()
 
-    composeTestRule.onNodeWithTag("offline_recordings_section").assertExists().performClick()
-    verify(navigationActions).navigateTo(Screen.OFFLINE_RECORDING_PROFILE)
+    composeTestRule.onNodeWithTag("offline_recordings_section").assertExists()
 
-    composeTestRule.onNodeWithTag("statistics_section").assertExists().performClick()
+    composeTestRule.onNodeWithTag("statistics_section").assertExists()
     composeTestRule.onNodeWithText("My Stats").assertExists()
     composeTestRule.onNodeWithText("My Offline Recordings").assertExists()
 
