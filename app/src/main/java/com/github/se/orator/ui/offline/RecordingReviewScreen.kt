@@ -42,7 +42,11 @@ fun RecordingReviewScreen(
   Box(
       modifier =
           Modifier.fillMaxSize()
-              .padding(AppDimensions.paddingMedium)
+              .padding(
+                  start = AppDimensions.paddingLarge,
+                  top = AppDimensions.paddingXXXLarge,
+                  end = AppDimensions.paddingLarge,
+                  bottom = AppDimensions.paddingLarge)
               .testTag("RecordingReviewScreen")) {
         Row(
             modifier = Modifier.fillMaxWidth().align(Alignment.TopStart),

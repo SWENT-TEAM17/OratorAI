@@ -275,9 +275,8 @@ class OfflineEndToEndAppTest {
 
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen
-              .OFFLINE_INTERVIEW_MODULE) // this here forces us to navigate to the create_profile
-                                         // screen
+          Screen.OFFLINE_INTERVIEW_MODULE) // this here forces us to navigate to the create_profile
+      // screen
     }
     composeTestRule.onNodeWithTag("company_field").assertIsDisplayed()
     composeTestRule.onNodeWithTag("job_field").assertIsDisplayed()
