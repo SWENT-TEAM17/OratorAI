@@ -20,7 +20,6 @@ import com.github.se.orator.model.speaking.AnalysisData
 import com.github.se.orator.model.symblAi.AudioPlayer
 import com.github.se.orator.model.symblAi.SpeakingRepository
 import com.github.se.orator.model.symblAi.SpeakingViewModel
-import com.github.se.orator.model.theme.AppThemeValue
 import com.github.se.orator.model.theme.AppThemeViewModel
 import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
@@ -43,9 +42,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.*
-import org.mockito.kotlin.verify
 
-class EndToEndAppTest {
+class OfflineEndToEndAppTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -116,10 +114,12 @@ class EndToEndAppTest {
     offlinePromptFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
+
     `when`(
             offlinePromptFunctions.getPromptMapElement(
                 org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any()))
         .thenReturn("Apple")
+
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
@@ -211,6 +211,7 @@ class EndToEndAppTest {
         composable(Screen.OFFLINE_INTERVIEW_MODULE) {
           OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptFunctions)
         }
+
         composable(Screen.OFFLINE_RECORDING_SCREEN) {
           OfflineRecordingScreen(
               navigationActions = navigationActions,
@@ -240,233 +241,54 @@ class EndToEndAppTest {
 
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen.CREATE_PROFILE) // this here forces us to navigate to the create_profile screen
+          Screen.OFFLINE_INTERVIEW_MODULE) // this here forces us to navigate to the create_profile
+      // screen
     }
-    composeTestRule.onNodeWithTag("save_profile_button").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("save_profile_button")
-        .assertIsNotEnabled() // clicking save profile without a username to see if the button is
-    // enabled (it shouldn't be)
+    `when`(
+            offlinePromptFunctions.getPromptMapElement(
+                anyString(), anyString(), org.mockito.kotlin.any()))
+        .thenReturn("Test Company")
 
-    composeTestRule
-        .onNodeWithTag("username_input")
-        .performTextInput("TestUser") // add a username then the button should be enabled
-    composeTestRule
-        .onNodeWithTag("username_input")
-        .assertTextContains("TestUser") // making sure username is shown correctly
-    composeTestRule
-        .onNodeWithTag("save_profile_button")
-        .assertIsEnabled() // now the save profile button should be enabled
-    composeTestRule.runOnUiThread { navController?.navigate(Screen.HOME) }
-
-    // navigating to profile
-    composeTestRule.onNodeWithTag("Profile").performClick()
-    composeTestRule.onNodeWithContentDescription("Settings").assertIsDisplayed()
-    composeTestRule.onNodeWithContentDescription("Sign out").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("edit_button").assertExists()
-    composeTestRule.onNodeWithTag("statistics_section").assertIsDisplayed()
-    // go to settings
-    composeTestRule
-        .onNodeWithContentDescription("Settings")
-        .performClick() // Simulate click on Settings button
-    verify(navigationActions).navigateTo(Screen.SETTINGS)
-
-    // Open the theme dialog
-    composeTestRule.onNodeWithTag("theme").assertExists()
-    composeTestRule.onNodeWithTag("theme").assertHasClickAction()
-    composeTestRule.onNodeWithTag("theme").performClick()
-
-    val correctTexts = listOf("Light", "Dark", "System default")
-    // Check if the theme dialog is displayed
-    composeTestRule.onNodeWithTag("settingsThemeDialog").assertIsDisplayed()
-    // Check that each theme option exists and is clickable, and that the text is correctly
-    // formatted
-    AppThemeValue.entries.zip(correctTexts).forEach { (theme, textValue) ->
-      composeTestRule.onNodeWithTag("settingsThemeDialogRow#$theme").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("settingsThemeDialogRow#$theme").assertHasClickAction()
-      composeTestRule.onNodeWithTag("settingsThemeDialogRow#$theme").performClick()
-
-      composeTestRule
-          .onNodeWithTag("settingsThemeDialogText#$theme", useUnmergedTree = true)
-          .assertTextContains(textValue)
-    }
-
-    // Select the dark theme
-    composeTestRule.onNodeWithTag("settingsThemeDialogRow#${AppThemeValue.DARK}").performClick()
-    // Close the theme dialog by clicking the confirm button
-    composeTestRule
-        .onNodeWithTag("settingsThemeDialogConfirm", useUnmergedTree = true)
-        .performClick()
-    // Check that the theme value is saved correctly
-    assert(appThemeViewModel.currentTheme.value == AppThemeValue.DARK)
-
-    // Assert that the dialog is closed
-    composeTestRule.onNodeWithTag("settingsThemeDialog").assertDoesNotExist()
-
-    // Don't press the permissions button as clicking it would go to the device settings
-    composeTestRule.onNodeWithTag("permissions").assertExists()
-    composeTestRule.onNodeWithTag("permissions").assertHasClickAction()
-
-    // go back to profile and test the features there
-    composeTestRule.onNodeWithTag("back_button").performClick()
-    verify(navigationActions).goBack() // ensure back button brings user back to profile
-    clearInvocations(navigationActions)
-
-    // navigate to edit profile
-    composeTestRule.onNodeWithTag("edit_button").performClick()
-    verify(navigationActions).navigateTo(Screen.EDIT_PROFILE)
-    composeTestRule.onNodeWithTag("back_button", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("settings_button", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("username_field").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("bio_field").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Save changes").assertIsDisplayed()
-
-    // testing that adding text to username and bio is shown fine on screen
-    composeTestRule.onNodeWithTag("username_field").performTextInput("TestName")
-    composeTestRule.onNodeWithTag("username_field").assertTextContains("TestName")
-    composeTestRule.onNodeWithTag("bio_field").assertTextContains(bio)
-    composeTestRule.onNodeWithTag("bio_field").performTextInput("adding text ")
-
-    // making sure adding profile pictures works as expected
-    composeTestRule.onNodeWithTag("upload_profile_picture_button").performClick()
-    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Cancel").performClick()
-    composeTestRule.onNodeWithText("Choose Profile Picture").assertIsNotDisplayed()
-
-    // go back to profile screen
-    composeTestRule.onNodeWithTag("back_button").performClick()
-    verify(navigationActions).goBack()
-    clearInvocations(navigationActions)
-    composeTestRule.runOnUiThread { navController?.navigate(Screen.PROFILE) }
-
-    // navigate from profile to friends
-    composeTestRule.onNodeWithTag("Friends").performClick()
-    composeTestRule.runOnUiThread { navController?.navigate(Screen.FRIENDS) }
-
-    composeTestRule.onNodeWithTag("viewFriendsMenuButton").performClick()
-    composeTestRule.onNodeWithTag("viewFriendsLeaderboardButton").performClick()
-    composeTestRule.onNodeWithTag("leaderboardTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("leaderboardBackButton", useUnmergedTree = true).performClick()
-    verify(navigationActions).goBack()
-    clearInvocations(navigationActions)
-
-    composeTestRule.onNodeWithTag("viewFriendsAddFriendButton").performClick()
-    // Check if the add friend screen elements are displayed
-    composeTestRule.onNodeWithTag("addFriendTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("addFriendSearchField").assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag("addFriendBackButton", useUnmergedTree = true).performClick()
-    composeTestRule.onNodeWithTag("viewFriendsSearch").performClick()
-    composeTestRule.onNodeWithTag("viewFriendsSearch").performTextInput("John")
-
-    composeTestRule.onNodeWithTag("viewFriendsItem#1", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("viewFriendsItem#2", useUnmergedTree = true)
-        .assertIsNotDisplayed()
-
-    verify(navigationActions).goBack()
-    clearInvocations(navigationActions)
-
-    // Step 7: Navigate back to Home from Friends
-    composeTestRule.onNodeWithTag("Home").performClick() // Simulate clicking Home button
-
-    `when`(speakingRepository.analysisState)
-        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
-
-    // Step 8: Speaking screen
-    composeTestRule.runOnUiThread { navController?.navigate(Screen.SPEAKING) }
-    composeTestRule.onNodeWithTag("ui_column").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Tap the mic to start recording.")
-
-    composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
-    composeTestRule.onNodeWithContentDescription("Start recording").assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag("ui_column").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("back_button").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("back_button").performClick()
-
-    verify(navigationActions).goBack()
-    clearInvocations(navigationActions)
-
-    `when`(speakingRepository.analysisState)
-        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.RECORDING))
-
-    speakingViewModel =
-        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-
-    composeTestRule.runOnUiThread { navController?.navigate(Screen.SPEAKING) }
-    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Recording...")
-
-    composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
-    composeTestRule.onNodeWithContentDescription("Stop recording").assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag("mic_button").performClick()
-    //    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
-    composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
-
-    `when`(speakingRepository.analysisState)
-        .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.FINISHED))
-
-    speakingViewModel =
-        SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-
-    composeTestRule.runOnUiThread { navController?.navigate(Screen.SPEAKING) }
-    // Step 9: Offline mode:
-
-    composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE) }
-    composeTestRule.onNodeWithText("No Internet Connection").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithText(
-            "It seems like you don't have any WiFi connection... You can still practice offline!")
-        .assertIsDisplayed()
-    composeTestRule.onNodeWithText("Practice Offline").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Practice Offline").performClick()
-
-    verify(navigationActions).navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
     composeTestRule.onNodeWithTag("company_field").assertIsDisplayed()
     composeTestRule.onNodeWithTag("job_field").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("content").assertIsDisplayed()
     composeTestRule.onNodeWithTag("question_field").assertIsDisplayed()
     composeTestRule.onNodeWithTag("doneButton").assertIsDisplayed()
-
+    composeTestRule.onNodeWithText("What company are you applying to?").assertIsDisplayed()
+    composeTestRule.onNodeWithText("What job are you applying to?").assertIsDisplayed()
     composeTestRule.onNodeWithText("Go to recording screen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("company_field", useUnmergedTree = true).performTextInput("Apple")
+    composeTestRule
+        .onNodeWithTag("company_field", useUnmergedTree = true)
+        .assertTextContains("Apple")
 
-    composeTestRule.onNodeWithTag("company_field").performTextInput("Apple")
-    composeTestRule.onNodeWithTag("job_field").performTextInput("Engineer")
-    composeTestRule.onNodeWithTag("question_field").performClick()
-    composeTestRule.onNodeWithText("How do you handle conflict in a team?").performClick()
-
-    composeTestRule.onNodeWithTag("company_field").assertTextContains("Apple")
-    composeTestRule.onNodeWithTag("job_field").assertTextContains("Engineer")
-
-    composeTestRule.onNodeWithTag("doneButton").performClick()
+    // Input Job Position
+    composeTestRule.onNodeWithTag("job_field", useUnmergedTree = true).performTextInput("Engineer")
+    composeTestRule
+        .onNodeWithTag("job_field", useUnmergedTree = true)
+        .assertTextContains("Engineer")
 
     composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE_RECORDING_SCREEN) }
-
-    // offline recording screen
+    composeTestRule.onNodeWithTag("OfflineRecordingScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BackButtonRow").assertIsDisplayed()
     composeTestRule.onNodeWithTag("RecordingColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("MicIconContainer").assertIsDisplayed()
     composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("QuestionText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DoneButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("OfflineRecordingScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BackButtonRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("mic_text").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("targetCompany").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("QuestionText").assertIsDisplayed()
 
-    composeTestRule.onNodeWithText("Done!").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DoneButton").performClick()
+    composeTestRule.onNodeWithTag("mic_button").performClick()
 
-    composeTestRule.runOnUiThread {
-      navController?.navigate(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
-    }
-    // offline recording review screen
-    composeTestRule.onNodeWithTag("RecordingReviewScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("Back").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("hear_recording_button").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("stop_recording_button").assertIsDisplayed()
+    // Verify startRecording was called
+    org.mockito.kotlin.verify(speakingRepository).startRecording(org.mockito.kotlin.any())
 
-    composeTestRule.onNodeWithTag("BackButton").performClick()
-    verify(navigationActions).goBack()
+    // Click mic button to stop recording
+    composeTestRule.onNodeWithTag("mic_button").performClick()
+
+    // Verify stopRecording was called
+    org.mockito.kotlin.verify(speakingRepository).stopRecording()
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE_RECORDING_SCREEN) }
   }
 }

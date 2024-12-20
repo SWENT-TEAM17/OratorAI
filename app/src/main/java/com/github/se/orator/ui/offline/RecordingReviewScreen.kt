@@ -45,13 +45,13 @@ fun RecordingReviewScreen(
               .padding(AppDimensions.paddingMedium)
               .testTag("RecordingReviewScreen"),
       verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally) {
+      horizontalAlignment = Alignment.Start) {
         Button(
             modifier = Modifier.testTag("hear_recording_button"),
             colors =
                 ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { player.playFile(audioFile) }) {
-              Text(text = "Hear recording", color = MaterialTheme.colorScheme.surface)
+              Text(text = "Play recording", color = MaterialTheme.colorScheme.surface)
             }
 
         Button(
@@ -73,17 +73,15 @@ fun RecordingReviewScreen(
                   modifier = Modifier.testTag("text_try_again"))
             }
 
-        Row(
-            modifier = Modifier.fillMaxWidth().testTag("Back"),
-            verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  imageVector = Icons.Outlined.ArrowBackIosNew,
-                  contentDescription = "Back",
-                  modifier =
-                      Modifier.size(AppDimensions.iconSizeSmall)
-                          .clickable { navigationActions.goBack() }
-                          .testTag("BackButton"),
-                  tint = MaterialTheme.colorScheme.primary)
-            }
+        Row(modifier = Modifier.fillMaxWidth().testTag("Back"), verticalAlignment = Alignment.Top) {
+          Icon(
+              imageVector = Icons.Outlined.ArrowBackIosNew,
+              contentDescription = "Back",
+              modifier =
+                  Modifier.size(AppDimensions.iconSizeSmall)
+                      .clickable { navigationActions.goBack() }
+                      .testTag("BackButton"),
+              tint = MaterialTheme.colorScheme.primary)
+        }
       }
 }
