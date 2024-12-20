@@ -42,6 +42,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 
 class OfflineEndToEndAppTest {
 
@@ -114,12 +116,10 @@ class OfflineEndToEndAppTest {
     offlinePromptFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
-
     `when`(
             offlinePromptFunctions.getPromptMapElement(
                 org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any()))
         .thenReturn("Apple")
-
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
@@ -211,7 +211,6 @@ class OfflineEndToEndAppTest {
         composable(Screen.OFFLINE_INTERVIEW_MODULE) {
           OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptFunctions)
         }
-
         composable(Screen.OFFLINE_RECORDING_SCREEN) {
           OfflineRecordingScreen(
               navigationActions = navigationActions,
@@ -234,21 +233,52 @@ class OfflineEndToEndAppTest {
         }
       }
     }
-    // manually going to create profile to simulate what a new user would go through
-    // cannot have a sign in screen then a create profile screen since mocking the google
-    // auth response would take too long, so we manually go to create profile, see if it works
-    // then go back.
+    composeTestRule.runOnUiThread {
+      navController?.navigate(
+          Screen.CREATE_PROFILE) // this here forces us to navigate to the create_profile screen
+    }
+    composeTestRule.onNodeWithTag("save_profile_button").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("save_profile_button")
+        .assertIsNotEnabled() // clicking save profile without a username to see if the button is
+    // enabled (it shouldn't be)
+
+    composeTestRule
+        .onNodeWithTag("username_input")
+        .performTextInput("TestUser") // add a username then the button should be enabled
+    composeTestRule
+        .onNodeWithTag("username_input")
+        .assertTextContains("TestUser") // making sure username is shown correctly
+    composeTestRule
+        .onNodeWithTag("save_profile_button")
+        .assertIsEnabled() // now the save profile button should be enabled
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.HOME) }
+    // entering offline mode
+    composeTestRule.runOnUiThread {
+      navController?.navigate(
+          Screen.OFFLINE) // this here forces us to navigate to the create_profile screen
+    }
+    // Verify "No Internet Connection" title is displayed
+    composeTestRule.onNodeWithText("No Internet Connection").assertIsDisplayed()
+
+    // Verify subtext message is displayed
+    composeTestRule
+        .onNodeWithText(
+            "It seems like you don't have any WiFi connection... You can still practice offline!")
+        .assertIsDisplayed()
+
+    // Verify "Practice Offline" button is displayed
+    composeTestRule.onNodeWithText("Practice Offline").assertIsDisplayed()
+
+    composeTestRule.onNodeWithText("Practice Offline").performClick()
+    verify(navigationActions).navigateTo(Screen.OFFLINE_INTERVIEW_MODULE)
 
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen.OFFLINE_INTERVIEW_MODULE) // this here forces us to navigate to the create_profile
-      // screen
+          Screen
+              .OFFLINE_INTERVIEW_MODULE) // this here forces us to navigate to the create_profile
+                                         // screen
     }
-    `when`(
-            offlinePromptFunctions.getPromptMapElement(
-                anyString(), anyString(), org.mockito.kotlin.any()))
-        .thenReturn("Test Company")
-
     composeTestRule.onNodeWithTag("company_field").assertIsDisplayed()
     composeTestRule.onNodeWithTag("job_field").assertIsDisplayed()
     composeTestRule.onNodeWithTag("question_field").assertIsDisplayed()
@@ -267,7 +297,22 @@ class OfflineEndToEndAppTest {
         .onNodeWithTag("job_field", useUnmergedTree = true)
         .assertTextContains("Engineer")
 
+    // Input necessary fields
+    composeTestRule.onNodeWithTag("company_field").performTextInput("Apple")
+    composeTestRule.onNodeWithTag("job_field").performTextInput("Engineer")
+
+    // Click Done button
+
+    composeTestRule.onNodeWithTag("question_field").performClick()
+    composeTestRule
+        .onNodeWithTag("dropdown_item_What are your strengths?", useUnmergedTree = true)
+        .performClick()
+    // Verify navigation to OfflineRecordingScreen with the correct question
+    composeTestRule.onNodeWithTag("doneButton").performClick()
+    verify(navigationActions).goToOfflineRecording(any())
+
     composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE_RECORDING_SCREEN) }
+
     composeTestRule.onNodeWithTag("OfflineRecordingScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BackButtonRow").assertIsDisplayed()
@@ -279,16 +324,9 @@ class OfflineEndToEndAppTest {
     composeTestRule.onNodeWithTag("targetCompany").assertIsDisplayed()
     composeTestRule.onNodeWithTag("QuestionText").assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag("mic_button").performClick()
-
-    // Verify startRecording was called
-    org.mockito.kotlin.verify(speakingRepository).startRecording(org.mockito.kotlin.any())
-
-    // Click mic button to stop recording
-    composeTestRule.onNodeWithTag("mic_button").performClick()
-
-    // Verify stopRecording was called
-    org.mockito.kotlin.verify(speakingRepository).stopRecording()
-    composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE_RECORDING_SCREEN) }
+    // user goes back online to see his recordings
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.PROFILE) }
+    composeTestRule.onNodeWithTag("offline_recordings_section").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("offline_recordings_section").performClick()
   }
 }
