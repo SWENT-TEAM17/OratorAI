@@ -20,6 +20,9 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
   private val _analysisState = MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)
   override val analysisState: StateFlow<SpeakingRepository.AnalysisState> = _analysisState
 
+  private val _fileSaved: MutableStateFlow<Boolean> = MutableStateFlow(false)
+  override val fileSaved: StateFlow<Boolean> = _fileSaved
+
   // Functions to start and stop recording
 
   // Function to start recording to the default file "audio_record.wav" kept for backwards
@@ -28,6 +31,10 @@ class SpeakingRepositoryRecord(private val context: Context) : SpeakingRepositor
   override fun startRecording() {
     _analysisState.value = SpeakingRepository.AnalysisState.RECORDING
     audioRecorder.startRecording(File(context.cacheDir, "audio_record.wav"))
+  }
+
+  override fun setFileSaved(newVal: Boolean) {
+    _fileSaved.value = true
   }
 
   // This overload of startRecording() allows specifying a custom audio file name.

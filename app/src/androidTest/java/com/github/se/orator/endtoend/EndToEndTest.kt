@@ -116,12 +116,10 @@ class EndToEndAppTest {
     offlinePromptFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
-
     `when`(
             offlinePromptFunctions.getPromptMapElement(
                 org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any()))
         .thenReturn("Apple")
-
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
     chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel)
@@ -213,7 +211,6 @@ class EndToEndAppTest {
         composable(Screen.OFFLINE_INTERVIEW_MODULE) {
           OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptFunctions)
         }
-
         composable(Screen.OFFLINE_RECORDING_SCREEN) {
           OfflineRecordingScreen(
               navigationActions = navigationActions,
@@ -340,7 +337,6 @@ class EndToEndAppTest {
     composeTestRule.onNodeWithTag("back_button").performClick()
     verify(navigationActions).goBack()
     clearInvocations(navigationActions)
-
     composeTestRule.runOnUiThread { navController?.navigate(Screen.PROFILE) }
 
     // navigate from profile to friends

@@ -43,6 +43,11 @@ class SpeakingViewModel(
   /** True if the user is currently recording their speech, false otherwise. */
   val isRecording: StateFlow<Boolean> = _isRecording
 
+  val fileSaved: StateFlow<Boolean> = repository.fileSaved
+
+  fun setFileSaved(newVal: Boolean) {
+    repository.setFileSaved(newVal)
+  }
   /** To be called when the speaking screen is closed or the "Done" button is pressed. */
   fun endAndSave() {
     if (_isRecording.value) {
