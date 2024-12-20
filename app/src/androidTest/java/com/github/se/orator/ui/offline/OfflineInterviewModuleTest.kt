@@ -82,10 +82,6 @@ class OfflineInterviewModuleTest {
     composeTestRule
         .onNodeWithTag("job_field", useUnmergedTree = true)
         .assertTextContains("Engineer")
-
-    // Input Question
-    composeTestRule.onNodeWithTag("question_field").performTextInput("Focus on leadership skills")
-    composeTestRule.onNodeWithTag("question_field").assertTextContains("Focus on leadership skills")
   }
 
   @Test
@@ -93,7 +89,6 @@ class OfflineInterviewModuleTest {
     // Input necessary fields
     composeTestRule.onNodeWithTag("company_field").performTextInput("Apple")
     composeTestRule.onNodeWithTag("job_field").performTextInput("Engineer")
-    composeTestRule.onNodeWithTag("question_field").performTextInput("Focus on leadership skills")
 
     // Click Done button
     composeTestRule.onNodeWithTag("doneButton").performClick()

@@ -1,6 +1,8 @@
 package com.github.se.orator.ui.overview
 
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,11 +19,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -127,44 +133,86 @@ fun OfflineInterviewModule(
                           focusedLabelColor = MaterialTheme.colorScheme.onSurface,
                           unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
 
-              OutlinedTextField(
-                  value = question,
-                  onValueChange = { newQuestion -> question = newQuestion },
-                  label = {
-                    Text("What do you want to focus on?", modifier = Modifier.testTag("question"))
-                  },
-                  modifier = Modifier.fillMaxWidth().testTag("question_field"),
-                  singleLine = false,
-                  colors =
-                      androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
-                          backgroundColor = MaterialTheme.colorScheme.surface,
-                          textColor = MaterialTheme.colorScheme.onSurface,
-                          focusedBorderColor = MaterialTheme.colorScheme.outline,
-                          unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                          cursorColor = MaterialTheme.colorScheme.primary,
-                          focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                          unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant))
+              var expanded by remember { mutableStateOf(false) }
+              val options =
+                  listOf(
+                      "What are your strengths?",
+                      "How do you handle conflict in a team?",
+                      "Why should we hire you?",
+                      "How do you perform under pressure?",
+                      "What is your greatest weakness?")
+
+              ExposedDropdownMenuBox(
+                  expanded = expanded,
+                  onExpandedChange = { expanded = !expanded },
+                  modifier = Modifier.fillMaxWidth().testTag("question_field")) {
+                    TextField(
+                        value = question,
+                        onValueChange = {},
+                        readOnly = true,
+                        placeholder = {
+                          Text(
+                              "What question do you want to focus on?",
+                              color = MaterialTheme.colorScheme.onSurface)
+                        },
+                        trailingIcon = {
+                          ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        modifier =
+                            Modifier.menuAnchor()
+                                .fillMaxWidth()
+                                .border(
+                                    width = AppDimensions.borderStrokeWidth,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    shape = MaterialTheme.shapes.small),
+                        colors =
+                            TextFieldDefaults.textFieldColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                cursorColor = MaterialTheme.colorScheme.primary),
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.fillMaxWidth()) {
+                          options.forEach { option ->
+                            DropdownMenuItem(
+                                onClick = {
+                                  question = option
+                                  expanded = false
+                                },
+                                text = {
+                                  Text(text = option, color = MaterialTheme.colorScheme.onSurface)
+                                },
+                                modifier = Modifier.testTag("dropdown_item_$option"))
+                          }
+                        }
+                  }
 
               Spacer(modifier = Modifier.height(AppDimensions.paddingLarge))
 
               Button(
                   onClick = {
-                    // this is for the profile screen to see previous interviews
-                    offlinePromptsFunctions.savePromptsToFile(
-                        context = context,
-                        prompts =
-                            mapOf(
-                                "targetCompany" to targetCompany,
-                                "jobPosition" to jobPosition,
-                                "question" to question,
-                                "ID" to ID,
-                                "transcribed" to "0",
-                                "GPTresponse" to "0",
-                                "transcription" to ""),
-                    )
-                    offlinePromptsFunctions.createEmptyPromptFile(context, ID)
-                    speakingViewModel.interviewPromptNb.value = ID
-                    navigationActions.goToOfflineRecording(question)
+                    if (question == "") {
+                      Toast.makeText(context, "Please select a question first!", Toast.LENGTH_SHORT)
+                          .show()
+                    } else {
+                      // this is for the profile screen to see previous interviews
+                      offlinePromptsFunctions.savePromptsToFile(
+                          context = context,
+                          prompts =
+                              mapOf(
+                                  "targetCompany" to targetCompany,
+                                  "jobPosition" to jobPosition,
+                                  "question" to question,
+                                  "ID" to ID,
+                                  "transcribed" to "0",
+                                  "GPTresponse" to "0",
+                                  "transcription" to ""),
+                      )
+                      offlinePromptsFunctions.createEmptyPromptFile(context, ID)
+                      speakingViewModel.interviewPromptNb.value = ID
+                      navigationActions.goToOfflineRecording(question)
+                    }
                   },
                   modifier =
                       Modifier.fillMaxWidth(0.8f)

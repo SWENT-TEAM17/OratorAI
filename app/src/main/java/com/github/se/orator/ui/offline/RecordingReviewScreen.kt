@@ -73,17 +73,15 @@ fun RecordingReviewScreen(
                   modifier = Modifier.testTag("text_try_again"))
             }
 
-        Row(
-            modifier = Modifier.fillMaxWidth().testTag("Back"),
-            verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  imageVector = Icons.Outlined.ArrowBackIosNew,
-                  contentDescription = "Back",
-                  modifier =
-                      Modifier.size(AppDimensions.iconSizeSmall)
-                          .clickable { navigationActions.goBack() }
-                          .testTag("BackButton"),
-                  tint = MaterialTheme.colorScheme.primary)
-            }
+        Row(modifier = Modifier.fillMaxWidth().testTag("Back"), verticalAlignment = Alignment.Top) {
+          Icon(
+              imageVector = Icons.Outlined.ArrowBackIosNew,
+              contentDescription = "Back",
+              modifier =
+                  Modifier.size(AppDimensions.iconSizeSmall)
+                      .clickable { navigationActions.goBack() }
+                      .testTag("BackButton"),
+              tint = MaterialTheme.colorScheme.primary)
+        }
       }
 }
