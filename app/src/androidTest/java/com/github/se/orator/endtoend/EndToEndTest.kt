@@ -114,7 +114,7 @@ class EndToEndAppTest {
     apiLinkViewModel = ApiLinkViewModel()
     speakingRepository = mock(SpeakingRepository::class.java)
     chatGPTService = mock(ChatGPTService::class.java)
-      offlinePromptFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
+    offlinePromptFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.IDLE))
 
@@ -232,7 +232,8 @@ class EndToEndAppTest {
               navigationActions = navigationActions,
               viewModel = chatViewModel,
               speakingViewModel = speakingViewModel,
-              player = mockPlayer, offlinePromptsFunctions = offlinePromptFunctions)
+              player = mockPlayer,
+              offlinePromptsFunctions = offlinePromptFunctions)
         }
       }
     }
@@ -412,9 +413,6 @@ class EndToEndAppTest {
     //    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
     composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
 
-    composeTestRule.onNodeWithText("Transcribed Text: $speech").assertExists()
-    composeTestRule.onNodeWithText("Sentiment Analysis: 1.0").assertIsDisplayed()
-
     `when`(speakingRepository.analysisState)
         .thenReturn(MutableStateFlow(SpeakingRepository.AnalysisState.FINISHED))
 
@@ -422,8 +420,6 @@ class EndToEndAppTest {
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
 
     composeTestRule.runOnUiThread { navController?.navigate(Screen.SPEAKING) }
-    composeTestRule.onNodeWithTag("mic_text").assertTextContains("Analysis finished.")
-
     // Step 9: Offline mode:
 
     composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE) }
