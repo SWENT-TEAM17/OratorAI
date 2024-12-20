@@ -16,7 +16,7 @@ The app is designed for everyone, from beginners to experienced entrepreneurs an
 
 ### **Architecture diagram**
 Below is the architecture diagram we have this far for our application, which we will change as the app progresses:
-![image](https://github.com/user-attachments/assets/cb5c6d83-80de-4c9c-991f-56f5e9d5ce7f)
+![image](https://github.com/user-attachments/assets/7fbdce65-c227-4007-9a47-352650f3999b)
 
 
 ### **Offline Functionality**
