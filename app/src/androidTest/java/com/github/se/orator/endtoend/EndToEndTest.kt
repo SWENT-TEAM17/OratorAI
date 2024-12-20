@@ -344,7 +344,7 @@ class EndToEndAppTest {
     clearInvocations(navigationActions)
 
     // checking the previous recordings card in the profile screen
-    composeTestRule.onNodeWithTag("previous_sessions_section").performClick()
+    composeTestRule.onNodeWithTag("offline_recordings_section").performClick()
     // add tests later
 
     // navigate from profile to friends
