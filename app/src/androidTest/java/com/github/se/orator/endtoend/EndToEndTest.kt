@@ -237,7 +237,7 @@ class EndToEndAppTest {
     composeTestRule.onNodeWithText("Cancel").performClick()
     composeTestRule.onNodeWithText("Choose Profile Picture").assertIsNotDisplayed()
 
-    // go back to profile screen
+    // go back to profile screenn
     composeTestRule.onNodeWithTag("back_button").performClick()
     verify(navigationActions).goBack()
     clearInvocations(navigationActions)
