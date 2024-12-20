@@ -45,7 +45,7 @@ fun RecordingReviewScreen(
               .padding(AppDimensions.paddingMedium)
               .testTag("RecordingReviewScreen"),
       verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally) {
+      horizontalAlignment = Alignment.Start) {
         Button(
             modifier = Modifier.testTag("hear_recording_button"),
             colors =

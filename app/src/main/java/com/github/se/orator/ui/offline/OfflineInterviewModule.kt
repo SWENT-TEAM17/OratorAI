@@ -192,8 +192,8 @@ fun OfflineInterviewModule(
 
               Button(
                   onClick = {
-                    if (question == "") {
-                      Toast.makeText(context, "Please select a question first!", Toast.LENGTH_SHORT)
+                    if (question == "" || jobPosition == "" || targetCompany == "") {
+                      Toast.makeText(context, "Please fill all prompts first!", Toast.LENGTH_SHORT)
                           .show()
                     } else {
                       // this is for the profile screen to see previous interviews

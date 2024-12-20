@@ -91,10 +91,14 @@ class OfflineInterviewModuleTest {
     composeTestRule.onNodeWithTag("job_field").performTextInput("Engineer")
 
     // Click Done button
-    composeTestRule.onNodeWithTag("doneButton").performClick()
 
+    composeTestRule.onNodeWithTag("question_field").performClick()
+    composeTestRule
+        .onNodeWithTag("dropdown_item_What are your strengths?", useUnmergedTree = true)
+        .performClick()
     // Verify navigation to OfflineRecordingScreen with the correct question
-    verify(navigationActions).goToOfflineRecording("Focus on leadership skills")
+    composeTestRule.onNodeWithTag("doneButton").performClick()
+    verify(navigationActions).goToOfflineRecording("What are your strengths?")
   }
 
   @Test
