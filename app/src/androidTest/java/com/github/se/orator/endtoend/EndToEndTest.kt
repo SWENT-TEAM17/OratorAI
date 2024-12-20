@@ -157,8 +157,9 @@ class EndToEndAppTest {
         .assertIsEnabled() // now the save profile button should be enabled
     composeTestRule.runOnUiThread {
       navController?.navigate(
-          Screen.HOME) // forcing back to home where the user would be once he finishes creating his
-      // account
+          Screen
+              .HOME) // forcing back to home where the user would be once he finishes creating their
+                     // account
     }
 
     // navigating to profile
