@@ -123,9 +123,7 @@ fun EditProfileScreen(
               // Profile Picture with Camera Icon Overlay
               Box(contentAlignment = Alignment.Center) {
                 ProfilePicture(
-                    profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic,
-                    onClick = { isDialogOpen = true })
-
+                    profilePictureUrl = newProfilePicUri?.toString() ?: userProfile?.profilePic)
                 // Edit profile picture button
                 Button(
                     onClick = { isDialogOpen = true },

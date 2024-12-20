@@ -99,10 +99,7 @@ fun CreateAccountScreen(
                         contentScale = ContentScale.Crop)
 
                     // Profile Picture overlay
-                    ProfilePicture(
-                        profilePictureUrl = profilePicUri?.toString(),
-                        onClick = { isDialogOpen = true },
-                    )
+                    ProfilePicture(profilePictureUrl = profilePicUri?.toString())
                   }
 
               // Camera icon overlay

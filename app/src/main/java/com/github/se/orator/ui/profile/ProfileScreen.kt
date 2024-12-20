@@ -154,11 +154,9 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                               .shadow(
                                   elevation = AppDimensions.elevationSmall,
                                   shape = RoundedCornerShape(size = AppDimensions.statusBarPadding),
-                                  clip = false)
-                              .background(
-                                  colors.surfaceVariant,
-                                  shape =
-                                      RoundedCornerShape(size = AppDimensions.statusBarPadding)),
+                                  clip = false),
+                      backgroundColor = colors.surfaceVariant,
+                      shape = RoundedCornerShape(size = AppDimensions.statusBarPadding),
                       elevation = AppDimensions.elevationSmall) {}
 
                   // Profile Picture with overlapping positioning
