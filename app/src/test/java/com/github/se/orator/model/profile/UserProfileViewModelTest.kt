@@ -713,4 +713,52 @@ class UserProfileViewModelTest {
         assertEquals(1, currentSentReqProfiles.size)
         assertEquals("Sent sentZ", currentSentReqProfiles[0].name)
       }
+
+  @Test
+  fun `startListeningToAllProfiles updates allProfiles in real-time`() = runTest {
+    val user1 =
+        UserProfile(
+            uid = "user1",
+            name = "User One",
+            age = 20,
+            statistics = UserStatistics(),
+            friends = emptyList(),
+            recReq = emptyList(),
+            sentReq = emptyList())
+    val user2 =
+        UserProfile(
+            uid = "user2",
+            name = "User Two",
+            age = 25,
+            statistics = UserStatistics(),
+            friends = emptyList(),
+            recReq = emptyList(),
+            sentReq = emptyList())
+
+    // Variables to hold the captured callbacks
+    var capturedOnProfilesChanged: ((List<UserProfile>) -> Unit)? = null
+    var capturedOnError: ((Exception) -> Unit)? = null
+
+    // Mock the repository's listenToAllUserProfiles function to capture the callbacks
+    doAnswer { invocation ->
+          capturedOnProfilesChanged = invocation.getArgument<(List<UserProfile>) -> Unit>(0)
+          capturedOnError = invocation.getArgument<(Exception) -> Unit>(1)
+          null
+        }
+        .`when`(repository)
+        .listenToAllUserProfiles(any(), any())
+
+    // Act
+    viewModel.startListeningToAllProfiles()
+
+    // Simulate receiving new profiles from the repository
+    capturedOnProfilesChanged?.invoke(listOf(user1, user2))
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Assert
+    val currentAllProfiles = viewModel.allProfiles.first()
+    assertEquals(2, currentAllProfiles.size)
+    assertEquals("User One", currentAllProfiles[0].name)
+    assertEquals("User Two", currentAllProfiles[1].name)
+  }
 }

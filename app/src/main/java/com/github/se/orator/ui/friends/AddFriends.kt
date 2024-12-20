@@ -46,7 +46,6 @@ import com.github.se.orator.ui.navigation.BottomNavigationMenu
 import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
-import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
 
@@ -70,186 +69,185 @@ fun AddFriendsScreen(
 ) {
   val userProfile by userProfileViewModel.userProfile.collectAsState()
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
-  var query by remember { mutableStateOf("") } // Holds the search query input
-  var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
-  val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
-  val focusRequester = FocusRequester() // Manages focus for the search field
+  var query by remember { mutableStateOf("") }
+  var expanded by remember { mutableStateOf(false) }
+  val allProfiles by userProfileViewModel.allProfiles.collectAsState()
+  val focusRequester = FocusRequester()
   val sentReqProfiles by userProfileViewModel.sentReqProfiles.collectAsState()
-  // Exclude the current user's profile and their friends' profiles from the list
+
   val filteredProfiles =
       allProfiles.filter { profile ->
-        profile.uid != userProfile?.uid && // Exclude own profile
-            friendsProfiles.none { friend -> friend.uid == profile.uid } && // Exclude friends
-            sentReqProfiles.none { sent -> sent.uid == profile.uid } && // Exclude sent requests
-            profile.name.contains(query, ignoreCase = true) // Match search query
+        profile.uid != userProfile?.uid &&
+            friendsProfiles.none { friend -> friend.uid == profile.uid } &&
+            sentReqProfiles.none { sent -> sent.uid == profile.uid } &&
+            profile.name.contains(query, ignoreCase = true)
       }
+
   val filteredSentReq =
       sentReqProfiles.filter { recReq -> recReq.name.contains(query, ignoreCase = true) }
 
-  // State variable to keep track of the selected user's profile picture
   var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
-
-  // State variable to control the expansion of Sent Friend Requests
   var isSentRequestsExpanded by remember { mutableStateOf(false) }
 
   Scaffold(
-      topBar = {
-        TopNavigationMenu(
-            textTestTag = "addFriendTitle",
-            title = "Add a friend",
-            navigationIcon = {
-              IconButton(
-                  onClick = {
-                    navigationActions.goBack() // Navigate back
-                  },
-                  modifier = Modifier.testTag("addFriendBackButton")) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onSurface)
-                  }
-            })
-      },
+      // No top bar, placing a custom row instead
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.FRIENDS)
-      }) { paddingValues ->
-        // Replace Column with LazyColumn
-        LazyColumn(
-            modifier =
-                Modifier.fillMaxSize().padding(paddingValues).padding(AppDimensions.paddingMedium),
-            content = {
-              // Search Field
-              item {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { newValue ->
-                      query = newValue
-                      expanded = newValue.isNotEmpty()
-                    },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .wrapContentHeight()
-                            .focusRequester(focusRequester)
-                            .testTag("addFriendSearchField"),
-                    label = {
-                      Text(
-                          "Username",
-                          modifier = Modifier.testTag("searchFieldLabel"),
-                          color = MaterialTheme.colorScheme.onSurface)
-                    },
-                    leadingIcon = {
+      }) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+          // Row at the top with a Back button and "Add a friend" Title
+          Row(
+              modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
+              verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = { navigationActions.goBack() },
+                    modifier = Modifier.testTag("addFriendBackButton")) {
                       Icon(
-                          Icons.Default.Search,
-                          contentDescription = "Search Icon",
-                          modifier = Modifier.testTag("searchIcon"),
-                          tint = MaterialTheme.colorScheme.primary)
-                    },
-                    trailingIcon = {
-                      if (query.isNotEmpty()) {
-                        IconButton(
-                            onClick = { query = "" },
-                            modifier = Modifier.testTag("clearSearchButton")) {
-                              Icon(
-                                  Icons.Default.Clear,
-                                  contentDescription = "Clear Icon",
-                                  modifier = Modifier.testTag("clearIcon"))
-                            }
-                      }
-                    },
-                    colors =
-                        TextFieldDefaults.outlinedTextFieldColors(
-                            backgroundColor = MaterialTheme.colorScheme.surface,
-                            textColor = MaterialTheme.colorScheme.onSurface,
-                            focusedBorderColor = MaterialTheme.colorScheme.outline,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            leadingIconColor = MaterialTheme.colorScheme.primary,
-                        ),
-                    singleLine = true,
-                    keyboardActions = KeyboardActions.Default)
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = MaterialTheme.colorScheme.onSurface)
+                    }
+
+                Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+
+                Text(
+                    text = "Add a friend",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.testTag("addFriendTitle"))
               }
 
-              item { Spacer(modifier = Modifier.height(AppDimensions.paddingMedium)) }
-
-              // Expandable Section: Sent Friend Requests
-              if (filteredSentReq.isNotEmpty()) {
-                // Header with Toggle Button
+          LazyColumn(
+              modifier = Modifier.fillMaxSize().padding(horizontal = AppDimensions.paddingMedium)) {
+                // Search Field
                 item {
-                  Row(
+                  OutlinedTextField(
+                      value = query,
+                      onValueChange = { newValue ->
+                        query = newValue
+                        expanded = newValue.isNotEmpty()
+                      },
                       modifier =
                           Modifier.fillMaxWidth()
-                              .clickable { isSentRequestsExpanded = !isSentRequestsExpanded }
-                              .padding(vertical = AppDimensions.smallPadding),
-                      verticalAlignment = Alignment.CenterVertically,
-                      horizontalArrangement = Arrangement.SpaceBetween) {
+                              .wrapContentHeight()
+                              .focusRequester(focusRequester)
+                              .testTag("addFriendSearchField"),
+                      label = {
                         Text(
-                            text = "Sent Friend Requests",
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.weight(1f).testTag("sentFriendRequestsHeader"),
+                            "Username",
+                            modifier = Modifier.testTag("searchFieldLabel"),
                             color = MaterialTheme.colorScheme.onSurface)
-                        IconButton(
-                            onClick = { isSentRequestsExpanded = !isSentRequestsExpanded },
-                            modifier = Modifier.testTag("toggleSentRequestsButton")) {
-                              Icon(
-                                  imageVector =
-                                      if (isSentRequestsExpanded) Icons.Default.ExpandLess
-                                      else Icons.Default.ExpandMore,
-                                  contentDescription =
-                                      if (isSentRequestsExpanded) "Collapse Sent Requests"
-                                      else "Expand Sent Requests",
-                                  tint = MaterialTheme.colorScheme.onSurface)
-                            }
-                      }
-                }
-
-                // Sent Friend Requests List with AnimatedVisibility
-                item {
-                  AnimatedVisibility(
-                      visible = isSentRequestsExpanded,
-                      enter = expandVertically(),
-                      exit = shrinkVertically()) {
-                        Column {
-                          Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-                          // Sent Friend Requests Items
-                          for (sentRequest in filteredSentReq) {
-                            SentFriendRequestItem(
-                                sentRequest = sentRequest,
-                                userProfileViewModel = userProfileViewModel)
-                            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-                          }
-                          Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                      },
+                      leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Search Icon",
+                            tint = MaterialTheme.colorScheme.primary)
+                      },
+                      trailingIcon = {
+                        if (query.isNotEmpty()) {
+                          IconButton(
+                              onClick = { query = "" },
+                              modifier = Modifier.testTag("clearSearchButton")) {
+                                Icon(
+                                    Icons.Default.Clear,
+                                    contentDescription = "Clear Icon",
+                                    modifier = Modifier.testTag("clearIcon"))
+                              }
                         }
+                      },
+                      colors =
+                          TextFieldDefaults.outlinedTextFieldColors(
+                              backgroundColor = MaterialTheme.colorScheme.surface,
+                              textColor = MaterialTheme.colorScheme.onSurface,
+                              focusedBorderColor = MaterialTheme.colorScheme.outline,
+                              unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                              cursorColor = MaterialTheme.colorScheme.primary,
+                              focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                              unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                              leadingIconColor = MaterialTheme.colorScheme.primary,
+                          ),
+                      singleLine = true,
+                      keyboardActions = KeyboardActions.Default)
+                }
+
+                item { Spacer(modifier = Modifier.height(AppDimensions.paddingMedium)) }
+
+                // Expandable Section: Sent Friend Requests
+                if (filteredSentReq.isNotEmpty()) {
+                  item {
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .clickable { isSentRequestsExpanded = !isSentRequestsExpanded }
+                                .padding(vertical = AppDimensions.smallPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween) {
+                          Text(
+                              text = "Sent Friend Requests",
+                              style = MaterialTheme.typography.titleSmall,
+                              modifier = Modifier.weight(1f).testTag("sentFriendRequestsHeader"),
+                              color = MaterialTheme.colorScheme.onSurface)
+                          IconButton(
+                              onClick = { isSentRequestsExpanded = !isSentRequestsExpanded },
+                              modifier = Modifier.testTag("toggleSentRequestsButton")) {
+                                Icon(
+                                    imageVector =
+                                        if (isSentRequestsExpanded) Icons.Default.ExpandLess
+                                        else Icons.Default.ExpandMore,
+                                    contentDescription =
+                                        if (isSentRequestsExpanded) "Collapse Sent Requests"
+                                        else "Expand Sent Requests",
+                                    tint = MaterialTheme.colorScheme.onSurface)
+                              }
+                        }
+                  }
+
+                  item {
+                    AnimatedVisibility(
+                        visible = isSentRequestsExpanded,
+                        enter = expandVertically(),
+                        exit = shrinkVertically()) {
+                          Column {
+                            Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+                            for (sentRequest in filteredSentReq) {
+                              SentFriendRequestItem(
+                                  sentRequest = sentRequest,
+                                  userProfileViewModel = userProfileViewModel)
+                              Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
+                            }
+                            Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
+                          }
+                        }
+                  }
+                }
+
+                // Display search results if there is a query
+                if (query.isNotEmpty()) {
+                  items(
+                      filteredProfiles.filter { profile ->
+                        profile.name.contains(query, ignoreCase = true)
+                      }) { user ->
+                        UserItem(
+                            user = user,
+                            userProfileViewModel = userProfileViewModel,
+                            onProfilePictureClick = { selectedUser ->
+                              selectedProfilePicUser = selectedUser
+                            })
+                        Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
                       }
                 }
               }
 
-              // Display search results if there is a query
-              if (query.isNotEmpty()) {
-                items(
-                    filteredProfiles.filter { profile ->
-                      profile.name.contains(query, ignoreCase = true)
-                    }) { user ->
-                      UserItem(
-                          user = user,
-                          userProfileViewModel = userProfileViewModel,
-                          onProfilePictureClick = { selectedUser ->
-                            selectedProfilePicUser = selectedUser
-                          })
-                      Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-                    }
-              }
-            })
-
-        // Dialog to show the enlarged profile picture
-        if (selectedProfilePicUser?.profilePic != null) {
-          ProfilePictureDialog(
-              profilePictureUrl = selectedProfilePicUser?.profilePic ?: "",
-              onDismiss = { selectedProfilePicUser = null })
+          // Dialog to show the enlarged profile picture
+          if (selectedProfilePicUser?.profilePic != null) {
+            ProfilePictureDialog(
+                profilePictureUrl = selectedProfilePicUser?.profilePic ?: "",
+                onDismiss = { selectedProfilePicUser = null })
+          }
         }
       }
 }

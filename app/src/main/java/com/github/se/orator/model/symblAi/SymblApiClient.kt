@@ -8,6 +8,7 @@ import android.util.Log
 import com.github.se.orator.model.speaking.AnalysisData
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -21,14 +22,24 @@ import org.json.JSONObject
 
 private const val CLASS_LOG_ID = "SymblApiClient"
 
+// Timeout duration for API calls
+private const val TIMEOUT_DURATION = 20L
+
 /**
  * The SymblApiClient class is responsible for making API calls to the Symbl.ai API.
  *
  * @param context The context of the application.
  * @param client The OkHttpClient instance to use for making API calls.
  */
-class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttpClient()) :
-    VoiceAnalysisApi {
+class SymblApiClient(
+    context: Context,
+    private val client: OkHttpClient =
+        OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
+            .writeTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
+            .build()
+) : VoiceAnalysisApi {
 
   // Variables to hold Symbl.ai credentials
   private var symblAppId: String
@@ -131,7 +142,7 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
           }
 
           // Append the disfluencies before the transcribed message
-          textBuilder.append("You said: $disfluencies$messageText\n")
+          textBuilder.append("$disfluencies$messageText\n")
 
           val sentiment = messageObject.optJSONObject("sentiment")
           if (sentiment != null) {
@@ -455,15 +466,20 @@ class SymblApiClient(context: Context, private val client: OkHttpClient = OkHttp
       onSuccess: (String) -> Unit,
       onFailure: (SpeakingError) -> Unit
   ) {
-    client.newCall(request).execute().use { response ->
-      val responseData = response.body?.string() ?: "No Response"
-      Log.d(CLASS_LOG_ID, responseData)
-      if (response.isSuccessful && responseData.isNotEmpty()) {
-        onSuccess(responseData)
-      } else {
-        onFailure(SpeakingError.HTTP_REQUEST_ERROR)
-        Log.e(CLASS_LOG_ID, "HTTP request failed: $responseData")
+    try {
+      client.newCall(request).execute().use { response ->
+        val responseData = response.body?.string() ?: "No Response"
+        Log.d(CLASS_LOG_ID, responseData)
+        if (response.isSuccessful && responseData.isNotEmpty()) {
+          onSuccess(responseData)
+        } else {
+          onFailure(SpeakingError.HTTP_REQUEST_ERROR)
+          Log.e(CLASS_LOG_ID, "HTTP request failed: $responseData")
+        }
       }
+    } catch (e: IOException) {
+      Log.e(CLASS_LOG_ID, "Failed to fetch data", e)
+      onFailure(SpeakingError.HTTP_REQUEST_ERROR)
     }
   }
 }

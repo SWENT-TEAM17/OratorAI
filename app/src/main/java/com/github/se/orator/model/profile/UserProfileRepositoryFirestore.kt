@@ -770,4 +770,35 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
       }
     }
   }
+
+  /**
+   * Sets up a real-time listener for all user profiles in the data store.
+   *
+   * Listens to changes in the `user_profiles` collection and triggers the [onProfilesChanged]
+   * callback with the updated list whenever a profile is added, modified, or deleted. If an error
+   * occurs, the [onError] callback is invoked.
+   *
+   * @param onProfilesChanged Callback invoked with the updated list of [UserProfile].
+   * @param onError Callback invoked if an error occurs during listening.
+   */
+  override fun listenToAllUserProfiles(
+      onProfilesChanged: (List<UserProfile>) -> Unit,
+      onError: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).addSnapshotListener { querySnapshot, e ->
+      if (e != null) {
+        // Error occurred
+        onError(e)
+        return@addSnapshotListener
+      }
+      if (querySnapshot != null) {
+        // Map documents to UserProfile objects
+        val profiles = querySnapshot.documents.mapNotNull { documentToUserProfile(it) }
+        onProfilesChanged(profiles)
+      } else {
+        // If we get a null snapshot, return an empty list
+        onProfilesChanged(emptyList())
+      }
+    }
+  }
 }

@@ -31,6 +31,7 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -1117,5 +1118,83 @@ class UserProfileRepositoryFirestoreTest {
     // Assert
     verify(mockOnError).invoke(exception)
     verifyNoMoreInteractions(mockOnProfileChanged, mockOnError)
+  }
+
+  @Test
+  fun `listenToAllUserProfiles triggers onProfilesChanged with updated list`() {
+    // Arrange
+    val user1 =
+        UserProfile(uid = "user1", name = "User One", age = 20, statistics = UserStatistics())
+    val user2 =
+        UserProfile(uid = "user2", name = "User Two", age = 25, statistics = UserStatistics())
+
+    // Mock query snapshot with documents
+    val mockUserDoc1 = mock(DocumentSnapshot::class.java)
+    val mockUserDoc2 = mock(DocumentSnapshot::class.java)
+    whenever(mockUserDoc1.exists()).thenReturn(true)
+    whenever(mockUserDoc2.exists()).thenReturn(true)
+    whenever(mockUserDoc1.toObject(UserProfile::class.java)).thenReturn(user1)
+    whenever(mockUserDoc2.toObject(UserProfile::class.java)).thenReturn(user2)
+
+    // Mock a QuerySnapshot containing the above documents
+    val mockQuerySnapshot = mock(QuerySnapshot::class.java)
+    whenever(mockQuerySnapshot.documents).thenReturn(listOf(mockUserDoc1, mockUserDoc2))
+
+    val onProfilesChanged: (List<UserProfile>) -> Unit = mock()
+    val onError: (Exception) -> Unit = mock()
+
+    // Capture the EventListener for the collection snapshot
+    val eventListenerCaptor = argumentCaptor<EventListener<QuerySnapshot>>()
+
+    // When listenToAllUserProfiles is called, we add a snapshot listener to the collection
+    doAnswer {
+          // Return a mock ListenerRegistration
+          mockListenerRegistration
+        }
+        .`when`(mockCollectionReference)
+        .addSnapshotListener(any<EventListener<QuerySnapshot>>())
+
+    // Act
+    repository.listenToAllUserProfiles(onProfilesChanged, onError)
+
+    // Verify that addSnapshotListener was called and capture the listener
+    verify(mockCollectionReference).addSnapshotListener(eventListenerCaptor.capture())
+    val capturedListener = eventListenerCaptor.firstValue
+
+    // Simulate a Firestore update by invoking onEvent on the captured listener
+    capturedListener.onEvent(mockQuerySnapshot, null)
+
+    // Assert
+    // Verify that onProfilesChanged was invoked with the correct list
+    argumentCaptor<List<UserProfile>>().apply { verify(onProfilesChanged).invoke(capture()) }
+
+    // Ensure onError was not called
+    verify(onError, never()).invoke(any())
+  }
+
+  @Test
+  fun `listenToAllUserProfiles calls onError when snapshot listener fails`() {
+    val onProfilesChanged: (List<UserProfile>) -> Unit = mock()
+    val onError: (Exception) -> Unit = mock()
+    val eventListenerCaptor = argumentCaptor<EventListener<QuerySnapshot>>()
+
+    // Set up the snapshot listener
+    doAnswer { mockListenerRegistration }
+        .`when`(mockCollectionReference)
+        .addSnapshotListener(any<EventListener<QuerySnapshot>>())
+
+    repository.listenToAllUserProfiles(onProfilesChanged, onError)
+    verify(mockCollectionReference).addSnapshotListener(eventListenerCaptor.capture())
+    val capturedListener = eventListenerCaptor.firstValue
+
+    // Simulate an error
+    val testException =
+        FirebaseFirestoreException(
+            "Document does not exist", FirebaseFirestoreException.Code.NOT_FOUND)
+    capturedListener.onEvent(null, testException)
+
+    // Verify that onError is called with the exception
+    verify(onError).invoke(testException)
+    verifyNoMoreInteractions(onProfilesChanged)
   }
 }

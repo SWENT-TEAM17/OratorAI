@@ -101,7 +101,6 @@ fun BattleScreen(
   // Use the existing SpeakingPracticeModule for consistent UI
   SpeakingPracticeModule(
       navigationActions = navigationActions,
-      screenTitle = "Interview battle with $friendName",
       headerText = "Challenge $friendName to an interview battle!",
       inputs = inputFields,
       onClick = {

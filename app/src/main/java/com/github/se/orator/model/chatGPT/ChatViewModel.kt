@@ -198,9 +198,7 @@ class ChatViewModel(
         }
 
     val systemMessage = Message(role = "system", content = systemMessageContent)
-
     val userStartMessage = Message(role = "user", content = "I'm ready to begin the session.")
-
     _chatMessages.value = listOf(systemMessage, userStartMessage)
 
     getNextGPTResponse()
@@ -519,7 +517,7 @@ The session is now over. According to the initial instructions, you can now brea
 
     val systemMessageContent =
         """
-                    You are engaged in a battle against $friendName a ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.targetPosition} at ${practiceContextAsValue.companyName}. 
+                    You are engaged in a battle of type ${practiceContextAsValue.interviewType} for the position of ${practiceContextAsValue.targetPosition} at ${practiceContextAsValue.companyName}. 
                     Focus on the following areas: ${practiceContextAsValue.focusArea}. 
                     Ask questions one at a time and wait for the user's response before proceeding. 
                     Do not provide feedback until the end.
@@ -570,7 +568,7 @@ The session is now over. According to the initial instructions, you can now brea
 
     val prompt =
         """
-        You are an impartial and strict recruiter tasked with evaluating two AI interview candidates, $user1Uid and $user2Uid, based on their interview transcripts. Your goal is to determine which AI performed better and provide constructive feedback for both.
+        You are an impartial and strict recruiter tasked with evaluating two AI interview candidates, $user1Uid and $user2Uid  based on their interview transcripts. Your goal is to determine which AI performed better and provide constructive feedback for both.
 
       **Guidelines:**
 
@@ -583,7 +581,7 @@ The session is now over. According to the initial instructions, you can now brea
 
       2. **Determining the Winner:**
       - Based on the criteria above, decide which AI performed better overall.
-      - Explicitly state the winner in the format: "The winner is: <winnerUid>."
+      - Explicitly state the winner in the format: "The winner is: <winnerUid>"
 
       3. **Feedback for Both AIs:**
       - **Winner's Feedback:** Provide specific strengths that led to their victory.

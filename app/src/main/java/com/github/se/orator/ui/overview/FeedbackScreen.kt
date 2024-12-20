@@ -26,14 +26,6 @@ import com.github.se.orator.ui.network.Message
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
 
-/**
- * Composable function to display the feedback screen.
- *
- * @param chatViewModel The view model for chat interactions.
- * @param userProfileViewModel The view model for user profiles.
- * @param apiLinkViewModel The view model for API links.
- * @param navigationActions The actions used for navigation.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedbackScreen(
@@ -42,7 +34,6 @@ fun FeedbackScreen(
     apiLinkViewModel: ApiLinkViewModel,
     navigationActions: NavigationActions
 ) {
-  // State variables for feedback message, decision, loading status, and error message.
   var feedbackMessage by remember { mutableStateOf<String?>(null) }
   var decisionResult by remember { mutableStateOf<ChatViewModel.DecisionResult?>(null) }
   var isLoading by remember { mutableStateOf(true) }
@@ -50,6 +41,8 @@ fun FeedbackScreen(
 
   val practiceContext by apiLinkViewModel.practiceContext.collectAsState()
   val userProfile by userProfileViewModel.userProfile.collectAsState()
+  val paceMean = userProfile?.statistics?.paceMean
+  val talkTimeSecondsMean = userProfile?.statistics?.talkTimeSecMean
 
   val sessionType =
       when (practiceContext) {
@@ -59,7 +52,6 @@ fun FeedbackScreen(
         else -> null
       }
 
-  // Retrieve the number of successful sessions
   val successfulSessionsCount =
       sessionType?.let { userProfile?.statistics?.successfulSessions?.get(it.name) ?: 0 } ?: 0
 
@@ -68,8 +60,6 @@ fun FeedbackScreen(
       feedbackMessage = chatViewModel.generateFeedback()
       feedbackMessage?.let {
         decisionResult = parseDecisionFromFeedback(it, sessionType)
-
-        // Update user statistics based on the decision and session type
         if (decisionResult != null && sessionType != null) {
           userProfileViewModel.updateSessionResult(
               isSuccess = decisionResult!!.isSuccess, sessionType = sessionType)
@@ -148,7 +138,6 @@ fun FeedbackScreen(
                                 .weight(1f)
                                 .verticalScroll(rememberScrollState())
                                 .testTag("feedbackMessage")) {
-                          // Display the decision prominently.
                           decisionResult?.message?.let { decisionText ->
                             Text(
                                 text = decisionText,
@@ -163,29 +152,49 @@ fun FeedbackScreen(
                           Text(
                               text =
                                   "You have successfully completed $successfulSessionsCount ${
-                                when (sessionType) {
-                                    SessionType.SPEECH -> "speeches"
-                                    SessionType.INTERVIEW -> "interviews"
-                                    SessionType.NEGOTIATION -> "negotiations"
-                                    else -> "sessions"
-                                }
-                            } so far!",
+                                        when (sessionType) {
+                                            SessionType.SPEECH -> "speeches"
+                                            SessionType.INTERVIEW -> "interviews"
+                                            SessionType.NEGOTIATION -> "negotiations"
+                                            else -> "sessions"
+                                        }
+                                    } so far!",
                               style = AppTypography.bodyLargeStyle,
                               modifier =
                                   Modifier.align(Alignment.CenterHorizontally)
                                       .padding(AppDimensions.paddingMedium)
                                       .testTag("successfulSessionsText"),
                               color = MaterialTheme.colorScheme.tertiary)
-                          // Display the detailed feedback message.
                           ChatMessageItem(
                               message = Message(content = feedbackMessage!!, role = "assistant"))
+
+                          Text(
+                              text = "Your Performance Metrics:",
+                              style = AppTypography.mediumTitleStyle,
+                              color = MaterialTheme.colorScheme.secondary,
+                              modifier =
+                                  Modifier.padding(AppDimensions.paddingMedium)
+                                      .testTag("performanceMetricsTitle"))
+
+                          // Display Talk Time Seconds
+                          MetricDisplayItem(
+                              title = "Talk Time (Seconds)",
+                              value = talkTimeSecondsMean?.let { "%.2f".format(it) } ?: "No data",
+                              testTag = "talkTimeSeconds")
+
+                          // Display Pace
+                          MetricDisplayItem(
+                              title = "Pace",
+                              value = paceMean?.let { "%.2f".format(it) } ?: "No data",
+                              testTag = "pace")
                         }
                   }
                   else -> {
                     Text(
                         text = "No feedback available.",
                         style = AppTypography.bodyLargeStyle,
-                        color = MaterialTheme.colorScheme.secondary)
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.testTag("feedbackNoMessage"))
                   }
                 }
 
@@ -217,10 +226,43 @@ fun FeedbackScreen(
 }
 
 /**
- * Function to parse the decision from the feedback message.
+ * A reusable composable function to display a performance metric.
+ *
+ * @param title The title of the metric, typically describing what the metric represents. Example:
+ *   "Talk Time (Seconds)" or "Talk Time (Percentage)".
+ * @param value The value of the metric, formatted as a string for display. Example: "120.00" or
+ *   "75.50%".
+ * @param testTag A test tag assigned to the composable for UI testing purposes.
+ *
+ * Functionality:
+ * - Displays a metric with its title and value in a column layout.
+ * - Applies consistent padding and styling to ensure visual alignment with other UI components.
+ * - Includes a test tag for accessibility and testing frameworks.
+ *
+ * Usage: Call this function with appropriate parameters to render a performance metric anywhere in
+ * the UI.
+ */
+@Composable
+fun MetricDisplayItem(title: String, value: String, testTag: String) {
+  Column(modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingSmall).testTag(testTag)) {
+    Text(
+        text = title,
+        style = AppTypography.smallTitleStyle,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(bottom = AppDimensions.paddingSmall))
+    Text(
+        text = value,
+        style = AppTypography.smallTitleStyle,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(bottom = AppDimensions.paddingSmall))
+  }
+}
+
+/**
+ * Parses the decision from the feedback message.
  *
  * @param feedback The feedback message.
- * @param sessionType The type of session.
+ * @param sessionType The session type.
  * @return The decision result.
  */
 private fun parseDecisionFromFeedback(

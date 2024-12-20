@@ -13,6 +13,7 @@ import com.github.se.orator.model.speaking.InterviewContext
 import com.github.se.orator.model.speechBattle.*
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopLevelDestinations
 import com.github.se.orator.ui.network.ChatGPTService
 import com.github.se.orator.ui.network.Message
 import com.google.firebase.firestore.ListenerRegistration
@@ -382,5 +383,48 @@ class EvaluationScreenTest {
 
     // Verify navigation to Home
     verify(mockNavigationActions).navigateTo(Screen.HOME)
+  }
+
+  /** Test clicking the "Retry" button navigates correctly and calls reset functions. */
+  @Test
+  fun evaluationScreen_ClickRetry_NavigatesCorrectly() {
+    // Arrange
+    val evaluationResult =
+        EvaluationResult(
+            winnerUid = currentUserId,
+            winnerMessage = Message(content = "Great job!", role = "assistant"),
+            loserMessage = Message(content = "Better luck next time.", role = "assistant"))
+    val completedBattle =
+        createMockBattle(
+            status = BattleStatus.COMPLETED,
+            evaluationResult = evaluationResult,
+            userId = currentUserId,
+            challengerUid = "challengerUid",
+            opponentUid = currentUserId)
+
+    // Act
+    composeTestRule.setContent {
+      EvaluationScreen(
+          userId = currentUserId,
+          battleId = testBattleId,
+          navigationActions = mockNavigationActions,
+          battleViewModel = battleViewModel,
+          chatViewModel = chatViewModel)
+    }
+
+    // Emit the completed battle via battleUpdateCallback
+    battleUpdateCallback?.invoke(completedBattle)
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+
+    // Assert buttons are displayed
+    composeTestRule.onNodeWithText("Retry").assertIsDisplayed()
+
+    // Perform click on "Go to Practice" button
+    composeTestRule.onNodeWithText("Retry").performClick()
+
+    // Verify navigation to Speaking Job Interview
+    verify(mockNavigationActions).navigateTo(TopLevelDestinations.FRIENDS)
   }
 }
