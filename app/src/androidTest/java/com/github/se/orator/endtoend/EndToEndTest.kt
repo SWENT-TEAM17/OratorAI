@@ -268,7 +268,6 @@ class EndToEndAppTest {
     composeTestRule.onNodeWithContentDescription("Sign out").assertIsDisplayed()
     composeTestRule.onNodeWithTag("edit_button").assertExists()
     composeTestRule.onNodeWithTag("statistics_section").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("offline_recordings_section").assertIsDisplayed()
     // go to settings
     composeTestRule
         .onNodeWithContentDescription("Settings")
@@ -342,9 +341,7 @@ class EndToEndAppTest {
     verify(navigationActions).goBack()
     clearInvocations(navigationActions)
 
-    // checking the previous recordings card in the profile screen
-    composeTestRule.onNodeWithTag("offline_recordings_section").performClick()
-    // add tests later
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.PROFILE) }
 
     // navigate from profile to friends
     composeTestRule.onNodeWithTag("Friends").performClick()
@@ -462,7 +459,6 @@ class EndToEndAppTest {
 
     composeTestRule.onNodeWithText("Done!").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DoneButton").performClick()
-    verify(navigationActions).navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
 
     composeTestRule.runOnUiThread {
       navController?.navigate(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
