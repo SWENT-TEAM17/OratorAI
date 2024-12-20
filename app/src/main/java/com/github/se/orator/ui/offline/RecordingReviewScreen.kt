@@ -39,13 +39,35 @@ fun RecordingReviewScreen(
   val audioFile: File = File(context.cacheDir, "${speakingViewModel.interviewPromptNb.value}.mp3")
 
   Log.d("rec screen review", "the file that you shall play is $audioFile")
+  Box(
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(
+                  start = AppDimensions.paddingLarge,
+                  top = AppDimensions.paddingXXXLarge,
+                  end = AppDimensions.paddingLarge,
+                  bottom = AppDimensions.paddingLarge)
+              .testTag("RecordingReviewScreen")) {
+        Row(
+            modifier = Modifier.fillMaxWidth().align(Alignment.TopStart),
+            verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  imageVector = Icons.Outlined.ArrowBackIosNew,
+                  contentDescription = "Back",
+                  modifier =
+                      Modifier.size(AppDimensions.iconSizeSmall)
+                          .clickable { navigationActions.goBack() }
+                          .testTag("BackButton"),
+                  tint = MaterialTheme.colorScheme.primary)
+            }
+      }
   Column(
       modifier =
           Modifier.fillMaxSize()
               .padding(AppDimensions.paddingMedium)
               .testTag("RecordingReviewScreen"),
       verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.Start) {
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             modifier = Modifier.testTag("hear_recording_button"),
             colors =
@@ -72,16 +94,5 @@ fun RecordingReviewScreen(
                   color = MaterialTheme.colorScheme.surface,
                   modifier = Modifier.testTag("text_try_again"))
             }
-
-        Row(modifier = Modifier.fillMaxWidth().testTag("Back"), verticalAlignment = Alignment.Top) {
-          Icon(
-              imageVector = Icons.Outlined.ArrowBackIosNew,
-              contentDescription = "Back",
-              modifier =
-                  Modifier.size(AppDimensions.iconSizeSmall)
-                      .clickable { navigationActions.goBack() }
-                      .testTag("BackButton"),
-              tint = MaterialTheme.colorScheme.primary)
-        }
       }
 }
