@@ -45,7 +45,6 @@ fun OfflineRecordingScreen(
     }, // Makes for easier testing
     offlinePromptsFunctions: OfflinePromptsFunctionsInterface = OfflinePromptsFunctions()
 ) {
-  val fileSaved = viewModel.fileSaved
   val analysisState = remember {
     MutableStateFlow(SpeakingRepository.AnalysisState.IDLE)
   } // viewModel.analysisState.collectAsState()
@@ -131,10 +130,7 @@ fun OfflineRecordingScreen(
                               SpeakingRepository.AnalysisState.RECORDING) {
                             analysisState.value = SpeakingRepository.AnalysisState.IDLE
                             File(context.cacheDir, "${viewModel.interviewPromptNb.value}.mp3")
-                                .also {
-                                  recorder.stopRecording()
-                                  viewModel.setFileSaved(false)
-                                }
+                                .also { recorder.stopRecording() }
                           } else {
                             Log.d("offline recording screen issue", "Unrecognized analysis state!")
                           }
@@ -172,10 +168,8 @@ fun OfflineRecordingScreen(
               // button for user to click when he is done recording
               Button(
                   onClick = {
-                    if (fileSaved.value &&
-                        analysisState.value != SpeakingRepository.AnalysisState.RECORDING) {
+                    if (analysisState.value != SpeakingRepository.AnalysisState.RECORDING) {
                       viewModel.endAndSave()
-                      viewModel.setFileSaved(false)
                       navigationActions.navigateTo(Screen.OFFLINE_RECORDING_REVIEW_SCREEN)
                     }
                   },

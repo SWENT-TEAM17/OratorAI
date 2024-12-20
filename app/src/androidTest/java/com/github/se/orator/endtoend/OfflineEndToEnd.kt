@@ -177,112 +177,118 @@ class OfflineEndToEndAppTest {
 
   @Test
   fun testEndToEndNavigationAndUI() {
-      // Set up NavHost for navigation and initialize different screens within one setContent
-      composeTestRule.setContent {
-          navController = rememberNavController()
+    // Set up NavHost for navigation and initialize different screens within one setContent
+    composeTestRule.setContent {
+      navController = rememberNavController()
 
-          NavHost(navController = navController!!, startDestination = Screen.HOME) {
-              composable(Screen.HOME) { ProfileScreen(navigationActions, userProfileViewModel) }
-              composable(Screen.SETTINGS) {
-                  SettingsScreen(navigationActions, userProfileViewModel, appThemeViewModel)
-              }
-              composable(Screen.FRIENDS) {
-                  ViewFriendsScreen(
-                      navigationActions,
-                      userProfileViewModel
-                  )
-              }
-              composable(Screen.ADD_FRIENDS) {
-                  AddFriendsScreen(
-                      navigationActions,
-                      userProfileViewModel
-                  )
-              }
-              composable(Screen.EDIT_PROFILE) {
-                  EditProfileScreen(navigationActions, userProfileViewModel)
-              }
-              composable(Screen.CREATE_PROFILE) {
-                  CreateAccountScreen(navigationActions, userProfileViewModel)
-              }
-              composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
-              composable(Screen.LEADERBOARD) {
-                  LeaderboardScreen(navigationActions, userProfileViewModel)
-              }
-              composable(Screen.SPEAKING) {
-                  SpeakingScreen(
-                      navigationActions = navigationActions,
-                      speakingViewModel,
-                      apiLinkViewModel
-                  )
-              }
+      NavHost(navController = navController!!, startDestination = Screen.HOME) {
+        composable(Screen.HOME) { ProfileScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.SETTINGS) {
+          SettingsScreen(navigationActions, userProfileViewModel, appThemeViewModel)
+        }
+        composable(Screen.FRIENDS) { ViewFriendsScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.ADD_FRIENDS) { AddFriendsScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.EDIT_PROFILE) {
+          EditProfileScreen(navigationActions, userProfileViewModel)
+        }
+        composable(Screen.CREATE_PROFILE) {
+          CreateAccountScreen(navigationActions, userProfileViewModel)
+        }
+        composable(Screen.PROFILE) { ProfileScreen(navigationActions, userProfileViewModel) }
+        composable(Screen.LEADERBOARD) {
+          LeaderboardScreen(navigationActions, userProfileViewModel)
+        }
+        composable(Screen.SPEAKING) {
+          SpeakingScreen(navigationActions = navigationActions, speakingViewModel, apiLinkViewModel)
+        }
 
-              composable(Screen.OFFLINE) { OfflineScreen(navigationActions = navigationActions) }
+        composable(Screen.OFFLINE) { OfflineScreen(navigationActions = navigationActions) }
 
-              composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-                  SpeakingScreen(
-                      navigationActions = navigationActions,
-                      speakingViewModel,
-                      apiLinkViewModel
-                  )
-              }
+        composable(Screen.OFFLINE_INTERVIEW_MODULE) {
+          SpeakingScreen(navigationActions = navigationActions, speakingViewModel, apiLinkViewModel)
+        }
 
-              composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-                  OfflineInterviewModule(
-                      navigationActions,
-                      speakingViewModel,
-                      offlinePromptFunctions
-                  )
-              }
+        composable(Screen.OFFLINE_INTERVIEW_MODULE) {
+          OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptFunctions)
+        }
 
-              composable(Screen.OFFLINE_RECORDING_SCREEN) {
-                  OfflineRecordingScreen(
-                      navigationActions = navigationActions,
-                      question = "How do you handle conflict in a team?",
-                      viewModel = speakingViewModel,
-                      offlinePromptsFunctions = offlinePromptFunctions
-                  )
-              }
+        composable(Screen.OFFLINE_RECORDING_SCREEN) {
+          OfflineRecordingScreen(
+              navigationActions = navigationActions,
+              question = "How do you handle conflict in a team?",
+              viewModel = speakingViewModel,
+              offlinePromptsFunctions = offlinePromptFunctions)
+        }
 
-              composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
-                  RecordingReviewScreen(navigationActions, speakingViewModel)
-              }
+        composable(Screen.OFFLINE_RECORDING_REVIEW_SCREEN) {
+          RecordingReviewScreen(navigationActions, speakingViewModel)
+        }
 
-              composable(Screen.FEEDBACK_SCREEN) {
-                  PreviousRecordingsFeedbackScreen(
-                      navigationActions = navigationActions,
-                      viewModel = chatViewModel,
-                      speakingViewModel = speakingViewModel,
-                      player = mockPlayer,
-                      offlinePromptsFunctions = offlinePromptFunctions
-                  )
-              }
-          }
+        composable(Screen.FEEDBACK_SCREEN) {
+          PreviousRecordingsFeedbackScreen(
+              navigationActions = navigationActions,
+              viewModel = chatViewModel,
+              speakingViewModel = speakingViewModel,
+              player = mockPlayer,
+              offlinePromptsFunctions = offlinePromptFunctions)
+        }
       }
-      // manually going to create profile to simulate what a new user would go through
-      // cannot have a sign in screen then a create profile screen since mocking the google
-      // auth response would take too long, so we manually go to create profile, see if it works
-      // then go back.
+    }
+    // manually going to create profile to simulate what a new user would go through
+    // cannot have a sign in screen then a create profile screen since mocking the google
+    // auth response would take too long, so we manually go to create profile, see if it works
+    // then go back.
 
-      composeTestRule.runOnUiThread {
-          navController?.navigate(
-              Screen
-                  .OFFLINE_INTERVIEW_MODULE
-          ) // this here forces us to navigate to the create_profile
-          // screen
-      }
-      `when`(
-          offlinePromptFunctions.getPromptMapElement(
-              anyString(), anyString(), org.mockito.kotlin.any()
-          )
-      )
-          .thenReturn("Test Company")
+    composeTestRule.runOnUiThread {
+      navController?.navigate(
+          Screen.OFFLINE_INTERVIEW_MODULE) // this here forces us to navigate to the create_profile
+      // screen
+    }
+    `when`(
+            offlinePromptFunctions.getPromptMapElement(
+                anyString(), anyString(), org.mockito.kotlin.any()))
+        .thenReturn("Test Company")
 
-      composeTestRule.onNodeWithTag("company_field").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("job_field").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("question_field").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("doneButton").assertIsDisplayed()
-      composeTestRule.onNodeWithText("What company are you applying to?").assertIsDisplayed()
-      composeTestRule.onNodeWithText("What job are you applying to?").assertIsDisplayed()
-      composeTestRule.onNodeWithText("Go to recording screen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("company_field").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("job_field").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("question_field").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("doneButton").assertIsDisplayed()
+    composeTestRule.onNodeWithText("What company are you applying to?").assertIsDisplayed()
+    composeTestRule.onNodeWithText("What job are you applying to?").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Go to recording screen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("company_field", useUnmergedTree = true).performTextInput("Apple")
+    composeTestRule
+        .onNodeWithTag("company_field", useUnmergedTree = true)
+        .assertTextContains("Apple")
+
+    // Input Job Position
+    composeTestRule.onNodeWithTag("job_field", useUnmergedTree = true).performTextInput("Engineer")
+    composeTestRule
+        .onNodeWithTag("job_field", useUnmergedTree = true)
+        .assertTextContains("Engineer")
+
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE_RECORDING_SCREEN) }
+    composeTestRule.onNodeWithTag("OfflineRecordingScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BackButtonRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("RecordingColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("MicIconContainer").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("mic_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DoneButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("mic_text").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("targetCompany").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("QuestionText").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("mic_button").performClick()
+
+    // Verify startRecording was called
+    org.mockito.kotlin.verify(speakingRepository).startRecording(org.mockito.kotlin.any())
+
+    // Click mic button to stop recording
+    composeTestRule.onNodeWithTag("mic_button").performClick()
+
+    // Verify stopRecording was called
+    org.mockito.kotlin.verify(speakingRepository).stopRecording()
+    composeTestRule.runOnUiThread { navController?.navigate(Screen.OFFLINE_RECORDING_SCREEN) }
   }
 }
