@@ -63,7 +63,7 @@ fun OfflineInterviewModule(
   var jobPosition by remember { mutableStateOf("") }
   var question by remember { mutableStateOf("") }
   val ID = generateRandomString()
-
+    var lastQuestion by remember { mutableStateOf<String?>(null) } // Local state for the last question
   val context = LocalContext.current
 
   Scaffold(
@@ -164,7 +164,8 @@ fun OfflineInterviewModule(
                     )
                     offlinePromptsFunctions.createEmptyPromptFile(context, ID)
                     speakingViewModel.interviewPromptNb.value = ID
-                    navigationActions.goToOfflineRecording(question)
+                     navigationActions.goToOfflineRecording(question.ifEmpty { lastQuestion ?: "" })
+
                   },
                   modifier =
                       Modifier.fillMaxWidth(0.8f)
@@ -173,7 +174,9 @@ fun OfflineInterviewModule(
                           .align(Alignment.CenterHorizontally),
                   colors =
                       ButtonDefaults.buttonColors(
-                          containerColor = MaterialTheme.colorScheme.primary)) {
+                          containerColor = MaterialTheme.colorScheme.primary),
+                           enabled = question.isNotEmpty() || !lastQuestion.isNullOrEmpty(), // Disable if no valid question     
+                          ) {
                     Text(
                         text = "Go to recording screen",
                         fontSize = AppFontSizes.buttonText,
