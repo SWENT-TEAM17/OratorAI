@@ -269,7 +269,7 @@ class EndToEndAppTest {
     composeTestRule.onNodeWithContentDescription("Sign out").assertIsDisplayed()
     composeTestRule.onNodeWithTag("edit_button").assertExists()
     composeTestRule.onNodeWithTag("statistics_section").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("previous_sessions_section").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("offline_recordings_section").assertIsDisplayed()
     // go to settings
     composeTestRule
         .onNodeWithContentDescription("Settings")
