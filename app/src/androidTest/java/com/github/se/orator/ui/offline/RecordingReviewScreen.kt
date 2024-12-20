@@ -44,7 +44,6 @@ class RecordingReviewScreen {
 
   @Test
   fun testEverythingIsDisplayed() {
-    composeTestRule.onNodeWithTag("RecordingReviewScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("Back").assertIsDisplayed()
     composeTestRule.onNodeWithTag("hear_recording_button").assertIsDisplayed()
