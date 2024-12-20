@@ -38,9 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -82,9 +79,6 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   // Get the context
   val context = LocalContext.current
-
-  // State to control whether the profile picture dialog is open
-  var isDialogOpen by remember { mutableStateOf(false) }
 
   // Collect the profile data from the ViewModel
   val userProfile by profileViewModel.userProfile.collectAsState()
@@ -170,7 +164,6 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
                   // Profile Picture with overlapping positioning
                   ProfilePicture(
                       profilePictureUrl = profile.profilePic,
-                      onClick = { isDialogOpen = true },
                       modifier =
                           Modifier.align(Alignment.TopCenter)
                               .offset(y = (-AppDimensions.profilePictureSize / 2)))
@@ -313,17 +306,11 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
               }) {}
         }
       }
-
-  // Dialog to show the profile picture in larger format
-  if (isDialogOpen && userProfile?.profilePic != null) {
-    ProfilePictureDialog(
-        profilePictureUrl = userProfile!!.profilePic!!, onDismiss = { isDialogOpen = false })
-  }
 }
 
 /** Composable function to display the profile picture. */
 @Composable
-fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ProfilePicture(profilePictureUrl: String?, modifier: Modifier = Modifier) {
   val painter = rememberAsyncImagePainter(model = profilePictureUrl ?: R.drawable.profile_picture)
 
   Image(
@@ -334,7 +321,6 @@ fun ProfilePicture(profilePictureUrl: String?, onClick: () -> Unit, modifier: Mo
           modifier
               .size(AppDimensions.profilePictureSize)
               .clip(CircleShape)
-              .clickable(onClick = onClick)
               .testTag("profile_picture"))
 }
 
