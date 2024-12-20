@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctions
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModel
 import com.github.se.orator.model.speechBattle.BattleViewModelFactory
@@ -47,6 +48,7 @@ import com.github.se.orator.ui.friends.AddFriendsScreen
 import com.github.se.orator.ui.friends.LeaderboardScreen
 import com.github.se.orator.ui.friends.ViewFriendsScreen
 import com.github.se.orator.ui.mainScreen.MainScreen
+import com.github.se.orator.ui.mainScreen.OnlineScreen
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
@@ -64,6 +66,7 @@ import com.github.se.orator.ui.overview.SpeakingPublicSpeakingModule
 import com.github.se.orator.ui.overview.SpeakingSalesPitchModule
 import com.github.se.orator.ui.profile.CreateAccountScreen
 import com.github.se.orator.ui.profile.EditProfileScreen
+import com.github.se.orator.ui.profile.GraphStats
 import com.github.se.orator.ui.profile.OfflineRecordingsProfileScreen
 import com.github.se.orator.ui.profile.PreviousRecordingsFeedbackScreen
 import com.github.se.orator.ui.profile.ProfileScreen
@@ -163,6 +166,8 @@ fun OratorApp(
       SpeakingViewModel(SpeakingRepositoryRecord(context), apiLinkViewModel, userProfileViewModel)
   val chatViewModel = ChatViewModel(chatGPTService, apiLinkViewModel, textToSpeech)
 
+  val offlinePromptsFunctions = OfflinePromptsFunctions()
+
   // Initialize BattleViewModel using the factory
   val battleViewModel: BattleViewModel =
       viewModel(
@@ -189,10 +194,11 @@ fun OratorApp(
             RecordingReviewScreen(navigationActions, speakingViewModel)
           }
           composable(Screen.OFFLINE_RECORDING_PROFILE) {
-            OfflineRecordingsProfileScreen(navigationActions, speakingViewModel)
+            OfflineRecordingsProfileScreen(
+                navigationActions, speakingViewModel, offlinePromptsFunctions)
           }
           composable(Screen.OFFLINE_INTERVIEW_MODULE) {
-            OfflineInterviewModule(navigationActions, speakingViewModel)
+            OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsFunctions)
           }
 
           composable(
@@ -214,6 +220,7 @@ fun OratorApp(
           // Main/home flow
           navigation(startDestination = Screen.HOME, route = Route.HOME) {
             composable(Screen.HOME) { MainScreen(navigationActions) }
+            composable(Screen.ONLINE_SCREEN) { OnlineScreen(navigationActions) }
             composable(Screen.SPEAKING_JOB_INTERVIEW) {
               SpeakingJobInterviewModule(navigationActions, chatViewModel, apiLinkViewModel)
             }
@@ -251,12 +258,17 @@ fun OratorApp(
 
             composable(Screen.FEEDBACK_SCREEN) {
               PreviousRecordingsFeedbackScreen(
-                  context, navigationActions, chatViewModel, speakingViewModel)
+                  context,
+                  navigationActions,
+                  chatViewModel,
+                  speakingViewModel,
+                  offlinePromptsFunctions = offlinePromptsFunctions)
             }
 
             composable(Screen.EDIT_PROFILE) {
               EditProfileScreen(navigationActions, userProfileViewModel)
             }
+            composable(Screen.STAT) { GraphStats(navigationActions, userProfileViewModel) }
             composable(Screen.LEADERBOARD) {
               LeaderboardScreen(navigationActions, userProfileViewModel)
             }
@@ -305,7 +317,7 @@ fun OratorApp(
               arguments =
                   listOf(
                       navArgument("battleId") { type = NavType.StringType },
-                      navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                  )) { backStackEntry ->
                 val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
                 val userId = userProfileViewModel.userProfile.value?.uid ?: ""
                 BattleChatScreen(
@@ -318,22 +330,32 @@ fun OratorApp(
               }
 
           composable(
-              route = "${Route.WAITING_FOR_COMPLETION}/{battleId}",
-              arguments = listOf(navArgument("battleId") { type = NavType.StringType })) {
-                  backStackEntry ->
+              route = "${Route.WAITING_FOR_COMPLETION}/{battleId}/{friendUid}",
+              arguments =
+                  listOf(
+                      navArgument("battleId") { type = NavType.StringType },
+                      navArgument("friendUid") { type = NavType.StringType })) { backStackEntry ->
                 val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
+                val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
                 WaitingForCompletionScreen(
+                    friendUid = friendUid,
                     battleId = battleId,
                     navigationActions = navigationActions,
                     battleViewModel = battleViewModel,
-                    userId = userProfileViewModel.userProfile.value?.uid ?: "")
+                    userProfileViewModel = userProfileViewModel)
               }
           composable(
               route = "${Route.EVALUATION}/{battleId}",
               arguments = listOf(navArgument("battleId") { type = NavType.StringType })) {
                   backStackEntry ->
                 val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
-                EvaluationScreen(battleId = battleId, navigationActions = navigationActions)
+                val userId = userProfileViewModel.userProfile.value?.uid ?: ""
+                EvaluationScreen(
+                    userId = userId,
+                    battleId = battleId,
+                    navigationActions = navigationActions,
+                    battleViewModel = battleViewModel,
+                    chatViewModel = chatViewModel)
               }
         }
 

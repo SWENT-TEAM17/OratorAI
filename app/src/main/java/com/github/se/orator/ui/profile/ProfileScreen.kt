@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
@@ -25,7 +24,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Settings
@@ -34,6 +32,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -59,6 +58,7 @@ import com.github.se.orator.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.navigation.Screen
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppFontSizes
 import com.github.se.orator.ui.theme.AppShapes
@@ -66,6 +66,7 @@ import com.github.se.orator.ui.theme.AppTypography
 import com.github.se.orator.ui.theme.COLOR_AMBER
 import com.google.firebase.auth.FirebaseAuth
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserProfileViewModel) {
   // Get the context
@@ -79,15 +80,9 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-            title = {
-              Text(
-                  modifier = Modifier.testTag("profile_title"),
-                  text = "Profile",
-                  color = MaterialTheme.colorScheme.onSurface)
-            },
-            backgroundColor = MaterialTheme.colorScheme.surface,
+        TopNavigationMenu(
+            textTestTag = "profile_title",
+            title = "Profile",
             actions = {
               IconButton(
                   onClick = { navigationActions.navigateTo(Screen.SETTINGS) },
@@ -238,12 +233,11 @@ fun ProfileScreen(navigationActions: NavigationActions, profileViewModel: UserPr
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingMedium))
                 Log.d("scn", "bio is: ${profile.bio}")
-
                 // stats section
                 CardSection(
                     title = "My stats",
                     imageVector = Icons.Outlined.QueryStats,
-                    onClick = { /*TODO: Handle achievements click */},
+                    onClick = { navigationActions.navigateTo(Screen.STAT) },
                     modifier = Modifier.testTag("statistics_section"))
 
                 Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))

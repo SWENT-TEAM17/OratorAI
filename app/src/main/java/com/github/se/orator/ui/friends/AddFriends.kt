@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -22,7 +21,15 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +48,6 @@ import com.github.se.orator.ui.navigation.NavigationActions
 import com.github.se.orator.ui.navigation.Route
 import com.github.se.orator.ui.profile.ProfilePictureDialog
 import com.github.se.orator.ui.theme.AppDimensions
-import com.github.se.orator.ui.theme.ProjectTheme
 
 /**
  * Composable function that displays the "Add Friends" screen, where users can:
@@ -63,39 +69,39 @@ fun AddFriendsScreen(
 ) {
   val userProfile by userProfileViewModel.userProfile.collectAsState()
   val friendsProfiles by userProfileViewModel.friendsProfiles.collectAsState()
-  var query by remember { mutableStateOf("") } // Holds the search query input
-  var expanded by remember { mutableStateOf(false) } // Controls if search results are visible
-  val allProfiles by userProfileViewModel.allProfiles.collectAsState() // All user profiles
-  val focusRequester = FocusRequester() // Manages focus for the search field
+  var query by remember { mutableStateOf("") }
+  var expanded by remember { mutableStateOf(false) }
+  val allProfiles by userProfileViewModel.allProfiles.collectAsState()
+  val focusRequester = FocusRequester()
   val sentReqProfiles by userProfileViewModel.sentReqProfiles.collectAsState()
-  // Exclude the current user's profile and their friends' profiles from the list
+
   val filteredProfiles =
       allProfiles.filter { profile ->
-        profile.uid != userProfile?.uid && // Exclude own profile
-            friendsProfiles.none { friend -> friend.uid == profile.uid } && // Exclude friends
-            sentReqProfiles.none { sent -> sent.uid == profile.uid } && // Exclude sent requests
-            profile.name.contains(query, ignoreCase = true) // Match search query
+        profile.uid != userProfile?.uid &&
+            friendsProfiles.none { friend -> friend.uid == profile.uid } &&
+            sentReqProfiles.none { sent -> sent.uid == profile.uid } &&
+            profile.name.contains(query, ignoreCase = true)
       }
+
   val filteredSentReq =
       sentReqProfiles.filter { recReq -> recReq.name.contains(query, ignoreCase = true) }
 
-  // State variable to keep track of the selected user's profile picture
   var selectedProfilePicUser by remember { mutableStateOf<UserProfile?>(null) }
-
-  // State variable to control the expansion of Sent Friend Requests
   var isSentRequestsExpanded by remember { mutableStateOf(false) }
 
-  ProjectTheme {
-    Scaffold(
-        topBar = {
-          TopAppBar(
-              title = {
-                Text(
-                    "Add a Friend",
-                    modifier = Modifier.testTag("addFriendTitle"),
-                    color = MaterialTheme.colorScheme.onSurface)
-              },
-              navigationIcon = {
+  Scaffold(
+      // No top bar, placing a custom row instead
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = Route.FRIENDS)
+      }) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+          // Row at the top with a Back button and "Add a friend" Title
+          Row(
+              modifier = Modifier.fillMaxWidth().padding(AppDimensions.paddingMedium),
+              verticalAlignment = Alignment.CenterVertically) {
                 IconButton(
                     onClick = { navigationActions.goBack() },
                     modifier = Modifier.testTag("addFriendBackButton")) {
@@ -104,26 +110,18 @@ fun AddFriendsScreen(
                           contentDescription = "Back",
                           tint = MaterialTheme.colorScheme.onSurface)
                     }
-              },
-              colors =
-                  TopAppBarDefaults.topAppBarColors(
-                      containerColor = MaterialTheme.colorScheme.surface,
-                  ))
-          Divider()
-        },
-        bottomBar = {
-          BottomNavigationMenu(
-              onTabSelect = { route -> navigationActions.navigateTo(route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION,
-              selectedItem = Route.FRIENDS)
-        }) { paddingValues ->
-          // Replace Column with LazyColumn
+
+                Spacer(modifier = Modifier.width(AppDimensions.paddingSmall))
+
+                Text(
+                    text = "Add a friend",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.testTag("addFriendTitle"))
+              }
+
           LazyColumn(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .padding(paddingValues)
-                      .padding(AppDimensions.paddingMedium),
-              content = {
+              modifier = Modifier.fillMaxSize().padding(horizontal = AppDimensions.paddingMedium)) {
                 // Search Field
                 item {
                   OutlinedTextField(
@@ -137,12 +135,17 @@ fun AddFriendsScreen(
                               .wrapContentHeight()
                               .focusRequester(focusRequester)
                               .testTag("addFriendSearchField"),
-                      label = { Text("Username", modifier = Modifier.testTag("searchFieldLabel")) },
+                      label = {
+                        Text(
+                            "Username",
+                            modifier = Modifier.testTag("searchFieldLabel"),
+                            color = MaterialTheme.colorScheme.onSurface)
+                      },
                       leadingIcon = {
                         Icon(
                             Icons.Default.Search,
                             contentDescription = "Search Icon",
-                            modifier = Modifier.testTag("searchIcon"))
+                            tint = MaterialTheme.colorScheme.primary)
                       },
                       trailingIcon = {
                         if (query.isNotEmpty()) {
@@ -175,7 +178,6 @@ fun AddFriendsScreen(
 
                 // Expandable Section: Sent Friend Requests
                 if (filteredSentReq.isNotEmpty()) {
-                  // Header with Toggle Button
                   item {
                     Row(
                         modifier =
@@ -187,7 +189,8 @@ fun AddFriendsScreen(
                           Text(
                               text = "Sent Friend Requests",
                               style = MaterialTheme.typography.titleSmall,
-                              modifier = Modifier.weight(1f).testTag("sentFriendRequestsHeader"))
+                              modifier = Modifier.weight(1f).testTag("sentFriendRequestsHeader"),
+                              color = MaterialTheme.colorScheme.onSurface)
                           IconButton(
                               onClick = { isSentRequestsExpanded = !isSentRequestsExpanded },
                               modifier = Modifier.testTag("toggleSentRequestsButton")) {
@@ -197,12 +200,12 @@ fun AddFriendsScreen(
                                         else Icons.Default.ExpandMore,
                                     contentDescription =
                                         if (isSentRequestsExpanded) "Collapse Sent Requests"
-                                        else "Expand Sent Requests")
+                                        else "Expand Sent Requests",
+                                    tint = MaterialTheme.colorScheme.onSurface)
                               }
                         }
                   }
 
-                  // Sent Friend Requests List with AnimatedVisibility
                   item {
                     AnimatedVisibility(
                         visible = isSentRequestsExpanded,
@@ -210,7 +213,6 @@ fun AddFriendsScreen(
                         exit = shrinkVertically()) {
                           Column {
                             Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
-                            // Sent Friend Requests Items
                             for (sentRequest in filteredSentReq) {
                               SentFriendRequestItem(
                                   sentRequest = sentRequest,
@@ -238,7 +240,7 @@ fun AddFriendsScreen(
                         Spacer(modifier = Modifier.height(AppDimensions.paddingSmall))
                       }
                 }
-              })
+              }
 
           // Dialog to show the enlarged profile picture
           if (selectedProfilePicUser?.profilePic != null) {
@@ -247,7 +249,7 @@ fun AddFriendsScreen(
                 onDismiss = { selectedProfilePicUser = null })
           }
         }
-  }
+      }
 }
 
 /**
@@ -288,7 +290,8 @@ fun SentFriendRequestItem(sentRequest: UserProfile, userProfileViewModel: UserPr
                         style = MaterialTheme.typography.titleMedium,
                         modifier =
                             Modifier.padding(bottom = AppDimensions.smallPadding)
-                                .testTag("sentFriendRequestName#${sentRequest.uid}"))
+                                .testTag("sentFriendRequestName#${sentRequest.uid}"),
+                        color = MaterialTheme.colorScheme.primary)
                     // Friend's Bio
                     Text(
                         text = sentRequest.bio ?: "No bio available",

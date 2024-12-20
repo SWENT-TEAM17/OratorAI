@@ -435,8 +435,8 @@ class FriendsUITests {
     // Select "Practice mode 2"
     composeTestRule.onNodeWithTag("practiceModeOption2").performClick()
 
-    // Optionally, verify that the selected mode is reflected
-    composeTestRule.onNodeWithTag("practiceModeSelector").assertTextEquals("Practice mode")
+    // Verify that the prefix text is displayed
+    composeTestRule.onNodeWithTag("practiceModeSelector").assertTextEquals("Mode : Speech")
   }
 
   /** Tests the Rank Metric Selector functionality. */
@@ -456,8 +456,8 @@ class FriendsUITests {
     // Select "Practice mode 2"
     composeTestRule.onNodeWithTag("rankMetricOption2").performClick()
 
-    // Optionally, verify that the selected mode is reflected
-    composeTestRule.onNodeWithTag("rankMetricSelector").assertTextEquals("Rank metric")
+    // Verify that the prefix text is displayed
+    composeTestRule.onNodeWithTag("rankMetricSelector").assertTextEquals("Metric : Success")
   }
 
   /**
@@ -819,7 +819,7 @@ class FriendsUITests {
    */
   @Test
   fun testAcceptPendingBattle() {
-    // Create a mock pending battle
+    // Arrange
     val mockBattles =
         listOf(
             SpeechBattle(
@@ -829,12 +829,12 @@ class FriendsUITests {
                 status = BattleStatus.PENDING,
                 context =
                     InterviewContext(
-                        "testPosition",
-                        "testCompany",
-                        "testType",
-                        "testExperience",
-                        "testDescription",
-                        "testFocusArea")))
+                        interviewType = "Mock Interview",
+                        targetPosition = "Software Engineer",
+                        companyName = "TechCorp",
+                        jobDescription = "Solve coding problems under pressure.",
+                        experienceLevel = "Entry Level",
+                        focusArea = "Problem Solving")))
 
     // Mock getPendingBattlesForUser to return the mockBattles
     doAnswer { invocation ->
@@ -843,7 +843,7 @@ class FriendsUITests {
           null
         }
         .`when`(mockBattleRepository)
-        .getPendingBattlesForUser(any(), any(), any())
+        .listenForPendingBattles(any(), any())
 
     // Mock getBattleById to return the specific battle
     `when`(mockBattleRepository.getBattleById(eq("battle1"), any())).thenAnswer { invocation ->
@@ -852,7 +852,17 @@ class FriendsUITests {
       null
     }
 
-    // Now render the screen
+    // Mock updateBattleStatus correctly
+    `when`(
+            mockBattleRepository.updateBattleStatus(
+                eq("battle1"), eq(BattleStatus.IN_PROGRESS), any<(Boolean) -> Unit>()))
+        .thenAnswer { invocation ->
+          val callback = invocation.getArgument<(Boolean) -> Unit>(2)
+          callback.invoke(true) // Simulate a successful update
+          null
+        }
+
+    // Act: Render the screen
     composeTestRule.setContent {
       ViewFriendsScreen(
           navigationActions = mockNavigationActions,
@@ -863,13 +873,27 @@ class FriendsUITests {
     // Wait for the UI to render
     composeTestRule.waitForIdle()
 
-    // Verify that the pending battle icon is displayed
+    // Perform UI interactions
+    // Click on the pending battle icon to open the dialog
     composeTestRule
         .onNodeWithTag("pendingBattleIcon#1", useUnmergedTree = true)
         .assertIsDisplayed()
         .performClick()
 
-    // Verify that updateBattleStatus was called to change the status to IN_PROGRESS
+    // Verify that the dialog is displayed
+    composeTestRule.onNodeWithTag("battlePopupTitle").assertExists().assertIsDisplayed()
+
+    // Click on the "Accept" button within the dialog
+    composeTestRule
+        .onNodeWithTag("battlePopupAcceptButton")
+        .assertExists()
+        .assertIsEnabled()
+        .performClick()
+
+    // Wait for the UI to process the state change
+    composeTestRule.waitForIdle()
+
+    // Verify that updateBattleStatus was called correctly
     verify(mockBattleRepository)
         .updateBattleStatus(eq("battle1"), eq(BattleStatus.IN_PROGRESS), any())
   }
@@ -896,5 +920,82 @@ class FriendsUITests {
 
     // Verify that we navigate to the send battle screen with the correct UID
     verify(mockNavigationActions).navigateToSendBattleScreen(eq("2"))
+  }
+
+  @Test
+  fun testDeclinePendingBattle() {
+    // Arrange
+    val mockBattle =
+        SpeechBattle(
+            battleId = "battle2",
+            challenger = "2",
+            opponent = "testUser",
+            status = BattleStatus.PENDING,
+            context =
+                InterviewContext(
+                    interviewType = "Mock Interview",
+                    targetPosition = "Software Engineer",
+                    companyName = "TechCorp",
+                    jobDescription = "Solve coding problems under pressure.",
+                    experienceLevel = "Entry Level",
+                    focusArea = "Problem Solving"))
+
+    // Mock getPendingBattlesForUser to return the mock battle
+    `when`(mockBattleRepository.listenForPendingBattles(eq("testUser"), any())).thenAnswer {
+      val callback = it.getArgument<(List<SpeechBattle>) -> Unit>(1)
+      callback(listOf(mockBattle))
+      null
+    }
+
+    `when`(
+            mockBattleRepository.updateBattleStatus(
+                eq("battle2"), eq(BattleStatus.CANCELLED), any()))
+        .thenAnswer { invocation ->
+          val callback = invocation.getArgument<(Boolean) -> Unit>(2)
+          callback.invoke(true) // Simulate a successful update
+          null
+        }
+
+    // Act
+    composeTestRule.setContent {
+      ViewFriendsScreen(mockNavigationActions, userProfileViewModel, battleViewModel)
+    }
+
+    // Wait for UI to render
+    composeTestRule.waitForIdle()
+
+    // Click on the friend with UID "2" to open the BattlePopup
+    composeTestRule.onNodeWithTag("viewFriendsItem#2").performClick()
+
+    // Verify the BattlePopup title
+    composeTestRule
+        .onNodeWithTag("battlePopupTitle")
+        .assertExists("BattlePopup title does not exist")
+        .assertIsDisplayed()
+        .assertTextEquals("Pending Battle Request from Jane Doe")
+
+    // Verify the BattlePopup description
+    val expectedDescription =
+        """
+        Interview Battle Context: Mock Interview for Software Engineer at TechCorp.
+        Job description: Solve coding problems under pressure.
+    """
+            .trimIndent()
+
+    composeTestRule
+        .onNodeWithTag("battlePopupDescription")
+        .assertExists("BattlePopup description does not exist")
+        .assertIsDisplayed()
+        .assertTextEquals(expectedDescription)
+
+    // Click the decline button
+    composeTestRule.onNodeWithTag("battlePopupDeclineButton").performClick()
+
+    // Verify that updateBattleStatus was called with correct parameters
+    verify(mockBattleRepository)
+        .updateBattleStatus(eq("battle2"), eq(BattleStatus.CANCELLED), any())
+
+    // Assert that the BattlePopup is dismissed
+    composeTestRule.onNodeWithTag("battlePopupTitle").assertDoesNotExist()
   }
 }

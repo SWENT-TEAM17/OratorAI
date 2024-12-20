@@ -120,7 +120,6 @@ fun SpeakingSalesPitchModule(
    */
   SpeakingPracticeModule(
       navigationActions = navigationActions,
-      screenTitle = "Sales Pitch",
       headerText = "Master your sales pitch and negotiation skills",
       inputs = inputFields,
       onClick = {

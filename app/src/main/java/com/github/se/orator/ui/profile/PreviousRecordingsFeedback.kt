@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.orator.model.chatGPT.ChatViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.symblAi.AndroidAudioPlayer
 import com.github.se.orator.model.symblAi.AudioPlayer
 import com.github.se.orator.model.symblAi.SpeakingViewModel
@@ -39,7 +40,6 @@ import com.github.se.orator.ui.theme.AppColors
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppShapes
 import java.io.File
-import loadPromptsFromFile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
@@ -49,54 +49,54 @@ fun PreviousRecordingsFeedbackScreen(
     navigationActions: NavigationActions,
     viewModel: ChatViewModel,
     speakingViewModel: SpeakingViewModel,
-    player: AudioPlayer = AndroidAudioPlayer(context)
+    player: AudioPlayer = AndroidAudioPlayer(context),
+    offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 ) {
-
-  // val recorder by lazy { AudioRecorder(context = context) }
-
-  // val player by lazy { AndroidAudioPlayer(context) }
   var prompts: Map<String, String>? =
-      loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
+      offlinePromptsFunctions.loadPromptsFromFile(context)?.find {
+        it["ID"] == speakingViewModel.interviewPromptNb.value
+      }
   var ID: String = prompts?.get("ID") ?: "audio.mp3"
   var audioFile: File = File(context.cacheDir, "$ID.mp3")
 
-  val offlineAnalysisData by speakingViewModel.offlineAnalysisData.collectAsState()
+  val fileData by offlinePromptsFunctions.fileData.collectAsState()
 
   LaunchedEffect(Unit) {
+    Log.d("aa", "launching")
+    // clearing old display text
+    offlinePromptsFunctions.clearDisplayText()
+    // read the file containing interviewer's response
+    offlinePromptsFunctions.readPromptTextFile(context, ID)
+
+    // retrieve previous interviews mapping
     prompts =
-        loadPromptsFromFile(context)?.find { it["ID"] == speakingViewModel.interviewPromptNb.value }
+        offlinePromptsFunctions.loadPromptsFromFile(context)?.find {
+          it["ID"] == speakingViewModel.interviewPromptNb.value
+        }
 
     ID = prompts?.get("ID") ?: "audio.mp3"
-
     audioFile = File(context.cacheDir, "$ID.mp3")
 
     Log.d("PreviousRecordingsFeedbackScreen", "Screen is opened, running code.")
-    // Call necessary methods or logic when the screen is opened
-    speakingViewModel.getTranscript(audioFile)
-    // Any other initialization logic
-    Log.d("prompts are: ", prompts?.get("targetPosition") ?: "Default Value")
-    viewModel.resetResponse()
   }
 
-  val response by viewModel.response.collectAsState("")
-
-  LaunchedEffect(response) { Log.d("gpt said: ", "gpt said: $response") }
-
-  if (offlineAnalysisData != null) {
-    viewModel.offlineRequest(
-        offlineAnalysisData!!.transcription.removePrefix("You said:").trim(),
-        prompts?.get("targetCompany") ?: "Apple",
-        prompts?.get("jobPosition") ?: "engineer")
-    Log.d("testing offline chat view model", "the gpt model offline value response is $response")
-    // Text(text = "What you said: ${what_has_been_said.value}")
-    Text(text = "Interviewer's response: $response", color = MaterialTheme.colorScheme.primary)
-    Log.d("d", "Hello! This is has been said: ${offlineAnalysisData!!.transcription}")
+  // if there isn't already an interviewer response: transcribe text + request a gpt prompt
+  if (fileData == "Loading interviewer response..." || fileData.isNullOrEmpty()) {
+    Log.d("in pre ", "calling get transcript and gpt response $fileData")
+    speakingViewModel.getTranscriptAndGetGPTResponse(
+        audioFile, prompts, viewModel, context, offlinePromptsFunctions)
   }
-  // prompts?.get("targetPosition") ?: "Default Value"
-  // val jobPosition = prompts?.get("jobPosition")
 
-  // val chatMessages by chatViewModel.chatMessages.collectAsState()
+  // text corresponding to interviewer's response
+  val displayText =
+      when {
+        fileData == "Loading interviewer response..." || fileData.isNullOrEmpty() -> {
+          "Processing your audio, please wait..."
+        }
+        else -> "Interviewer's response: $fileData"
+      }
 
+  // rest of UI elements
   Column(
       modifier =
           Modifier.fillMaxSize()
@@ -104,13 +104,18 @@ fun PreviousRecordingsFeedbackScreen(
               .testTag("RecordingReviewScreen"),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = displayText ?: "",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.testTag("ResponseText"))
+
         Button(
             onClick = { player.playFile(audioFile) },
             shape = AppShapes.circleShape,
             modifier = Modifier.testTag("play_button"),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface),
             contentPadding = PaddingValues(0.dp)) {
-              androidx.compose.material.Icon(
+              Icon(
                   Icons.Outlined.PlayCircleOutline,
                   contentDescription = "Play button",
                   modifier = Modifier.size(30.dp),

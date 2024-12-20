@@ -231,4 +231,41 @@ interface UserProfileRepository {
    * @param onFailure Callback invoked on failure.
    */
   fun updateLoginStreak(uid: String, onSuccess: () -> Unit, onFailure: () -> Unit)
+
+  /**
+   * Sets up a real-time listener for a user's profile in Firestore.
+   *
+   * This function attaches a snapshot listener to the specified user's profile document. It
+   * continuously monitors the document for any changes. When changes occur, it converts the updated
+   * document into a [UserProfile] object and invokes the [onProfileChanged] callback with the new
+   * data. In case of an error during listening, it invokes the [onError] callback with the
+   * encountered exception.
+   *
+   * @param uid The unique identifier (UID) of the user whose profile is to be listened to.
+   * @param onProfileChanged A callback function that is invoked with the updated [UserProfile]
+   *   whenever the user's profile data changes. If the document does not exist, [UserProfile?] will
+   *   be `null`.
+   * @param onError A callback function that is invoked with an [Exception] if an error occurs while
+   *   listening to the profile updates.
+   */
+  fun listenToUserProfile(
+      uid: String,
+      onProfileChanged: (UserProfile?) -> Unit,
+      onError: (Exception) -> Unit
+  )
+
+  /**
+   * Sets up a real-time listener for all user profiles in the data store.
+   *
+   * Listens to changes in the `user_profiles` collection and triggers the [onProfilesChanged]
+   * callback with the updated list whenever a profile is added, modified, or deleted. If an error
+   * occurs, the [onError] callback is invoked.
+   *
+   * @param onProfilesChanged Callback invoked with the updated list of [UserProfile].
+   * @param onError Callback invoked if an error occurs during listening.
+   */
+  fun listenToAllUserProfiles(
+      onProfilesChanged: (List<UserProfile>) -> Unit,
+      onError: (Exception) -> Unit
+  )
 }

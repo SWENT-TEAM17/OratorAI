@@ -43,7 +43,7 @@ class ApiLinkViewModel : ViewModel() {
    */
   fun updatePracticeContext(practiceContext: PracticeContext) {
     _practiceContext.value = practiceContext
-    Log.e("ApiLinkViewModel", "Practice context: $practiceContext")
+    Log.d("ApiLinkViewModel", "Practice context updated: $practiceContext")
   }
 
   /** Sets the analysis data field to null */

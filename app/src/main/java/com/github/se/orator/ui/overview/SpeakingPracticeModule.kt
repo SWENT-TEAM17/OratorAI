@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import com.github.se.orator.ui.navigation.NavigationActions
+import com.github.se.orator.ui.navigation.TopNavigationMenu
 import com.github.se.orator.ui.theme.AppDimensions
 import com.github.se.orator.ui.theme.AppTypography
 import kotlin.math.roundToInt
@@ -43,7 +44,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SpeakingPracticeModule(
     navigationActions: NavigationActions,
-    screenTitle: String,
+    screenTitle: String = "",
     headerText: String,
     inputs: List<InputFieldData>,
     onClick: () -> Unit,
@@ -54,19 +55,10 @@ fun SpeakingPracticeModule(
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("speakingPracticeScreen"),
       topBar = {
-        // Use CenterAlignedTopAppBar for consistency
-        TopAppBar(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .padding(top = AppDimensions.statusBarPadding)
-                    .testTag("topAppBar"),
-            title = {
-              Text(
-                  text = screenTitle,
-                  style = AppTypography.appBarTitleStyle.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.testTag("screenTitle"))
-            },
+        TopNavigationMenu(
+            testTag = "topAppBar",
+            textTestTag = "screenTitle",
+            title = screenTitle,
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -77,11 +69,7 @@ fun SpeakingPracticeModule(
                         modifier = Modifier.size(AppDimensions.iconSizeSmall),
                         tint = MaterialTheme.colorScheme.onSurface)
                   }
-            },
-            colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface))
+            })
       },
       content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -117,7 +105,8 @@ fun SpeakingPracticeModule(
                         question = input.question,
                         placeholder = input.placeholder,
                         testTag = input.testTag,
-                        dropdownItems = input.dropdownItems)
+                        dropdownItems = input.dropdownItems,
+                    )
                   } else {
                     // Display question as Text
                     Text(
@@ -210,7 +199,7 @@ fun SpeakingPracticeModule(
                           },
                           modifier =
                               Modifier.fillMaxWidth()
-                                  .height(input.height)
+                                  .height(input.height + AppDimensions.paddingSmall)
                                   .border(
                                       width = AppDimensions.borderStrokeWidth,
                                       color = MaterialTheme.colorScheme.primary,
@@ -227,6 +216,9 @@ fun SpeakingPracticeModule(
                                   unfocusedPlaceholderColor =
                                       MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                               ),
+                          textStyle =
+                              LocalTextStyle.current.copy(
+                                  color = MaterialTheme.colorScheme.onSurface),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Next))
                     }
@@ -319,15 +311,17 @@ fun FocusAreaDropdown(
             colors =
                 TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                ))
+                    cursorColor = MaterialTheme.colorScheme.primary),
+            textStyle =
+                LocalTextStyle.current.copy(
+                    color = MaterialTheme.colorScheme.onSurface)) // Apply text color
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier.testTag("$testTag-DropdownMenu")) {
               dropdownItems.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(text = item) },
+                    text = { Text(text = item, color = MaterialTheme.colorScheme.onSurface) },
                     onClick = {
                       onFocusAreaSelected(item)
                       expanded = false

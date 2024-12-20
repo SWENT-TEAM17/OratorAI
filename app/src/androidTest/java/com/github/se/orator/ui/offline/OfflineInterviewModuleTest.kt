@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.github.se.orator.model.apiLink.ApiLinkViewModel
+import com.github.se.orator.model.offlinePrompts.OfflinePromptsFunctionsInterface
 import com.github.se.orator.model.profile.UserProfileRepository
 import com.github.se.orator.model.profile.UserProfileViewModel
 import com.github.se.orator.model.symblAi.SpeakingRepository
@@ -30,10 +31,12 @@ class OfflineInterviewModuleTest {
   private lateinit var apiLinkViewModel: ApiLinkViewModel
   private lateinit var userProfileViewModel: UserProfileViewModel
   private lateinit var userProfileRepository: UserProfileRepository
+  private lateinit var offlinePromptsFunctions: OfflinePromptsFunctionsInterface
 
   @Before
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
+    offlinePromptsFunctions = mock(OfflinePromptsFunctionsInterface::class.java)
     speakingRepository = mock(SpeakingRepository::class.java)
     apiLinkViewModel = ApiLinkViewModel()
     userProfileRepository = mock(UserProfileRepository::class.java)
@@ -41,7 +44,9 @@ class OfflineInterviewModuleTest {
 
     speakingViewModel =
         SpeakingViewModel(speakingRepository, apiLinkViewModel, userProfileViewModel)
-    composeTestRule.setContent { OfflineInterviewModule(navigationActions, speakingViewModel) }
+    composeTestRule.setContent {
+      OfflineInterviewModule(navigationActions, speakingViewModel, offlinePromptsFunctions)
+    }
   }
 
   @Test
